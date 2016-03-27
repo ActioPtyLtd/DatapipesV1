@@ -1,0 +1,199 @@
+package com.actio;
+
+/**
+ * Created by jim on 7/13/2015.
+ */
+
+import com.actio.dpsystem.DPFnNode;
+import com.actio.dpsystem.DPSystemFactory;
+import com.typesafe.config.ConfigObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.io.InputStream;
+import java.util.ArrayDeque;
+import java.util.LinkedList;
+import java.util.List;
+
+
+public class TaskPipeline extends Task implements Runnable
+{
+    String result = "";
+    InputStream inputStream;
+
+    protected ConfigObject pipes;
+    protected ConfigObject tasks;
+
+    static final Logger logger = LoggerFactory.getLogger(TaskPipeline.class);
+
+
+    //private String pipelineString;
+    //private Map<String, Task> pipeline;
+
+    public ArrayDeque<DataSet> getPipelineResults() {
+
+        return pipelineResults;
+    }
+
+    public void setPipelineResults(ArrayDeque<DataSet> pipelineResults) {
+
+        this.pipelineResults = pipelineResults;
+    }
+
+    private ArrayDeque<DataSet> pipelineResults = null;
+
+    public List<String> getSortedPipes() {
+        return sortedPipes;
+    }
+
+    public void setSortedPipes(List<String> sortedPipes) {
+
+        this.sortedPipes = sortedPipes;
+    }
+
+    private List<String> sortedPipes;
+
+    public TaskPipeline() {
+        pipelineResults = new ArrayDeque<DataSet>();
+    }
+
+    public void extract() throws Exception {
+        throw new Exception(FUNCTION_UNIMPLEMENTED_MSG);
+    }
+
+
+    public void load() throws Exception {
+        throw new Exception(FUNCTION_UNIMPLEMENTED_MSG);
+    }
+
+    public void execute () throws Exception {
+        processPipe();
+    }
+
+
+    private void processPipe() throws Exception {
+
+        logger.info("Entered processPipe, name= '"+node.getName()+"'");
+
+        try {
+            // get the list of tasks for that pipeline
+            LinkedList<DPFnNode> tasksInPipeline = node.getNodeList();
+            processPipeLineRE(tasksInPipeline, 0, new DataSetTabular());
+
+        } catch (Exception e) {
+            logger.info("processPipeLine Exception::" + e.getMessage());
+        }
+    }
+
+
+    private void processPipeLineRE(LinkedList<DPFnNode> tasksInPipeline,
+                                   int keyIndex,
+                                   DataSet initDataSet) throws Exception {
+
+        // check that there are tasks in the pipeline
+        if (tasksInPipeline == null || tasksInPipeline.size() <= 0) {
+            logger.debug("No tasks in pipeline");
+        }
+
+        DPFnNode currentNode = tasksInPipeline.get(keyIndex++);
+
+        logger.info("===== keyRE::" + currentNode.getName() +" ============== ");
+        DataSet resultSet;
+
+        if (currentNode.getType().contains(PIPE_LABEL))
+            resultSet = evokePipe(currentNode, initDataSet);
+        else
+            resultSet = evokeTask(currentNode, initDataSet);
+
+        resultSet.initBatch();
+        while ( resultSet.isNextBatch() == true && tasksInPipeline.size() > keyIndex) {
+            DataSet subResultSet = resultSet.getNextBatch();
+            // recursively traverse the rest of the pipeline batching up the ResultSet
+            subResultSet.dump();
+
+            logger.info("Calling Batch Recursively::"+currentNode.getName()+"("+keyIndex + ")");
+
+            processPipeLineRE(tasksInPipeline, keyIndex, subResultSet);
+        }
+
+        logger.info("--------------------------------------Exit recursive "+currentNode.getName()+"  "+resultSet.key.getKey()+"---");
+    }
+
+    //
+    // ==============================================================================
+    //
+    private DataSet evokeTask(DPFnNode taskNode, DataSet initDataSet) throws Exception {
+
+
+        try {
+            //initialise Task - at somepoint replace with a Factory
+            Task t = null;
+
+            logger.info("TaskPipeline:evokeTask:");
+
+            t = DPSystemFactory.newTask(sysconf, taskNode);
+
+            // pass the prior results if there are any
+            if (initDataSet != null)
+                t.setDataSet(initDataSet);
+
+            // ===========================================
+            t.execute();
+
+            return t.getDataSet();
+
+        } catch (Exception e) {
+            logger.error("evokeTask Exception:" + e.toString());
+        }
+
+        // return an empty set on an exception
+        return new DataSetTabular();
+    }
+
+
+    private DataSet evokePipe(DPFnNode node, DataSet initDataSet) throws Exception
+    {
+
+        logger.info("Entered evokePipe name= '"+node.getName()+"'");
+
+        // locate the actual compiled pipe this is just a stub.
+
+        DPFnNode pipeNode = sysconf.resolveNode(node);
+
+        try {
+            Task t=null;
+            // These are all parallel pipes for execution
+
+            logger.info("====== execute Pipeline '"+pipeNode.name+"'");
+            pipeNode.dump();
+
+            // Instantiate the Node Function
+            t = DPSystemFactory.newTask(sysconf,pipeNode);
+
+            t.execute();
+
+            return t.getDataSet();
+        } catch (Exception e) {
+            logger.info("processPipeLine Exception::" + e.getMessage());
+        }
+
+        // return empty dataset
+        return new DataSetTabular();
+    }
+
+
+    //
+    // ==============================================================================
+    //
+
+    public void run()
+    {
+        // enter Threaded class
+
+        logger.info("=====Entered new thread ====================");
+
+        // exit threaded class
+        return;
+    }
+
+}

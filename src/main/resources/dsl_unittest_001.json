@@ -1,0 +1,90 @@
+{
+  "script": {
+    "schema": {},
+    "tasks": {
+      "sqlin_new_notifications_2": {
+        "type": "extract",
+        "dataSource": {
+          "type": "sql",
+          "jdbcDriver": "com.extendedsystems.jdbc.advantage.ADSDriver",
+          "connect": "jdbc:extendedsystems:advantage://hardtoswallow:6262;catalog=C:\\tmp\\AISDATA\\JIM\\AISDATA-; TableType=cdx; LockType=proprietary;",
+          "query": {
+            "queryTemplate": "select top 30 Wvssapt.APT_ClINUM, Wvssapt.APT_NAME, Wvssapt.APT_PNAME, Wvssapt.APT_DATE, Wvssapt.APT_TIMSTR, WVSSVET.VET_LAST, WVSSVET.VET_FIRST, WVSSPCK.PCK_CODE, WVSSPCK.PCK_DESC, apt_type from Wvssapt inner join WVSSVET on Wvssapt.APT_VETNUM=WVSSVET.VET_VETNUM inner join WVSSPCK on Wvssapt.APT_BOOK=WVSSPCK.PCK_LINK where WVSSPCK.PCK_CODE=112 and Wvssapt.APT_NAME <> '' and Wvssapt.APT_PNAME <> '' and pck_desc not in ('1 Welcome to Sash','1a. General surgery list','3a. Ophthalmologic surgery list','4. Medicine Procedure list','7. CT procedure','7a.  SASH 1.0 Ultrasound #1','8a. Hospitalized + boarding','8b. Staff Boarding','9 EVENT','9a Reception Messages','9b Medicine Messages','9c Ophtho Messages','9d Surgery Messages','9e Emergency Messages','9f Emergency','9g Oncology Messages','9i Cardiology messages','9k. Dermatology Messages','z Dentistry Messages','O. Radioiodine Treatment','O. Physiotherapy','O. MRI','Blood Bank','Appointment Book Names')and apt_type not in ('Discharge from hospi','Ultrasound','Pickups & Procedures','Cancelled Appt','Procedure','Telephone Message','Inpatient','Inpatient assessment','Internal Referral','Communication','Allergy Vax Initial','Drop Off','Emergency','Allergy Vax Repeat','Lab Results','Meeting','Radioiodine initial','Radioiodine Inpatien','Surgery','Interpretation','Owner visiting','Responsibility','CT Scan','Admitted','Teamwork','MRI','Estimate Required','Phone Calls', 'CT Scan')and apt_type in ('Initial Visit','Recheck','Post op recheck','Chemo')  and (Wvssapt.APT_DATE in ( '@@getDate,-52,yyyy-MM-dd@@', '@@getDate,-32,yyyy-MM-dd@@', '@@getDate,-42,yyyy-MM-dd@@', '@@getDate,-3,yyyy-MM-dd@@', '@@getDate,-15,yyyy-MM-dd@@', '@@getDate,-27,yyyy-MM-dd@@') OR  Wvssapt.APT_DATE < '@@getDate,-150,yyyy-MM-dd@@'  )"
+          },
+          "inputDelimiter": ","
+        }
+      },
+      "fileload01": {
+        "type": "load",
+        "behavior": "simple",
+        "dataSource": {
+          "behavior" : "append",
+          "directory": "c://tmp//xmatters",
+          "type": "file",
+          "filenameTemplate": "@@getDate,0,yyyy-MM-dd@@prodload_01.csv_all",
+          "outputDelimiter": "\t"
+        }
+      },
+      "datacleanup01": {
+        "type" : "transform",
+        "columns" : {
+          "10" : ["setDefaults,blah@gmail.com"],
+          "2" : ["setDateFormat,YYMMDD,MM/DD/YY"],
+          "3" : ["getOffsetDate,-5"],
+          "11" : ["formatForPhone,au"]
+        },
+        "global" :  ["removeDuplicates"],
+        "row" : ["no-Op"]
+      },
+      "webtask02": {
+        "type": "load",
+        "behavior": "checkpointDiff",
+        "dataSource": {
+          "type": "rest",
+          "behavior": "simple",
+          "xxurl": "https://sash.au1.xmatters.com.au/reapi/2015-01-01/forms/74595e64-f548-4c3d-b2b2-3a286e7e02ae/triggers",
+          "credential": {
+            "user": "rxp.ra",
+            "password": "7qu0KKa7"
+          }
+        },
+        "dataSourceLog": {
+          "type": "file",
+          "behavior": "checkpointDiff",
+          "directory": "c:/xmatters/Actius/data",
+          "prefixDiffFile": "weboutDiff_02",
+          "outputDelimiter": "\t"
+        },
+        "diffProcessAll": "true"
+      },
+      "mergetrans01": {
+        "type": "transform",
+        "behavior": "mergeTemplate",
+        "mergeTemplate": "{ \"properties\" : {\"aptName\": \"@001\",\"aptClientNum\": \"@000\",\"aptPname\": \"@002\",\"aptDate\": \"@003\", \"aptTimStr\": \"@004\", \"vetLastName\": \"@005\",\"vetFirstName\": \"@006\",\"sashCode\": \"@007\",\"sashVetName\": \"@008\"},\"recipients\": [{\"targetName\": \"@000\"}]}"
+      }
+    },
+    "pipelines": {
+      "p000": {
+        "pipe": "sqlin_new_notifications_2 | datacleanup01 | fileload01"
+      },
+      "upload001" : {
+        "pipe" : " fileextract01 | mergetrans01 | webtask01 "
+      },
+      "p003" : {
+        "pipe" : " {p000} | {upload001} "
+      },
+      "p004" : {
+        "pipe" : "{{{p000}} | {{p003}} } "
+      }
+    },
+    "services": {
+      "name001": {
+        "path": "/a/b/c",
+        "pipe": "p00411"
+      }
+    },
+    "startup": {
+      "exec": "p004"
+    }
+  }
+}

@@ -1,0 +1,168 @@
+{
+  "declare": {
+    "schemas": {
+    },
+    "maps": {
+    },
+    "tasks": {
+      "sqlrecord01": {
+        "type": "extract",
+        "dataSource": {7e://127.0.0.1:6262;catalog=C:\\tmp\\AISDATA\\JIM\\AISDATA-; TableType=adt; LockType=proprietary;",
+          "query" : {
+            "queryTemplate": "select * from record  "
+          }
+        }
+      },
+      "sqlrecord01": {
+        "type": "extract",
+        "dataSource": {
+          "type": "sql",
+          "jdbcDriver": "com.extendedsystems.jdbc.advantage.ADSDriver",
+          "connect": "jdbc:extendedsystems:advantage://127.0.0.1:6262;catalog=C:\\tmp\\AISDATA\\JIM\\AISDATA-; TableType=adt; LockType=proprietary;",
+          "query": {
+            "queryTemplate": "select * from record  "
+          }
+        }
+      },
+      "sqlrecord01": {
+        "type": "extract",
+        "dataSource": {
+          "type": "sql",
+          "jdbcDriver": "com.extendedsystems.jdbc.advantage.ADSDriver",
+          "connect": "jdbc:extendedsystems:advantage://127.0.0.1:6262;catalog=C:\\tmp\\AISDATA\\JIM\\AISDATA-; TableType=adt; LockType=proprietary;",
+          "query": {
+            "queryTemplate": "select * from record  "
+          }
+        }
+      },
+      "sqlrecord01": {
+        "type": "extract",
+        "dataSource": {
+          "type": "sql",
+          "jdbcDriver": "com.extendedsystems.jdbc.advantage.ADSDriver",
+          "connect": "jdbc:extendedsystems:advantage://127.0.0.1:6262;catalog=C:\\tmp\\AISDATA\\JIM\\AISDATA-; TableType=adt; LockType=proprietary;",
+          "query": {
+            "queryTemplate": "select * from record  "
+          }
+        }
+      },
+      "sqlrecord01": {
+        "type": "extract",
+        "dataSource": {
+          "type": "sql",
+          "jdbcDriver": "com.extendedsystems.jdbc.advantage.ADSDriver",
+          "connect": "jdbc:extendedsystems:advantage://127.0.0.1:6262;catalog=C:\\tmp\\AISDATA\\JIM\\AISDATA-; TableType=adt; LockType=proprietary;",
+          "query": {
+            "queryTemplate": "select * from record  "
+          }
+        }
+      },
+      "sqlrecord01": {
+        "type": "extract",
+        "dataSource": {
+          "type": "sql",
+          "jdbcDriver": "com.extendedsystems.jdbc.advantage.ADSDriver",
+          "connect": "jdbc:extendedsystems:advantage://127.0.0.1:6262;catalog=C:\\tmp\\AISDATA\\JIM\\AISDATA-; TableType=adt; LockType=proprietary;",
+          "query": {
+            "queryTemplate": "select * from record  "
+          }
+        }
+      },
+      "sqlrecord01": {
+        "type": "extract",
+        "dataSource": {
+          "type": "sql",
+          "jdbcDriver": "com.extendedsystems.jdbc.advantage.ADSDriver",
+          "connect": "jdbc:extendedsystems:advantage://127.0.0.1:6262;catalog=C:\\tmp\\AISDATA\\JIM\\AISDATA-; TableType=adt; LockType=proprietary;",
+          "query": {
+            "queryTemplate": "select * from record  "
+          }
+        }
+      },
+      "sqlrecord01": {
+        "type": "extract",
+        "dataSource": {
+          "type": "sql",
+          "jdbcDriver": "com.extendedsystems.jdbc.advantage.ADSDriver",
+          "connect": "jdbc:extendedsystems:advantage://127.0.0.1:6262;catalog=C:\\tmp\\AISDATA\\JIM\\AISDATA-; TableType=adt; LockType=proprietary;",
+          "query": {
+            "queryTemplate": "select * from record  "
+          }
+        }
+      },
+      "sqlrecord01": {
+        "type": "extract",
+        "dataSource": {
+          "type": "sql",
+          "jdbcDriver": "com.extendedsystems.jdbc.advantage.ADSDriver",
+          "connect": "jdbc:extendedsystems:advantage://127.0.0.1:6262;catalog=C:\\tmp\\AISDATA\\JIM\\AISDATA-; TableType=adt; LockType=proprietary;",
+          "query": {
+            "queryTemplate": "select * from record  "
+          }
+        }
+      },
+      "sqlrecord01": {
+        "type": "extract",
+        "dataSource": {
+          "type": "sql",
+          "jdbcDriver": "com.extendedsystems.jdbc.advantage.ADSDriver",
+          "connect": "jdbc:extendedsystems:advantage://127.0.0.1:6262;catalog=C:\\tmp\\AISDATA\\JIM\\AISDATA-; TableType=adt; LockType=proprietary;",
+          "query": {
+            "queryTemplate": "select * from record  "
+          }
+        }
+      },
+      "sqlrecord01": {
+        "type": "extract",
+        "dataSource": {
+          "type": "sql",
+          "jdbcDriver": "com.extendedsystems.jdbc.advantage.ADSDriver",
+          "connect": "jdbc:extendedsystems:advantage://127.0.0.1:6262;catalog=C:\\tmp\\AISDATA\\JIM\\AISDATA-; TableType=adt; LockType=proprietary;",
+          "query": {
+            "queryTemplate": "select * from record  "
+          }
+        }
+      },
+      "fileload05": {
+        "type": "load",
+        "behavior": "simple",
+        "dataSource": {
+          "directory": "c:/tmp/sash",
+          "type": "file",
+          "filenameTemplate": "prodload_03_@@getDate@@.csv",
+          "outputDelimiter": ",",
+          "inputDelimiter": ","
+        }
+      }
+    },
+    "pipelines": {
+      "dslp005": {
+        "pipe": "sqlinput05 | fileload05"
+      },
+      "dslp006": {
+        "pipe": "sqlinput06 | fileload05"
+      },
+      "listenPipe001": {
+        "pipe": "restInput001 | logfile001 | (dslp006)"
+      }
+    }
+  },
+  "execute": {
+    "main01": {
+      "exec" : "{dlp005}"
+    },
+    "main02": {
+      "service" : "{t1 | t2 | t3}"
+    },
+    "main03" : {
+      "exec" : "(service {pipeName01})"
+    },
+    "main04" : {
+      "exec" : "(exec { {pipeName01} | {p2} | {p3} )"
+    }
+  }
+}
+
+
+
+

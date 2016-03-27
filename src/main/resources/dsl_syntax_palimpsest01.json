@@ -1,0 +1,62 @@
+{
+  "script": {
+    "schema": {},
+    "tasks": {
+      "sqlrecord01": {
+        "type": "extract",
+        "dataSource": {
+          "type": "sql",
+          "jdbcDriver": "com.extendedsystems.jdbc.advantage.ADSDriver",
+          "connect": "jdbc:extendedsystems:advantage://127.0.0.1:6262;catalog=C:\\tmp\\AISDATA\\JIM\\AISDATA-;TableType=adt;LockType=proprietary;",
+          "query": {
+            "queryTemplate": "select*fromrecord"
+          }
+        },
+        "T1": {},
+        "T2": {},
+        "T3": {},
+        "T4": {},
+        "T5": {},
+        "T6": {},
+        "T7": {},
+        "merge-task": {
+          "type": "transform",
+          "function": {
+            "label": "merge",
+            "inputs": "-1",
+            "mergetype": "row"
+          }
+        },
+        "split-task": {
+        }
+      }
+    },
+    "pipelines": {
+      "abp001": " T1 | T2 | T3",
+      "aap003": " T5 | {p001 | p004} ",
+      "p004": {
+        "pipe": " T6 , T7 , {p002} ",
+        "parallel": true,
+        "serviceType": "REST"
+      },
+      "main001": "(merge-task {p001} {p002} {p003})",
+      "main002": "(split-task {main001} )",
+      "main003": "(constrain {main001} )",
+      "main004": "( constrain {main002} )",
+      "main005": "{ {t1,t2,t3} | t4 | t5 | t6 }",
+      "main006": "{ {main005} | {main001} }",
+      "service001": "(((({{{}}})))-----,____|``````|~~~~~~|abacd",
+      "aaaservice002": "('123  456','abcd-- dd')",
+      "main007": "{{t1,t2,t3}|t4|t5|t6}"
+    },
+    "services": {
+      "name001": {
+        "path": "/a/b/c",
+        "pipe": "p004"
+      }
+    },
+    "executables": {
+      "exec": "main001"
+    }
+  }
+}

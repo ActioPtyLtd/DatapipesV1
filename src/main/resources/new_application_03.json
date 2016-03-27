@@ -1,0 +1,156 @@
+{
+  "script": {"schemas": {
+    },
+    "maps" : {
+    },
+    "tasks": {
+      "task003q_sqlinput": {
+        "type": "extract",
+        "dataSource": {
+          "type": "sql",
+          "jdbcDriver" :  "com.extendedsystems.jdbc.advantage.ADSDriver",
+          "connect": "jdbc:extendedsystems:advantage://192.168.10.37:6262;catalog=D:/AI - live db/AISDATA; TableType=cdx; LockType=proprietary;",
+          "query": {
+            "queryTemplate2" : "select apt_type, Wvssapt.APT_ClINUM, Wvssapt.APT_NAME, Wvssapt.APT_PNAME, Wvssapt.APT_DATE, Wvssapt.APT_TIMSTR,WVSSVET.VET_LAST, WVSSVET.VET_FIRST, WVSSPCK.PCK_CODE, WVSSPCK.PCK_DESCfrom Wvssaptinner join WVSSVET on Wvssapt.APT_VETNUM=WVSSVET.VET_VETNUMinner join WVSSPCK on Wvssapt.APT_BOOK=WVSSPCK.PCK_LINK where WVSSPCK.PCK_CODE=112 and Wvssapt.APT_NAME <> ''and Wvssapt.APT_PNAME <> '' and Wvssapt.APT_DATE = '09/23/2015'and pck_desc not in ('1 Welcome to Sash','1a. General surgery list','3a. Ophthalmologic surgery list','4. Medicine Procedure list','7. CT procedure','7a.  SASH 1.0 Ultrasound #1','8a. Hospitalized + boarding','8b. Staff Boarding','9 EVENT','9a Reception Messages','9b Medicine Messages','9c Ophtho Messages','9d Surgery Messages','9e Emergency Messages','9f Emergency','9g Oncology Messages','9i Cardiology messages','9k. Dermatology Messages','z Dentistry Messages','O. Radioiodine Treatment','O. Physiotherapy','O. MRI','Blood Bank','Appointment Book Names')and apt_type not in ('Discharge from hospi','Ultrasound','Pickups & Procedures','Cancelled Appt','Procedure','Telephone Message','Inpatient','Inpatient assessment','Internal Referral','Communication','Allergy Vax Initial','Drop Off','Emergency','Allergy Vax Repeat','Lab Results','Meeting','Radioiodine initial','Radioiodine Inpatien','Surgery','Interpretation','Owner visiting','Responsibility','CT Scan','Admitted','Teamwork','MRI','Estimate Required','Phone Calls', 'CT Scan')and apt_type in ('Initial Visit','Recheck','Post op recheck','Chemo')",
+            "queryTemplate": "select Wvssapt.APT_ClINUM, Wvssapt.APT_NAME, Wvssapt.APT_PNAME, Wvssapt.APT_DATE, Wvssapt.APT_TIMSTR, WVSSVET.VET_LAST, WVSSVET.VET_FIRST, WVSSPCK.PCK_CODE, WVSSPCK.PCK_DESC, apt_type from Wvssapt inner join WVSSVET on Wvssapt.APT_VETNUM=WVSSVET.VET_VETNUM inner join WVSSPCK on Wvssapt.APT_BOOK=WVSSPCK.PCK_LINK where WVSSPCK.PCK_CODE=112 and Wvssapt.APT_NAME <> '' and Wvssapt.APT_PNAME <> '' and pck_desc not in ('1 Welcome to Sash','1a. General surgery list','3a. Ophthalmologic surgery list','4. Medicine Procedure list','7. CT procedure','7a.  SASH 1.0 Ultrasound #1','8a. Hospitalized + boarding','8b. Staff Boarding','9 EVENT','9a Reception Messages','9b Medicine Messages','9c Ophtho Messages','9d Surgery Messages','9e Emergency Messages','9f Emergency','9g Oncology Messages','9i Cardiology messages','9k. Dermatology Messages','z Dentistry Messages','O. Radioiodine Treatment','O. Physiotherapy','O. MRI','Blood Bank','Appointment Book Names')and apt_type not in ('Discharge from hospi','Ultrasound','Pickups & Procedures','Cancelled Appt','Procedure','Telephone Message','Inpatient','Inpatient assessment','Internal Referral','Communication','Allergy Vax Initial','Drop Off','Emergency','Allergy Vax Repeat','Lab Results','Meeting','Radioiodine initial','Radioiodine Inpatien','Surgery','Interpretation','Owner visiting','Responsibility','CT Scan','Admitted','Teamwork','MRI','Estimate Required','Phone Calls', 'CT Scan')and apt_type in ('Initial Visit','Recheck','Post op recheck','Chemo')  and Wvssapt.APT_DATE = '@yesterdaysDateWithOffset' ",
+            "dateDayOffset": "2"
+          },
+          "inputDelimiter": ","
+        }
+      },
+      "task006_fileinput": {
+        "type": "extract",
+        "behavior": "simple",
+        "dataSource": {
+          "directory": "/Users/dimitarpopov/Downloads/data02",
+          "type":"file",
+          "filenameTemplate": "testdata05.csv",
+          "inputDelimiter": ",",
+          "headerPreamble": "Reminders Output",
+          "header": "ClientNumber,PetName,ClientFirstname,ClientLastname,Date,time,RefVetFName,RefVetLName,SashCode,SashVetName"
+        }
+      },
+      "task007_fileoutput": {
+        "type": "load",
+        "behavior" : "checkpointDiff",
+        "dataSource": {
+          "type" : "file",
+          "behavior": "simple",
+          "directory": "/Users/dimitarpopov/Downloads/data02",
+          "filenameTemplate": "outdata002_@datetime.csv",
+          "dateOffset": "-1",
+          "outputDelimiter" : "\t",
+          "headerPreamble": "Data Import File Format Version: 1.2",
+          "header": "Operation, User, First Name, Last Name, Site, Language, Time Zone, User Supervisor, Role, Home Email, SMS Phone"
+        },
+        "dataSourceLog": {
+          "type" : "file",
+          "behavior": "checkpointDiff",
+          "directory": "/Users/dimitarpopov/Downloads/data02",
+          "prefixDiffFile": "p_outdata002",
+          "outputDelimiter" : "\t"
+        },
+        "diffProcessAll":"true"
+      },
+      "webtask010": {
+        "type": "load",
+        "dataSource": {
+          "type": "rest",
+          "mergeTemplate":"{ \"properties\" : {\"aptName\": \"@@\",\"aptClientNum\": \"@@\",\"aptPname\": \"@@\",\"aptDate\": \"@@\", \"aptTimStr\": \"@@\", \"vetLastName\": \"@@\",\"vetFirstName\": \"@@\",\"sashCode\": \"@@\",\"sashVetName\": \"@@\"},\"recipients\": [{\"targetName\": \"@@\"}]}",
+          "url": "https://sash.au1.xmatters.com.au/reapi/2015-01-01/forms/74595e64-f548-4c3d-b2b2-3a286e7e02ae/triggers",
+          "credential": {
+            "user": "rxp.ra",
+            "password": "7qu0KKa7",
+            "file": "",
+            "cookie": "",
+            "key": ""
+          }
+        },
+        "dataSourceLog": {
+          "type" : "file",
+          "behavior": "checkpointDiff",
+          "directory": "/Users/dimitarpopov/Downloads/data02",
+          "prefixDiffFile": "weboutDiff_001",
+          "outputDelimiter" : "\t"
+        },
+        "diffProcessAdd":"false",
+        "diffProcessAll":"true"
+      },
+      "webtask012": {
+        "type": "load",
+        "behavior": "checkpointDiff",
+        "dataSource": {
+          "type": "rest",
+          "behavior": "simple",
+          "url": "https://sash.au1.xmatters.com.au/reapi/2015-01-01/forms/74595e64-f548-4c3d-b2b2-3a286e7e02ae/triggers",
+          "credential": {
+            "user": "rxp.ra",
+            "password": "7qu0KKa7",
+            "file": "",
+            "cookie": "",
+            "key": ""
+          }
+        },
+        "dataSourceLog": {
+          "type" : "file",
+          "behavior": "checkpointDiff",
+          "directory": "/Users/dimitarpopov/Downloads/data02",
+          "prefixDiffFile": "weboutDiff_001",
+          "outputDelimiter" : "\t"
+        },
+        "diffProcessAdd":"false",
+        "diffProcessAll":"true"
+      },
+      "mergetrans001" : {
+        "type" : "transform",
+        "behavior" : "mergeTemplate",
+        "templateString_old" : "{ \"properties\" : {\"aptName\": \"@aptName\",\"aptClientNum\": \"@aptClientNum\",\"aptPname\": \"@aptPname\",\"aptDate\": \"@aptDate\", \"aptTimStr\": \"@aptTime\", \"vetLastName\": \"@vetLastName\",\"vetFirstName\": \"@vetFirstName\",\"sashCode\": \"@sashCode\",\"sashVetName\": \"@sashVetName\"},\"recipients\": [{\"targetName\": \"@aptClientNum\"}]}",
+        "mergeTemplate" : "{ \"properties\" : {\"aptName\": \"@002\",\"aptClientNum\": \"@000\",\"aptPname\": \"@001\",\"aptDate\": \"@003\", \"aptTimStr\": \"@004\", \"vetLastName\": \"@005\",\"vetFirstName\": \"@006\",\"sashCode\": \"@007\",\"sashVetName\": \"@008\"},\"recipients\": [{\"targetName\": \"@000\"}]}"
+      },
+      "datacleanup002" : {
+        "type" : "transform",
+        "behavior" : "lineValidation",
+        "setValueByRegexp_Columns" : [9],
+        "setValueByRegexp_Regexp" : "^(\\w*\\.*\\s)",
+        "setValueByRegexp_Value" : "",
+        "SetDateFormat_Columns" : [4],
+        "SetDateFormat_InputFormat" : "yyyy-MM-dd",
+        "SetDateFormat_OutputFormat" : "dd/MM/yyyy",
+        "allowDuplicates" : false
+       }
+    },
+    "pipelines": {
+      "p5" : {
+        "pipe" : "task003q_sqlinput | datacleanup002 | mergetrans001 | task007_fileoutput "
+      }
+    }
+  }
+}
+
+
+
+"type": "extract",
+"directory": "/Users/dimitarpopov/Downloads/data",
+"dataSource": {
+"query1": {
+"query": "select distinct 'process',cli_clinum ,cli_first1,cli_last1,'North Ryde SASH 1.0','English','Australia/Sydney',' ','Read-only User',cli_email,mp.phn_num from wvsscli left join wvssphn mp on ( mp.phn_clinum  = cli_clinum  and mp.phn_cat = 4 ) where cli_clinum > 30000",
+"queryCheckpointValue": "",
+"queryType": "CheckpointDiff",
+"dataSource": "file",
+"connect": "/Users/dimitarpopov/Downloads/data/custRecords.csv",
+"prefixFile": "cli_@datetime",
+"prefixDiffFile": "datacli",
+"inputDelimiter": "\\t",
+"outputDelimiter": ",",
+"headerPreamble": "Data Import File Format Version: 1.2",
+"customHeader": "Operation, User, First Name, Last Name, Site, Language, Time Zone, User Supervisor, Role, Work Email, Home Email, SMS Phone",
+"dateDayOffset": -59,
+"xMattersOutput": "true",
+"xMattersNewKey": "false"
+}
+}
+}
+}
+
+
+

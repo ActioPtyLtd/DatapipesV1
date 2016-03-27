@@ -1,0 +1,86 @@
+{
+  "script": {"schemas": {
+    },
+    "maps" : {
+    },
+    "tasks": {
+      "fileinput01": {
+        "type": "extract",
+        "behavior": "simple",
+        "dataSource": {
+          "directory": "/Users/dimitarpopov/Downloads/prodData01",
+          "type":"file",
+          "filenameTemplate": "proddata01.csv",
+          "inputDelimiter": "\t"
+        }
+      },
+      "fileoutput01": {
+        "type": "load",
+        "behavior" : "checkpointDiff",
+        "dataSource": {
+          "type" : "file",
+          "behavior": "simple",
+          "directory": "/Users/dimitarpopov/Downloads/prodData01",
+          "filenameTemplate": "prodload01_@datetime.csv",
+          "dateOffset": "-1",
+          "outputDelimiter" : "\t"
+        },
+        "dataSourceLog": {
+          "type" : "file",
+          "behavior": "checkpointDiff",
+          "directory": "/Users/dimitarpopov/Downloads/prodData01",
+          "prefixDiffFile": "prodlog_01_",
+          "outputDelimiter" : "\t"
+        },
+        "diffProcessAll":"true"
+      },
+      "webtask01": {
+        "type": "load",
+        "behavior": "checkpointDiff",
+        "dataSource": {
+          "type": "rest",
+          "behavior": "simple",
+          "url": "https://sash.au1.xmatters.com.au/reapi/2015-01-01/forms/74595e64-f548-4c3d-b2b2-3a286e7e02ae/triggers",
+          "credential": {
+            "user": "rxp.ra",
+            "password": "7qu0KKa7"
+          }
+        },
+        "dataSourceLog": {
+          "type" : "file",
+          "behavior": "checkpointDiff",
+          "directory": "/Users/dimitarpopov/Downloads/prodData01",
+          "prefixDiffFile": "webprodDiff_01",
+          "outputDelimiter" : "\t"
+        },
+        "diffProcessAdd":"false",
+        "diffProcessAll":"true"
+      },
+      "mergetrans01" : {
+        "type" : "transform",
+        "behavior" : "mergeTemplate",
+        "mergeTemplate" : "{ \"properties\" : {\"aptName\": \"@002\",\"aptClientNum\": \"@000\",\"aptPname\": \"@001\",\"aptDate\": \"@003\", \"aptTimStr\": \"@004\", \"vetLastName\": \"@005\",\"vetFirstName\": \"@006\",\"sashCode\": \"@007\",\"sashVetName\": \"@008\"},\"recipients\": [{\"targetName\": \"@000\"}]}"
+      },
+      "datacleanup01" : {
+        "type" : "transform",
+        "behavior" : "lineValidation",
+        "setValueByRegexp_Columns" : [9],
+        "setValueByRegexp_Regexp" : "^(\\w*\\.*\\s)",
+        "setValueByRegexp_Value" : "",
+        "SetDateFormat_Columns" : [4],
+        "SetDateFormat_InputFormat" : "yyyy-MM-dd",
+        "SetDateFormat_OutputFormat" : "dd/MM/yyyy",
+        "allowDuplicates" : false
+       }
+    },
+    "pipelines": {
+      "p5" : {
+        "pipe" : " loadfile01 | datacleanup01 | mergetrans01 | fileoutput01 "
+      }
+    }
+  }
+}
+
+
+
+

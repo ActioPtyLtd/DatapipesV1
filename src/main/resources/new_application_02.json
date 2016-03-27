@@ -1,0 +1,186 @@
+{
+  "script": {
+    "schemas": {
+      "schem001": {
+        "type": "tabular",
+        "header": "Operation, User, First Name, Last Name, Site, Language, Time Zone, User Supervisor, Role, Home Email, SMS Phone"
+      },
+      "schem002": {
+        "type": "tabular",
+        "fields": [
+          {
+            "label": "User",
+            "displayLabel" : "The Users ID",
+            "seq" : 1,
+            "type" : "String[50]"
+
+          },
+          {
+            "label": "First Name"
+          },
+          {
+            "label": "Last Name"
+          },
+          {
+            "label": "Site"
+          },
+          {
+            "label": "Language"
+          },
+          {
+            "label": "Time Zone"
+          },
+          {
+            "label": "User Supervisor"
+          },
+          {
+            "label": "Role"
+          },
+          {
+            "label": "Home Email",
+            "type": "email"
+          },
+          {
+            "label": "SMS Phone",
+            "type": "phone",
+            "region": "au"
+          }
+        ]
+      }
+    },"maps" : {
+      "m1" : {
+        "source": "schem001",
+        "dest": "schem002",
+        "map": {
+          "1": [
+            2
+          ],
+          "2": [
+            3
+          ],
+          "3": [
+            4
+          ],
+          "4": [
+            5
+          ],
+          "5": [
+            6
+          ],
+          "6": [
+            7
+          ],
+          "7": [
+            8
+          ],
+          "8": [
+            9
+          ],
+          "9": [
+            10
+          ],
+          "10": [
+            11
+          ]
+        }
+      }
+    },
+    "tasks": {
+      "task005": {
+        "type": "extract",
+        "query": "select top 1000 'process',cli_clinum ,cli_first1,cli_last1,'North Ryde SASH 1.0','English','Australia/Sydney',' ','Read-only User',mp.phn_num from wvsscli left join wvssphn mp on ( mp.phn_clinum  = cli_clinum  and mp.phn_cat = 4 ) where cli_clinum > 30000",
+        "dataSource": "sql",
+        "connect": "jdbc:extendedsystems:advantage://192.168.10.37:6262;catalog=D:/AI - live db/AISDATA; TableType=cdx; LockType=proprietary;",
+        "prefixFile": "cli2_@datetime",
+        "prefixDiffFile": "datacli2",
+        "inputDelimiter": "\\t"
+      },
+      "task006": {
+        "type": "extract",
+        "directory": "/Users/dimitarpopov/Downloads/data",
+        "behavior" : "simple",
+        "dataSource": "file",
+        "filename": "data001.csv",
+        "dateOffset" : "-1",
+        "prefixDiffFile": "datacli2",
+        "inputDelimiter": ",",
+        "headerPreamble": "Data Import File Format Version: 1.2",
+        "header": "Operation, User, First Name, Last Name, Site, Language, Time Zone, User Supervisor, Role, Home Email, SMS Phone"
+      },
+      "task007": {
+        "type": "load",
+        "directory": "/Users/dimitarpopov/Downloads/data",
+        "behavior" : "Diffwriter",
+        "dataSource": "file",
+        "prefixFile": "cli2_@datetime",
+        "prefixDiffFile": "datacli2",
+        "outputDelimiter": ",",
+        "headerPreamble": "Data Import File Format Version: 1.2",
+        "customHeader": "Operation, User, First Name, Last Name, Site, Language, Time Zone, User Supervisor, Role, Home Email, SMS Phone"
+      }, "webtask010": {
+        "type": "load",
+        "datasource": {
+          "type": "rest",
+          "url": "",
+          "host": "",
+          "credential": {
+            "user": "rxp.ra",
+            "password": "7qu0KKa7",
+            "file": "",
+            "cookie" : "",
+            "key" : ""
+          }
+        },
+        "query": {
+          "type" : "rest",
+          "schema": "schem010",
+          "encoding": "json",
+          "errorhandling": "fail",
+          "querytemplate":"{ \"properties\" : {\"aptName\": \"@aptName\",\"aptClientNum\": \"@aptClientNum\",\"aptPname\": \"@aptPname\",\"aptDate\": \"@aptDate\", \"aptTimStr\": \"@aptTime\", \"vetLastName\": \"@vetLastName\",\"vetFirstName\": \"@vetFirstName\",\"sashCode\": \"@sashCode\",\"sashVetName\": \"@sashVetName\"},\"recipients\": [{\"targetName\": \"@aptClientNum\"}]}"
+        }
+      },
+      "transform007": {
+        "type": "transform",
+        "behavior" : "lineValidation",
+        "xMattersOutput": "true",
+        "xMattersNewKey": "false",
+        "transformRegexp": "",
+        "transformDest": "",
+        "transformColumns": [
+          9
+        ],
+        "validateColumnCount": [
+          10
+        ],
+        "phoneValidate":[10],
+        "testhackemail": true,
+        "allowDuplicates": false
+      },
+      "transfrom008" : {
+        "type" : "transform",
+        "behavior": "map",
+        "map" : "m1"
+      },
+      "transform009" : {
+        "type" : "transform",
+        "behavior" : "mergeTemplate",
+        "templateString" : "{ \"properties\" : {\"aptName\": \"@aptName\",\"aptClientNum\": \"@aptClientNum\",\"aptPname\": \"@aptPname\",\"aptDate\": \"@aptDate\", \"aptTimStr\": \"@aptTime\", \"vetLastName\": \"@vetLastName\",\"vetFirstName\": \"@vetFirstName\",\"sashCode\": \"@sashCode\",\"sashVetName\": \"@sashVetName\"},\"recipients\": [{\"targetName\": \"@aptClientNum\"}]}"
+      }
+    },
+    "pipelines": {
+      "p1": {
+        "pipe": "task006 | transform007 | task007"
+      },
+      "p2": {
+        "pipe": "task006 | transform008 | task007"
+      },
+      "p3": {
+        "pipe": "task006 | transform009 | task007"
+      }
+    }
+  }
+}
+
+
+
+

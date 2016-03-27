@@ -1,0 +1,35 @@
+{
+  "tasks": {
+    "task003": {
+      "type": "QueryToFile",
+      "directory": "D:\\AI - live db\\actius\\xmatters",
+      "queries": {
+        "query1": {
+          "query2": "select distinct 'process',cli_clinum ,cli_first1,cli_last1,'North Ryde SASH 1.0','English','Australia/Sydney',' ','Read-only User',cli_email,mp.phn_num from wvsscli left join wvssphn mp on ( mp.phn_clinum  = cli_clinum  and mp.phn_cat = 4 ) where cli_clinum > 30000",
+          "query" : "select distinct 'process',cli_clinum ,cli_first1,cli_last1,'North Ryde SASH 1.0','English','Australia/Sydney','rxp.rp','Read-only User',cli_email,mp.phn_num from wvsscli left join wvssphn mp on ( mp.phn_clinum  = cli_clinum  and mp.phn_cat = 4 ) where cli_first1 <> '' and cli_last1 <> '' and mp.phn_num <> '' and cli_clinum in (select distinct cli_clinum from wvsscli inner join wvssapt on wvssapt.apt_clinum = cli_clinum where Wvssapt.APT_NAME <> '' and Wvssapt.APT_PNAME <> '' and apt_date > '2014-01-01' and cli_first1 <> '' and cli_last1 <> '' and wvssapt.apt_type in ('Recheck','Chemo','Initials','Drop Off','Post op recheck'))",
+	  "queryCheckpointValue": "",
+          "type": "CheckpointDiff",
+          "dataSource": "sql",
+          "connect": "jdbc:extendedsystems:advantage://localhost:6262;catalog=D:/AI - live db/AISDATA; TableType=cdx; LockType=proprietary;",
+          "prefixFile": "cli_@datetime",
+          "prefixDiffFile": "datacli",
+          "inputDelimiter": "\\t",
+          "outputDelimiter": ",",
+          "headerPreamble": "Data Import File Format Version: 1.2",
+          "customHeader": "Operation, User, First Name, Last Name, Site, Language, Time Zone, User Supervisor, Role, Home Email, SMS Phone",
+          "transform": {
+            "t1": {
+              "xMattersOutput": "true",
+              "xMattersNewKey": "false",
+              "type": "phoneformat_au",
+              "validateColumnCount" : [11],
+	          "setDefaultColumnValue" : [9],
+	          "defaultColumnValue" : "noemail@sashvets.com" ,
+              "allowDuplicates":false
+            }
+	      }
+        }
+      }
+    }
+  }
+}

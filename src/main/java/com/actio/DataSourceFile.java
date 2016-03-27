@@ -1,0 +1,336 @@
+package com.actio;
+
+import com.typesafe.config.Config;
+
+import java.io.*;
+import java.nio.charset.Charset;
+import java.nio.charset.UnmappableCharacterException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardOpenOption;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.*;
+
+/**
+ * Created by dimitarpopov on 24/08/15.
+ */
+
+public class DataSourceFile extends DataSource {
+
+    private String type;
+    private String directory;
+
+    private int currentFileIncrement;
+    private String lastFileName;
+    private String generatedFilename;
+    private String prefixDiffFile;
+    private String filenameTemplate;
+
+    private String getCompiledFilename() throws Exception
+    {
+
+        if (compiledFilename == null)
+           compiledFilename = QueryParser.processTemplate(filenameTemplate);
+
+        return compiledFilename;
+    }
+
+    public void setCompiledFilename(String compiledFilename) {
+        this.compiledFilename = compiledFilename;
+    }
+
+    private String compiledFilename;
+
+    //protected String filePrefix;
+    //protected String filePostfix;
+
+    protected String preamble;
+    protected String header;
+    private String behaviour;
+
+    public void resetFilename()
+    {
+        generatedFilename = null;
+    }
+
+    @Override
+    public void execute() throws Exception{
+        extract();
+    }
+
+    public void extract() throws Exception {
+
+        // execute the sqlquery
+        logger.info("ReadFile: " + getFilename());
+
+        // read the file into memory -- yeah yeah
+        ArrayList<String> list = new ArrayList<String>();
+
+        try {
+            Scanner scanner = new Scanner(new File(getFilename()));
+            scanner.useDelimiter(System.getProperty("line.separator"));
+            while (scanner.hasNext()) {
+                list.add(scanner.next());
+            }
+            scanner.close();
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
+
+        // save the results
+        dataSet = new DataSetTabular();
+        // must initialise or the defaults are wrong
+        dataSet.setConfig(config, masterConfig);
+        dataSet.set(list);
+
+        logger.info("Read in lines="+list.size()+" From file:"+getFilename());
+    }
+
+    public void load() throws Exception {
+        throw new Exception(FUNCTION_UNIMPLEMENTED_MSG);
+    }
+
+    @Override
+    public DataSet read(QueryParser queryParser) throws Exception
+    {
+        throw new Exception("Not implemented");
+    }
+
+    // Generate Filename from parameters
+    @Override
+    public void setConfig(Config _conf, Config _master) throws Exception
+    {
+        super.setConfig(_conf, _master);
+        // Optional fields -- MUST SET A DEFAULT
+        if (config.hasPath(BEHAVIOR_LABEL) == true)
+            behaviour = config.getString(BEHAVIOR_LABEL);
+        else
+            behaviour = BASIC_LOAD_LABEL;
+
+        //mandatory fields will throw exception if not found
+        directory = config.getString(DIRECTORY_LABEL);
+        type = config.getString(TYPE_LABEL);
+
+        if (behaviour.equalsIgnoreCase("checkpointDiff"))
+            prefixDiffFile = config.getString("prefixDiffFile");
+        else
+            filenameTemplate = config.getString(FILENAME_TEMPLATE_LABEL);
+
+
+        if (config.hasPath(FILENAME_TEMPLATE_LABEL) == true)
+            filenameTemplate = config.getString(FILENAME_TEMPLATE_LABEL);
+        else
+            filenameTemplate = DEFAULT_FILENAME_LABEL;
+
+        // General Init
+        generatedFilename = null;
+                /* no op */
+        dataSet = new DataSetTabular() {
+        };
+
+    }
+
+    @Override
+    public DataSet getLastLoggedDataSet() throws Exception
+    {
+        // from directory
+
+        initialiseDeltaFiles();
+        List<String> file = fileToLines(lastFileName);
+        DataSet returnSet = new DataSetTabular();
+        returnSet.set(file);
+
+        return returnSet;
+    }
+
+    @Override
+    public void LogNextDataSet(DataSet set) throws Exception {
+
+        // May need to change this to increment properly
+        write(set);
+    }
+
+    @Override
+    public void write(DataSet data) throws Exception
+    {
+        String outFileName = getFilename();
+        WriteWorker(outFileName, data, data.getColumnHeaderStr(), data.getCustomHeader());
+    }
+
+    @Override
+    public void write(DataSet data, String qualifier) throws Exception
+    {
+        List<String>rowList = data.getAsList();
+
+        logger.info("Entered writeListSet "+qualifier);
+        if (rowList.isEmpty())
+        {
+            logger.info(" list is empty no file created: "+qualifier);
+            return;
+        }
+
+        String outFileName = generateFilenameByLabel(qualifier);
+        logger.info("   DiffOutputFile="+outFileName);
+        WriteWorker(outFileName, data, data.getColumnHeaderStr(), data.getCustomHeader());
+
+    }
+
+    private void WriteWorker(String outFileName, DataSet data,
+                             String header, String preamble) throws Exception {
+
+        List<String> rowList = data.getAsList();
+
+        logger.info("Writing File=" + getFilename() + "No.Lines=" + rowList.size());
+
+        // open to a file
+        Charset charset = Charset.forName("UTF-8");
+        logger.info(outFileName);
+        Path datafile = Paths.get(outFileName);
+
+        if (!Files.exists(datafile))
+            Files.createFile(datafile);
+
+        BufferedWriter writer = Files.newBufferedWriter(datafile, charset, StandardOpenOption.APPEND);
+
+        // print out the dataSource
+        try {
+            // write preamble header
+            if (preamble != null) {
+                writer.write(preamble);
+                writer.newLine();
+            }
+            // write preamble header
+            if (header != null) {
+                writer.write(header);
+                writer.newLine();
+            }
+
+            for (String columns : rowList) {
+                try {
+                    writer.write(columns);
+                    writer.newLine();
+                } catch (UnmappableCharacterException e) {
+                    logger.info("ERROR:unmappable character expressoion");
+                }
+            }
+            writer.close();
+        } catch (UnmappableCharacterException e) {
+            logger.info("ERROR:unmappable character expressoion");
+        }
+
+    }
+
+    @Override
+    public String getConnectStr() throws Exception {
+        return getFilename();
+    }
+
+    // =======================================================================================
+    //
+    //
+    //
+    // =======================================================================================
+
+
+    private String getFilename() throws Exception {
+
+        if (generatedFilename != null)
+            return generatedFilename;
+
+        // process file template to generate a filename
+        // search through supported labels to determine format
+
+        if (matchLabel(behaviour, CHECKPOINT_DIFF_LABEL))
+            initialiseDeltaFiles();
+        else
+          generateFilenameByLabel(null);
+
+        return generatedFilename;
+    }
+
+    private void initialiseDeltaFiles() throws IOException {
+        // delta logfiles are of the form 'fixed'__0001__.csv
+        // number should always increment and should get the last number in the sequence
+
+        // set the following variables
+        // CurrentFileIncrement
+        // LastFileName
+        // NextFileName
+
+        // loop over applicable filenames looking for last one - also store previous at this point
+        OptionalInt currentMaxFileNo = Files.list(Paths.get(directory)).mapToInt(filePath -> {
+            int val = -1;
+            if (Files.isRegularFile(filePath)) {
+
+                String[] fileTokens = filePath.getFileName().toString().split("__");
+
+                // get the number and check the prefixs match
+                if (fileTokens.length < 2)
+                    return 0;
+
+                String filePrefix = fileTokens[0];
+
+                if( filePrefix.equals(prefixDiffFile) && isInteger(fileTokens[1], 10) == true ) {
+                    val = Integer.parseInt(fileTokens[1]);
+                }
+            }
+            return val;
+        }).max();
+
+        currentFileIncrement = currentMaxFileNo.isPresent() ? currentMaxFileNo.getAsInt() : 0;
+        logger.info(" CurrentFileIncrement=" + currentFileIncrement);
+
+        lastFileName = generateBaseFilename(currentFileIncrement);
+        generatedFilename = generateBaseFilename(currentFileIncrement+1);
+
+        logger.info("*** last=" + lastFileName + " next=" + generatedFilename);
+    }
+
+    // =======================================================================================
+    //
+    //
+    //
+    // =======================================================================================
+
+    private String generateBaseFilename(int increment) {
+        // take out the @datetime if its there
+        return directory + "/" + prefixDiffFile + "__" + String.format("%04d", increment) + "__.dat";
+    }
+
+    private String generateFilenameByLabel(String qualifier) throws Exception
+    {
+
+        generatedFilename = directory + FS + getCompiledFilename() +
+                ((qualifier==null)?"":qualifier);
+
+        return generatedFilename;
+    }
+
+    //=============================================================
+    private static List<String> fileToLines(String filename) {
+        List<String> lines = new LinkedList<String>();
+        String line = "";
+        BufferedReader in = null;
+        try {
+            in = new BufferedReader(new FileReader(filename));
+            while ((line = in.readLine()) != null) {
+                lines.add(line);
+            }
+        } catch (IOException e) {
+            logger.info("File not found - first diff entry");
+        } finally {
+            if (in != null) {
+                try {
+                    in.close();
+                } catch (IOException e) {
+                    // ignore ... any errors should already have been
+                    // reported via an IOException from the final flush.
+                }
+            }
+        }
+        return lines;
+    }
+
+}

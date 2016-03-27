@@ -1,0 +1,36 @@
+{
+  "tasks": {
+    "QueryToFile": {
+      "defaultConnect": "jdbc:extendedsystems:advantage://localhost:6262;catalog=D:/Database/AI/; TableType=cdx; LockType=compatible;",
+      "directory": "c:\\tmp",
+      "queries": {
+        "query0001": {
+          "query": "select * from wvsscof where cof_regdat >= '@yesterdaysDateWithOffset' cof_regdat < '@yesterdaysDate'",
+          "queryCheckpointValue": "",
+          "queryType": "CheckpointDiff",
+          "connect": "jdbc:extendedsystems:advantage://localhost:6262;catalog=C:/usr/data/actius; TableType=cdx; LockType=compatible;",
+          "prefixFile": "cof_@datetime",
+          "prefixDiffFile": "datacof",
+          "dateDayOffset": -59
+        },
+        "query0012": {
+          "query": "select * from wvssuse ",
+          "queryCheckpointValue" : "",
+          "queryType" : "Full",
+          "connect": "jdbc:extendedsystems:advantage://localhost:6262;catalog=C:/usr/data/actius; TableType=cdx; LockType=compatible;",
+          "prefixFile": "use_log.csv",
+          "dateDayOffset": -1
+        },
+        "query0113": {
+          "query": "select * from wvsscli ",
+          "queryCheckpointValue" : "",
+          "queryType" : "Full",
+          "connect": "jdbc:extendedsystems:advantage://localhost:6262;catalog=C:/usr/data/actius; TableType=cdx; LockType=compatible;",
+          "prefixFile": "cli_log.csv",
+          "dateDayOffset": -200
+        }
+      }
+    }
+  }
+
+}

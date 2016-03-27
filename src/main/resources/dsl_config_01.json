@@ -1,0 +1,336 @@
+{
+  "script": {"schemas": {
+    },
+    "maps" : {
+    },
+    "tasks": {
+      "sqlinput01": {
+        "type": "extract",
+        "dataSource": {
+          "type": "sql",
+          "jdbcDriver" :  "com.extendedsystems.jdbc.advantage.ADSDriver",
+          "connect": "jdbc:extendedsystems:advantage://192.168.10.37:6262;catalog=D:/AI - live db/AISDATA; TableType=cdx; LockType=proprietary;",
+          "query": {
+            "queryTemplate":"select Wvssapt.APT_ClINUM, Wvssapt.APT_NAME, Wvssapt.APT_PNAME, Wvssapt.APT_DATE, Wvssapt.APT_TIMSTR, WVSSVET.VET_LAST, WVSSVET.VET_FIRST, WVSSPCK.PCK_CODE, WVSSPCK.PCK_DESC, apt_type from Wvssapt inner join WVSSVET on Wvssapt.APT_VETNUM=WVSSVET.VET_VETNUM inner join WVSSPCK on Wvssapt.APT_BOOK=WVSSPCK.PCK_LINK where WVSSPCK.PCK_CODE=112 and Wvssapt.APT_NAME <> '' and Wvssapt.APT_PNAME <> '' and pck_desc not in ('1 Welcome to Sash','1a. General surgery list','3a. Ophthalmologic surgery list','4. Medicine Procedure list','7. CT procedure','7a.  SASH 1.0 Ultrasound #1','8a. Hospitalized + boarding','8b. Staff Boarding','9 EVENT','9a Reception Messages','9b Medicine Messages','9c Ophtho Messages','9d Surgery Messages','9e Emergency Messages','9f Emergency','9g Oncology Messages','9i Cardiology messages','9k. Dermatology Messages','z Dentistry Messages','O. Radioiodine Treatment','O. Physiotherapy','O. MRI','Blood Bank','Appointment Book Names')and apt_type not in ('Discharge from hospi','Ultrasound','Pickups & Procedures','Cancelled Appt','Procedure','Telephone Message','Inpatient','Inpatient assessment','Internal Referral','Communication','Allergy Vax Initial','Drop Off','Emergency','Allergy Vax Repeat','Lab Results','Meeting','Radioiodine initial','Radioiodine Inpatien','Surgery','Interpretation','Owner visiting','Responsibility','CT Scan','Admitted','Teamwork','MRI','Estimate Required','Phone Calls', 'CT Scan')and apt_type in ('Initial Visit','Recheck','Post op recheck','Chemo')  and Wvssapt.APT_DATE = '@yesterdaysDateWithOffset' ",
+            "dateDayOffset": "2"
+          },
+          "inputDelimiter": ","
+        }
+      },
+      "sqlinput02": {
+        "type": "extract",
+        "dataSource": {
+          "type": "sql",
+          "jdbcDriver" :  "com.extendedsystems.jdbc.advantage.ADSDriver",
+          "connect": "jdbc:extendedsystems:advantage://192.168.10.37:6262;catalog=D:/AI - live db/AISDATA; TableType=cdx; LockType=proprietary;",
+          "query": {
+            "queryTemplate":"select Wvssapt.APT_ClINUM, Wvssapt.APT_NAME, Wvssapt.APT_PNAME, Wvssapt.APT_DATE, Wvssapt.APT_TIMSTR, WVSSVET.VET_LAST, WVSSVET.VET_FIRST, WVSSPCK.PCK_CODE, WVSSPCK.PCK_DESC, apt_type from Wvssapt inner join WVSSVET on Wvssapt.APT_VETNUM=WVSSVET.VET_VETNUM inner join WVSSPCK on Wvssapt.APT_BOOK=WVSSPCK.PCK_LINK where WVSSPCK.PCK_CODE=112 and Wvssapt.APT_NAME <> '' and Wvssapt.APT_PNAME <> '' and pck_desc not in ('1 Welcome to Sash','1a. General surgery list','3a. Ophthalmologic surgery list','4. Medicine Procedure list','7. CT procedure','7a.  SASH 1.0 Ultrasound #1','8a. Hospitalized + boarding','8b. Staff Boarding','9 EVENT','9a Reception Messages','9b Medicine Messages','9c Ophtho Messages','9d Surgery Messages','9e Emergency Messages','9f Emergency','9g Oncology Messages','9i Cardiology messages','9k. Dermatology Messages','z Dentistry Messages','O. Radioiodine Treatment','O. Physiotherapy','O. MRI','Blood Bank','Appointment Book Names')and apt_type not in ('Discharge from hospi','Ultrasound','Pickups & Procedures','Cancelled Appt','Procedure','Telephone Message','Inpatient','Inpatient assessment','Internal Referral','Communication','Allergy Vax Initial','Drop Off','Emergency','Allergy Vax Repeat','Lab Results','Meeting','Radioiodine initial','Radioiodine Inpatien','Surgery','Interpretation','Owner visiting','Responsibility','CT Scan','Admitted','Teamwork','MRI','Estimate Required','Phone Calls', 'CT Scan')and apt_type in ('Initial Visit','Recheck','Post op recheck','Chemo')  and Wvssapt.APT_DATE = '@yesterdaysDateWithOffset' ",
+            "dateDayOffset": "3"
+          },
+          "inputDelimiter": ","
+        }
+      },
+      "sqlinput03": {
+        "type": "extract",
+        "dataSource": {
+          "type": "sql",
+          "jdbcDriver" :  "com.extendedsystems.jdbc.advantage.ADSDriver",
+          "connect": "jdbc:extendedsystems:advantage://192.168.10.37:6262;catalog=D:/AI - live db/AISDATA; TableType=cdx; LockType=proprietary;",
+          "query": {
+            "queryTemplate":"select Wvssapt.APT_ClINUM, Wvssapt.APT_NAME, Wvssapt.APT_PNAME, Wvssapt.APT_DATE, Wvssapt.APT_TIMSTR, WVSSVET.VET_LAST, WVSSVET.VET_FIRST, WVSSPCK.PCK_CODE, WVSSPCK.PCK_DESC, apt_type from Wvssapt inner join WVSSVET on Wvssapt.APT_VETNUM=WVSSVET.VET_VETNUM inner join WVSSPCK on Wvssapt.APT_BOOK=WVSSPCK.PCK_LINK where WVSSPCK.PCK_CODE=112 and Wvssapt.APT_NAME <> '' and Wvssapt.APT_PNAME <> '' and pck_desc not in ('1 Welcome to Sash','1a. General surgery list','3a. Ophthalmologic surgery list','4. Medicine Procedure list','7. CT procedure','7a.  SASH 1.0 Ultrasound #1','8a. Hospitalized + boarding','8b. Staff Boarding','9 EVENT','9a Reception Messages','9b Medicine Messages','9c Ophtho Messages','9d Surgery Messages','9e Emergency Messages','9f Emergency','9g Oncology Messages','9i Cardiology messages','9k. Dermatology Messages','z Dentistry Messages','O. Radioiodine Treatment','O. Physiotherapy','O. MRI','Blood Bank','Appointment Book Names')and apt_type not in ('Discharge from hospi','Ultrasound','Pickups & Procedures','Cancelled Appt','Procedure','Telephone Message','Inpatient','Inpatient assessment','Internal Referral','Communication','Allergy Vax Initial','Drop Off','Emergency','Allergy Vax Repeat','Lab Results','Meeting','Radioiodine initial','Radioiodine Inpatien','Surgery','Interpretation','Owner visiting','Responsibility','CT Scan','Admitted','Teamwork','MRI','Estimate Required','Phone Calls', 'CT Scan')and apt_type in ('Initial Visit','Recheck','Post op recheck','Chemo')  and Wvssapt.APT_DATE = '@yesterdaysDateWithOffset' ",
+            "dateDayOffset": "4"
+          },
+          "inputDelimiter": ","
+        }
+      },
+      "fileload01": {
+        "type": "load",
+        "behavior": "simple",
+        "dataSource": {
+          "directory": "c:/xmatters/data",
+          "type":"file",
+          "filenameTemplate": "prodload_01.csv_all",
+          "outputDelimiter": "\t"
+        }
+      },
+      "fileload02": {
+        "type": "load",
+        "behavior": "simple",
+        "dataSource": {
+          "directory": "c:/xmatters/data",
+          "type":"file",
+          "filenameTemplate": "prodload_02.csv_all",
+          "outputDelimiter": "\t"
+        }
+      },
+      "fileload03": {
+        "type": "load",
+        "behavior": "simple",
+        "dataSource": {
+          "directory": "c:/xmatters/data",
+          "type":"file",
+          "filenameTemplate": "prodload_03.csv_all",
+          "outputDelimiter": "\t"
+        }
+      },
+      "fileoutput01": {
+        "type": "load",
+        "behavior" : "checkpointDiff",
+        "dataSource": {
+          "type" : "file",
+          "behavior": "basic",
+          "directory": "c:/xmatters/data",
+          "filenameTemplate": "prodload_01.csv",
+          "outputDelimiter" : "\t"
+        },
+        "dataSourceLog": {
+          "type" : "file",
+          "behavior": "checkpointDiff",
+          "directory": "c:/xmatters/data",
+          "prefixDiffFile": "prodDifflog01",
+          "outputDelimiter" : "\t"
+        }
+      },
+      "fileextract01": {
+        "type": "extract",
+        "behavior": "simple",
+        "dataSource": {
+          "directory": "c:/xmatters/data",
+          "type":"file",
+          "filenameTemplate": "prodload_01.csv_all",
+          "inputDelimiter": "\t"
+        }
+      },
+      "webtask01": {
+        "type": "load",
+        "behavior": "checkpointDiff",
+        "dataSource": {
+          "type": "rest",
+          "behavior": "simple",
+          "url": "https://sash.au1.xmatters.com.au/reapi/2015-01-01/forms/74595e64-f548-4c3d-b2b2-3a286e7e02ae/triggers",
+          "credential": {
+            "user": "rxp.ra",
+            "password": "7qu0KKa7"
+          }
+        },
+        "dataSourceLog": {
+          "type" : "file",
+          "behavior": "checkpointDiff",
+          "directory": "c:/xmatters/data",
+          "prefixDiffFile": "weboutDiff_01",
+          "outputDelimiter" : "\t"
+        },
+        "diffProcessAll":"true"
+      },
+      "mergetrans01" : {
+        "type" : "transform",
+        "behavior" : "mergeTemplate",
+        "mergeTemplate" : "{ \"properties\" : {\"aptName\": \"@001\",\"aptClientNum\": \"@000\",\"aptPname\": \"@002\",\"aptDate\": \"@003\", \"aptTimStr\": \"@004\", \"vetLastName\": \"@005\",\"vetFirstName\": \"@006\",\"sashCode\": \"@007\",\"sashVetName\": \"@008\"},\"recipients\": [{\"targetName\": \"@000\"}]}"
+      },
+      "datacleanup01" : {
+        "type" : "transform",
+        "behavior" : "lineValidation",
+        "setValueByRegexp_Columns" : [9],
+        "setValueByRegexp_Regexp" : "^(\\w*\\.*\\s)",
+        "setValueByRegexp_Value" : "",
+        "SetDateFormat_Columns" : [4],
+        "SetDateFormat_InputFormat" : "yyyy-MM-dd",
+        "SetDateFormat_OutputFormat" : "dd/MM/yyyy",
+        "allowDuplicates" : false
+      },
+      "dslFileExtract": {
+        "type": "extract",
+        "behavior": "simple",
+        "dataSource": {
+          "directory": "c:/xmatters/data",
+          "type":"file",
+          "filenameTemplate": "prodload_@@getDate,-5,yyyyMMdd_HHmmss,dd@@.csv",
+          "inputDelimiter": "\t"
+        }
+      },
+      "dslsqltest01": {
+        "type": "extract",
+        "dataSource": {
+          "type": "sql",
+          "jdbcDriver" :  "com.extendedsystems.jdbc.advantage.ADSDriver",
+          "connect": "jdbc:extendedsystems:advantage://192.168.10.37:6262;catalog=D:/AI - live db/AISDATA; TableType=cdx; LockType=proprietary;",
+          "query": {
+            "queryTemplate":"select Wvssapt.APT_ClINUM, Wvssapt.APT_NAME, Wvssapt.APT_PNAME, Wvssapt.APT_DATE, Wvssapt.APT_TIMSTR, WVSSVET.VET_LAST, WVSSVET.VET_FIRST, WVSSPCK.PCK_CODE, WVSSPCK.PCK_DESC, apt_type from Wvssapt inner join WVSSVET on Wvssapt.APT_VETNUM=WVSSVET.VET_VETNUM inner join WVSSPCK on Wvssapt.APT_BOOK=WVSSPCK.PCK_LINK where WVSSPCK.PCK_CODE=112 and Wvssapt.APT_NAME <> '' and Wvssapt.APT_PNAME <> '' and pck_desc not in ('1 Welcome to Sash','1a. General surgery list','3a. Ophthalmologic surgery list','4. Medicine Procedure list','7. CT procedure','7a.  SASH 1.0 Ultrasound #1','8a. Hospitalized + boarding','8b. Staff Boarding','9 EVENT','9a Reception Messages','9b Medicine Messages','9c Ophtho Messages','9d Surgery Messages','9e Emergency Messages','9f Emergency','9g Oncology Messages','9i Cardiology messages','9k. Dermatology Messages','z Dentistry Messages','O. Radioiodine Treatment','O. Physiotherapy','O. MRI','Blood Bank','Appointment Book Names')and apt_type not in ('Discharge from hospi','Ultrasound','Pickups & Procedures','Cancelled Appt','Procedure','Telephone Message','Inpatient','Inpatient assessment','Internal Referral','Communication','Allergy Vax Initial','Drop Off','Emergency','Allergy Vax Repeat','Lab Results','Meeting','Radioiodine initial','Radioiodine Inpatien','Surgery','Interpretation','Owner visiting','Responsibility','CT Scan','Admitted','Teamwork','MRI','Estimate Required','Phone Calls', 'CT Scan')and apt_type in ('Initial Visit','Recheck','Post op recheck','Chemo')  and Wvssapt.APT_DATE in ( '@@getDate,-2,yyyy-MM-dd@@', '@@getDate,-2,yyyy-MM-dd@@', '@@getDate,-2,yyyy-MM-dd@@', '@@getDate,-3,yyyy-MM-dd@@', '@@getDate,-5,yyyy-MM-dd@@', '@@getDate,-7,yyyy-MM-dd@@') "
+          },
+          "inputDelimiter": ","
+        }
+      },
+      "datacleanup02" : {
+        "type": "transform",
+        "behavior": "lineValidation",
+        "setValueByRegexp_Columns": [
+          9
+        ],
+        "setValueByRegexp_Regexp": "^(\\w*\\.*\\s)",
+        "setValueByRegexp_Value": "",
+        "SetDateFormat_Columns": [
+          4
+        ],
+        "SetDateFormat_InputFormat": "yyyy-MM-dd",
+        "SetDateFormat_OutputFormat": "dd/MM/yyyy",
+        "allowDuplicates": false
+      },
+      "transform": {
+        "t1": {
+          "xMattersOutput": "true",
+          "xMattersNewKey": "false",
+          "type": "phoneformat_au",
+          "validateColumnCount" : [11],
+          "setDefaultColumnValue" : [9],
+          "defaultColumnValue" : "noemail@sashvets.com" ,
+          "allowDuplicates":false
+        }
+      },
+      "dslsqltest02": {
+        "type": "extract",
+        "dataSource": {
+          "type": "sql",
+          "jdbcDriver" :  "com.extendedsystems.jdbc.advantage.ADSDriver",
+          "connect": "jdbc:extendedsystems:advantage://192.168.10.37:6262;catalog=D:/AI - live db/AISDATA; TableType=cdx; LockType=proprietary;",
+          "query": {
+            "queryTemplate":"select distinct 'process',cli_clinum ,cli_first1,cli_last1,'North Ryde SASH 1.0','English','Australia/Sydney','rxp.rp','Read-only User',cli_email,mp.phn_num from wvsscli left join wvssphn mp on ( mp.phn_clinum  = cli_clinum  and mp.phn_cat = 4 ) where cli_first1 <> '' and cli_last1 <> '' and mp.phn_num <> '' and cli_clinum in (select distinct cli_clinum from wvsscli inner join wvssapt on wvssapt.apt_clinum = cli_clinum where Wvssapt.APT_NAME <> '' and Wvssapt.APT_PNAME <> '' and apt_date > '2014-01-01' and cli_first1 <> '' and cli_last1 <> '' and wvssapt.apt_type in ('Recheck','Chemo','Initials','Drop Off','Post op recheck'))"
+          },
+          "inputDelimiter": ","
+        }
+      },
+      "newUsersToCreate001": {
+        "type": "load",
+        "behavior" : "checkpointDiff",
+        "dataSource": {
+          "type" : "file",
+          "behavior": "basic",
+          "directory": "/Users/dimitarpopov/Downloads/data03",
+          "filenameTemplate": "newUser@@getDate@@.csv",
+          "outputDelimiter" : "\t"
+        },
+        "dataSourceLog": {
+          "type" : "file",
+          "behavior": "checkpointDiff",
+          "directory": "/Users/dimitarpopov/Downloads/data03",
+          "prefixDiffFile": "newuserDiff",
+          "outputDelimiter" : "\t"
+        }
+      },
+      "newUsersToCreate002": {
+        "type": "load",
+        "behavior" : "simple",
+        "dataSource": {
+          "type" : "file",
+          "behavior": "basic",
+          "directory": "/Users/dimitarpopov/Downloads/data03",
+          "filenameTemplate": "newUser_02_@@getDate@@.csv",
+          "outputDelimiter" : "\t"
+        }
+      },
+      "dslFileExtract_01": {
+        "type": "extract",
+        "behavior": "simple",
+        "dataSource": {
+          "directory": "/Users/dimitarpopov/Downloads/data03",
+          "type":"file",
+          "filenameTemplate": "newuserQuery_001.dat",
+          "inputDelimiter": "\t"
+        }
+      },
+      "dslFileExtract_02": {
+        "type": "extract",
+        "behavior": "simple",
+        "dataSource": {
+          "directory": "/Users/dimitarpopov/Downloads/data03",
+          "type":"file",
+          "filenameTemplate": "newuserQuery_002.dat",
+          "inputDelimiter": "\t"
+        }
+      },
+      "newTransform01" : {
+        "type" : "transform",
+        "columns" : {
+          "10" : ["setDefaults,blah@gmail.com"],
+          "2" : ["setDateFormat,YYMMDD,MM/DD/YY"],
+          "3" : ["getOffsetDate,-5"],
+          "11" : ["formatForPhone,au"]
+        },
+        "global" :  ["removeDuplicates"],
+        "row" : ["no-Op"]
+      },
+      "sqlinput05": {
+        "type": "extract",
+        "dataSource": {
+          "type": "sql",
+          "jdbcDriver" :  "com.extendedsystems.jdbc.advantage.ADSDriver",
+          "connect": "jdbc:extendedsystems:advantage://127.0.0.1:6262;catalog=C:\\tmp\\AISDATA\\JIM\\AISDATA-; TableType=adt; LockType=proprietary;",
+          "query": {
+            "queryTemplate":"select top 100000 * from record  "
+          }
+        }
+      },
+      "sqlinput06": {
+        "type": "extract",
+        "dataSource": {
+          "type": "sql",
+          "jdbcDriver" :  "com.extendedsystems.jdbc.advantage.ADSDriver",
+          "connect": "jdbc:extendedsystems:advantage://127.0.0.1:6262;catalog=C:\\tmp\\AISDATA\\JIM\\bak; TableType=adt; LockType=proprietary;",
+          "query": {
+            "queryTemplate_x":"select top 100000 * from record where rec_id > 88000 and rec_id < 91000 ",
+            "queryTemplate":"select * from bak_record "
+          }
+        }
+      },
+      "fileload05": {
+        "type": "load",
+        "behavior": "simple",
+        "dataSource": {
+          "directory": "c:/tmp/sash",
+          "type":"file",
+          "filenameTemplate": "prodload_03_@@getDate@@.csv",
+          "outputDelimiter": ",",
+          "inputDelimiter": ","
+        }
+      }
+    },
+    "pipelines": {
+      "p001": {
+        "pipe": "sqlinput01 | datacleanup01 | fileload01"
+      },
+      "p002": {
+        "pipe": "sqlinput02 | datacleanup01 | fileload02"
+      },
+      "p003": {
+        "pipe": "sqlinput03 | datacleanup01 | fileload03"
+      },
+      "upload001" : {
+        "pipe" : " fileinput02 | mergetrans01 | webtask01xxx "
+      },
+      "dslp001" : {
+        "pipe": "dslFileExtract | dslsqltest01"
+      },
+      "dslp002" : {
+        "pipe": "dslsqltest02 | datacleanup02 | newUsersToCreate001"
+      },
+      "dslp003a" : {
+        "pipe": "dslsqltest02 | newUsersToCreate001"
+      },
+      "dslp003" : {
+        "pipe": "dslFileExtract_01 | newTransform01 | newUsersToCreate001"
+      },
+      "dslp004" : {
+        "pipe": "dslFileExtract_02 | newTransform01 | newUsersToCreate002"
+      },
+      "dslp005" : {
+        "pipe" : "sqlinput05 | fileload05"
+      },
+      "dslp006" : {
+        "pipe" : "sqlinput06 | fileload05"
+      }
+    }
+  }
+}
+
+
+
+

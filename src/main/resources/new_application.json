@@ -1,0 +1,181 @@
+{
+  "script": {
+    "tasks": {
+      "task005": {
+        "type": "QueryToFilexxxx",
+        "directory": "/Users/dimitarpopov/Downloads/data",
+        "queries": {
+          "query1": {
+            "query": "select top 1000 'process',cli_clinum ,cli_first1,cli_last1,'North Ryde SASH 1.0','English','Australia/Sydney',' ','Read-only User',mp.phn_num from wvsscli left join wvssphn mp on ( mp.phn_clinum  = cli_clinum  and mp.phn_cat = 4 ) where cli_clinum > 30000",
+            "type": "CheckpointDiff",
+            "dataSource": "sql",
+            "connect": "jdbc:extendedsystems:advantage://192.168.10.37:6262;catalog=D:/AI - live db/AISDATA; TableType=cdx; LockType=proprietary;",
+            "prefixFile": "cli2_@datetime",
+            "prefixDiffFile": "datacli2",
+            "inputDelimiter": "\\t",
+            "outputDelimiter": ",",
+            "headerPreamble": "Data Import File Format Version: 1.2",
+            "customHeader": "Operation, User, First Name, Last Name, Site, Language, Time Zone, User Supervisor, Role, SMS Phone",
+            "transform": {
+              "t1": {
+                "xMattersOutput": "true",
+                "xMattersNewKey": "false",
+                "type": "phoneformat_au",
+                "transformRegexp": "",
+                "transformDest": "",
+                "transformColumns": [
+                  9
+                ],
+                "validateColumnCount": [
+                  10
+                ],
+                "allowDuplicates": true
+              }
+            }
+          }
+        }
+      },
+      "task006": {
+        "type": "QueryToFile",
+        "directory": "/Users/dimitarpopov/Downloads/data",
+        "queries": {
+          "query1": {
+            "query": "*",
+            "type": "simple",
+            "dataSource": "file",
+            "connect": "/Users/dimitarpopov/Downloads/data/cli_data.csv",
+            "prefixFile": "cli2_@datetime",
+            "prefixDiffFile": "datacli2",
+            "inputDelimiter": ",",
+            "outputDelimiter": ",",
+            "headerPreamble": "Data Import File Format Version: 1.2",
+            "customHeader": "Operation, User, First Name, Last Name, Site, Language, Time Zone, User Supervisor, Role, Home Email, SMS Phone",
+            "transform": {
+              "t1": {
+                "xMattersOutput": "true",
+                "xMattersNewKey": "false",
+                "type": "phoneformat_au",
+                "transformRegexp": "",
+                "transformDest": "",
+                "transformColumns": [
+                  9
+                ],
+                "validateColumnCount": [
+                  10
+                ],
+                "testhackemail": true,
+                "allowDuplicates": false
+              },
+              "t2": {
+                "type": "delete"
+              },
+              "t3": {
+                "type": "map"
+              },
+              "t4": {
+                "type": "default"
+              }
+            }
+          }
+        }
+      },
+      "task007": {
+        "type": "QueryToFile",
+        "directory": "/Users/dimitarpopov/Downloads/data",
+        "queries": {
+          "query1": {
+            "datasources": {
+              "d1": {
+                "type": "input",
+                "dataSource": "file",
+                "connect": "/Users/dimitarpopov/Downloads/data/cli_data.csv",
+                "inputDelimiter": ","
+              },
+              "d2": {
+                "dataSource": "file",
+                "type": "output",
+                "prefixFile": "cli2_@datetime",
+                "prefixDiffFile": "datacli2",
+                "outputDelimiter": ",",
+                "headerPreamble": "Data Import File Format Version: 1.2",
+                "customHeader": "Operation, User, First Name, Last Name, Site, Language, Time Zone, User Supervisor, Role, Home Email, SMS Phone"
+              }
+            },
+            "transform": {
+              "t1": {
+                "xMattersOutput": "true",
+                "xMattersNewKey": "false",
+                "type": "phoneformat_au",
+                "transformRegexp": "",
+                "transformDest": "",
+                "transformColumns": [
+                  9
+                ],
+                "validateColumnCount": [
+                  10
+                ],
+                "testhackemail": true,
+                "allowDuplicates": false
+              },
+              "t2": {
+                "type": "delete"
+              },
+              "t3": {
+                "type": "map"
+              },
+              "t4": {
+                "type": "default"
+              }
+            },
+            "pipelines": {
+              "p1": "d1 | t1 | d2"
+            }
+          }
+        }
+      },
+      "task004": {
+        "dataSources": {
+          "d1": {
+            "type": "input",
+            "datasource": "file",
+            "connect": "/Users/dimitarpopov/Downloads/data/custRecords.csv",
+            "inputDelimiter": ",",
+            "control": "input"
+          },
+          "d2": {
+            "type": "output",
+            "datasource": "webservice",
+            "control": "output"
+          }
+        },
+        "transforms": {
+          "t1": {},
+          "t2": {},
+          "t3": {},
+          "t4": {}
+        }
+      },
+      "task009": {
+        "type": "",
+        "dataSources": {
+        },
+        "transforms": {},
+        "query": {
+          "q1": {
+            "dataSource": ""
+          }
+        }
+      }
+    },
+    "pipelines": {
+      "p1": {
+        "pipe":"task006 | task005 | task006 | task007"
+      },
+      "p2": {"pipe" : "task007, task006, task005 | task006"},
+      "p3":  {"pipe":"task008"}
+    }
+  }
+}
+
+
+

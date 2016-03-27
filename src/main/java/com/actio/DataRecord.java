@@ -1,0 +1,73 @@
+package com.actio;
+
+/**
+ * Created by jim on 7/8/2015.
+ */
+
+import com.typesafe.config.Config;
+
+import java.util.LinkedList;
+import java.util.List;
+
+public abstract class DataRecord extends Configurable {
+    private String customHeader;
+
+    public List<String> getRow() {
+        return row;
+    }
+
+    public void setRow(List<String> row) {
+        this.row = row;
+    }
+
+    public String getCustomHeader() {
+        return customHeader;
+    }
+
+    public void setCustomHeader(String customHeader) {
+        this.customHeader = customHeader;
+    }
+
+    private List<String> row;
+
+    public Schema getSchema() {
+        return schema;
+    }
+
+    public void setSchema(Schema schema) {
+        this.schema = schema;
+    }
+
+    private Schema schema;
+
+    public String getOutputDelimiter() {
+        return outputDelimiter;
+    }
+
+    public void setOutputDelimiter(String outputDelimiter) {
+        this.outputDelimiter = outputDelimiter;
+    }
+
+    private String outputDelimiter = "\t";
+
+    public List<String> GetAsListOfColumns() throws Exception
+    {
+        return row;
+    }
+
+    public void setConfig(Config _conf, Config _master) throws Exception {
+        super.setConfig(_conf,_master);
+        if (config.hasPath("customHeader"))
+            customHeader = config.getString("customHeader");
+
+        if (config.hasPath("outputDelimiter"))
+            outputDelimiter = config.getString("outputDelimiter");
+    }
+
+    public void dump() throws Exception
+    {
+        for (String col : row){
+            logger.info(col+',');
+        }
+    }
+}

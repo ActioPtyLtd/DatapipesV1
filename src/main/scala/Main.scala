@@ -8,11 +8,11 @@ import org.slf4j.{Logger, LoggerFactory}
   */
 
 
-class Main {
-  private val logger: Logger = LoggerFactory.getLogger(classOf[Main])
+object Main {
+  private val logger: Logger = LoggerFactory.getLogger(this.getClass)
 
   @throws[Exception]
-  def main(args: Array[String]) {
+  def main(args: Array[String]) = {
     System.out.println("=====First line in main")
     logger.info("======First logging.info")
     var configFile: String = null
@@ -26,7 +26,9 @@ class Main {
       }
       logger.info("Params(" + args.length + ")=" + configFile + ":'" + args(0) + "'  Pipeline=" + pipelineName)
     }
-    else logger.info("Params(" + args.length + ")=" + configFile + ": Pipeline=" + pipelineName)
+    else
+      logger.info("Params(" + args.length + ")=" + configFile + ": Pipeline=" + pipelineName)
+
     debug
     val tf: DPSystemFactory = new DPSystemFactory
     tf.loadConfig(configFile)

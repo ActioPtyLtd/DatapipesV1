@@ -90,9 +90,11 @@ public class TaskPipeline extends Task implements Runnable
                                    int keyIndex,
                                    DataSet initDataSet) throws Exception {
 
+        logger.info("Entered::processPipeLineRE:"+keyIndex);
+
         // check that there are tasks in the pipeline
         if (tasksInPipeline == null || tasksInPipeline.size() <= 0) {
-            logger.debug("No tasks in pipeline");
+            logger.debug("processPipeLineRE: No tasks in pipeline");
         }
 
         DPFnNode currentNode = tasksInPipeline.get(keyIndex++);
@@ -106,17 +108,19 @@ public class TaskPipeline extends Task implements Runnable
             resultSet = evokeTask(currentNode, initDataSet);
 
         resultSet.initBatch();
-        while ( resultSet.isNextBatch() == true && tasksInPipeline.size() > keyIndex) {
+
+        logger.info("Calling Batch Recursively::"+currentNode.getName()+"("+keyIndex + "/"+tasksInPipeline.size()+")");
+        while ( resultSet.isNextBatch() == true && tasksInPipeline.size() > keyIndex ) {
             DataSet subResultSet = resultSet.getNextBatch();
             // recursively traverse the rest of the pipeline batching up the ResultSet
             subResultSet.dump();
-
-            logger.info("Calling Batch Recursively::"+currentNode.getName()+"("+keyIndex + ")");
-
             processPipeLineRE(tasksInPipeline, keyIndex, subResultSet);
+            logger.info("Called Batch Recursively::"+currentNode.getName()+
+                    "("+keyIndex + "/"+tasksInPipeline.size()+")");
         }
 
-        logger.info("--------------------------------------Exit recursive "+currentNode.getName()+"  "+resultSet.key.getKey()+"---");
+        logger.info("--------------------------------------Exit recursive "+
+                currentNode.getName()+"  "+resultSet.size()+"---");
     }
 
     //

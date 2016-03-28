@@ -32,17 +32,8 @@ public class DataSetTabular extends DataSet {
     }
 
     @Override
-    public int size(){
-
-        if (rs != null)
-        {
-            return rs.size();
-        } else if (rsc != null)
-        {
-            return rsc.size();
-        }
-
-        return 0;
+    public int size() throws Exception {
+        return getRs().size();
     }
 
     //protected String inputDelimiter = ",";
@@ -61,7 +52,14 @@ public class DataSetTabular extends DataSet {
         this.rsc = rsc;
     }
 
-    private List<String> getRs() {
+    private List<String> getRs() throws Exception {
+
+        if (rs != null)
+            if (rs.size() == 0 && rsc.size() > 0)
+                rs = getAsList();
+            else if (rs.size() != rsc.size() && rsc.size() != 0)
+                // ASSERTION TEST ERROR if they don't match
+                logger.error("getRs: ASSERTION ERROR rs.size()="+rs.size()+"  rsc.size()="+rsc.size()+" DO NOT MATCH");
 
         return rs;
     }
@@ -105,6 +103,8 @@ public class DataSetTabular extends DataSet {
 
     private int rowNumber = 0;
 
+    private boolean emptySet = true;
+
     @Override
     public void set(List<String> _rs) {
         rs = _rs;
@@ -122,7 +122,7 @@ public class DataSetTabular extends DataSet {
 
     @Override
     public List<String> getAsList() throws Exception {
-        if (rs != null)
+        if (rs != null && rs.size() != 0)
             return rs;
 
         // it's empty so return an empty list
@@ -168,6 +168,10 @@ public class DataSetTabular extends DataSet {
     public void initBatch() throws Exception{
         // Set row number
         rowNumber = 0;
+        if (size() == 0)
+            emptySet = true;
+        else
+            emptySet = false;
     }
 
     public List<List<String>> getAsListOfColumnsBatch(int batchLen) throws Exception{
@@ -178,7 +182,7 @@ public class DataSetTabular extends DataSet {
     @Override
     public boolean isNextBatch() throws Exception
     {
-        if (rowNumber < size())
+        if (rowNumber < size() || emptySet)
             return true;
         else
             return false;
@@ -195,6 +199,12 @@ public class DataSetTabular extends DataSet {
         logger.info("Entered getNextBatch rowNumber"+rowNumber+", batchSize="+getBatchSize());
 
         DataSet newSet =  new DataSetTabular();
+
+        if (emptySet) {
+            emptySet = false;
+            return newSet;
+        }
+
         if (rowNumber >= 0 && rowNumber < size()) {
             int index = rowNumber+getBatchSize();
             List<String> sublist = getAsList().subList(rowNumber,

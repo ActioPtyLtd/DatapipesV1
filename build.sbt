@@ -9,6 +9,6 @@ libraryDependencies ++= Seq("org.slf4j" % "slf4j-api" % "1.7.19",
 
 
 // set the main class for 'sbt run'
-mainClass in (Compile, run) := Some("com.actio.Main")
+mainClass in (Compile, run) := Some("Main")
 
 

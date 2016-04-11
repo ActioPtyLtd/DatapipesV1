@@ -1,5 +1,6 @@
 package com.actio;
 
+import com.actio.dpsystem.DPSystemConfigurable;
 import com.typesafe.config.Config;
 
 /**
@@ -13,7 +14,7 @@ import com.typesafe.config.Config;
 
  */
 
-public abstract class Node extends Configurable {
+public abstract class Node extends DPSystemConfigurable {
 
     public abstract void execute() throws Exception;
 

@@ -1,5 +1,7 @@
-package com.actio;
+package com.actio.dpsystem;
 
+import com.actio.DataSet;
+import com.actio.DataSetTabular;
 import com.jcabi.aspects.Loggable;
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigValue;
@@ -14,9 +16,9 @@ import java.util.*;
  */
 
 @Loggable(Loggable.DEBUG)
-public class Configurable {
+public class DPSystemConfigurable {
 
-    protected static final Logger logger = LoggerFactory.getLogger(Configurable.class);
+    protected static final Logger logger = LoggerFactory.getLogger(DPSystemConfigurable.class);
 
     // Basic Constants
     /** File separator. */
@@ -116,7 +118,7 @@ public class Configurable {
         this.masterConfig = masterConfig;
     }
 
-    DataSet dataSet;
+    public DataSet dataSet;
     public Config config;
     public Config masterConfig;
 
@@ -127,7 +129,7 @@ public class Configurable {
         masterConfig = _master;
     }
 
-    static boolean matchLabel(String value, String label){
+    static public boolean matchLabel(String value, String label){
 
         /// comment
 
@@ -159,7 +161,7 @@ public class Configurable {
 
     // @Loggable
 
-    static boolean isInteger(String s, int radix) {
+    static public boolean isInteger(String s, int radix) {
         Scanner sc = new Scanner(s.trim());
         if (!sc.hasNextInt(radix)) return false;
         // we know it starts with a valid int, now make sure

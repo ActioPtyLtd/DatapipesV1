@@ -1,6 +1,5 @@
 package com.actio.dpsystem;
 
-import com.actio.Configurable;
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigObject;
 import com.typesafe.config.ConfigValue;
@@ -24,7 +23,7 @@ import java.util.Map;
 
  */
 
-public class DPSystemConfig extends Configurable {
+public class DPSystemConfig extends DPSystemConfigurable {
 
     private ConfigObject script;
     private ConfigObject schema;
@@ -36,6 +35,7 @@ public class DPSystemConfig extends Configurable {
 
     //  pipeline name mapping to compiled parse tree
     private final Map<String,DPFnNode> pipelinesMap = new HashMap<>();
+    private final Map<String,DPFnNode> servicesMap = new HashMap<>();
 
     //  task name mapping to compiled task - TBD when we compileConfig tasks
 
@@ -90,6 +90,24 @@ public class DPSystemConfig extends Configurable {
         }
     }
 
+    public ConfigObject getServices() throws Exception
+    {
+        if (services != null)
+            return services;
+
+
+        throw new Exception("getServices::SERVICES Section undefined in Config");
+
+    }
+
+    public ConfigObject getServices(String name) throws Exception
+    {
+        if (services == null || !services.containsKey(name))
+            throw new Exception("getServices::SERVICES Section undefined in Config");
+
+        return services.toConfig().getObject(name);
+    }
+
 
     public String getType(String name) throws Exception
     {
@@ -105,7 +123,7 @@ public class DPSystemConfig extends Configurable {
             // otherwise look to see if it's a pipeline lable
             conf = getPipeConfig(name);
             if (conf!=null)
-                return Configurable.PIPE_LABEL;
+                return DPSystemConfigurable.PIPE_LABEL;
         }
         return null;
     }
@@ -131,13 +149,9 @@ public class DPSystemConfig extends Configurable {
     // Compile all pipelines into a parse tree
     //
 
-    public void compile() throws Exception {
-        logger.info("Entered full compileConfig");
-        // for now pipes need to be precompiled, loop over pipe section
-
+    public void compilePipes() throws Exception{
         // sort the collection
         List<String> sortedPipes = GetSortedKeys(pipes.entrySet());
-
         for (String key : sortedPipes) {
             try {
                 ConfigValue val = pipes.get(key);
@@ -169,6 +183,32 @@ public class DPSystemConfig extends Configurable {
                         "' Exception::" + e.getMessage());
             }
         }
+
+
+    }
+
+
+    public void compile() throws Exception {
+        logger.info("Entered full compileConfig");
+        // for now pipes need to be precompiled, loop over pipe section
+        compilePipes();
+        compileServices();
+        compileTasks();
+    }
+
+
+    public void compileServices() throws Exception
+    {
+        // TODO:build the services node -
+
+
+        return;
+    }
+
+    public void compileTasks()
+    {
+        // no op
+        return;
     }
 
 
@@ -263,6 +303,11 @@ public class DPSystemConfig extends Configurable {
 
         return null;
     }
+
+    public List<String> getServicesNames(){
+       return GetSortedKeys(services.entrySet());
+    }
+
 
     // ================================================================
 

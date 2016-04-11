@@ -3,13 +3,14 @@ package com.actio;
 /**
  * Created by jim on 7/8/2015.
  */
+import com.actio.dpsystem.DPSystemConfigurable;
 import com.typesafe.config.Config;
 
 import java.sql.*;
 import java.util.List;
 import java.util.LinkedList;
 
-public abstract class DataSet extends Configurable {
+public abstract class DataSet extends DPSystemConfigurable {
 
     public DataSetKey key = new DataSetKey();
     public void setKey(DataSetKey _key){

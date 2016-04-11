@@ -1,13 +1,12 @@
 package com.actio;
 
+import com.actio.dpsystem.DPSystemConfigurable;
 import com.typesafe.config.Config;
-
-import java.io.IOException;
 
 /**
  * Created by jim on 7/8/2015.
  */
-public abstract class DataSource extends Configurable{
+public abstract class DataSource extends DPSystemConfigurable {
 
     public abstract void execute() throws Exception;
     public abstract void extract() throws Exception;

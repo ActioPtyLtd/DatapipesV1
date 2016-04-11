@@ -4,12 +4,12 @@ package com.actio;
  * Created by jim on 7/8/2015.
  */
 
+import com.actio.dpsystem.DPSystemConfigurable;
 import com.typesafe.config.Config;
 
-import java.util.LinkedList;
 import java.util.List;
 
-public abstract class DataRecord extends Configurable {
+public abstract class DataRecord extends DPSystemConfigurable {
     private String customHeader;
 
     public List<String> getRow() {

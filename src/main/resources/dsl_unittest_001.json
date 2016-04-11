@@ -80,7 +80,19 @@
     "services": {
       "name001": {
         "path": "/a/b/c",
-        "pipe": "p00411"
+        "get" : "upload001",
+        "put" : "p0055",
+        "post": "p9999",
+        "port" : "123"
+      },
+      "name002" : {
+        "path": "/x/y/z",
+        "get" : "p000",
+        "put" : "p0055",
+        "post": "p9999",
+        "delete" : "",
+        "patch" : "",
+        "port" : "123"
       }
     },
     "startup": {

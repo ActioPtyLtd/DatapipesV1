@@ -1,5 +1,6 @@
 package com.actio;
 
+import com.actio.dpsystem.DPSystemConfigurable;
 import com.typesafe.config.Config;
 
 /**
@@ -9,7 +10,7 @@ import com.typesafe.config.Config;
 import java.util.List;
 
 
-public abstract class Schema extends Configurable {
+public abstract class Schema extends DPSystemConfigurable {
 
     protected List<Node> nodes;
     protected String header;

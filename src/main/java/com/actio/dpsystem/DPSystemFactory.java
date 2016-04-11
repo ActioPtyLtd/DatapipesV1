@@ -10,7 +10,6 @@ import java.io.InputStream;
 import java.util.*;
 
 import com.actio.*;
-import com.jcabi.aspects.Loggable;
 import com.typesafe.config.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -23,7 +22,7 @@ Should hide ALL the nasty Instantiation of specific Classes
 
 */
 
-public class DPSystemFactory extends Configurable {
+public class DPSystemFactory extends DPSystemConfigurable {
 
     private static final Logger logger = LoggerFactory.getLogger(DPSystemFactory.class);
 
@@ -91,43 +90,6 @@ public class DPSystemFactory extends Configurable {
 
 
     // =====================================================
-
-    @Deprecated
-    static public Task newTask(Config config, Config masterConfig) throws Exception
-    {
-        Task t;
-        String type;
-        type = config.getString(TYPE_LABEL);
-        t = newTask(type);
-        t.setConfig(config,masterConfig);
-        return t;
-    }
-
-    @Deprecated
-    private static Task newTask(String type) throws Exception
-    {
-        Task t;
-        logger.info("   Factory Found Type=" + type);
-        switch (type){
-            case TASK_EXTRACT_LABEL :
-                t = new TaskExtract();
-                break;
-            case TASK_LOAD_LABEL:
-                t = new TaskLoad();
-                break;
-            case TASK_TRANSFORM_LABEL:
-                t = new TaskTransform();
-                break;
-            case TASK_PIPELINE_LABEL:
-                t = new TaskPipeline();
-                break;
-            default:
-                throw new Exception("DPSystemFactory:Unknown Task Type "+type);
-        }
-
-        return t;
-    }
-
     //
 
     static public Task newTask(DPSystemConfig sysconf, DPFnNode node) throws Exception
@@ -162,6 +124,17 @@ public class DPSystemFactory extends Configurable {
 
 
     // =====================================================
+
+    static public DataSourceREST newDataSourceREST(String name, DPSystemConfig sysconf)
+            throws Exception
+    {
+        logger.info("newDataSourceREST::name="+name);
+        DataSourceREST dsr = new DataSourceREST();
+
+        dsr.setConfig(sysconf.getServices(name).toConfig() ,sysconf.getMasterConfig());
+
+        return dsr;
+    }
 
     static public DataSource newDataSource(Config config, Config masterConfig) throws Exception
     {
@@ -374,5 +347,15 @@ public class DPSystemFactory extends Configurable {
 
         return tfl;
     }
+
+    static public TaskService newService(DPSystemConfig sysconf) throws Exception
+    {
+        // locate Service Configuration
+        TaskService ts = new TaskService();
+        ts.setNode(sysconf);
+
+        return ts;
+    }
+
 
 }

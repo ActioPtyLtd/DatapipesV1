@@ -168,7 +168,8 @@ public class TaskPipeline extends Task implements Runnable
             Task t=null;
             // These are all parallel pipes for execution
 
-            logger.info("====== execute Pipeline '"+pipeNode.name+"'");
+            logger.info("====== execute Pipeline '"+
+                    pipeNode.name+"'");
             pipeNode.dump();
 
             // Instantiate the Node Function

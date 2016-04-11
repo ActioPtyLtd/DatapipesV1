@@ -4,14 +4,12 @@ package com.actio.dpsystem;
  * Created by jim on 3/03/2016.
  */
 
-import com.actio.Configurable;
-
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Scanner;
 import java.util.regex.Pattern;
 
-public class DPLangTokens extends Configurable {
+public class DPLangTokens extends DPSystemConfigurable {
 
     public static final char LeftFunctionStart ='(';
     public static final char RightFunctionStart =')';

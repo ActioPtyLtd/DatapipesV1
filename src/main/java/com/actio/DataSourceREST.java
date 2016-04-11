@@ -1,6 +1,5 @@
 package com.actio;
 
-import com.actio.dpsystem.DPSystemFactory;
 import com.typesafe.config.Config;
 
 import java.io.IOException;
@@ -24,18 +23,72 @@ public class DataSourceREST extends DataSource {
 
     // protected DataSet outputDataSet;
 
-    private String getUrl() {
-        return url;
+    private String route =null;
+    private TaskTransform trans=null;
+    private String user=null;
+    private String password=null;
+    private String getfn=null;
+    private String putfn=null;
+    private String postfn=null;
+    private String deletefn=null;
+    private String patchfn=null;
+    private String port=null;
+
+    public String getRoute() {
+        return route;
+    }
+    public void setRoute(String route) {
+        this.route = route;
     }
 
-    private void setUrl(String url) {
-        this.url = url;
+    public String getGetfn() {
+        return getfn;
     }
 
-    private String url;
-    private TaskTransform trans;
-    private String user;
-    private String password;
+    public void setGetfn(String getfn) {
+        this.getfn = getfn;
+    }
+
+    public String getPutfn() {
+        return putfn;
+    }
+
+    public void setPutfn(String putfn) {
+        this.putfn = putfn;
+    }
+
+    public String getPostfn() {
+        return postfn;
+    }
+
+    public void setPostfn(String postfn) {
+        this.postfn = postfn;
+    }
+
+    public String getDeletefn() {
+        return deletefn;
+    }
+
+    public void setDeletefn(String deletefn) {
+        this.deletefn = deletefn;
+    }
+
+    public String getPatchfn() {
+        return patchfn;
+    }
+
+    public void setPatchfn(String patchfn) {
+        this.patchfn = patchfn;
+    }
+
+    public String getPort() {
+        return port;
+    }
+
+    public void setPort(String port) {
+        this.port = port;
+    }
+
 
     private String getPassword() {
         return password;
@@ -60,11 +113,11 @@ public class DataSourceREST extends DataSource {
         super.setConfig(_conf,_master);
 
         if (config.hasPath("url"))
-            setUrl(config.getString("url"));
+            setRoute(config.getString("url"));
 
         // TODO ; fix this
         // ate a TransformTemplate if a template is declared
-        if (config.hasPath(MERGE_TEMPLATE_LABEL))
+        //if (config.hasPath(MERGE_TEMPLATE_LABEL))
             //trans = DPSystemFactory.newTransform(config,masterConfig);
 
         // Refactor to a credential class
@@ -76,7 +129,38 @@ public class DataSourceREST extends DataSource {
             setPassword(credConfig.getString("password"));
         }
 
+        if (config.hasPath("path"))
+        {
+            setRoute(config.getString("path"));
+        }
+        if (config.hasPath("get"))
+        {
+            setGetfn(config.getString("get"));
+        }
+        if (config.hasPath("put"))
+        {
+            setPutfn(config.getString("put"));
+        }
+        if (config.hasPath("post"))
+        {
+            setPostfn(config.getString("post"));
+        }
+        if (config.hasPath("delete"))
+        {
+            setDeletefn(config.getString("delete"));
+        }
+        if (config.hasPath("patch"))
+        {
+            setPatchfn(config.getString("patch"));
+        }
+        if (config.hasPath("port"))
+        {
+            setPort(config.getString("port"));
+        }
     }
+
+    //
+
 
     @Override
     public void extract() throws Exception {
@@ -172,7 +256,7 @@ public class DataSourceREST extends DataSource {
             httpClient = HttpClientBuilder.create()
                     .setDefaultCredentialsProvider(credentialsProvider).build();
 
-            HttpPost postRequest = new HttpPost(getUrl());
+            HttpPost postRequest = new HttpPost(getRoute());
 
             StringEntity input = null;
             input = new StringEntity(data);

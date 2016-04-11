@@ -1,12 +1,7 @@
 package com.actio.dpsystem;
 
-import com.actio.Configurable;
-import com.jcabi.aspects.Loggable;
-import com.typesafe.config.Config;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import com.actio.Configurable;
 
 /**
  * Created by jim on 4/03/2016.
@@ -21,7 +16,7 @@ class DPLangParser {
 
     public static DPFnNode parse(DPLangTokens tokens, DPSystemConfig sysconf) throws Exception
     {
-        DPFnNode root = new DPFnNode(Configurable.PIPE_LABEL,Configurable.PIPE_LABEL);
+        DPFnNode root = new DPFnNode(DPSystemConfigurable.PIPE_LABEL, DPSystemConfigurable.PIPE_LABEL);
         tokens.init();
 
         return parseNewNode(READ_PARAMS_STATE,root,tokens,0,true,sysconf);
@@ -44,7 +39,7 @@ class DPLangParser {
 
             if (tokens.getToken().compareTo(String.valueOf(DPLangTokens.LeftFunctionStart)) == 0){
                 // Create a new Node, with a pipeline function
-                DPFnNode newChild = new DPFnNode(Configurable.PIPE_LABEL,Configurable.PIPE_LABEL);
+                DPFnNode newChild = new DPFnNode(DPSystemConfigurable.PIPE_LABEL, DPSystemConfigurable.PIPE_LABEL);
 
                 currentState = READ_PARAMS_STATE;
                 parent.add( parseNewNode(READ_FUNCTION_STATE,newChild,tokens.moveNextToken(),++currentDepth,false,sysconf));
@@ -65,7 +60,7 @@ class DPLangParser {
             else if (tokens.getToken().compareTo(String.valueOf(DPLangTokens.LeftPipeStart)) == 0){
 
                 // Create a new Node, with a pipeline function
-                DPFnNode newChild = new DPFnNode(Configurable.PIPE_LABEL,Configurable.PIPE_LABEL);
+                DPFnNode newChild = new DPFnNode(DPSystemConfigurable.PIPE_LABEL, DPSystemConfigurable.PIPE_LABEL);
 
                 parent.add( parseNewNode(READ_PARAMS_STATE,newChild,tokens.moveNextToken(),currentDepth + 1,true,sysconf));
                 continue;

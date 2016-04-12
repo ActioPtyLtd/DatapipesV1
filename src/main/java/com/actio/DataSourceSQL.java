@@ -3,10 +3,7 @@ package com.actio;
 import com.actio.dpsystem.DPSystemFactory;
 import com.typesafe.config.Config;
 
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.PreparedStatement;
-import java.sql.SQLWarning;
+import java.sql.*;
 
 /**
  * Created by jim on 7/8/2015.
@@ -74,14 +71,20 @@ public class DataSourceSQL extends DataSource {
             logger.info("Connected");
 
             // Get QueryParser
-            PreparedStatement stmt = cn.prepareStatement(
-                    QueryParser.processTemplate(sqlquery.getQueryTemplate()));
+            String sqlQuery = QueryParser.processTemplate(sqlquery.getQueryTemplate());
+            //PreparedStatement stmt = cn.prepareStatement(QueryParser.processTemplate(sqlquery.getQueryTemplate()));
+
+            Statement st = cn.createStatement(ResultSet.TYPE_SCROLL_SENSITIVE,ResultSet.CONCUR_READ_ONLY);
 
             // store the results
             dataSet = new DataSetRS();
 
             dataSet.setConfig(config, masterConfig);
-            dataSet.set(stmt.executeQuery());
+           // dataSet.set(stmt.executeQuery());
+
+            logger.info("Executing Query="+sqlQuery);
+
+            dataSet.set(st.executeQuery(sqlQuery));
 
             logger.info("Executed SQL Statement :");
 

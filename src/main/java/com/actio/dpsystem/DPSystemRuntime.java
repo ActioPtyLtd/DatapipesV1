@@ -74,7 +74,7 @@ public class DPSystemRuntime extends DPSystemConfigurable {
 
         logger.info("====== Starting SERVICE ===== ");
 
-        Task service = DPSystemFactory.newService(sysconf);
+        Task service = DPSystemFactory.newService(sysconf,this);
 
         service.execute();
     }

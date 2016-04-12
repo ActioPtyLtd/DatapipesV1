@@ -1,6 +1,7 @@
 package com.actio;
 
 import com.actio.dpsystem.DPSystemFactory;
+import com.actio.dpsystem.DPSystemRuntime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import spark.Request;
@@ -23,6 +24,8 @@ import java.util.Map;
 public class TaskService extends TaskPipeline {
 
     static final Logger logger = LoggerFactory.getLogger(TaskService.class);
+
+    private DPSystemRuntime sysruntime;
 
     private Map<String, DataSourceREST> pathList = new HashMap<>();
 
@@ -63,9 +66,10 @@ public class TaskService extends TaskPipeline {
 
     }
 
-    public void setNode(DPSystemConfig _sysconf) throws Exception
+    public void setNode(DPSystemConfig _sysconf, DPSystemRuntime runtime) throws Exception
     {
         sysconf = _sysconf;
+        sysruntime = runtime;
         super.setConfig(sysconf.getServices().toConfig(),sysconf.getMasterConfig());
 
         logger.debug("setNode::Services");
@@ -90,8 +94,6 @@ public class TaskService extends TaskPipeline {
 
             registerPathsByFunction(datars);
         }
-
-
     }
 
     private void registerPathsByFunction(DataSourceREST datars) throws Exception
@@ -132,26 +134,29 @@ public class TaskService extends TaskPipeline {
         logger.info("dump::"+request.raw());
         // access to pathlist
         DataSourceREST datars = pathList.get(request.pathInfo());
+
+        sysruntime.execute(datars.getGetfn());
+
         return "getHandler-- Calling::"+datars.getGetfn();
     }
 
     public String postHandler(Request request, Response response)  throws Exception{
-        logger.info("postHandler Called a get ON::"+request.pathInfo());
-        logger.info("Called a get ON::"+request.url());
+        logger.info("postHandler Called a post ON::"+request.pathInfo());
+        logger.info("Called a post ON::"+request.url());
         logger.info("dump::"+request.raw());
         // access to pathlist
         DataSourceREST datars = pathList.get(request.pathInfo());
-        return "Hello World -- Calling::"+datars.getGetfn();
+        return "Hello World -- Calling::"+datars.getPostfn();
 
     }
 
     public String putHandler(Request request, Response response)  throws Exception {
-        logger.info("Called a get ON::"+request.pathInfo());
-        logger.info("Called a get ON::"+request.url());
+        logger.info("Called a put ON::"+request.pathInfo());
+        logger.info("Called a put ON::"+request.url());
         logger.info("dump::"+request.raw());
         // access to pathlist
         DataSourceREST datars = pathList.get(request.pathInfo());
-        return "Hello World -- Calling::"+datars.getGetfn();
+        return "Hello World -- Calling::"+datars.getPutfn();
     }
 
     public void deleteHandler(Request request, Response response)  throws Exception{

@@ -348,11 +348,11 @@ public class DPSystemFactory extends DPSystemConfigurable {
         return tfl;
     }
 
-    static public TaskService newService(DPSystemConfig sysconf) throws Exception
+    static public TaskService newService(DPSystemConfig sysconf, DPSystemRuntime runtime) throws Exception
     {
         // locate Service Configuration
         TaskService ts = new TaskService();
-        ts.setNode(sysconf);
+        ts.setNode(sysconf, runtime);
 
         return ts;
     }

@@ -68,6 +68,8 @@ public class DataSetRS extends DataSetTabular {
 
     @Override
     public void initBatch() throws Exception{
+
+
         dataRS.beforeFirst();
         currentIndex = 0;
         currentIndexCache = 0;

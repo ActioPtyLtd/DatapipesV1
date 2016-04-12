@@ -7,6 +7,7 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.SQLWarning;
+import java.util.stream.Collectors;
 
 /**
  * Created by jim on 7/8/2015.
@@ -40,12 +41,61 @@ public class DataSourceSQL extends DataSource {
     }
 
     public void execute() throws Exception {
-        extract();
+            extract();
     }
 
 
     public void load() throws Exception {
-        throw new Exception(FUNCTION_UNIMPLEMENTED_MSG);
+
+        Connection cn = null;
+
+        try {
+            cn = DriverManager.getConnection(getConnectStr());
+            //cn.setNetworkTimeout(null,160000);
+            // Get the warnings
+            for (SQLWarning warn = cn.getWarnings(); warn != null; warn = warn
+                    .getNextWarning()) {
+                // Note: Printing to Standard Out and putting messages in
+                // Pop-Up.
+                logger.info("Connection Warning:");
+                logger.info("State  : " + warn.getSQLState());
+                logger.info("Message: " + warn.getMessage());
+                logger.info("Error  : " + warn.getErrorCode());
+                warn = warn.getNextWarning();
+            }
+            logger.info("Connected");
+
+            String parameters = "(" + String.join(",", dataSet.getColumnHeader().stream().map(c -> "?").collect(Collectors.toList())) + ")";
+            String tablename = getConfig().getString("Table");
+            Boolean truncate = !getConfig().atKey("Truncate").isEmpty();
+
+            if(truncate) {
+                logger.info("Truncating table...");
+                cn.prepareStatement("truncate table " + tablename).execute();
+                logger.info("Table truncated");
+            }
+
+            PreparedStatement stmt = cn.prepareStatement("insert into " + tablename + "values " + parameters);
+
+            while(dataSet.isNextBatch()) {
+                for (java.util.List<String> row : dataSet.getAsListOfColumns()) {
+                    int i = 1;
+
+                    for (String value : row)
+                        stmt.setString(i++, value);
+
+                    stmt.addBatch();
+                }
+                logger.info("Executing SQL Statement...");
+                stmt.executeBatch();
+                logger.info("Executed SQL Statement.");
+            }
+            cn.close();
+
+        } catch (Exception e)
+        {
+            logger.info("Exception "+e.getMessage());
+        }
     }
 
     @Override

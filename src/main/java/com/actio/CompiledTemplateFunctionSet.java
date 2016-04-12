@@ -1,5 +1,6 @@
 package com.actio;
 
+import com.actio.dpsystem.DPSystemConfigurable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -18,7 +19,7 @@ import java.util.List;
  */
 
 
-public class CompiledTemplateFunctionSet extends Configurable {
+public class CompiledTemplateFunctionSet extends DPSystemConfigurable {
     private static final Logger logger = LoggerFactory.getLogger(CompiledTemplateFunctionSet.class);
 
     public String getTemplate() {

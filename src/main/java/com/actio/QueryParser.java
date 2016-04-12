@@ -1,5 +1,6 @@
 package com.actio;
 
+import com.actio.dpsystem.DPSystemConfigurable;
 import com.actio.dpsystem.DPSystemFactory;
 import com.typesafe.config.Config;
 
@@ -17,7 +18,7 @@ import org.apache.commons.lang.*;
 
  */
 
-public abstract class QueryParser extends Configurable {
+public abstract class QueryParser extends DPSystemConfigurable {
 
     private String queryTemplate=null;
     private String formattedQuery = null;

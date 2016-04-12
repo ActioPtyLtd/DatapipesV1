@@ -4,6 +4,7 @@ package com.actio;
  * Created by jim on 7/8/2015.
  */
 
+import com.actio.dpsystem.DPSystemConfigurable;
 import com.typesafe.config.Config;
 import difflib.Delta;
 import difflib.DiffUtils;
@@ -16,7 +17,7 @@ import java.util.Objects;
 // REFACTOR - current get mechanism is extremely inefficient for mutiple reads
 // need to cache the result
 
-public class DiffSet extends Configurable {
+public class DiffSet extends DPSystemConfigurable {
 
     private final List<Delta<String>> addLines = new LinkedList<>();
     private final List<Delta<String>> modifyLines = new LinkedList<>();

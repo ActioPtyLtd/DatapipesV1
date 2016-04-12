@@ -59,7 +59,6 @@ public class DPFnNode {
     }
 
 
-    @Loggable(Loggable.INFO)
     private static void dump(DPFnNode node, int depth, String indent)
     {
         logger.info(depth+indent+"::"+node.name+"::"+node.type+","+node.parallel);

@@ -1,5 +1,6 @@
 package com.actio;
 
+import com.actio.dpsystem.DPSystemConfigurable;
 import com.typesafe.config.Config;
 import org.joda.time.LocalDate;
 
@@ -12,7 +13,7 @@ import java.util.stream.Collectors;
 /**
  * Created by dimitarpopov on 24/08/15.
  */
-public class StaticUtilityFunctions extends Configurable{
+public class StaticUtilityFunctions extends DPSystemConfigurable {
 
     /*
 

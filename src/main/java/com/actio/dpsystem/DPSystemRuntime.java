@@ -1,7 +1,7 @@
 package com.actio.dpsystem;
 
-import com.actio.Configurable;
 import com.actio.Task;
+import com.actio.TaskService;
 
 import java.util.List;
 
@@ -15,7 +15,7 @@ import java.util.List;
 
  */
 
-public class DPSystemRuntime extends Configurable {
+public class DPSystemRuntime extends DPSystemConfigurable {
 
     // Collection of Instantiated Pipelines within the System
     private DPSystemConfig sysconf;
@@ -33,7 +33,7 @@ public class DPSystemRuntime extends Configurable {
 
     }
 
-    private void execute(String execName) throws Exception
+    public void execute(String execName) throws Exception
     {
 
         // by default execute the pipe in exec
@@ -67,9 +67,25 @@ public class DPSystemRuntime extends Configurable {
         
     }
 
+
+    // run as a service
+    public void service() throws Exception
+    {
+
+        logger.info("====== Starting SERVICE ===== ");
+
+        Task service = DPSystemFactory.newService(sysconf,this);
+
+        service.execute();
+    }
+
     public void dump()
     {
 
     }
+
+
+
+
 
 }

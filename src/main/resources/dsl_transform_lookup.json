@@ -1,0 +1,117 @@
+{
+  "script": {
+    "schema": {},
+    "tasks": {
+      "transform-lookup-001": {
+        "type": "transform",
+        "behavior": "lookup-merge",
+        "tablename": "VACCOUNT",
+        "dataSource-lookup": {
+          "type": "sql",
+          "jdbcDriver": "org.postgresql.Driver",
+          "connect": "jdbc:postgresql://localhost/test?user=postgres&password=postgres",
+          "inputDelimiter": ","
+        }
+      },
+      "postgres_extract-1": {
+        "type": "extract",
+        "dataSource": {
+          "type": "sql",
+          "jdbcDriver": "org.postgresql.Driver",
+          "connect": "jdbc:postgresql://localhost/test?user=postgres&password=postgres",
+          "query": {
+            "queryTemplate": "select * from t1"
+          },
+          "inputDelimiter": ","
+        }
+      },
+      "postgres_load-1": {
+        "type": "load",
+        "behavior" : "insert",
+        "dataSource": {
+          "type": "sql",
+          "behavior" : "insert",
+          "jdbcDriver": "org.postgresql.Driver",
+          "connect": "jdbc:postgresql://localhost/test?user=postgres&password=postgres",
+          "query": {
+            "queryTemplate": ""
+          },
+          "inputDelimiter": ",",
+          "Table": "t2",
+          "Truncate": "true"
+        }
+      },
+      "fileload01": {
+        "type": "load",
+        "behavior": "simple",
+        "dataSource": {
+          "behavior" : "append",
+          "directory": "c://tmp//xmatters",
+          "type": "file",
+          "filenameTemplate": "@@getDate,0,yyyy-MM-dd@@prodload_01.csv_all",
+          "outputDelimiter": "\t"
+        }
+      },
+      "datacleanup01": {
+        "type" : "transform",
+        "columns" : {
+          "10" : ["setDefaults,blah@gmail.com"],
+          "2" : ["setDateFormat,YYMMDD,MM/DD/YY"],
+          "3" : ["getOffsetDate,-5"],
+          "11" : ["formatForPhone,au"]
+        },
+        "global" :  ["removeDuplicates"],
+        "row" : ["no-Op"]
+      },
+      "webtask02": {
+        "type": "load",
+        "behavior": "checkpointDiff",
+        "dataSource": {
+          "type": "rest",
+          "behavior": "simple",
+          "xxurl": "https://sash.au1.xmatters.com.au/reapi/2015-01-01/forms/74595e64-f548-4c3d-b2b2-3a286e7e02ae/triggers",
+          "credential": {
+            "user": "rxp.ra",
+            "password": "7qu0KKa7"
+          }
+        },
+        "dataSourceLog": {
+          "type": "file",
+          "behavior": "checkpointDiff",
+          "directory": "c:/xmatters/Actius/data",
+          "prefixDiffFile": "weboutDiff_02",
+          "outputDelimiter": "\t"
+        },
+        "diffProcessAll": "true"
+      },
+      "mergetrans01": {
+        "type": "transform",
+        "behavior": "mergeTemplate",
+        "mergeTemplate": "{ \"properties\" : {\"aptName\": \"@001\",\"aptClientNum\": \"@000\",\"aptPname\": \"@002\",\"aptDate\": \"@003\", \"aptTimStr\": \"@004\", \"vetLastName\": \"@005\",\"vetFirstName\": \"@006\",\"sashCode\": \"@007\",\"sashVetName\": \"@008\"},\"recipients\": [{\"targetName\": \"@000\"}]}"
+      }
+    },
+    "pipelines": {
+      "p000": {
+        "pipe": "postgres_extract-1 | postgres_load-1"
+      },
+      "upload001" : {
+        "pipe" : " fileextract01 | mergetrans01 | webtask01 "
+      },
+      "p003" : {
+        "pipe" : " {p000} | {upload001} "
+      },
+      "p004" : {
+        "pipe" : "{{{p000}} | {{p003}} | p000 } "
+      }
+    },
+    "services": {
+      "name001": {
+        "path": "/a/b/c",
+        "pipe": "p00411"
+      }
+    },
+    "startup": {
+      "exec": "p000"
+    }
+  }
+}

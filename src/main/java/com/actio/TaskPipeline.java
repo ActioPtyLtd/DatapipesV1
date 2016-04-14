@@ -110,7 +110,7 @@ public class TaskPipeline extends Task implements Runnable
         resultSet.initBatch();
 
         logger.info("Calling Batch Recursively::"+currentNode.getName()+"("+keyIndex + "/"+tasksInPipeline.size()+")");
-        while ( resultSet.isNextBatch() == true && tasksInPipeline.size() > keyIndex ) {
+        while ( resultSet.isNextBatch() && tasksInPipeline.size() > keyIndex ) {
             DataSet subResultSet = resultSet.getNextBatch();
             // recursively traverse the rest of the pipeline batching up the ResultSet
             subResultSet.dump();

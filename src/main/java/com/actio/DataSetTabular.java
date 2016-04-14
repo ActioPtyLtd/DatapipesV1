@@ -54,7 +54,7 @@ public class DataSetTabular extends DataSet {
 
     private List<String> getRs() throws Exception {
 
-        if (rs != null)
+        if (rs != null && rsc != null)
             if (rs.size() == 0 && rsc.size() > 0)
                 rs = getAsList();
             else if (rs.size() != rsc.size() && rsc.size() != 0)

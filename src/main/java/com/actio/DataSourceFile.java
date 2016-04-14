@@ -12,6 +12,8 @@ import java.nio.file.StandardOpenOption;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Created by dimitarpopov on 24/08/15.
@@ -28,11 +30,10 @@ public class DataSourceFile extends DataSource {
     private String prefixDiffFile;
     private String filenameTemplate;
 
-    private String getCompiledFilename() throws Exception
-    {
+    private String getCompiledFilename() throws Exception {
 
         if (compiledFilename == null)
-           compiledFilename = QueryParser.processTemplate(filenameTemplate);
+            compiledFilename = QueryParser.processTemplate(filenameTemplate);
 
         return compiledFilename;
     }
@@ -50,58 +51,60 @@ public class DataSourceFile extends DataSource {
     protected String header;
     private String behaviour;
 
-    public void resetFilename()
-    {
+    public void resetFilename() {
         generatedFilename = null;
     }
 
     @Override
-    public void execute() throws Exception{
+    public void execute() throws Exception {
         extract();
+    }
+
+    @Override
+    public void execute(DataSet dataSet) throws Exception {
+        extract(dataSet);
     }
 
     public void extract() throws Exception {
 
-        // execute the sqlquery
-        logger.info("ReadFile: " + getFilename());
+        String fname = getFilename();
 
         // read the file into memory -- yeah yeah
         ArrayList<String> list = new ArrayList<String>();
 
-        try {
-            Scanner scanner = new Scanner(new File(getFilename()));
-            scanner.useDelimiter(System.getProperty("line.separator"));
-            while (scanner.hasNext()) {
-                list.add(scanner.next());
-            }
-            scanner.close();
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        }
+
+        // execute the sqlquery
+        logger.info("ReadFile: " + fname);
+
+        dataSet = new DataSetFileReader(new FileInputStream(new File(fname)));
 
         // save the results
-        dataSet = new DataSetTabular();
-        // must initialise or the defaults are wrong
-        dataSet.setConfig(config, masterConfig);
-        dataSet.set(list);
 
-        logger.info("Read in lines="+list.size()+" From file:"+getFilename());
+        dataSet.setConfig(config, masterConfig);
+
+        logger.info("done");
+    }
+
+    @Override
+    public void extract(DataSet dataSet) throws Exception {
+        directory = dataSet.FromRowGetField(0,"directory");
+        compiledFilename = dataSet.FromRowGetField(0,"filename");
+        extract();
     }
 
     public void load() throws Exception {
         throw new Exception(FUNCTION_UNIMPLEMENTED_MSG);
     }
 
+
     @Override
-    public DataSet read(QueryParser queryParser) throws Exception
-    {
+    public DataSet read(QueryParser queryParser) throws Exception {
         throw new Exception("Not implemented");
     }
 
     // Generate Filename from parameters
     @Override
-    public void setConfig(Config _conf, Config _master) throws Exception
-    {
+    public void setConfig(Config _conf, Config _master) throws Exception {
         super.setConfig(_conf, _master);
         // Optional fields -- MUST SET A DEFAULT
         if (config.hasPath(BEHAVIOR_LABEL) == true)
@@ -133,8 +136,7 @@ public class DataSourceFile extends DataSource {
     }
 
     @Override
-    public DataSet getLastLoggedDataSet() throws Exception
-    {
+    public DataSet getLastLoggedDataSet() throws Exception {
         // from directory
 
         initialiseDeltaFiles();
@@ -153,26 +155,23 @@ public class DataSourceFile extends DataSource {
     }
 
     @Override
-    public void write(DataSet data) throws Exception
-    {
+    public void write(DataSet data) throws Exception {
         String outFileName = getFilename();
         WriteWorker(outFileName, data, data.getColumnHeaderStr(), data.getCustomHeader());
     }
 
     @Override
-    public void write(DataSet data, String qualifier) throws Exception
-    {
-        List<String>rowList = data.getAsList();
+    public void write(DataSet data, String qualifier) throws Exception {
+        List<String> rowList = data.getAsList();
 
-        logger.info("Entered writeListSet "+qualifier);
-        if (rowList.isEmpty())
-        {
-            logger.info(" list is empty no file created: "+qualifier);
+        logger.info("Entered writeListSet " + qualifier);
+        if (rowList.isEmpty()) {
+            logger.info(" list is empty no file created: " + qualifier);
             return;
         }
 
         String outFileName = generateFilenameByLabel(qualifier);
-        logger.info("   DiffOutputFile="+outFileName);
+        logger.info("   DiffOutputFile=" + outFileName);
         WriteWorker(outFileName, data, data.getColumnHeaderStr(), data.getCustomHeader());
 
     }
@@ -245,7 +244,7 @@ public class DataSourceFile extends DataSource {
         if (matchLabel(behaviour, CHECKPOINT_DIFF_LABEL))
             initialiseDeltaFiles();
         else
-          generateFilenameByLabel(null);
+            generateFilenameByLabel(null);
 
         return generatedFilename;
     }
@@ -272,7 +271,7 @@ public class DataSourceFile extends DataSource {
 
                 String filePrefix = fileTokens[0];
 
-                if( filePrefix.equals(prefixDiffFile) && isInteger(fileTokens[1], 10) == true ) {
+                if (filePrefix.equals(prefixDiffFile) && isInteger(fileTokens[1], 10) == true) {
                     val = Integer.parseInt(fileTokens[1]);
                 }
             }
@@ -283,7 +282,7 @@ public class DataSourceFile extends DataSource {
         logger.info(" CurrentFileIncrement=" + currentFileIncrement);
 
         lastFileName = generateBaseFilename(currentFileIncrement);
-        generatedFilename = generateBaseFilename(currentFileIncrement+1);
+        generatedFilename = generateBaseFilename(currentFileIncrement + 1);
 
         logger.info("*** last=" + lastFileName + " next=" + generatedFilename);
     }
@@ -299,11 +298,10 @@ public class DataSourceFile extends DataSource {
         return directory + "/" + prefixDiffFile + "__" + String.format("%04d", increment) + "__.dat";
     }
 
-    private String generateFilenameByLabel(String qualifier) throws Exception
-    {
+    private String generateFilenameByLabel(String qualifier) throws Exception {
 
         generatedFilename = directory + FS + getCompiledFilename() +
-                ((qualifier==null)?"":qualifier);
+                ((qualifier == null) ? "" : qualifier);
 
         return generatedFilename;
     }

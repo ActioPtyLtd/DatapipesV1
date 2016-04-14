@@ -139,9 +139,11 @@ public class DataSourceSQL extends DataSource {
             }
             logger.info("Connected");
 
-            String parameters = "(?,?,?)";
+            logger.info("CREATE TABLE T1 (" + String.join(",", data.getColumnHeader().stream().map(f -> f + " text").collect(Collectors.toList())) + ");");
+
+            String parameters = "(" + String.join(",", data.getColumnHeader().stream().map(f -> "?").collect(Collectors.toList())) + ")";
             String tablename = getConfig().getString("Table");
-            Boolean truncate = !getConfig().atKey("Truncate").isEmpty();
+            Boolean truncate = getConfig().hasPath("Truncate");
 
             if(truncate) {
                 logger.info("Truncating table...");

@@ -162,6 +162,9 @@ public class DPSystemFactory extends DPSystemConfigurable {
             case REST_LABEL:
                 t = new DataSourceREST();
                 break;
+            case "dirfiles":
+                t = new DataSourceDirFiles();
+                break;
             default:
                 throw new Exception("DPSystemFactory:Unknown Task Type "+type);
         }

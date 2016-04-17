@@ -9,8 +9,11 @@ import com.typesafe.config.Config;
 public abstract class DataSource extends DPSystemConfigurable {
 
     public abstract void execute() throws Exception;
+    public void execute(DataSet dataSet) throws Exception { execute(); }
     public abstract void extract() throws Exception;
+    public void extract(DataSet dataSet) throws Exception { extract(); }
     public abstract void load() throws Exception;
+    public void load(DataSet dataSet) throws Exception { load(); }
 
     String getConnectStr() throws Exception {
         return connectStr;

@@ -37,19 +37,28 @@
             "queryTemplate": ""
           },
           "inputDelimiter": ",",
-          "Table": "t2",
-          "Truncate": "true"
+          "Table": "t2"
         }
       },
-      "fileload01": {
-        "type": "load",
-        "behavior": "simple",
+      "dirfiles": {
+        "type": "extract",
+        "behavior": "",
         "dataSource": {
-          "behavior" : "append",
-          "directory": "c://tmp//xmatters",
-          "type": "file",
-          "filenameTemplate": "@@getDate,0,yyyy-MM-dd@@prodload_01.csv_all",
-          "outputDelimiter": "\t"
+          "behavior": "",
+          "directory": "C:\\Users\\mauri\\bitbucket\\gandm-data\\gmdata_CSV\\CSV",
+          "type":"dirfiles",
+          "regex": "(?<name>^VACC[^.]*).*"
+        }
+      },
+      "fileinput01": {
+        "type": "extract",
+        "behavior": "regex",
+        "dataSource": {
+          "behavior": "regex",
+          "directory": "C:\\Users\\mauri\\bitbucket\\gandm-data\\gmdata_CSV\\CSV",
+          "type":"file",
+          "filenameTemplate": "(?<name>^VACC[^.]*).*",
+          "inputDelimiter": "\t"
         }
       },
       "datacleanup01": {
@@ -94,8 +103,8 @@
       "p000": {
         "pipe": "postgres_extract-1 | postgres_load-1"
       },
-      "upload001" : {
-        "pipe" : " fileextract01 | mergetrans01 | webtask01 "
+      "p001" : {
+        "pipe" : "dirfiles | fileinput01 | postgres_load-1"
       },
       "p003" : {
         "pipe" : " {p000} | {upload001} "
@@ -111,7 +120,7 @@
       }
     },
     "startup": {
-      "exec": "p000"
+      "exec": "p001"
     }
   }
 }

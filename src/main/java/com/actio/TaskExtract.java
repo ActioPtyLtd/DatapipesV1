@@ -17,7 +17,7 @@ public class TaskExtract extends Task {
     private DataSource dataSource;
     private String type;
     private String behaviour;
-    protected DataSet dataSet;
+    //protected DataSet dataSet;
 
     public TaskExtract() {
 
@@ -27,7 +27,8 @@ public class TaskExtract extends Task {
     {
         logger.info("Processes for READER");
 
-        dataSource.extract();
+            dataSource.extract(dataSet);
+            //dataSource.extract();
 
         setDataSet(dataSource.getDataSet());
 

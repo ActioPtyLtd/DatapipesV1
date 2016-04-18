@@ -87,8 +87,8 @@ public class DataSourceFile extends DataSource {
 
     @Override
     public void extract(DataSet dataSet) throws Exception {
-        directory = dataSet.FromRowGetField(0,"directory");
-        compiledFilename = dataSet.FromRowGetField(0,"filename");
+        directory = dataSet.FromRowGetField(1,"directory");
+        compiledFilename = dataSet.FromRowGetField(1,"filename");
         extract();
     }
 

@@ -11,9 +11,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.InputStream;
-import java.util.ArrayDeque;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.*;
+import java.util.stream.Collector;
+import java.util.stream.Collectors;
 
 
 public class TaskPipeline extends Task implements Runnable
@@ -114,13 +114,48 @@ public class TaskPipeline extends Task implements Runnable
             DataSet subResultSet = resultSet.getNextBatch();
             // recursively traverse the rest of the pipeline batching up the ResultSet
             subResultSet.dump();
-            processPipeLineRE(tasksInPipeline, keyIndex, subResultSet);
-            logger.info("Called Batch Recursively::"+currentNode.getName()+
-                    "("+keyIndex + "/"+tasksInPipeline.size()+")");
+
+            for (DataSet iteratedDatSet : getSubDataSets(subResultSet, tasksInPipeline, keyIndex)) {
+                processPipeLineRE(tasksInPipeline, keyIndex, iteratedDatSet);
+
+                logger.info("Called Batch Recursively::" + currentNode.getName() +
+                        "(" + keyIndex + "/" + tasksInPipeline.size() + ")");
+            }
         }
 
         logger.info("--------------------------------------Exit recursive "+
                 currentNode.getName()+"  "+resultSet.size()+"---");
+    }
+
+    private List<DataSet> getSubDataSets(DataSet dataSet, LinkedList<DPFnNode> tasks, int keyIndex) throws Exception {
+        if(iterateOverDataSet(tasks, keyIndex))
+            return iterateDataSetItems(dataSet);
+
+        return Collections.singletonList(dataSet);
+    }
+
+    private Boolean iterateOverDataSet(LinkedList<DPFnNode> tasks, int keyIndex) throws Exception {
+        if(keyIndex <= tasks.size())
+            return sysconf.getTask(tasks.get(keyIndex).getName()).toConfig().hasPath("iterate");
+
+        return false;
+    }
+
+    private List<DataSet> iterateDataSetItems(DataSet dataSet) throws Exception {
+        List<DataSet> ret = new ArrayList<DataSet>();
+
+        List<String> header = dataSet.getColumnHeader();
+
+        for(List<String> row : dataSet.getAsListOfColumns()) {
+            List<List<String>> rows = new ArrayList<List<String>>();
+            rows.add(header);
+            rows.add(row);
+
+            DataSetTabular ds = new DataSetTabular();
+            ds.setRsc(rows);
+            ret.add(ds);
+        }
+        return ret;
     }
 
     //

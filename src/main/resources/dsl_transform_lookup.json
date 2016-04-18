@@ -53,6 +53,7 @@
       "fileinput01": {
         "type": "extract",
         "behavior": "regex",
+        "iterate" : "true",
         "dataSource": {
           "behavior": "regex",
           "directory": "C:\\Users\\mauri\\bitbucket\\gandm-data\\gmdata_CSV\\CSV",

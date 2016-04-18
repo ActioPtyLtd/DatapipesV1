@@ -10,7 +10,7 @@
 	  "queryCheckpointValue": "",
           "type": "CheckpointDiff",
           "dataSource": "sql",
-          "connect": "jdbc:extendedsystems:advantage://localhost:6262;catalog=D:/AI - live db/AISDATA; TableType=cdx; LockType=proprietary;",
+          "connect": "jdbc:extendedsystems:advantage://hardtoswallow:6262;catalog=D:/AI - live db/AISDATA; TableType=cdx; LockType=proprietary;",
           "prefixFile": "cli_@datetime",
           "prefixDiffFile": "datacli",
           "inputDelimiter": "\\t",

@@ -170,6 +170,7 @@ public class DataSourceSQL extends DataSource {
         } catch (Exception e)
         {
             logger.info("Exception "+e.getMessage());
+            cn.close();
         }
     }
 

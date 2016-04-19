@@ -3,13 +3,15 @@
     "schema": {},
     "tasks": {
       "transform-lookup-001": {
-        "type": "transform",
+        "type": "lookup",
         "behavior": "lookup-merge",
-        "tablename": "VACCOUNT",
+        "lookup1": "storecode",
+        "lookup2": "storecode",
         "dataSource-lookup": {
           "type": "sql",
           "jdbcDriver": "org.postgresql.Driver",
           "connect": "jdbc:postgresql://localhost/test?user=postgres&password=postgres",
+          "query": "select * from \"VACCOUNT\" where storecode in ($1)",
           "inputDelimiter": ","
         }
       },
@@ -37,7 +39,7 @@
             "queryTemplate": ""
           },
           "inputDelimiter": ",",
-          "Table": "t2"
+          "Table": "t1"
         }
       },
       "dirfiles": {
@@ -62,15 +64,9 @@
           "inputDelimiter": "\t"
         }
       },
-      "datacleanup01": {
+      "csv": {
         "type" : "transform",
-        "columns" : {
-          "10" : ["setDefaults,blah@gmail.com"],
-          "2" : ["setDateFormat,YYMMDD,MM/DD/YY"],
-          "3" : ["getOffsetDate,-5"],
-          "11" : ["formatForPhone,au"]
-        },
-        "global" :  ["removeDuplicates"],
+        "global" :  ["firstrowasheader", "csv"],
         "row" : ["no-Op"]
       },
       "webtask02": {
@@ -105,7 +101,7 @@
         "pipe": "postgres_extract-1 | postgres_load-1"
       },
       "p001" : {
-        "pipe" : "dirfiles | fileinput01 | postgres_load-1"
+        "pipe" : "dirfiles | fileinput01 | csv | postgres_load-1"
       },
       "p003" : {
         "pipe" : " {p000} | {upload001} "

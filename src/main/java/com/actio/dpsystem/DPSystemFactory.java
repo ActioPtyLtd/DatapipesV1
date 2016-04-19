@@ -112,6 +112,9 @@ public class DPSystemFactory extends DPSystemConfigurable {
             case PIPE_LABEL:
                 t = new TaskPipeline();
                 break;
+            case "lookup":
+                t = new TaskLookup();
+                break;
             default:
                 throw new Exception("DPSystemFactory:Unknown Task Type "+type);
         }

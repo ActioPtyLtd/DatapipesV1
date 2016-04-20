@@ -5,13 +5,15 @@
       "transform-lookup-001": {
         "type": "lookup",
         "behavior": "lookup-merge",
-        "lookup1": "storecode",
-        "lookup2": "storecode",
-        "dataSource-lookup": {
+        "lookup1": "accnum",
+        "lookup2": "refnum",
+        "dataSource": {
           "type": "sql",
           "jdbcDriver": "org.postgresql.Driver",
           "connect": "jdbc:postgresql://localhost/test?user=postgres&password=postgres",
-          "query": "select * from \"VACCOUNT\" where storecode in ($1)",
+          "query": {
+            "queryTemplate": "select * from testlookup where refnum in ($1)"
+          },
           "inputDelimiter": ","
         }
       },
@@ -101,7 +103,7 @@
         "pipe": "postgres_extract-1 | postgres_load-1"
       },
       "p001" : {
-        "pipe" : "dirfiles | fileinput01 | csv | postgres_load-1"
+        "pipe" : "dirfiles | fileinput01 | csv | transform-lookup-001 | postgres_load-1"
       },
       "p003" : {
         "pipe" : " {p000} | {upload001} "

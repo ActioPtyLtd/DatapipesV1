@@ -6,6 +6,8 @@ import com.actio.dpsystem.DPSystemRuntime;
 
 import java.net.URL;
 import java.net.URLClassLoader;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 
 import com.jcabi.aspects.Loggable;
 import org.apache.commons.cli.*;
@@ -20,10 +22,11 @@ class Main {
     private static final Logger logger = LoggerFactory.getLogger(Main.class);
 
     public static void main(String[] args) throws Exception {
-        
-        System.out.println("=====First line in main");
 
         logger.info("======First logging.info");
+        Path currentRelativePath = Paths.get("");
+        String s = currentRelativePath.toAbsolutePath().toString();
+        System.out.println("Current relative path is: " + s);
 
         CommandLineParser parser = new DefaultParser();
         Options options = setOptions();

@@ -12,7 +12,7 @@ package com.actio;
 import java.sql.ResultSet;
 import java.util.List;
 
-public abstract class DataSetHierarchical extends DataSet {
+public abstract class DataSetHierarchical_java extends DataSet {
 
     // tab
 

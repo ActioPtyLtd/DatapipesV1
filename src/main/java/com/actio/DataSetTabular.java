@@ -23,6 +23,7 @@ public class DataSetTabular extends DataSet {
         set(_rs);
     }
 
+
     // Create an empty valid set
     public DataSetTabular()
     {
@@ -225,7 +226,7 @@ public class DataSetTabular extends DataSet {
     @Override
     public List<String> getColumnHeader() throws Exception {
         // not supported
-        return null;
+        return getAsListOfColumns().get(0);
     }
 
     @Override
@@ -256,7 +257,7 @@ public class DataSetTabular extends DataSet {
 
     // Iterator for Rows and Columns by Index or by string
     public String FromRowGetField(int rowIndex, String label) throws Exception {
-        return getRs().get(rowIndex);
+        return FromRowGetField(rowIndex, getColumnHeader().indexOf(label));
     }
 
     public String FromRowGetField(int rowIndex, int label) throws Exception {

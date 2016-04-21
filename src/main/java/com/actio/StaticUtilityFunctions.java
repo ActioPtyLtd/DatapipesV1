@@ -120,8 +120,8 @@ public class StaticUtilityFunctions extends DPSystemConfigurable {
         return newSource;
     }
 
-
     private static DataSet execute(DataSet set, TransformFunction fn) throws Exception {
+
         // iterate over the functions, processing the source
         DataSet newset = set;
 
@@ -134,6 +134,13 @@ public class StaticUtilityFunctions extends DPSystemConfigurable {
 
                 break;
             case "GroupBy" :
+
+                break;
+            case "firstrowasheader" :
+                newset = DataSetTableScala.toDataSetTableScala(set).transformFirstRowAsHeader();
+                break;
+            case "csv" :
+                newset = DataSetTableScala.toDataSetTableScala(set).transformToColumnsWithDelimiter(",");
 
                 break;
             default :

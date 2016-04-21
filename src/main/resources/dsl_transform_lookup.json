@@ -3,13 +3,17 @@
     "schema": {},
     "tasks": {
       "transform-lookup-001": {
-        "type": "transform",
+        "type": "lookup",
         "behavior": "lookup-merge",
-        "tablename": "VACCOUNT",
-        "dataSource-lookup": {
+        "lookup1": "accnum",
+        "lookup2": "refnum",
+        "dataSource": {
           "type": "sql",
           "jdbcDriver": "org.postgresql.Driver",
           "connect": "jdbc:postgresql://localhost/test?user=postgres&password=postgres",
+          "query": {
+            "queryTemplate": "select * from testlookup where refnum in ($1)"
+          },
           "inputDelimiter": ","
         }
       },
@@ -37,7 +41,7 @@
             "queryTemplate": ""
           },
           "inputDelimiter": ",",
-          "Table": "t2"
+          "Table": "t1"
         }
       },
       "dirfiles": {
@@ -53,6 +57,7 @@
       "fileinput01": {
         "type": "extract",
         "behavior": "regex",
+        "iterate" : "true",
         "dataSource": {
           "behavior": "regex",
           "directory": "C:\\Users\\mauri\\bitbucket\\gandm-data\\gmdata_CSV\\CSV",
@@ -61,15 +66,9 @@
           "inputDelimiter": "\t"
         }
       },
-      "datacleanup01": {
+      "csv": {
         "type" : "transform",
-        "columns" : {
-          "10" : ["setDefaults,blah@gmail.com"],
-          "2" : ["setDateFormat,YYMMDD,MM/DD/YY"],
-          "3" : ["getOffsetDate,-5"],
-          "11" : ["formatForPhone,au"]
-        },
-        "global" :  ["removeDuplicates"],
+        "global" :  ["firstrowasheader", "csv"],
         "row" : ["no-Op"]
       },
       "webtask02": {
@@ -104,7 +103,7 @@
         "pipe": "postgres_extract-1 | postgres_load-1"
       },
       "p001" : {
-        "pipe" : "dirfiles | fileinput01 | postgres_load-1"
+        "pipe" : "dirfiles | fileinput01 | csv | transform-lookup-001 | postgres_load-1"
       },
       "p003" : {
         "pipe" : " {p000} | {upload001} "

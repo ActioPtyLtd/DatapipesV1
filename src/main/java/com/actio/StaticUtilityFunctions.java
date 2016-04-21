@@ -102,7 +102,7 @@ public class StaticUtilityFunctions extends DPSystemConfigurable {
                 newSource = formatForPhone(source, fn);
                 break;
             case "setValueByRegexpForColumns" :
-
+                //newSource = setValueByRegexpForColumns(source, fn);
                 break;
             case "setDateFormat" :
 
@@ -224,8 +224,7 @@ public class StaticUtilityFunctions extends DPSystemConfigurable {
 
     // =====================================================================
 
-    public static List<String> setValueByRegexpForColumns(List<String> row,
-                                                          Config config){
+    public static List<String> setValueByRegexpForColumns(String regexpRaw, TransformFunction fn){
 
         // REFACTOR: should move these to instance variables so they don't get recreated on every single loop
         List<Integer> rows = config.getIntList("setValueByRegexp_Columns");

@@ -131,7 +131,10 @@ public class TaskService extends TaskPipeline {
     public String getHandler(Request request, Response response) throws Exception {
         logger.info("getHandler Called a get ON::"+request.pathInfo());
         logger.info("Called a get ON::"+request.url());
-        logger.info("dump::"+request.raw());
+
+        // pass body as a DS
+
+
         // access to pathlist
         DataSourceREST datars = pathList.get(request.pathInfo());
 

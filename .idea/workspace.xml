@@ -2,15 +2,9 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="3f4cf355-dbdc-4751-b329-de04536bed8b" name="Default" comment="Checkpoint commit: Handling the empty Dataset  for Tabular DataSets">
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/main/java/com/actio/DataSetHierarchical.scala" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/src/main/java/com/actio/DataSetHierarchical.java" afterPath="$PROJECT_DIR$/src/main/java/com/actio/DataSetHierarchical_java.java" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.gitignore" afterPath="$PROJECT_DIR$/.gitignore" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/modules/dpipes-build.iml" afterPath="$PROJECT_DIR$/.idea/modules/dpipes-build.iml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/modules/dpipes.iml" afterPath="$PROJECT_DIR$/.idea/modules/dpipes.iml" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/com/actio/Main.java" afterPath="$PROJECT_DIR$/src/main/java/com/actio/Main.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/com/actio/TaskService.java" afterPath="$PROJECT_DIR$/src/main/java/com/actio/TaskService.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/resources/dsl_unittest_001.json" afterPath="$PROJECT_DIR$/src/main/resources/dsl_unittest_001.json" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/com/actio/StaticUtilityFunctions.java" afterPath="$PROJECT_DIR$/src/main/java/com/actio/StaticUtilityFunctions.java" />
     </list>
     <ignored path="dpipes.iws" />
     <ignored path=".idea/workspace.xml" />
@@ -53,13 +47,13 @@
     <favorites_list name="dpipes" />
   </component>
   <component name="FileEditorManager">
-    <splitter split-orientation="horizontal" split-proportion="0.4263341">
+    <splitter split-orientation="horizontal" split-proportion="0.5588608">
       <split-first>
         <leaf SIDE_TABS_SIZE_LIMIT_KEY="600">
           <file leaf-file-name="DataSetRS.java" pinned="false" current-in-tab="false">
             <entry file="file://$PROJECT_DIR$/src/main/java/com/actio/DataSetRS.java">
               <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="918">
+                <state relative-caret-position="0">
                   <caret line="73" column="0" selection-start-line="73" selection-start-column="0" selection-end-line="73" selection-end-column="0" />
                   <folding>
                     <element signature="imports" expanded="false" />
@@ -76,102 +70,52 @@
               </provider>
             </entry>
           </file>
-          <file leaf-file-name="DataSource.java" pinned="false" current-in-tab="false">
-            <entry file="file://$PROJECT_DIR$/src/main/java/com/actio/DataSource.java">
-              <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="595">
-                  <caret line="38" column="0" selection-start-line="38" selection-start-column="0" selection-end-line="38" selection-end-column="0" />
-                  <folding>
-                    <element signature="imports" expanded="false" />
-                    <element signature="e#708#709#0" expanded="false" />
-                    <element signature="e#752#753#0" expanded="false" />
-                  </folding>
-                </state>
-              </provider>
-            </entry>
-          </file>
-          <file leaf-file-name="DataSourceREST.java" pinned="false" current-in-tab="false">
-            <entry file="file://$PROJECT_DIR$/src/main/java/com/actio/DataSourceREST.java">
-              <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="170">
-                  <caret line="24" column="0" selection-start-line="24" selection-start-column="0" selection-end-line="24" selection-end-column="0" />
-                  <folding>
-                    <element signature="imports" expanded="false" />
-                    <element signature="e#1118#1119#0" expanded="false" />
-                    <element signature="e#1146#1147#0" expanded="false" />
-                    <element signature="e#1187#1188#0" expanded="false" />
-                    <element signature="e#1221#1222#0" expanded="false" />
-                    <element signature="e#1253#1254#0" expanded="false" />
-                    <element signature="e#1281#1282#0" expanded="false" />
-                    <element signature="e#1323#1324#0" expanded="false" />
-                    <element signature="e#1357#1358#0" expanded="false" />
-                    <element signature="e#1389#1390#0" expanded="false" />
-                    <element signature="e#1417#1418#0" expanded="false" />
-                    <element signature="e#1459#1460#0" expanded="false" />
-                    <element signature="e#1493#1494#0" expanded="false" />
-                    <element signature="e#1526#1527#0" expanded="false" />
-                    <element signature="e#1555#1556#0" expanded="false" />
-                    <element signature="e#1599#1600#0" expanded="false" />
-                    <element signature="e#1635#1636#0" expanded="false" />
-                    <element signature="e#1670#1671#0" expanded="false" />
-                    <element signature="e#1701#1702#0" expanded="false" />
-                    <element signature="e#1749#1750#0" expanded="false" />
-                    <element signature="e#1789#1790#0" expanded="false" />
-                    <element signature="e#1823#1824#0" expanded="false" />
-                    <element signature="e#1853#1854#0" expanded="false" />
-                    <element signature="e#1899#1900#0" expanded="false" />
-                    <element signature="e#1937#1938#0" expanded="false" />
-                    <element signature="e#1968#1969#0" expanded="false" />
-                    <element signature="e#1995#1996#0" expanded="false" />
-                    <element signature="e#2035#2036#0" expanded="false" />
-                    <element signature="e#2067#2068#0" expanded="false" />
-                    <element signature="e#2104#2105#0" expanded="false" />
-                    <element signature="e#2135#2136#0" expanded="false" />
-                    <element signature="e#2184#2185#0" expanded="false" />
-                    <element signature="e#2224#2225#0" expanded="false" />
-                    <element signature="e#2256#2257#0" expanded="false" />
-                    <element signature="e#2283#2284#0" expanded="false" />
-                    <element signature="e#2324#2325#0" expanded="false" />
-                    <element signature="e#2356#2357#0" expanded="false" />
-                    <element signature="e#5442#5443#0" expanded="false" />
-                    <element signature="e#5472#5473#0" expanded="false" />
-                    <element signature="e#5528#5529#0" expanded="false" />
-                    <element signature="e#5557#5558#0" expanded="false" />
-                  </folding>
-                </state>
-              </provider>
-            </entry>
-          </file>
           <file leaf-file-name="DataSourceSQL.java" pinned="false" current-in-tab="false">
             <entry file="file://$PROJECT_DIR$/src/main/java/com/actio/DataSourceSQL.java">
               <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="784">
+                <state relative-caret-position="0">
                   <caret line="91" column="0" selection-start-line="91" selection-start-column="0" selection-end-line="91" selection-end-column="0" />
                   <folding />
                 </state>
               </provider>
             </entry>
           </file>
-          <file leaf-file-name="DPFnNode.java" pinned="false" current-in-tab="true">
+          <file leaf-file-name="DPFnNode.java" pinned="false" current-in-tab="false">
             <entry file="file://$PROJECT_DIR$/src/main/java/com/actio/dpsystem/DPFnNode.java">
               <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="-243">
-                  <caret line="6" column="0" selection-start-line="6" selection-start-column="0" selection-end-line="6" selection-end-column="0" />
+                <state relative-caret-position="0">
+                  <caret line="80" column="0" selection-start-line="80" selection-start-column="0" selection-end-line="80" selection-end-column="0" />
                   <folding />
                 </state>
               </provider>
             </entry>
           </file>
-          <file leaf-file-name="DPSystemConfig.java" pinned="false" current-in-tab="false">
-            <entry file="file://$PROJECT_DIR$/src/main/java/com/actio/dpsystem/DPSystemConfig.java">
+          <file leaf-file-name="QueryParser.java" pinned="false" current-in-tab="false">
+            <entry file="file://$PROJECT_DIR$/src/main/java/com/actio/QueryParser.java">
               <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="1972">
-                  <caret line="124" column="0" selection-start-line="124" selection-start-column="0" selection-end-line="124" selection-end-column="0" />
-                  <folding>
-                    <element signature="imports" expanded="false" />
-                    <element signature="e#8824#8825#0" expanded="false" />
-                    <element signature="e#8880#8881#0" expanded="false" />
-                  </folding>
+                <state relative-caret-position="0">
+                  <caret line="20" column="22" selection-start-line="20" selection-start-column="22" selection-end-line="20" selection-end-column="22" />
+                  <folding />
+                </state>
+              </provider>
+            </entry>
+          </file>
+          <file leaf-file-name="StaticUtilityFunctions.java" pinned="false" current-in-tab="false">
+            <entry file="file://$PROJECT_DIR$/src/main/java/com/actio/StaticUtilityFunctions.java">
+              <provider selected="true" editor-type-id="text-editor">
+                <state relative-caret-position="222">
+                  <caret line="219" column="91" selection-start-line="219" selection-start-column="91" selection-end-line="219" selection-end-column="91" />
+                  <folding />
+                </state>
+              </provider>
+            </entry>
+          </file>
+          <file leaf-file-name="TransformFunction.java" pinned="false" current-in-tab="true">
+            <entry file="file://$PROJECT_DIR$/src/main/java/com/actio/TransformFunction.java">
+              <provider selected="true" editor-type-id="text-editor">
+                <state relative-caret-position="-131">
+                  <caret line="16" column="13" selection-start-line="16" selection-start-column="13" selection-end-line="16" selection-end-column="13" />
+                  <folding />
                 </state>
               </provider>
             </entry>
@@ -179,7 +123,7 @@
           <file leaf-file-name="DPSystemFactory.java" pinned="false" current-in-tab="false">
             <entry file="file://$PROJECT_DIR$/src/main/java/com/actio/dpsystem/DPSystemFactory.java">
               <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="5423">
+                <state relative-caret-position="0">
                   <caret line="331" column="0" selection-start-line="331" selection-start-column="0" selection-end-line="331" selection-end-column="0" />
                   <folding>
                     <element signature="e#673#674#0" expanded="false" />
@@ -194,7 +138,7 @@
           <file leaf-file-name="DPSystemRuntime.java" pinned="false" current-in-tab="false">
             <entry file="file://$PROJECT_DIR$/src/main/java/com/actio/dpsystem/DPSystemRuntime.java">
               <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="1445">
+                <state relative-caret-position="0">
                   <caret line="91" column="0" selection-start-line="91" selection-start-column="0" selection-end-line="91" selection-end-column="0" />
                   <folding>
                     <element signature="imports" expanded="false" />
@@ -208,7 +152,7 @@
           <file leaf-file-name="dsl_unittest_002.json" pinned="false" current-in-tab="false">
             <entry file="file://$PROJECT_DIR$/src/main/resources/dsl_unittest_002.json">
               <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="136">
+                <state relative-caret-position="0">
                   <caret line="8" column="0" selection-start-line="8" selection-start-column="0" selection-end-line="10" selection-end-column="20" />
                   <folding />
                 </state>
@@ -218,7 +162,7 @@
           <file leaf-file-name="Main.java" pinned="false" current-in-tab="false">
             <entry file="file://$PROJECT_DIR$/src/main/java/com/actio/Main.java">
               <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="133">
+                <state relative-caret-position="0">
                   <caret line="24" column="0" selection-start-line="24" selection-start-column="0" selection-end-line="24" selection-end-column="0" />
                   <folding>
                     <element signature="imports" expanded="true" />
@@ -231,33 +175,11 @@
       </split-first>
       <split-second>
         <leaf SIDE_TABS_SIZE_LIMIT_KEY="600">
-          <file leaf-file-name="DPLangTokens.java" pinned="false" current-in-tab="false">
-            <entry file="file://$PROJECT_DIR$/src/main/java/com/actio/dpsystem/DPLangTokens.java">
-              <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="221">
-                  <caret line="16" column="0" selection-start-line="16" selection-start-column="0" selection-end-line="16" selection-end-column="0" />
-                  <folding>
-                    <element signature="imports" expanded="false" />
-                    <element signature="e#1238#1239#0" expanded="false" />
-                    <element signature="e#1271#1272#0" expanded="false" />
-                    <element signature="e#1294#1295#0" expanded="false" />
-                    <element signature="e#1323#1324#0" expanded="false" />
-                    <element signature="e#1630#1631#0" expanded="false" />
-                    <element signature="e#1667#1668#0" expanded="false" />
-                    <element signature="e#2088#2089#0" expanded="false" />
-                    <element signature="e#2150#2151#0" expanded="false" />
-                    <element signature="e#2331#2332#0" expanded="false" />
-                    <element signature="e#2378#2379#0" expanded="false" />
-                  </folding>
-                </state>
-              </provider>
-            </entry>
-          </file>
-          <file leaf-file-name="dsl_unittest_001.json" pinned="false" current-in-tab="false">
+          <file leaf-file-name="dsl_unittest_001.json" pinned="false" current-in-tab="true">
             <entry file="file://$PROJECT_DIR$/src/main/resources/dsl_unittest_001.json">
               <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="-391">
-                  <caret line="49" column="0" selection-start-line="49" selection-start-column="0" selection-end-line="49" selection-end-column="41" />
+                <state relative-caret-position="34">
+                  <caret line="2" column="17" selection-start-line="2" selection-start-column="17" selection-end-line="2" selection-end-column="17" />
                   <folding />
                 </state>
               </provider>
@@ -266,7 +188,7 @@
           <file leaf-file-name="dsl_transform_lookup.json" pinned="false" current-in-tab="false">
             <entry file="file://$PROJECT_DIR$/src/main/resources/dsl_transform_lookup.json">
               <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="850">
+                <state relative-caret-position="-8">
                   <caret line="86" column="22" selection-start-line="86" selection-start-column="9" selection-end-line="86" selection-end-column="22" />
                   <folding />
                 </state>
@@ -276,7 +198,7 @@
           <file leaf-file-name="TaskPipeline.java" pinned="false" current-in-tab="false">
             <entry file="file://$PROJECT_DIR$/src/main/java/com/actio/TaskPipeline.java">
               <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="1061">
+                <state relative-caret-position="0">
                   <caret line="107" column="60" selection-start-line="107" selection-start-column="60" selection-end-line="107" selection-end-column="60" />
                   <folding />
                 </state>
@@ -286,7 +208,7 @@
           <file leaf-file-name="TaskService.java" pinned="false" current-in-tab="false">
             <entry file="file://$PROJECT_DIR$/src/main/java/com/actio/TaskService.java">
               <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="248">
+                <state relative-caret-position="0">
                   <caret line="134" column="28" selection-start-line="134" selection-start-column="28" selection-end-line="134" selection-end-column="28" />
                   <folding>
                     <element signature="imports" expanded="true" />
@@ -298,7 +220,7 @@
           <file leaf-file-name="DataSetFileReader.scala" pinned="false" current-in-tab="false">
             <entry file="file://$PROJECT_DIR$/src/main/java/com/actio/DataSetFileReader.scala">
               <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="119">
+                <state relative-caret-position="0">
                   <caret line="9" column="6" selection-start-line="9" selection-start-column="6" selection-end-line="9" selection-end-column="6" />
                   <folding />
                 </state>
@@ -308,7 +230,7 @@
           <file leaf-file-name="DataSetHierarchical_java.java" pinned="false" current-in-tab="false">
             <entry file="file://$PROJECT_DIR$/src/main/java/com/actio/DataSetHierarchical_java.java">
               <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="221">
+                <state relative-caret-position="0">
                   <caret line="14" column="22" selection-start-line="14" selection-start-column="22" selection-end-line="14" selection-end-column="22" />
                   <folding />
                 </state>
@@ -318,7 +240,7 @@
           <file leaf-file-name="DataSetHierarchical.scala" pinned="false" current-in-tab="false">
             <entry file="file://$PROJECT_DIR$/src/main/java/com/actio/DataSetHierarchical.scala">
               <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="119">
+                <state relative-caret-position="0">
                   <caret line="9" column="6" selection-start-line="9" selection-start-column="6" selection-end-line="9" selection-end-column="6" />
                   <folding />
                 </state>
@@ -328,18 +250,8 @@
           <file leaf-file-name="DataSetTableScala.scala" pinned="false" current-in-tab="false">
             <entry file="file://$PROJECT_DIR$/src/main/java/com/actio/DataSetTableScala.scala">
               <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="2059">
+                <state relative-caret-position="0">
                   <caret line="132" column="7" selection-start-line="132" selection-start-column="7" selection-end-line="132" selection-end-column="7" />
-                  <folding />
-                </state>
-              </provider>
-            </entry>
-          </file>
-          <file leaf-file-name=".gitignore" pinned="false" current-in-tab="true">
-            <entry file="file://$PROJECT_DIR$/.gitignore">
-              <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="17">
-                  <caret line="1" column="0" selection-start-line="1" selection-start-column="0" selection-end-line="1" selection-end-column="0" />
                   <folding />
                 </state>
               </provider>
@@ -384,6 +296,7 @@
         <option value="$PROJECT_DIR$/src/main/java/com/actio/DataSetHierarchical.scala" />
         <option value="$PROJECT_DIR$/src/main/resources/dsl_unittest_001.json" />
         <option value="$PROJECT_DIR$/.gitignore" />
+        <option value="$PROJECT_DIR$/src/main/java/com/actio/StaticUtilityFunctions.java" />
       </list>
     </option>
   </component>
@@ -593,7 +506,7 @@
     </panes>
   </component>
   <component name="PropertiesComponent">
-    <property name="settings.editor.selected.configurable" value="preferences.lookFeel" />
+    <property name="settings.editor.selected.configurable" value="preferences.editor" />
     <property name="settings.editor.splitter.proportion" value="0.2" />
     <property name="project.structure.last.edited" value="Libraries" />
     <property name="project.structure.proportion" value="0.15" />
@@ -1054,7 +967,14 @@
       <option name="project" value="LOCAL" />
       <updated>1459192291205</updated>
     </task>
-    <option name="localTasksCounter" value="4" />
+    <task id="LOCAL-00004" summary="Checkpoint commit: Handling the empty Dataset  for Tabular DataSets">
+      <created>1461169545510</created>
+      <option name="number" value="00004" />
+      <option name="presentableId" value="LOCAL-00004" />
+      <option name="project" value="LOCAL" />
+      <updated>1461169545510</updated>
+    </task>
+    <option name="localTasksCounter" value="5" />
     <servers />
   </component>
   <component name="TodoView">
@@ -1076,14 +996,14 @@
       <window_info id="SBT" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.15098634" sideWeight="0.49643493" order="8" side_tool="false" content_ui="tabs" />
       <window_info id="Palette&#9;" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
       <window_info id="Capture Analysis" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
-      <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.3197051" sideWeight="0.50755286" order="9" side_tool="true" content_ui="tabs" />
+      <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.23263507" sideWeight="0.50959486" order="9" side_tool="true" content_ui="tabs" />
       <window_info id="Maven Projects" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
-      <window_info id="Version Control" active="true" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.32745314" sideWeight="0.5" order="10" side_tool="false" content_ui="tabs" />
-      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.3109151" sideWeight="0.49244714" order="2" side_tool="false" content_ui="tabs" />
+      <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.1874311" sideWeight="0.49413645" order="10" side_tool="false" content_ui="tabs" />
+      <window_info id="Run" active="true" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.23263507" sideWeight="0.4904051" order="2" side_tool="false" content_ui="tabs" />
       <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.3296582" sideWeight="0.5" order="11" side_tool="false" content_ui="tabs" />
       <window_info id="Capture Tool" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Designer" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="5" side_tool="false" content_ui="tabs" />
-      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.18017058" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
+      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.15778251" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
       <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.07542263" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Ant Build" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
@@ -1114,6 +1034,8 @@
     <MESSAGE value="first checkin" />
     <MESSAGE value="Checkpoint commit: Handling the empty Dataset  for Tabular DataSets" />
     <option name="LAST_COMMIT_MESSAGE" value="Checkpoint commit: Handling the empty Dataset  for Tabular DataSets" />
+    <option name="REFORMAT_BEFORE_PROJECT_COMMIT" value="true" />
+    <option name="REARRANGE_BEFORE_PROJECT_COMMIT" value="true" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
@@ -1164,46 +1086,6 @@
     <option name="FILTER_TARGETS" value="false" />
   </component>
   <component name="editorHistoryManager">
-    <entry file="file://$PROJECT_DIR$/src/main/java/com/actio/TaskExtract.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="1881">
-          <caret line="60" column="0" selection-start-line="56" selection-start-column="0" selection-end-line="60" selection-end-column="0" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/build.sbt">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="363">
-          <caret line="11" column="41" selection-start-line="11" selection-start-column="41" selection-end-line="11" selection-end-column="41" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/resources/dsl_unittest_001.json">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="0">
-          <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/com/actio/Main.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="1254">
-          <caret line="47" column="0" selection-start-line="47" selection-start-column="0" selection-end-line="47" selection-end-column="0" />
-          <folding>
-            <element signature="imports" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/scala/Main.scala">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="396">
-          <caret line="12" column="0" selection-start-line="12" selection-start-column="0" selection-end-line="12" selection-end-column="0" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/build.sbt">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="0">
@@ -1408,7 +1290,7 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/src/main/java/com/actio/DataSourceREST.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="170">
+        <state relative-caret-position="0">
           <caret line="24" column="0" selection-start-line="24" selection-start-column="0" selection-end-line="24" selection-end-column="0" />
           <folding>
             <element signature="imports" expanded="false" />
@@ -1458,7 +1340,7 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/src/main/java/com/actio/dpsystem/DPSystemRuntime.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="1445">
+        <state relative-caret-position="0">
           <caret line="91" column="0" selection-start-line="91" selection-start-column="0" selection-end-line="91" selection-end-column="0" />
           <folding>
             <element signature="imports" expanded="false" />
@@ -1470,7 +1352,7 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/src/main/java/com/actio/dpsystem/DPSystemFactory.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="5423">
+        <state relative-caret-position="0">
           <caret line="331" column="0" selection-start-line="331" selection-start-column="0" selection-end-line="331" selection-end-column="0" />
           <folding>
             <element signature="e#673#674#0" expanded="false" />
@@ -1483,7 +1365,7 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/src/main/resources/dsl_unittest_002.json">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="136">
+        <state relative-caret-position="0">
           <caret line="8" column="0" selection-start-line="8" selection-start-column="0" selection-end-line="10" selection-end-column="20" />
           <folding />
         </state>
@@ -1491,7 +1373,7 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/src/main/java/com/actio/DataSetRS.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="918">
+        <state relative-caret-position="0">
           <caret line="73" column="0" selection-start-line="73" selection-start-column="0" selection-end-line="73" selection-end-column="0" />
           <folding>
             <element signature="imports" expanded="false" />
@@ -1509,7 +1391,7 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/src/main/java/com/actio/DataSourceSQL.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="784">
+        <state relative-caret-position="0">
           <caret line="91" column="0" selection-start-line="91" selection-start-column="0" selection-end-line="91" selection-end-column="0" />
           <folding />
         </state>
@@ -1517,7 +1399,7 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/src/main/java/com/actio/Main.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="133">
+        <state relative-caret-position="0">
           <caret line="24" column="0" selection-start-line="24" selection-start-column="0" selection-end-line="24" selection-end-column="0" />
           <folding>
             <element signature="imports" expanded="true" />
@@ -1525,17 +1407,9 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/com/actio/dpsystem/DPFnNode.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-243">
-          <caret line="6" column="0" selection-start-line="6" selection-start-column="0" selection-end-line="6" selection-end-column="0" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/src/main/java/com/actio/TaskService.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="248">
+        <state relative-caret-position="0">
           <caret line="134" column="28" selection-start-line="134" selection-start-column="28" selection-end-line="134" selection-end-column="28" />
           <folding>
             <element signature="imports" expanded="true" />
@@ -1545,7 +1419,7 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/src/main/java/com/actio/DataSetFileReader.scala">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="119">
+        <state relative-caret-position="0">
           <caret line="9" column="6" selection-start-line="9" selection-start-column="6" selection-end-line="9" selection-end-column="6" />
           <folding />
         </state>
@@ -1553,7 +1427,7 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/src/main/java/com/actio/DataSetHierarchical_java.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="221">
+        <state relative-caret-position="0">
           <caret line="14" column="22" selection-start-line="14" selection-start-column="22" selection-end-line="14" selection-end-column="22" />
           <folding />
         </state>
@@ -1561,7 +1435,7 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/src/main/resources/dsl_transform_lookup.json">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="850">
+        <state relative-caret-position="-8">
           <caret line="86" column="22" selection-start-line="86" selection-start-column="9" selection-end-line="86" selection-end-column="22" />
           <folding />
         </state>
@@ -1569,40 +1443,88 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/src/main/java/com/actio/TaskPipeline.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="1061">
+        <state relative-caret-position="0">
           <caret line="107" column="60" selection-start-line="107" selection-start-column="60" selection-end-line="107" selection-end-column="60" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/resources/dsl_unittest_001.json">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-391">
-          <caret line="49" column="0" selection-start-line="49" selection-start-column="0" selection-end-line="49" selection-end-column="41" />
           <folding />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/src/main/java/com/actio/DataSetHierarchical.scala">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="119">
+        <state relative-caret-position="0">
           <caret line="9" column="6" selection-start-line="9" selection-start-column="6" selection-end-line="9" selection-end-column="6" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/.idea/workspace.xml">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="0">
+          <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
           <folding />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/src/main/java/com/actio/DataSetTableScala.scala">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="2059">
+        <state relative-caret-position="0">
           <caret line="132" column="7" selection-start-line="132" selection-start-column="7" selection-end-line="132" selection-end-column="7" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/.idea/sbt.xml">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="0">
+          <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/com/actio/dpsystem/DPFnNode.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="0">
+          <caret line="80" column="0" selection-start-line="80" selection-start-column="0" selection-end-line="80" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/com/actio/QueryParser.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="0">
+          <caret line="20" column="22" selection-start-line="20" selection-start-column="22" selection-end-line="20" selection-end-column="22" />
           <folding />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/.gitignore">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="17">
-          <caret line="1" column="0" selection-start-line="1" selection-start-column="0" selection-end-line="1" selection-end-column="0" />
+        <state relative-caret-position="357">
+          <caret line="21" column="0" selection-start-line="21" selection-start-column="0" selection-end-line="21" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/resources/dsl_unittest_001.json">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="34">
+          <caret line="2" column="17" selection-start-line="2" selection-start-column="17" selection-end-line="2" selection-end-column="17" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/com/actio/StaticUtilityFunctions.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="222">
+          <caret line="219" column="91" selection-start-line="219" selection-start-column="91" selection-end-line="219" selection-end-column="91" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/com/actio/TransformFunction.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-131">
+          <caret line="16" column="13" selection-start-line="16" selection-start-column="13" selection-end-line="16" selection-end-column="13" />
           <folding />
         </state>
       </provider>

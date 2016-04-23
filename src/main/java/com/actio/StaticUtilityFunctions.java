@@ -227,25 +227,26 @@ public class StaticUtilityFunctions extends DPSystemConfigurable {
     public static List<String> setValueByRegexpForColumns(String regexpRaw, TransformFunction fn){
 
         // REFACTOR: should move these to instance variables so they don't get recreated on every single loop
-        List<Integer> rows = config.getIntList("setValueByRegexp_Columns");
-        String replaceRegExp = config.getString("setValueByRegexp_Regexp");
-        String replaceValue = config.getString("setValueByRegexp_Value");
+        //List<Integer> rows = config.getIntList("setValueByRegexp_Columns");
+        //String replaceRegExp = config.getString("setValueByRegexp_Regexp");
+        //String replaceValue = config.getString("setValueByRegexp_Value");
 
-        try {
+        //try {
 
-            for (int idx : rows) {
-                idx = idx - 1; // adjust for array starting at 0
-                String sashVetName = row.get(idx);
+        //    for (int idx : rows) {
+        //        idx = idx - 1; // adjust for array starting at 0
+        //        String sashVetName = rows.get(idx);
 
-                if (sashVetName != null) {
-                    sashVetName = sashVetName.replaceFirst(replaceRegExp, replaceValue).trim();
-                    row.set(idx, sashVetName);
-                }
-            }
-        } catch (Exception e) {
-            logger.info("TaskTransform::setValueByRegexpForColumns::"+e);
-        }
-        return row;
+        //        if (sashVetName != null) {
+        //            sashVetName = sashVetName.replaceFirst(replaceRegExp, replaceValue).trim();
+        //            rows.set(idx, sashVetName);
+        //        }
+        //    }
+        //} catch (Exception e) {
+        //    logger.info("TaskTransform::setValueByRegexpForColumns::"+e);
+        //}
+        //return rows;
+        return null;
     }
 
 

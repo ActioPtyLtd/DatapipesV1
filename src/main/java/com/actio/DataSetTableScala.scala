@@ -101,7 +101,7 @@ trait TableScala {
 
   def transformConcat(columnName: String, selectorFunc: String => Boolean, delim: String = "") = transformWithRowFunction(columnName, r => getOrdinalsWithPredicate(selectorFunc).map(c => r(c)).mkString(delim) )
 
-  def transformDiffNew(t2: TableScala, keySelectorFunc: String => Boolean) =  new DataSetTableScala(header, rows.filter(r => t2.rows.map(r2 => getOrdinalsWithPredicate(keySelectorFunc).map(c => r2(c))).contains(getOrdinalsWithPredicate(keySelectorFunc).map(r(_)))))
+  def transformDiffNew(t2: TableScala, keySelectorFunc: String => Boolean) =  new DataSetTableScala(header, rows.filter(r => !t2.rows.map(r2 => getOrdinalsWithPredicate(keySelectorFunc).map(c => r2(c))).contains(getOrdinalsWithPredicate(keySelectorFunc).map(r(_)))))
 
   def transformLookup(t2: TableScala, condition: (List[String],List[String]) => Boolean, lookupSelectorFunc: String => Boolean) = new DataSetTableScala(header ::: t2.header.filter(lookupSelectorFunc),
     rows.map(r1 => r1 :::
@@ -133,6 +133,9 @@ object DataSetTableScala {
   import scala.collection.JavaConverters._
 
   implicit def toDataSetTableScala(dataSet : DataSet): DataSetTableScala = new DataSetTableScala(dataSet.getColumnHeader.asScala.toList, dataSet.getAsListOfColumns.asScala.map(_.asScala.toList).toList)
+
+  // revisit this with two headers
+  def diffRow(header1: List[String], row1: List[String], header2: List[String], row2: List[String]) = ((row1 zip row2) zip header1).filter(f => f._1._1 != f._1._2).map(p => (p._2, p._1._2))
 
 }
 

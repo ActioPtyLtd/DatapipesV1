@@ -52,6 +52,7 @@ class DataSetTableScala(var header: List[String], var rows: List[List[String]]) 
 
   def getAsListOfColumns: util.List[util.List[String]] = rows.map(_.asJava).asJava
 
+  override def toString = header.toString + "\n" + rows.toString + "\n"
 }
 
 trait TableScala {
@@ -64,6 +65,17 @@ trait TableScala {
   def getOrdinalsWithPredicate(predicate: String => Boolean) = header.zipWithIndex.filter(c => predicate(c._1)).map(_._2)
 
   def getColumnValues(columnName: String) = rows.map(r => getValue(r, columnName))
+
+  def getNextAvailableColumnName(columnName: String, n: Int) = {
+    val pair = (columnName :: header).map(c => (c.replaceAll("\\d*$", ""), c.reverse.takeWhile(Character.isDigit) match {
+      case "" => 1
+      case m => m.reverse.toInt + 1
+    }))
+      .filter(_._1 == columnName.replaceAll("\\d*$", "")).maxBy(_._2)
+    pair._2 to (pair._2 + n) map (pair._1 + _) toList
+  }
+  def getNextAvailableColumnName(columnName: String): String = getNextAvailableColumnName(columnName, 1).head
+
 
   def getNumberOfColumns = header.length
 
@@ -78,7 +90,6 @@ trait TableScala {
 
   def transformWithRowFunction(selectorFunc : String => Boolean, columnRenameFunc: String => String, valueFunc : String => String) =  new DataSetTableScala(header ::: header.filter(selectorFunc).map(columnRenameFunc), rows.map(r => r ::: getOrdinalsWithPredicate(selectorFunc).map(o => valueFunc(r(o)))))
 
-  //note i found a bug in the regex for csv..trailing ,,, don't get picked up. bloody stackoverflow
   def transformToColumnsWithDelimiter(delim: String = ",") =  new DataSetTableScala(header.head.split(delim).toList, rows.map(_.head.split(",(?=([^\\\"]*\\\"[^\\\"]*\\\")*[^\\\"]*$)", -1).map(_.replaceAll("^\"|\"$", "")).toList))
 
   def transformToRowsWithDelimiter(delim: String = ";") =  new DataSetTableScala(header, rows.head.head.split(delim).map(List(_)).toList)
@@ -101,13 +112,29 @@ trait TableScala {
 
   def transformConcat(columnName: String, selectorFunc: String => Boolean, delim: String = "") = transformWithRowFunction(columnName, r => getOrdinalsWithPredicate(selectorFunc).map(c => r(c)).mkString(delim) )
 
-  def transformDiffNew(t2: TableScala, keySelectorFunc: String => Boolean) =  new DataSetTableScala(header, rows.filter(r => !t2.rows.map(r2 => getOrdinalsWithPredicate(keySelectorFunc).map(c => r2(c))).contains(getOrdinalsWithPredicate(keySelectorFunc).map(r(_)))))
+  def transformDiffNew(t2: TableScala, keySelectorFunc: String => Boolean) =  new DataSetTableScala(header, rows.filter(r => !t2.rows.map(r2 => t2.getOrdinalsWithPredicate(keySelectorFunc).map(c => r2(c))).contains(getOrdinalsWithPredicate(keySelectorFunc).map(r(_)))))
 
   def transformLookup(t2: TableScala, condition: (List[String],List[String]) => Boolean, lookupSelectorFunc: String => Boolean) = new DataSetTableScala(header ::: t2.header.filter(lookupSelectorFunc),
     rows.map(r1 => r1 :::
       t2.rows.find(condition(r1,_)).getOrElse(t2.getEmptyRow).zipWithIndex.filter(f => t2.getOrdinalsWithPredicate(lookupSelectorFunc).contains(f._2)).map(_._1)))
 
   def transformAll(transforms: List[TableScala => TableScala]) = transforms.foldLeft(this)((a,b) => b(a))
+
+  def transformRearrangeTo(t2: TableScala) = rows.map(r => (t2.header.map(c => getOrdinalOfColumn(c)).toList ::: (header.toSet -- t2.header.toSet).map(c2 => getOrdinalOfColumn(c2)).toList ).map(r(_)))
+
+  // not a table right now
+  def transformDiff(t2: TableScala, condition: (List[String],List[String]) => Boolean) =
+    rows map(r1 => (r1,t2.rows.find(condition(r1,_)))) filter(_._2.isDefined) map(m => header zip m._1 zip m._2.get filterNot(f => f._1._2 == f._2) map(_._1))
+
+  def transformSplitToRows(columnName: String, regex: String) = new DataSetTableScala(getNextAvailableColumnName(columnName) :: header, rows.flatMap(r => r(getOrdinalOfColumn(columnName)).split(regex).map(s => s :: r )))
+
+  def transformMatchToColumns(columnName: String, regexes: List[String]) = new DataSetTableScala(getNextAvailableColumnName(columnName, regexes.length) ::: header, rows.map(r => {
+    val matches = regexes.map(m => m.r.findFirstMatchIn(r(getOrdinalOfColumn(columnName))).isDefined)
+    if(matches.contains(true))
+      List.fill(matches.indexOf(true))("") ::: (r(getOrdinalOfColumn(columnName)) :: List.fill(matches.length - matches.indexOf(true) - 1)("")) ::: r
+    else
+      List.fill(matches.length)("") ::: r
+  }))
 
 }
 
@@ -134,13 +161,10 @@ object DataSetTableScala {
 
   implicit def toDataSetTableScala(dataSet : DataSet): DataSetTableScala = new DataSetTableScala(dataSet.getColumnHeader.asScala.toList, dataSet.getAsListOfColumns.asScala.map(_.asScala.toList).toList)
 
-  // revisit this with two headers
-  def diffRow(header1: List[String], row1: List[String], header2: List[String], row2: List[String]) = ((row1 zip row2) zip header1).filter(f => f._1._1 != f._1._2).map(p => (p._2, p._1._2))
-
 }
 
 object ScalaTest extends App {
-  val t1 = DataSetTableScala("A,B,C;1,2,3;4,5,6").transformToRowsWithDelimiter().transformFirstRowAsHeader.transformToColumnsWithDelimiter().transformAddConstant("D", "9")
+  val t1 = DataSetTableScala("A,B,C;1,2,3;4,5,6").transformToRowsWithDelimiter().transformFirstRowAsHeader.transformToColumnsWithDelimiter() //.transformAddConstant("D", "9")
   println(t1)
 
   val t2 = DataSetTableScala("B;5;2;2;1").transformToRowsWithDelimiter().transformFirstRowAsHeader.transformToColumnsWithDelimiter()
@@ -151,4 +175,13 @@ object ScalaTest extends App {
 
   val t4 = t3.transformDrop(c => c == "B")
   println(t4)
+
+
+  val t5 = DataSetTableScala("A,B,C;1,9,3;4,5,9").transformToRowsWithDelimiter().transformFirstRowAsHeader.transformToColumnsWithDelimiter()
+  //val t6 = t5.transformDiff(t1, (r2,r1) => t5.getValue(r2,"A") == t1.getValue(r1, "A"))
+
+  //println(t6)
+
+  val t7 = DataSetTableScala("A;19/4/84;2016-04-25").transformToRowsWithDelimiter().transformFirstRowAsHeader.transformToColumnsWithDelimiter()
+  println(t7.transformMatchToColumns("A", List("/","-")))
 }

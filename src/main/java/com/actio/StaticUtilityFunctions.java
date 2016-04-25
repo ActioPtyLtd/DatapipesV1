@@ -102,7 +102,7 @@ public class StaticUtilityFunctions extends DPSystemConfigurable {
                 newSource = formatForPhone(source, fn);
                 break;
             case "setValueByRegexpForColumns" :
-                //newSource = setValueByRegexpForColumns(source, fn);
+                newSource = setValueByRegexpForColumns(source, fn);
                 break;
             case "setDateFormat" :
 
@@ -224,8 +224,8 @@ public class StaticUtilityFunctions extends DPSystemConfigurable {
 
     // =====================================================================
 
-    public static List<String> setValueByRegexpForColumns(String regexpRaw, TransformFunction fn){
-
+    public static List<String> setValueByRegexpForColumns(String row, TransformFunction fn){
+/*
         // REFACTOR: should move these to instance variables so they don't get recreated on every single loop
         List<Integer> rows = config.getIntList("setValueByRegexp_Columns");
         String replaceRegExp = config.getString("setValueByRegexp_Regexp");
@@ -246,6 +246,9 @@ public class StaticUtilityFunctions extends DPSystemConfigurable {
             logger.info("TaskTransform::setValueByRegexpForColumns::"+e);
         }
         return row;
+        */
+
+        return null;
     }
 
 
@@ -257,8 +260,6 @@ public class StaticUtilityFunctions extends DPSystemConfigurable {
         String inFormat = config.getString("SetDateFormat_InputFormat");
         String outFormat = config.getString("SetDateFormat_OutputFormat");
 
-
-
         try {
             for (int idx : rows) {
 
@@ -268,7 +269,6 @@ public class StaticUtilityFunctions extends DPSystemConfigurable {
                 if (value != null) {
                     SimpleDateFormat inSdf = new SimpleDateFormat(inFormat);
                     SimpleDateFormat sdf = new SimpleDateFormat(outFormat);
-
 
                         Date date = inSdf.parse(value);
 

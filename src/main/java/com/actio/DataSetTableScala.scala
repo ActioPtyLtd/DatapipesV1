@@ -1,6 +1,8 @@
 package com.actio
 
 import java.sql.ResultSet
+import java.time.{LocalDate, LocalDateTime}
+import java.time.format.DateTimeFormatter
 import java.util
 
 //import com.actio.DataSet
@@ -71,7 +73,7 @@ trait TableScala {
       case "" => 1
       case m => m.reverse.toInt + 1
     })) filter(_._1 == columnName.replaceAll("\\d*$", "")) maxBy(_._2)
-    (pair._2 to (pair._2 + n)).map(pair._1 + _).toList
+    (pair._2 to (pair._2 + n - 1)).map(pair._1 + _).toList
   }
   def getNextAvailableColumnName(columnName: String): String = getNextAvailableColumnName(columnName, 1).head
 
@@ -86,30 +88,51 @@ trait TableScala {
   def transformFirstRowAsHeader = DataSetTableScala(rows.head map(_.toString), rows.tail)
 
   def transformWithRowFunction(columnName: String, rowFunc: List[String] => String) = DataSetTableScala(columnName :: header, rows map(r => rowFunc(r) :: r))
+  def transformRowsOnColumn(columnName: String, valFunc: String => String, default: String) = transformWithRowFunction(getNextAvailableColumnName(columnName), v => try { valFunc(getValue(v, columnName)) } catch { case _: Exception => default })
+  def transformRowsDateConvert(columnName: String, in: String, out: String, default: String) = transformRowsOnColumn(columnName, p => LocalDate.parse(p, DateTimeFormatter.ofPattern(in)).format(DateTimeFormatter.ofPattern(out)), default)
+
+
 
   def transformWithRowFunction(selectorFunc : String => Boolean, columnRenameFunc: String => String, valueFunc : String => String) =  DataSetTableScala(header ::: (header filter selectorFunc map columnRenameFunc), rows map(r => r ::: getOrdinalsWithPredicate(selectorFunc).map(o => valueFunc(r(o)))))
 
-  def transformToColumnsWithDelimiter(delim: String = ",") =  DataSetTableScala(header.head.split(delim).toList, rows map(_.head.split(",(?=([^\\\"]*\\\"[^\\\"]*\\\")*[^\\\"]*$)", -1).toList map(_.replaceAll("^\"|\"$", ""))))
 
-  def transformToRowsWithDelimiter(delim: String = ";") =  DataSetTableScala(header, rows.head.head.split(delim).map(List(_)).toList)
+  def transformSplitToColumns(columnName: String, delim: String = ",") = {
+    def csvSplit = delim + "(?=([^\\\"]*\\\"[^\\\"]*\\\")*[^\\\"]*$)"
+    val numberOfNewCols = getColumnValues(columnName).map(_.split(csvSplit, -1).length).max
 
-  def transformCombineColumnsWithOtherTable(t2: TableScala, pos: Int) = DataSetTableScala(header.take(pos) ::: t2.header ::: header.drop(pos), (rows zip t2.rows) map(r => r._1.take(pos) ::: r._2 ::: r._1.drop(pos)))
+    DataSetTableScala(getNextAvailableColumnName(columnName, numberOfNewCols) ::: header, rows.map(r => getValue(r, columnName).split(csvSplit, -1).padTo(numberOfNewCols, "").toList ::: r)) /// map(_.replaceAll("^\"|\"$", ""))))
+  }
+  def transformSplitToColumns(f: TransformFunction): DataSet = transformSplitToColumns(f.getParameters.head, f.getParameters.tail.headOption.getOrElse(","))
+
+
+  def transformSplitToRows(delim: String = ";") =  DataSetTableScala(header, rows.head.head.split(delim).map(List(_)).toList)
+  def transformSplitToRows(f: TransformFunction): DataSet = transformSplitToRows(f.getParameters.head)
+
+  def transformCombineColumnsWithOtherTable(t2: TableScala) = DataSetTableScala(t2.header ::: header, (rows zip t2.rows) map(r => r._2 ::: r._1))
 
   def transformUnion(t2: TableScala) = DataSetTableScala(header, rows ::: t2.rows)
 
   def transformSelect(selectorFunc: String => Boolean) = DataSetTableScala(header filter selectorFunc, rows.map(r => getOrdinalsWithPredicate(selectorFunc) map(r(_))))
+  def transformSelect(f: TransformFunction): DataSet = transformSelect(c => f.getParameters.contains(c))
+  def transformSelectRegex(f: TransformFunction): DataSet = transformSelect(c => f.getParameters.head.matches(c))
 
-  def transformSelect(columnOrdinals: List[Int]) = DataSetTableScala(columnOrdinals map (header(_)), rows map(r => columnOrdinals map(r(_))))
+  def transformSelectByOrdinal(columnOrdinals: List[Int]) = DataSetTableScala(columnOrdinals map (header(_)), rows map(r => columnOrdinals map(r(_))))
+  def transformSelectByOrdinal(f: TransformFunction): DataSet = transformSelectByOrdinal(f.getParameters.map(_.toInt).toList)
 
   def transformFilter(filter: List[String] => Boolean) = DataSetTableScala(header, rows filter filter)
 
   def transformRename(selectorFunc: String => Boolean, renameFunc: String => String) = DataSetTableScala(header map(c => if(selectorFunc(c)) renameFunc(c) else c), rows)
+  def transformRename(f: TransformFunction): DataSet = transformRename(c => f.getParameters.zipWithIndex.filter(_._2 % 2 == 0).contains(c), c => f.getParameters.drop(f.getParameters.indexOf(c)).head )
 
   def transformAddConstant(value: String) = transformWithRowFunction(getNextAvailableColumnName("const"), _ => value)
+  def transformAddConstant(f: TransformFunction): DataSet = transformAddConstant(f.getParameters.head)
 
   def transformDrop(selectorFunc: String => Boolean) = transformSelect(!selectorFunc(_))
+  def transformDrop(f: TransformFunction): DataSet = transformDrop(c => f.getParameters.head.matches(c))
 
   def transformConcat(selectorFunc: String => Boolean, delim: String = "") = transformWithRowFunction(getNextAvailableColumnName("concat"), r => getOrdinalsWithPredicate(selectorFunc) map(r(_)) mkString delim)
+  def transformConcat(cols: List[String], delim: String): TableScala = transformConcat(c => cols.contains(c), delim)
+  def transformConcat(f: TransformFunction): DataSet = transformConcat(c => f.getParameters.head.matches(c), f.getParameters.tail.headOption.getOrElse(""))
 
   def transformDiffNew(t2: TableScala, keySelectorFunc: String => Boolean) = DataSetTableScala(header, rows.filter(r => !t2.rows.map(r2 => t2.getOrdinalsWithPredicate(keySelectorFunc).map(c => r2(c))).contains(getOrdinalsWithPredicate(keySelectorFunc).map(r(_)))))
 
@@ -123,7 +146,8 @@ trait TableScala {
   // not a table right now
   def transformDiff(t2: TableScala, condition: (List[String],List[String]) => Boolean) = rows map(r1 => (r1,t2.rows.find(condition(r1,_)))) filter(_._2.isDefined) map(m => header zip m._1 zip m._2.get filterNot(f => f._1._2 == f._2) map(_._1))
 
-  def transformSplitToRows(columnName: String, regex: String) = DataSetTableScala(getNextAvailableColumnName(columnName) :: header, rows flatMap(r => r(getOrdinalOfColumn(columnName)) split regex map (_ :: r )))
+  def transformSplitColToRows(columnName: String, regex: String) = DataSetTableScala(getNextAvailableColumnName(columnName) :: header, rows flatMap(r => r(getOrdinalOfColumn(columnName)) split regex map (_ :: r )))
+  def transformSplitColToRows(f: TransformFunction): DataSet = transformSplitColToRows(f.getParameters.head, f.getParameters.tail.head)
 
   def transformMatchToColumns(columnName: String, regexes: List[String]) = DataSetTableScala(getNextAvailableColumnName(columnName, regexes.length) ::: header, rows.map(r => {
     val matches = regexes map(_.r.findFirstMatchIn(r(getOrdinalOfColumn(columnName))).isDefined)
@@ -133,6 +157,7 @@ trait TableScala {
     else
       List.fill(matches.length)("") ::: r
   }))
+  def transformMatchToColumns(f: TransformFunction): DataSet = transformMatchToColumns(f.getParameters.head, f.getParameters.tail.toList)
 
 }
 
@@ -164,10 +189,10 @@ object DataSetTableScala {
 }
 
 object ScalaTest extends App {
-  val t1 = DataSetTableScala("A,B,C;1,2,3;4,5,6").transformToRowsWithDelimiter().transformFirstRowAsHeader.transformToColumnsWithDelimiter() //.transformAddConstant("D", "9")
+  val t1 = DataSetTableScala("A,B,C;1,2,3;4,5,6").transformSplitToRows().transformSplitToColumns("col1").transformFirstRowAsHeader //.transformAddConstant("D", "9")
   println(t1)
 
-  val t2 = DataSetTableScala("B;5;2;2;1").transformToRowsWithDelimiter().transformFirstRowAsHeader.transformToColumnsWithDelimiter()
+  val t2 = DataSetTableScala("B;5;2;2;1").transformSplitToRows().transformFirstRowAsHeader
   println(t2)
 
   val t3 = t2.transformLookup(t1, (r2,r1) => t2.getValue(r2, "B") == t1.getValue(r1, "B"), c => c == "C")
@@ -177,11 +202,11 @@ object ScalaTest extends App {
   println(t4)
 
 
-  val t5 = DataSetTableScala("A,B,C;1,9,3;4,5,9").transformToRowsWithDelimiter().transformFirstRowAsHeader.transformToColumnsWithDelimiter()
+  val t5 = DataSetTableScala("A,B,C;1,9,3;4,5,9").transformSplitToRows().transformSplitToColumns("col1").transformFirstRowAsHeader
   //val t6 = t5.transformDiff(t1, (r2,r1) => t5.getValue(r2,"A") == t1.getValue(r1, "A"))
 
   //println(t6)
 
-  val t7 = DataSetTableScala("A;19/4/84;2016-04-25").transformToRowsWithDelimiter().transformFirstRowAsHeader.transformToColumnsWithDelimiter()
-  println(t7.transformMatchToColumns("A", List("/","-")))
+  val t7 = DataSetTableScala("A;19/04/1984;2016-04-25").transformSplitToRows().transformFirstRowAsHeader.transformMatchToColumns("A", List("/","-"))
+  println(t7.transformRowsDateConvert("A1", "dd/MM/yyyy", "yyyy-MM-dd", "").transformConcat(List("A3","A2"), ""))
 }

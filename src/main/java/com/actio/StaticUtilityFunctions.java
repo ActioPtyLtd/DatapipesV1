@@ -136,12 +136,38 @@ public class StaticUtilityFunctions extends DPSystemConfigurable {
             case "GroupBy" :
 
                 break;
-            case "firstrowasheader" :
+            case "header" :
                 newset = DataSetTableScala.toDataSetTableScala(set).transformFirstRowAsHeader();
                 break;
-            case "csv" :
-                newset = DataSetTableScala.toDataSetTableScala(set).transformToColumnsWithDelimiter(",");
-
+            case "spli2cols" :
+                newset = DataSetTableScala.toDataSetTableScala(set).transformSplitToColumns(fn);
+                break;
+            case "split2rows":
+                newset = DataSetTableScala.toDataSetTableScala(set).transformSplitToRows(fn);
+                break;
+            case "select":
+                newset = DataSetTableScala.toDataSetTableScala(set).transformSelect(fn);
+                break;
+            case "selectregex":
+                newset = DataSetTableScala.toDataSetTableScala(set).transformSelectRegex(fn);
+                break;
+            case "constant":
+                newset = DataSetTableScala.toDataSetTableScala(set).transformAddConstant(fn);
+                break;
+            case "rename":
+                newset = DataSetTableScala.toDataSetTableScala(set).transformRename(fn);
+                break;
+            case "concat":
+                newset = DataSetTableScala.toDataSetTableScala(set).transformConcat(fn);
+                break;
+            case "drop":
+                newset = DataSetTableScala.toDataSetTableScala(set).transformDrop(fn);
+                break;
+            case "match2cols":
+                newset = DataSetTableScala.toDataSetTableScala(set).transformMatchToColumns(fn);
+                break;
+            case "splitcol2rows":
+                newset = DataSetTableScala.toDataSetTableScala(set).transformSplitColToRows(fn);
                 break;
             default :
                 logger.info("Unknown Function in StaticUtilityFunctions::"+fn.getName());

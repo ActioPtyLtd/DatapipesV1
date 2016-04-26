@@ -224,9 +224,10 @@ public class StaticUtilityFunctions extends DPSystemConfigurable {
 
     // =====================================================================
 
-    public static List<String> setValueByRegexpForColumns(String regexpRaw, TransformFunction fn){
-
+    public static List<String> setValueByRegexpForColumns(String row, TransformFunction fn){
+/*
         // REFACTOR: should move these to instance variables so they don't get recreated on every single loop
+<<<<<<< HEAD
         //List<Integer> rows = config.getIntList("setValueByRegexp_Columns");
         //String replaceRegExp = config.getString("setValueByRegexp_Regexp");
         //String replaceValue = config.getString("setValueByRegexp_Value");
@@ -246,6 +247,29 @@ public class StaticUtilityFunctions extends DPSystemConfigurable {
         //    logger.info("TaskTransform::setValueByRegexpForColumns::"+e);
         //}
         //return rows;
+=======
+        List<Integer> rows = config.getIntList("setValueByRegexp_Columns");
+        String replaceRegExp = config.getString("setValueByRegexp_Regexp");
+        String replaceValue = config.getString("setValueByRegexp_Value");
+
+        try {
+
+            for (int idx : rows) {
+                idx = idx - 1; // adjust for array starting at 0
+                String sashVetName = row.get(idx);
+
+                if (sashVetName != null) {
+                    sashVetName = sashVetName.replaceFirst(replaceRegExp, replaceValue).trim();
+                    row.set(idx, sashVetName);
+                }
+            }
+        } catch (Exception e) {
+            logger.info("TaskTransform::setValueByRegexpForColumns::"+e);
+        }
+        return row;
+
+
+>>>>>>> 142ce3a10e7d9e97c95bab4fabee6945c2badaec */
         return null;
     }
 
@@ -258,8 +282,6 @@ public class StaticUtilityFunctions extends DPSystemConfigurable {
         String inFormat = config.getString("SetDateFormat_InputFormat");
         String outFormat = config.getString("SetDateFormat_OutputFormat");
 
-
-
         try {
             for (int idx : rows) {
 
@@ -269,7 +291,6 @@ public class StaticUtilityFunctions extends DPSystemConfigurable {
                 if (value != null) {
                     SimpleDateFormat inSdf = new SimpleDateFormat(inFormat);
                     SimpleDateFormat sdf = new SimpleDateFormat(outFormat);
-
 
                         Date date = inSdf.parse(value);
 

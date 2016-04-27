@@ -7,9 +7,7 @@ import java.util
 /**
   * Created by mauri on 14/04/2016.
   */
-class DataSetHierarchical(val reader: InputStream) extends DataSet {
-  var header: String = null
-  var iterable: Iterator[Seq[String]] = null
+class DataSetHierarchical(val dSObject: DSObject) extends DataSet with TableScala {
 
   def size(): Int = 0
 
@@ -19,16 +17,7 @@ class DataSetHierarchical(val reader: InputStream) extends DataSet {
 
   def set(_results: util.List[String]): Unit = ???
 
-  def getNextBatch: DataSet = {
-    val lines = iterable.next().toList
-
-    if (header == null) {
-      header = lines.head
-      new DataSetTableScala(lines)
-    }
-    else
-      new DataSetTableScala(header :: lines)
-  }
+  def getNextBatch: DataSet = ???
 
   def getColumnHeader: util.List[String] = ???
 
@@ -38,7 +27,7 @@ class DataSetHierarchical(val reader: InputStream) extends DataSet {
 
   def getColumnHeaderStr: String = ???
 
-  def isNextBatch = iterable.hasNext
+  def isNextBatch = ???
 
   def GetRow(): Array[String] = ???
 
@@ -52,9 +41,36 @@ class DataSetHierarchical(val reader: InputStream) extends DataSet {
 
   def FromRowGetField(rowIndex: Int, label: Int): String = ???
 
-  def initBatch() = {
-    iterable = scala.io.Source.fromInputStream(reader, "windows-1252").getLines().grouped(100).toIterator
-  }
+  def initBatch() = ???
 
   def getAsListOfColumns: util.List[util.List[String]] = ???
+
+
+  override def header: List[String] = dSObject.fields.head.value match {
+    case a: DSArray => a.arr.flatMap(f => f match {
+      case v: DSObject => v.fields.map(_.name)
+      case _ => Nil
+    }).distinct
+    case _ => Nil
+  }
+
+  override def rows: List[List[String]] = dSObject.fields.head.value match {
+    case rs: DSArray => rs.arr.map(r => r match {
+      case kv: DSObject => header.map(h => kv.fields.find(f => f.name == h).getOrElse(DSNothing) match {
+        case v: DSStringValue => v.value
+        case _ => null
+      })
+      case _ => Nil
+    })
+    case _ => Nil
+  }
 }
+
+
+case class DSField(name: String, value: DSValue)
+case class DSObject(fields: List[DSField]) extends DSValue
+sealed abstract class DSValue
+case class DSStringValue(value: String) extends DSValue
+case class DSArray(arr: List[DSValue]) extends DSValue
+case object DSNothing extends DSValue
+case object DSNull extends DSValue

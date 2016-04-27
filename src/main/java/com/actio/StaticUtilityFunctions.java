@@ -102,7 +102,7 @@ public class StaticUtilityFunctions extends DPSystemConfigurable {
                 newSource = formatForPhone(source, fn);
                 break;
             case "setValueByRegexpForColumns" :
-                newSource = setValueByRegexpForColumns(source, fn);
+                //newSource = setValueByRegexpForColumns(source, fn);
                 break;
             case "setDateFormat" :
 
@@ -136,12 +136,41 @@ public class StaticUtilityFunctions extends DPSystemConfigurable {
             case "GroupBy" :
 
                 break;
-            case "firstrowasheader" :
+            case "header" :
                 newset = DataSetTableScala.toDataSetTableScala(set).transformFirstRowAsHeader();
                 break;
-            case "csv" :
-                newset = DataSetTableScala.toDataSetTableScala(set).transformToColumnsWithDelimiter(",");
-
+            case "addheader":
+                newset = DataSetTableScala.toDataSetTableScala(set).transformAddHeader(fn);
+                break;
+            case "split2cols" :
+                newset = DataSetTableScala.toDataSetTableScala(set).transformSplitToColumns(fn);
+                break;
+            case "split2rows":
+                newset = DataSetTableScala.toDataSetTableScala(set).transformSplitToRows(fn);
+                break;
+            case "keep":
+                newset = DataSetTableScala.toDataSetTableScala(set).transformSelect(fn);
+                break;
+            case "keepregex":
+                newset = DataSetTableScala.toDataSetTableScala(set).transformSelectRegex(fn);
+                break;
+            case "constant":
+                newset = DataSetTableScala.toDataSetTableScala(set).transformAddConstant(fn);
+                break;
+            case "rename":
+                newset = DataSetTableScala.toDataSetTableScala(set).transformRename(fn);
+                break;
+            case "concat":
+                newset = DataSetTableScala.toDataSetTableScala(set).transformConcat(fn);
+                break;
+            case "drop":
+                newset = DataSetTableScala.toDataSetTableScala(set).transformDrop(fn);
+                break;
+            case "match2cols":
+                newset = DataSetTableScala.toDataSetTableScala(set).transformMatchToColumns(fn);
+                break;
+            case "splitcol2rows":
+                newset = DataSetTableScala.toDataSetTableScala(set).transformSplitColToRows(fn);
                 break;
             default :
                 logger.info("Unknown Function in StaticUtilityFunctions::"+fn.getName());
@@ -227,6 +256,27 @@ public class StaticUtilityFunctions extends DPSystemConfigurable {
     public static List<String> setValueByRegexpForColumns(String row, TransformFunction fn){
 /*
         // REFACTOR: should move these to instance variables so they don't get recreated on every single loop
+<<<<<<< HEAD
+        //List<Integer> rows = config.getIntList("setValueByRegexp_Columns");
+        //String replaceRegExp = config.getString("setValueByRegexp_Regexp");
+        //String replaceValue = config.getString("setValueByRegexp_Value");
+
+        //try {
+
+        //    for (int idx : rows) {
+        //        idx = idx - 1; // adjust for array starting at 0
+        //        String sashVetName = rows.get(idx);
+
+        //        if (sashVetName != null) {
+        //            sashVetName = sashVetName.replaceFirst(replaceRegExp, replaceValue).trim();
+        //            rows.set(idx, sashVetName);
+        //        }
+        //    }
+        //} catch (Exception e) {
+        //    logger.info("TaskTransform::setValueByRegexpForColumns::"+e);
+        //}
+        //return rows;
+=======
         List<Integer> rows = config.getIntList("setValueByRegexp_Columns");
         String replaceRegExp = config.getString("setValueByRegexp_Regexp");
         String replaceValue = config.getString("setValueByRegexp_Value");
@@ -246,8 +296,9 @@ public class StaticUtilityFunctions extends DPSystemConfigurable {
             logger.info("TaskTransform::setValueByRegexpForColumns::"+e);
         }
         return row;
-        */
 
+
+>>>>>>> 142ce3a10e7d9e97c95bab4fabee6945c2badaec */
         return null;
     }
 

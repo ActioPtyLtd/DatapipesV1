@@ -8,7 +8,7 @@ import java.util
   * Created by mauri on 14/04/2016.
   */
 class DataSetFileReader(val reader: InputStream) extends DataSet {
-  var header: String = null
+  var lineheader: String = null
   var iterable: Iterator[Seq[String]] = null
 
   def size(): Int = 0
@@ -22,12 +22,12 @@ class DataSetFileReader(val reader: InputStream) extends DataSet {
   def getNextBatch: DataSet = {
     val lines = iterable.next().toList
 
-    if(header == null) {
-      header = lines.head
+    if(lineheader == null) {
+      lineheader = lines.head
       new DataSetTableScala(lines)
     }
     else
-      new DataSetTableScala(header :: lines)
+      new DataSetTableScala(lineheader :: lines)
   }
 
   def getColumnHeader: util.List[String] = ???

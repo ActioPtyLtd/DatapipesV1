@@ -87,7 +87,7 @@ public class DataSetRS extends DataSetTabular {
     @Override
     public DataSet getNextBatch() throws Exception
     {
-        List<List<String>> batch = getAsListOfColumnsBatch(batchSize);
+        List<List<String>> batch = getAsListOfColumnsBatch(getBatchSize());
 
         DataSetTabular batchDS = new DataSetTabular();
         batchDS.setRsc(batch);
@@ -159,7 +159,7 @@ public class DataSetRS extends DataSetTabular {
 
         // FLATTEN THE COLUMNS
         for (List<String> columns : listSet){
-            outList.add(columnsToRow(columns,outputDelimiter));
+            outList.add(columnsToRow(columns,getOutputDelimiter()));
         }
 
         setRs(outList);
@@ -171,8 +171,8 @@ public class DataSetRS extends DataSetTabular {
     public List<String> getColumnHeader() throws Exception
     {
         // customHeader overrides
-        if (customHeader != null) {
-            List<String> columnHeader = Arrays.asList(customHeader.split(","));
+        if (getCustomHeader() != null) {
+            List<String> columnHeader = Arrays.asList(getCustomHeader().split(","));
             return columnHeader;
         }
         else {
@@ -190,7 +190,7 @@ public class DataSetRS extends DataSetTabular {
     @Override
     public String getColumnHeaderStr() throws Exception
     {
-        return columnsToRow(getColumnHeader(),outputDelimiter);
+        return columnsToRow(getColumnHeader(),getOutputDelimiter());
     }
 
 

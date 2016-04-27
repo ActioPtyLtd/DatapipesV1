@@ -10,7 +10,7 @@ import java.sql.*;
 import java.util.List;
 import java.util.LinkedList;
 
-public abstract class DataSet extends DPSystemConfigurable {
+public abstract class DataSetJava extends DPSystemConfigurable {
 
     public DataSetKey key = new DataSetKey();
     public void setKey(DataSetKey _key){

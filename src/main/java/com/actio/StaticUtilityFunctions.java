@@ -139,16 +139,19 @@ public class StaticUtilityFunctions extends DPSystemConfigurable {
             case "header" :
                 newset = DataSetTableScala.toDataSetTableScala(set).transformFirstRowAsHeader();
                 break;
-            case "spli2cols" :
+            case "addheader":
+                newset = DataSetTableScala.toDataSetTableScala(set).transformAddHeader(fn);
+                break;
+            case "split2cols" :
                 newset = DataSetTableScala.toDataSetTableScala(set).transformSplitToColumns(fn);
                 break;
             case "split2rows":
                 newset = DataSetTableScala.toDataSetTableScala(set).transformSplitToRows(fn);
                 break;
-            case "select":
+            case "keep":
                 newset = DataSetTableScala.toDataSetTableScala(set).transformSelect(fn);
                 break;
-            case "selectregex":
+            case "keepregex":
                 newset = DataSetTableScala.toDataSetTableScala(set).transformSelectRegex(fn);
                 break;
             case "constant":

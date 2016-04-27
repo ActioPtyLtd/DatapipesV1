@@ -231,7 +231,7 @@ public class DataSetTabular extends DataSet {
 
     @Override
     public String getColumnHeaderStr() throws Exception {
-        if (customHeader == null) {
+        if (getCustomHeader() == null) {
             // assume first line is header - piss poor assumption
             if (rs!= null)
                 return rs.get(1);
@@ -240,7 +240,7 @@ public class DataSetTabular extends DataSet {
 
         } else {
 
-            return customHeader;
+            return getCustomHeader();
         }
 
     }

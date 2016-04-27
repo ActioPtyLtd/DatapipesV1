@@ -87,8 +87,10 @@ public class DataSourceFile extends DataSource {
 
     @Override
     public void extract(DataSet dataSet) throws Exception {
-        directory = dataSet.FromRowGetField(1,"directory");
-        compiledFilename = dataSet.FromRowGetField(1,"filename");
+        if(dataSet.size()>0) {
+            directory = dataSet.FromRowGetField(1, "directory");
+            compiledFilename = dataSet.FromRowGetField(1, "filename");
+        }
         extract();
     }
 
@@ -271,7 +273,7 @@ public class DataSourceFile extends DataSource {
 
                 String filePrefix = fileTokens[0];
 
-                if (filePrefix.equals(prefixDiffFile) && isInteger(fileTokens[1], 10) == true) {
+                if (filePrefix.equals(prefixDiffFile) && isInteger(fileTokens[1], 10)) {
                     val = Integer.parseInt(fileTokens[1]);
                 }
             }

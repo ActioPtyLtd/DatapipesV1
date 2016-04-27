@@ -1,6 +1,9 @@
 package com.actio;
 
 import com.typesafe.config.Config;
+
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -76,8 +79,11 @@ public class TransformFunction {
         String[] params = QueryParser.paramsTokenize(getRaw());
         setParameters(params);
         // the first param should always be the name of the function, set Name of function
-        if (params.length >= 1)
+        if (params.length >= 1) {
             setName(params[0]);
+
+            setParameters(Arrays.copyOfRange(params, 1, params.length)); // remove the function name from parameters, yes yes array nonsense
+        }
     }
 
     private String[] parameters;

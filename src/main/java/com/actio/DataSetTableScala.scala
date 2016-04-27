@@ -7,7 +7,7 @@ import java.util
 
 //import com.actio.DataSet
 
-class DataSetTableScala(var header: List[String], var rows: List[List[String]]) extends DataSet with TableScala {
+class DataSetTableScala(var header1: List[String], var rows1: List[List[String]]) extends DataSet with TableScala {
   private var boolNext = false
 
   def this() = this(List(), List(List()))
@@ -15,7 +15,7 @@ class DataSetTableScala(var header: List[String], var rows: List[List[String]]) 
 
   import scala.collection.JavaConverters._
 
-  def size() = rows.length
+  def size() = rows1.length
 
   def dump() = {}
 
@@ -25,9 +25,9 @@ class DataSetTableScala(var header: List[String], var rows: List[List[String]]) 
 
   def getNextBatch: DataSet = this
 
-  def getColumnHeader: util.List[String] = header.asJava
+  def getColumnHeader: util.List[String] = header1.asJava
 
-  def getAsListOfColumnsBatch(batchLen: Int): util.List[util.List[String]] = rows.map(_.asJava).asJava
+  def getAsListOfColumnsBatch(batchLen: Int): util.List[util.List[String]] = rows1.map(_.asJava).asJava
 
   def getResultSet: ResultSet = ???
 
@@ -42,7 +42,7 @@ class DataSetTableScala(var header: List[String], var rows: List[List[String]]) 
 
   def getAsList: util.List[String] = ???
 
-  def setWithFields(_results: java.util.List[java.util.List[String]]) = { rows = _results.asScala.map(_.asScala.toList).toList}
+  def setWithFields(_results: java.util.List[java.util.List[String]]) = { rows1 = _results.asScala.map(_.asScala.toList).toList}
 
   def NextRow(): Boolean = false
 
@@ -52,9 +52,9 @@ class DataSetTableScala(var header: List[String], var rows: List[List[String]]) 
 
   def FromRowGetField(rowIndex: Int, label: Int): String = ???
 
-  def getAsListOfColumns: util.List[util.List[String]] = rows.map(_.asJava).asJava
+  def getAsListOfColumns: util.List[util.List[String]] = rows1.map(_.asJava).asJava
 
-  override def toString = (header mkString ", ") + "\n" + ("-" * (header.map(_.length + 2).sum - 2)) + "\n" + (rows map (_ mkString ", ") mkString "\n") + "\n\n" + rows.length + " rows.\n"
+  override def toString = (header1 mkString ", ") + "\n" + ("-" * (header1.map(_.length + 2).sum - 2)) + "\n" + (rows1 map (_ mkString ", ") mkString "\n") + "\n\n" + rows1.length + " rows.\n"
 }
 
 trait TableScala {
@@ -122,7 +122,8 @@ trait TableScala {
   def transformFilter(filter: List[String] => Boolean) = DataSetTableScala(header, rows filter filter)
 
   def transformRename(selectorFunc: String => Boolean, renameFunc: String => String) = DataSetTableScala(header map(c => if(selectorFunc(c)) renameFunc(c) else c), rows)
-  def transformRename(f: TransformFunction): DataSet = transformRename(c => f.getParameters.zipWithIndex.filter(_._2 % 2 == 0).contains(c), c => f.getParameters.drop(f.getParameters.indexOf(c)).head )
+  def transformRename(colPair: List[(String,String)]): DataSet = transformRename(c => colPair.map(_._1).contains(c), r => colPair.find(f => f._1 == r).get._2)
+  def transformRename(f: TransformFunction): DataSet = transformRename(f.getParameters.grouped(2).map(m => (m.head, m.tail.head)).toList)
 
   def transformAddConstant(value: String) = transformWithRowFunction(getNextAvailableColumnName("const"), _ => value)
   def transformAddConstant(f: TransformFunction): DataSet = transformAddConstant(f.getParameters.head)
@@ -159,6 +160,8 @@ trait TableScala {
   }))
   def transformMatchToColumns(f: TransformFunction): DataSet = transformMatchToColumns(f.getParameters.head, f.getParameters.tail.toList)
 
+  def transformAddHeader(cols: List[String]) = DataSetTableScala(cols, header :: rows)
+  def transformAddHeader(f: TransformFunction): DataSet = transformAddHeader(f.getParameters.toList)
 }
 
 
@@ -209,4 +212,6 @@ object ScalaTest extends App {
 
   val t7 = DataSetTableScala("A;19/04/1984;2016-04-25").transformSplitToRows().transformFirstRowAsHeader.transformMatchToColumns("A", List("/","-"))
   println(t7.transformRowsDateConvert("A1", "dd/MM/yyyy", "yyyy-MM-dd", "").transformConcat(List("A3","A2"), ""))
+
+  println(t5.transformRename(List(("B","D"))))
 }

@@ -56,20 +56,22 @@
       },
       "fileinput01": {
         "type": "extract",
-        "behavior": "regex",
-        "iterate" : "true",
+        "behavior": "simple",
         "dataSource": {
           "behavior": "regex",
           "directory": "C:\\Users\\mauri\\bitbucket\\gandm-data\\gmdata_CSV\\CSV",
           "type":"file",
-          "filenameTemplate": "(?<name>^VACC[^.]*).*",
-          "inputDelimiter": "\t"
+          "filenameTemplate": "VACCOUNT.CSV"
         }
       },
       "csv": {
         "type" : "transform",
-        "global" :  ["firstrowasheader", "csv"],
-        "row" : ["no-Op"]
+        "global" :  ["addheader,col1",
+                    "split2cols,col1",
+                    "header",
+                    "keep,accnum,accdate,status,sungamt,confee,clensamt,specamt,frameamt,miscamt",
+                    "rename,accnum,code,accdate,invoiceissued" ],
+        "row" : []
       },
       "webtask02": {
         "type": "load",
@@ -103,7 +105,7 @@
         "pipe": "postgres_extract-1 | postgres_load-1"
       },
       "p001" : {
-        "pipe" : "dirfiles | fileinput01 | csv | transform-lookup-001 | postgres_load-1"
+        "pipe" : "fileinput01 | csv"
       },
       "p003" : {
         "pipe" : " {p000} | {upload001} "

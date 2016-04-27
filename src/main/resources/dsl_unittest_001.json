@@ -47,7 +47,7 @@
           "3" : ["getOffsetDate,-5"],
           "11" : ["formatForPhone,au"]
         },
-        "global" :  ["removeDuplicates"],
+        "batch" :  ["removeDuplicates"],
         "row" : ["no-Op"]
       },
       "webtask02": {

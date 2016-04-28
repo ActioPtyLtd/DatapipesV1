@@ -7,7 +7,7 @@ import java.util
 /**
   * Created by mauri on 14/04/2016.
   */
-class DataSetHierarchical(val dSObject: DSObject) extends DataSet with TableScala {
+class DataSetHierarchical(val dSObject: DSObject) extends DataSet {
 
   def size(): Int = 0
 

@@ -4,6 +4,7 @@ import com.actio.dpsystem.DPSystemConfigurable;
 import com.typesafe.config.Config;
 import org.joda.time.LocalDate;
 
+
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -121,62 +122,9 @@ public class StaticUtilityFunctions extends DPSystemConfigurable {
     }
 
     private static DataSet execute(DataSet set, TransformFunction fn) throws Exception {
-
-        // iterate over the functions, processing the source
-        DataSet newset = set;
-
-        switch (fn.getName()) {
-
-            case "Sort" :
-
-                break;
-            case "RemoveDuplicate" :
-
-                break;
-            case "GroupBy" :
-
-                break;
-            case "header" :
-                newset = DataSetTableScala.toDataSetTableScala(set).transformFirstRowAsHeader();
-                break;
-            case "addheader":
-                newset = DataSetTableScala.toDataSetTableScala(set).transformAddHeader(fn);
-                break;
-            case "split2cols" :
-                newset = DataSetTableScala.toDataSetTableScala(set).transformSplitToColumns(fn);
-                break;
-            case "split2rows":
-                newset = DataSetTableScala.toDataSetTableScala(set).transformSplitToRows(fn);
-                break;
-            case "keep":
-                newset = DataSetTableScala.toDataSetTableScala(set).transformSelect(fn);
-                break;
-            case "keepregex":
-                newset = DataSetTableScala.toDataSetTableScala(set).transformSelectRegex(fn);
-                break;
-            case "constant":
-                newset = DataSetTableScala.toDataSetTableScala(set).transformAddConstant(fn);
-                break;
-            case "rename":
-                newset = DataSetTableScala.toDataSetTableScala(set).transformRename(fn);
-                break;
-            case "concat":
-                newset = DataSetTableScala.toDataSetTableScala(set).transformConcat(fn);
-                break;
-            case "drop":
-                newset = DataSetTableScala.toDataSetTableScala(set).transformDrop(fn);
-                break;
-            case "match2cols":
-                newset = DataSetTableScala.toDataSetTableScala(set).transformMatchToColumns(fn);
-                break;
-            case "splitcol2rows":
-                newset = DataSetTableScala.toDataSetTableScala(set).transformSplitColToRows(fn);
-                break;
-            default :
-                logger.info("Unknown Function in StaticUtilityFunctions::"+fn.getName());
-        }
-
-        return newset;
+        List<Object> ps = Arrays.asList(fn.getParameters()).stream().map(m -> (Object)m).collect(Collectors.toList());
+        ps.add(0, set);
+        return UtilityFunctions.execute(fn.getName(), ps);
     }
 
     private static List<String> execute(List<String> source, TransformFunction fn) throws Exception {
@@ -207,7 +155,7 @@ public class StaticUtilityFunctions extends DPSystemConfigurable {
             return col;
 
         if (col.matches("") || col == null)
-            return params[1];
+            return params[0];
         else
             return col;
     }

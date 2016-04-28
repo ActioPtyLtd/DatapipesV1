@@ -152,4 +152,27 @@ abstract class DataSet extends DPSystemConfigurable {
   def rows: List[List[String]] = getAsListOfColumns.asScala.map(_.asScala.toList).toList
   def header: List[String] = getColumnHeader.asScala.toList
 
+
+  def getOrdinalOfColumn(columnName: String) = header.indexWhere(_ == columnName)
+
+  def getOrdinalsWithPredicate(predicate: String => Boolean) = header.zipWithIndex filter(c => predicate(c._1)) map(_._2)
+
+  def getColumnValues(columnName: String) = rows map(r => getValue(r, columnName))
+
+  def getNextAvailableColumnName(columnName: String, n: Int) = {
+    val pair = (columnName :: header) map(c => (c.replaceAll("\\d*$", ""), c.reverse takeWhile Character.isDigit match {
+      case "" => 1
+      case m => m.reverse.toInt + 1
+    })) filter(_._1 == columnName.replaceAll("\\d*$", "")) maxBy(_._2)
+    (pair._2 to (pair._2 + n - 1)).map(pair._1 + _).toList
+  }
+  def getNextAvailableColumnName(columnName: String): String = getNextAvailableColumnName(columnName, 1).head
+
+
+  def getNumberOfColumns = header.length
+
+  def getEmptyRow = List.fill(getNumberOfColumns)(null)
+
+  def getValue(row: List[String], columnName: String) = row(getOrdinalOfColumn(columnName))
+
 }

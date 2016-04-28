@@ -7,11 +7,11 @@ import java.util
 
 //import com.actio.DataSet
 
-class DataSetTableScala(var header1: List[String], var rows1: List[List[String]]) extends DataSet with TableScala {
+class DataSetTableScala(var header1: List[String], var rows1: List[List[String]]) extends DataSet {
   private var boolNext = false
 
   def this() = this(List(), List(List()))
-  def this(rows: List[String]) = this(List("col1"), rows.map(List(_)))
+  def this(rows: List[String]) = this(List(rows.head), rows.tail.map(List(_)))
 
   import scala.collection.JavaConverters._
 
@@ -56,34 +56,11 @@ class DataSetTableScala(var header1: List[String], var rows1: List[List[String]]
 
   override def toString = (header1 mkString ", ") + "\n" + ("-" * (header1.map(_.length + 2).sum - 2)) + "\n" + (rows1 map (_ mkString ", ") mkString "\n") + "\n\n" + rows1.length + " rows.\n"
 }
-
+/*
 trait TableScala {
 
   def header: List[String]
   def rows: List[List[String]]
-
-  def getOrdinalOfColumn(columnName: String) = header.indexWhere(_ == columnName)
-
-  def getOrdinalsWithPredicate(predicate: String => Boolean) = header.zipWithIndex filter(c => predicate(c._1)) map(_._2)
-
-  def getColumnValues(columnName: String) = rows map(r => getValue(r, columnName))
-
-  def getNextAvailableColumnName(columnName: String, n: Int) = {
-    val pair = (columnName :: header) map(c => (c.replaceAll("\\d*$", ""), c.reverse takeWhile Character.isDigit match {
-      case "" => 1
-      case m => m.reverse.toInt + 1
-    })) filter(_._1 == columnName.replaceAll("\\d*$", "")) maxBy(_._2)
-    (pair._2 to (pair._2 + n - 1)).map(pair._1 + _).toList
-  }
-  def getNextAvailableColumnName(columnName: String): String = getNextAvailableColumnName(columnName, 1).head
-
-
-  def getNumberOfColumns = header.length
-
-  def getEmptyRow = List.fill(getNumberOfColumns)(null)
-
-  def getValue(row: List[String], columnName: String) = row(getOrdinalOfColumn(columnName))
-
 
   def transformFirstRowAsHeader = DataSetTableScala(rows.head map(_.toString), rows.tail)
 
@@ -95,14 +72,6 @@ trait TableScala {
 
   def transformWithRowFunction(selectorFunc : String => Boolean, columnRenameFunc: String => String, valueFunc : String => String) =  DataSetTableScala(header ::: (header filter selectorFunc map columnRenameFunc), rows map(r => r ::: getOrdinalsWithPredicate(selectorFunc).map(o => valueFunc(r(o)))))
 
-
-  def transformSplitToColumns(columnName: String, delim: String = ",") = {
-    def csvSplit = delim + "(?=([^\\\"]*\\\"[^\\\"]*\\\")*[^\\\"]*$)"
-    val numberOfNewCols = getColumnValues(columnName).map(_.split(csvSplit, -1).length).max
-
-    DataSetTableScala(getNextAvailableColumnName(columnName, numberOfNewCols) ::: header, rows.map(r => getValue(r, columnName).split(csvSplit, -1).padTo(numberOfNewCols, "").toList ::: r)) /// map(_.replaceAll("^\"|\"$", ""))))
-  }
-  def transformSplitToColumns(f: TransformFunction): DataSet = transformSplitToColumns(f.getParameters.head, f.getParameters.tail.headOption.getOrElse(","))
 
 
   def transformSplitToRows(delim: String = ";") =  DataSetTableScala(header, rows.head.head.split(delim).map(List(_)).toList)
@@ -147,9 +116,6 @@ trait TableScala {
   // not a table right now
   def transformDiff(t2: TableScala, condition: (List[String],List[String]) => Boolean) = rows map(r1 => (r1,t2.rows.find(condition(r1,_)))) filter(_._2.isDefined) map(m => header zip m._1 zip m._2.get filterNot(f => f._1._2 == f._2) map(_._1))
 
-  def transformSplitColToRows(columnName: String, regex: String) = DataSetTableScala(getNextAvailableColumnName(columnName) :: header, rows flatMap(r => r(getOrdinalOfColumn(columnName)) split regex map (_ :: r )))
-  def transformSplitColToRows(f: TransformFunction): DataSet = transformSplitColToRows(f.getParameters.head, f.getParameters.tail.head)
-
   def transformMatchToColumns(columnName: String, regexes: List[String]) = DataSetTableScala(getNextAvailableColumnName(columnName, regexes.length) ::: header, rows.map(r => {
     val matches = regexes map(_.r.findFirstMatchIn(r(getOrdinalOfColumn(columnName))).isDefined)
 
@@ -160,11 +126,7 @@ trait TableScala {
   }))
   def transformMatchToColumns(f: TransformFunction): DataSet = transformMatchToColumns(f.getParameters.head, f.getParameters.tail.toList)
 
-  def transformAddHeader(cols: List[String]) = DataSetTableScala(cols, header :: rows)
-  def transformAddHeader(f: TransformFunction): DataSet = transformAddHeader(f.getParameters.toList)
-}
-
-
+*/
 
 
 object DataSetTableScala {
@@ -180,17 +142,17 @@ object DataSetTableScala {
 //    case _ => TableScala(dataSet.getColumnHeader.asScala.toList, dataSet.getAsListOfColumns().asScala.map(_.asScala.toList).toList)
 //  }
 
-  def union(tables: List[TableScala]) = new DataSetTableScala(tables.head.header, tables flatMap (_.rows))
+  //def union(tables: List[TableScala]) = new DataSetTableScala(tables.head.header, tables flatMap (_.rows))
 
   def inPredicate[T](list: List[T]) = (i: T) => list.contains(i)
 
   import scala.language.implicitConversions
   import scala.collection.JavaConverters._
 
-  implicit def toDataSetTableScala(dataSet : DataSet): DataSetTableScala = DataSetTableScala(dataSet.getColumnHeader.asScala.toList, dataSet.getAsListOfColumns.asScala.map(_.asScala.toList).toList)
+  implicit def toDataSetTableScala(dataSet : DataSet): DataSetTableScala = DataSetTableScala(dataSet.header, dataSet.rows)
 
 }
-
+/*
 object ScalaTest extends App {
   val t1 = DataSetTableScala("A,B,C;1,2,3;4,5,6").transformSplitToRows().transformSplitToColumns("col1").transformFirstRowAsHeader //.transformAddConstant("D", "9")
   println(t1)
@@ -215,3 +177,4 @@ object ScalaTest extends App {
 
   println(t5.transformRename(List(("B","D"))))
 }
+ */

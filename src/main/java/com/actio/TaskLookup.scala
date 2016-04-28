@@ -24,7 +24,8 @@ class TaskLookup extends Task {
 
     val condition = (row1: List[String], row2: List[String]) => row1(dataSet.getOrdinalOfColumn(lookupColumn1)) == row2(dataSource.dataSet.getOrdinalOfColumn(lookupColumn2))
 
-    dataSet = dataSet.transformLookup(dataSource.dataSet, condition, _ => true)
+    //TODO: fix lookup transform
+    //dataSet = dataSet.transformLookup(dataSource.dataSet, condition, _ => true)
 
   }
 

@@ -68,9 +68,9 @@
         "type" : "transform",
         "global" :  ["addheader,col1",
                     "split2cols,col1",
-                    "header",
+                    "row1header",
                     "keep,accnum,accdate,status,sungamt,confee,clensamt,specamt,frameamt,miscamt",
-                    "rename,accnum,code,accdate,invoiceissued" ],
+                    "rename,accnum,code,accdate,invoiceissued"],
         "row" : []
       },
       "webtask02": {

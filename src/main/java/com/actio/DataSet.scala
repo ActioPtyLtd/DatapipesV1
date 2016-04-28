@@ -164,7 +164,7 @@ abstract class DataSet extends DPSystemConfigurable {
       case "" => 1
       case m => m.reverse.toInt + 1
     })) filter(_._1 == columnName.replaceAll("\\d*$", "")) maxBy(_._2)
-    (pair._2 to (pair._2 + n - 1)).map(pair._1 + _).toList
+    (pair._2 until (n - 1)).map(pair._1 + _).toList
   }
   def getNextAvailableColumnName(columnName: String): String = getNextAvailableColumnName(columnName, 1).head
 

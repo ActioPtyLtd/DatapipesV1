@@ -70,8 +70,9 @@
                     "split2cols,col1",
                     "row1header",
                     "keep,accnum,accdate,status,sungamt,confee,clensamt,specamt,frameamt,miscamt",
-                    "rename,accnum,code,accdate,invoiceissued"],
-        "row" : []
+                    "sum,sungamt,confee,clensamt,specamt,frameamt,miscamt",
+                    "drop,sungamt,confee,clensamt,specamt,frameamt,miscamt",
+                    "rename,accnum,code,accdate,invoiceissued,sum1,total"]
       },
       "webtask02": {
         "type": "load",

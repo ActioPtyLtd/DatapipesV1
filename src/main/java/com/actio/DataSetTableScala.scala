@@ -59,12 +59,7 @@ class DataSetTableScala(var header1: List[String], var rows1: List[List[String]]
 /*
 trait TableScala {
 
-  def header: List[String]
-  def rows: List[List[String]]
 
-  def transformFirstRowAsHeader = DataSetTableScala(rows.head map(_.toString), rows.tail)
-
-  def transformWithRowFunction(columnName: String, rowFunc: List[String] => String) = DataSetTableScala(columnName :: header, rows map(r => rowFunc(r) :: r))
   def transformRowsOnColumn(columnName: String, valFunc: String => String, default: String) = transformWithRowFunction(getNextAvailableColumnName(columnName), v => try { valFunc(getValue(v, columnName)) } catch { case _: Exception => default })
   def transformRowsDateConvert(columnName: String, in: String, out: String, default: String) = transformRowsOnColumn(columnName, p => LocalDate.parse(p, DateTimeFormatter.ofPattern(in)).format(DateTimeFormatter.ofPattern(out)), default)
 
@@ -89,10 +84,6 @@ trait TableScala {
   def transformSelectByOrdinal(f: TransformFunction): DataSet = transformSelectByOrdinal(f.getParameters.map(_.toInt).toList)
 
   def transformFilter(filter: List[String] => Boolean) = DataSetTableScala(header, rows filter filter)
-
-  def transformRename(selectorFunc: String => Boolean, renameFunc: String => String) = DataSetTableScala(header map(c => if(selectorFunc(c)) renameFunc(c) else c), rows)
-  def transformRename(colPair: List[(String,String)]): DataSet = transformRename(c => colPair.map(_._1).contains(c), r => colPair.find(f => f._1 == r).get._2)
-  def transformRename(f: TransformFunction): DataSet = transformRename(f.getParameters.grouped(2).map(m => (m.head, m.tail.head)).toList)
 
   def transformAddConstant(value: String) = transformWithRowFunction(getNextAvailableColumnName("const"), _ => value)
   def transformAddConstant(f: TransformFunction): DataSet = transformAddConstant(f.getParameters.head)

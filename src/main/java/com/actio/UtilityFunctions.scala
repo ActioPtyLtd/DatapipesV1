@@ -28,14 +28,14 @@ object UtilityFunctions extends Logging {
   @tailrec
   def getParamValues(methodParams: List[Parameter], paramValues: List[Any], result: List[Any]): List[Any] = {
     paramValues match {
-      case Nil => result.reverse
+      case Nil => result.reverse ::: List.fill(methodParams.length)(null)
       case pv => methodParams match {
         case Nil => result.reverse
         case h :: t =>
           if (h.getType == classOf[String] || h.getType == classOf[DataSet])
             getParamValues(t, pv.tail, pv.head :: result)
           else if (h.getType == classOf[List[String]]) {
-            val l = pv.splitAt(pv.length - methodParams.length)
+            val l = pv.splitAt(pv.length - methodParams.length + 1)
             getParamValues(t, l._2, l._1 :: result)
           }
           else

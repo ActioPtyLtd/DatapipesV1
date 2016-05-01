@@ -41,6 +41,19 @@ public abstract class DataSource extends DPSystemConfigurable {
             setConnectStr(config.getString("connect"));
     }
 
+    public void create(DataSet ds) throws Exception {
+        String query = getConfig().getConfig("query").getString("create");
+        execute(ds, query);
+    }
+    public void update(DataSet ds) throws Exception {
+        String query = getConfig().getConfig("query").getString("update");
+        execute(ds, query);
+    }
+    public void delete(DataSet ds) throws Exception {
+        String query = getConfig().getConfig("query").getString("delete");
+        execute(ds, query);
+    }
 
+    public abstract void execute(DataSet ds, String query) throws Exception;
 
 }

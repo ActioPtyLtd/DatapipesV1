@@ -4,7 +4,6 @@ import com.actio.dpsystem.DPSystemConfigurable;
 import com.typesafe.config.Config;
 import org.joda.time.LocalDate;
 
-
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -49,9 +48,10 @@ public class StaticUtilityFunctions extends DPSystemConfigurable {
             newSource.setWithFields(newRows);
         }
 
-        for (TransformFunction tf : fns.getFunctions().get(GLOBAL_FUNCTIONS_KEY)){
-            newSource = execute(newSource, tf);
+        if (fns.getFunctions().containsKey(GLOBAL_FUNCTIONS_KEY)) {
+            return UtilityFunctions.execute(newSource, fns.getFunctions().get(GLOBAL_FUNCTIONS_KEY));
         }
+
         return newSource;
     }
 
@@ -124,12 +124,6 @@ public class StaticUtilityFunctions extends DPSystemConfigurable {
         }
 
         return newSource;
-    }
-
-    private static DataSet execute(DataSet set, TransformFunction fn) throws Exception {
-        List<Object> ps = Arrays.asList(fn.getParameters()).stream().map(m -> (Object)m).collect(Collectors.toList());
-        ps.add(0, set);
-        return UtilityFunctions.execute(fn.getName(), ps);
     }
 
     private static List<String> execute(List<String> source, TransformFunction fn) throws Exception {

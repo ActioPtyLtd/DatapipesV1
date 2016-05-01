@@ -38,10 +38,11 @@
           "jdbcDriver": "org.postgresql.Driver",
           "connect": "jdbc:postgresql://localhost/test?user=postgres&password=postgres",
           "query": {
-            "queryTemplate": ""
+            "queryTemplate": "",
+            "create": "insert into invoice values (@code,@patientid,@specialistid,@status,@invoiceissued,@total::numeric)"
           },
           "inputDelimiter": ",",
-          "Table": "t1"
+          "Table": "invoice"
         }
       },
       "dirfiles": {
@@ -69,10 +70,8 @@
         "global" :  ["addheader,col1",
                     "split2cols,col1",
                     "row1header",
-                    "keep,accnum,accdate,status,sungamt,confee,clensamt,specamt,frameamt,miscamt",
                     "sum,sungamt,confee,clensamt,specamt,frameamt,miscamt",
-                    "drop,sungamt,confee,clensamt,specamt,frameamt,miscamt",
-                    "rename,accnum,code,accdate,invoiceissued,sum1,total"]
+                    "rename,accnum,code,accdate,invoiceissued,sum1,total,refnum,patientid,optom,specialistid"]
       },
       "webtask02": {
         "type": "load",
@@ -106,7 +105,7 @@
         "pipe": "postgres_extract-1 | postgres_load-1"
       },
       "p001" : {
-        "pipe" : "fileinput01 | csv"
+        "pipe" : "fileinput01 | csv | postgres_load-1"
       },
       "p003" : {
         "pipe" : " {p000} | {upload001} "

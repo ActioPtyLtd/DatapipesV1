@@ -12,6 +12,9 @@ import scala.collection.JavaConverters._
 
 object UtilityFunctions extends Logging {
 
+  def execute(ds: DataSet, fs: java.util.List[TransformFunction]): DataSet =
+    fs.asScala.foldLeft[DataSet](ds)((s,f) => execute(f.getName, (s.asInstanceOf[Any] :: f.getParameters.toList).asJava))
+
   def execute(methodName: String, params: java.util.List[Any]) = {
     val method = Class.forName("com.actio.DataSetTransforms").getDeclaredMethods.find(_.getName.equalsIgnoreCase(methodName))
 

@@ -2,7 +2,9 @@ package com.actio;
 
 import com.actio.dpsystem.DPSystemFactory;
 import com.typesafe.config.Config;
+import org.apache.commons.lang.StringUtils;
 
+import java.math.BigDecimal;
 import java.util.stream.Collectors;
 import java.sql.*;
 
@@ -120,6 +122,25 @@ public class DataSourceSQL extends DataSource {
     @Override
     public void write(DataSet data)  throws Exception
     {
+        create(data);
+    }
+
+    @Override
+    public void write(DataSet data, String suffix)  throws Exception
+    {
+        throw new Exception(FUNCTION_UNIMPLEMENTED_MSG);
+    }
+
+    @Override
+    public DataSet read(QueryParser queryParser)  throws Exception
+    {
+        throw new Exception(FUNCTION_UNIMPLEMENTED_MSG);
+    }
+
+    public void execute(DataSet data, String statement) throws Exception {
+
+        DataSet nds = DataSetTransforms.prepare4statement(data, statement);
+        statement = statement.replaceAll("@(?<name>[a-zA-z0-9]+)","?");
 
         Connection cn = null;
 
@@ -139,54 +160,34 @@ public class DataSourceSQL extends DataSource {
             }
             logger.info("Connected");
 
-            logger.info("CREATE TABLE T1 (" + String.join(",", data.getColumnHeader().stream().map(f -> f + " text").collect(Collectors.toList())) + ");");
+            logger.info("CREATE TABLE T1 (" + String.join(",", nds.getColumnHeader().stream().map(f -> f + " text").collect(Collectors.toList())) + ");");
 
-            String parameters = "(" + String.join(",", data.getColumnHeader().stream().map(f -> "?").collect(Collectors.toList())) + ")";
-            String tablename = getConfig().getString("Table");
-            Boolean truncate = getConfig().hasPath("Truncate");
+            PreparedStatement stmt = cn.prepareStatement(statement);
 
-            if(truncate) {
-                logger.info("Truncating table...");
-                cn.prepareStatement("truncate table " + tablename).execute();
-                logger.info("Table truncated");
-            }
+            for (java.util.List<String> row : nds.getAsListOfColumns()) {
+                int i = 1;
 
-            PreparedStatement stmt = cn.prepareStatement("insert into " + tablename + " values " + parameters +";");
-
-                for (java.util.List<String> row : data.getAsListOfColumns()) {
-                    int i = 1;
-
-                    for (String value : row)
-                        stmt.setString(i++, value);
-
-                    stmt.addBatch();
+                for (String value : row) {
+                    stmt.setString(i++, value);
                 }
-                logger.info("Executing SQL Statement...");
-                stmt.executeBatch();
-                logger.info("Executed SQL Statement.");
+
+                stmt.addBatch();
+            }
+            logger.info("Executing SQL Statement...");
+            stmt.executeBatch();
+            logger.info("Executed SQL Statement.");
 
             cn.close();
 
         } catch (Exception e)
         {
             logger.info("Exception "+e.getMessage());
-            cn.close();
+        }
+        finally {
+            if(cn !=null)
+                cn.close();
         }
     }
-
-    @Override
-    public void write(DataSet data, String suffix)  throws Exception
-    {
-        throw new Exception(FUNCTION_UNIMPLEMENTED_MSG);
-    }
-
-    @Override
-    public DataSet read(QueryParser queryParser)  throws Exception
-    {
-        throw new Exception(FUNCTION_UNIMPLEMENTED_MSG);
-    }
-
-
 
 
 }

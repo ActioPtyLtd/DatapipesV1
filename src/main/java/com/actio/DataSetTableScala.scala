@@ -8,7 +8,7 @@ import java.util
 //import com.actio.DataSet
 
 class DataSetTableScala(var header1: List[String], var rows1: List[List[String]]) extends DataSet {
-  private var boolNext = false
+  private var boolNext = true
 
   def this() = this(List(), List(List()))
   def this(rows: List[String]) = this(List(rows.head), rows.tail.map(List(_)))
@@ -34,8 +34,9 @@ class DataSetTableScala(var header1: List[String], var rows1: List[List[String]]
   def getColumnHeaderStr: String = header mkString ","
 
   def isNextBatch: Boolean = {
-    boolNext = !boolNext
-    boolNext
+    val bn = boolNext
+    boolNext = false
+    bn
   }
 
   def GetRow(): Array[String] = rows.head.toArray

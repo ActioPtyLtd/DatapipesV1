@@ -48,8 +48,8 @@ public class StaticUtilityFunctions extends DPSystemConfigurable {
             newSource.setWithFields(newRows);
         }
 
-        if (fns.getFunctions().containsKey(GLOBAL_FUNCTIONS_KEY)) {
-            return UtilityFunctions.execute(newSource, fns.getFunctions().get(GLOBAL_FUNCTIONS_KEY));
+        if (fns.getFunctions().containsKey(BATCH_FUNCTIONS_KEY)) {
+            return UtilityFunctions.execute(newSource, fns.getFunctions().get(BATCH_FUNCTIONS_KEY));
         }
 
         return newSource;

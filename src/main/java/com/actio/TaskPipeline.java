@@ -205,7 +205,7 @@ public class TaskPipeline extends Task implements Runnable
 
             logger.info("====== execute Pipeline '"+
                     pipeNode.name+"'");
-            pipeNode.dump();
+            //pipeNode.dump();
 
             // Instantiate the Node Function
             t = DPSystemFactory.newTask(sysconf,pipeNode);

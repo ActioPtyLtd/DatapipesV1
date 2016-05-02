@@ -44,7 +44,7 @@ public class StaticUtilityFunctions extends DPSystemConfigurable {
         // copy across into the new DataSet
         newSource.setWithFields(newRows);
 
-        for (TransformFunction tf : fns.getFunctions().get(GLOBAL_FUNCTIONS_KEY)){
+        for (TransformFunction tf : fns.getFunctions().get(BATCH_FUNCTIONS_KEY)){
             newSource = execute(newSource, tf);
         }
         return newSource;

@@ -7,7 +7,6 @@ package com.actio
 import com.actio.dpsystem.DPSystemConfigurable
 import com.typesafe.config.Config
 import java.sql.ResultSet
-import java.util.LinkedList
 
 object DataSet {
   def flattenRows(rows: java.util.List[java.util.List[String]], _outputDelimiter: String): java.util.List[String] = {

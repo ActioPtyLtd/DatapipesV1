@@ -7,7 +7,7 @@ import java.util
 /**
   * Created by mauri on 14/04/2016.
   */
-class DataSetFileReader(val reader: InputStream) extends DataSet {
+class DataSetFileStream(val reader: InputStream) extends DataSet {
   var lineheader: String = null
   var iterable: Iterator[Seq[String]] = null
 

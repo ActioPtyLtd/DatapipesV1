@@ -321,10 +321,10 @@ public class DPSystemFactory extends DPSystemConfigurable {
         }
 
         // process for global functions add a custom entry for GLOBAL Functions using a custom label
-        if (config.hasPath(GLOBAL_FUNCTIONS_LABEL) == true)
+        if (config.hasPath(BATCH_FUNCTIONS_LABEL) == true)
         {
-            List<String> rawFunctionList = config.getStringList(GLOBAL_FUNCTIONS_LABEL);
-            newFuncSet.addFunctions(GLOBAL_FUNCTIONS_KEY, buildTransformFunctionsFromList(rawFunctionList));
+            List<String> rawFunctionList = config.getStringList(BATCH_FUNCTIONS_LABEL);
+            newFuncSet.addFunctions(BATCH_FUNCTIONS_KEY, buildTransformFunctionsFromList(rawFunctionList));
         }
 
         // process for row functions add a custom entry for LOCAL Functions using a custom label

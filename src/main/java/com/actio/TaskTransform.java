@@ -3,7 +3,6 @@ package com.actio;
 import com.actio.dpsystem.DPFnNode;
 import com.actio.dpsystem.DPSystemConfig;
 import com.actio.dpsystem.DPSystemFactory;
-import com.typesafe.config.Config;
 
 import java.util.List;
 import java.util.Objects;
@@ -132,7 +131,7 @@ public class TaskTransform extends Task {
         // Get the TaskTransform Node
 
         // compileConfig transform list by column Reference
-        if (config.hasPath(COLUMN_LABEL) != true && config.hasPath(GLOBAL_FUNCTIONS_LABEL) != true &&
+        if (config.hasPath(COLUMN_LABEL) != true && config.hasPath(BATCH_FUNCTIONS_LABEL) != true &&
                 config.hasPath(ROW_FUNCTIONS_LABEL) != true)
              return null;
 

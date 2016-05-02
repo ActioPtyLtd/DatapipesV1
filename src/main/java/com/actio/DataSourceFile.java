@@ -9,11 +9,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
 import java.util.*;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 /**
  * Created by dimitarpopov on 24/08/15.
@@ -76,7 +72,7 @@ public class DataSourceFile extends DataSource {
         // execute the sqlquery
         logger.info("ReadFile: " + fname);
 
-        dataSet = new DataSetFileReader(new FileInputStream(new File(fname)));
+        dataSet = new DataSetFileStream(new FileInputStream(new File(fname)));
 
         // save the results
 

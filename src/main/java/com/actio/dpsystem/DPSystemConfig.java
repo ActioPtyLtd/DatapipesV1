@@ -320,8 +320,14 @@ public class DPSystemConfig extends DPSystemConfigurable {
         for (String key : pipelinesMap.keySet())
         {
             // dump compiled map
-            logger.info("================ '"+key+"'");
+            System.out.println("\n---------------------------------------------------------");
+
+            String cfg = pipes.toConfig().getObject(key).toConfig().getString(PIPE_LABEL);
+
+            System.out.println("dpipe script '"+key+" : "+cfg+"'");
+            System.out.print("json => '");
             pipelinesMap.get(key).dump();
+            System.out.println("'");
         }
 
 

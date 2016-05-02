@@ -83,9 +83,9 @@ public class DPSystemConfigurable {
     public static final String JDBC_DRIVER_LABEL = "jdbcDriver";
 
     public static final String COLUMN_LABEL = "columns";
-    public static final String GLOBAL_FUNCTIONS_LABEL = "global";
+    public static final String BATCH_FUNCTIONS_LABEL = "batch";
     public static final String ROW_FUNCTIONS_LABEL = "row";
-    public static final String GLOBAL_FUNCTIONS_KEY = "****global****";
+    public static final String BATCH_FUNCTIONS_KEY = "****batch****";
     public static final String ROW_FUNCTIONS_KEY = "****row****";
 
 

@@ -93,11 +93,18 @@
     },
     "services": {
       "name001": {
-        "path": "/api/store/id",
-        "get" : "upload001",
-        "put" : "p0055",
-        "post": "p9999",
-        "port": "12311"
+        "comment" : "This Service example sets up a dataset that can be called via the listed operations",
+        "type" : "extract",
+        "dataSource" : {
+          "type" : "REST",
+          "path": "/api/store/@@$x@@/id",
+          "operations" : {
+            "get": "upload001",
+            "put": "p0055",
+            "post": "p9999",
+            "port": "12311"
+          }
+        }
       },
       "name002" : {
         "path": "/x/y/z",

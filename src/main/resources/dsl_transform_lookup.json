@@ -48,6 +48,7 @@
       "invoiceupdate": {
         "type": "datasourceupdate",
         "behavior" : "",
+        "keys": ["code"],
         "dataSource": {
           "type": "sql",
           "behavior" : "",
@@ -56,6 +57,7 @@
           "query": {
             "queryTemplate": "",
             "create": "insert into invoice values (@code,@patientid,@specialistid,@status,@invoiceissued,@total::numeric)",
+            "read": "select * from invoice",
             "update": "update invoice set patientid = @patientid, specialistid = @specialistid, status = @status, invoiceissued = @invoiceissued, total = @total::numeric where code = @code"
           }
         }
@@ -82,7 +84,7 @@
       },
       "csv": {
         "type" : "transform",
-        "global" :  ["addheader,col1",
+        "batch" :  ["addheader,col1",
                     "split2cols,col1",
                     "row1header",
                     "sum,sungamt,confee,clensamt,specamt,frameamt,miscamt",

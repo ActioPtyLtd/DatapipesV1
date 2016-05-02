@@ -50,51 +50,7 @@ public class DataSourceSQL extends DataSource {
 
     @Override
     public void extract() throws Exception {
-        // default to an extract behavior for SQL
-        // execute the sqlquery
-
-        logger.info("SqlQuery: " + QueryParser.processTemplate(sqlquery.getQueryTemplate()));
-
-        Connection cn = null;
-
-        try {
-            cn = DriverManager.getConnection(getConnectStr());
-            //cn.setNetworkTimeout(null,160000);
-            // Get the warnings
-            for (SQLWarning warn = cn.getWarnings(); warn != null; warn = warn
-                    .getNextWarning()) {
-                // Note: Printing to Standard Out and putting messages in
-                // Pop-Up.
-                logger.info("Connection Warning:");
-                logger.info("State  : " + warn.getSQLState());
-                logger.info("Message: " + warn.getMessage());
-                logger.info("Error  : " + warn.getErrorCode());
-                warn = warn.getNextWarning();
-            }
-            logger.info("Connected");
-
-            // Get QueryParser
-            String sqlQuery = QueryParser.processTemplate(sqlquery.getQueryTemplate());
-            //PreparedStatement stmt = cn.prepareStatement(QueryParser.processTemplate(sqlquery.getQueryTemplate()));
-
-            Statement st = cn.createStatement(ResultSet.TYPE_SCROLL_SENSITIVE,ResultSet.CONCUR_READ_ONLY);
-
-            // store the results
-            dataSet = new DataSetRS();
-
-            dataSet.setConfig(config, masterConfig);
-           // dataSet.set(stmt.executeQuery());
-
-            logger.info("Executing Query="+sqlQuery);
-
-            dataSet.set(st.executeQuery(sqlQuery));
-
-            logger.info("Executed SQL Statement :");
-
-        } catch (Exception e)
-        {
-            logger.info("Exception "+e.getMessage());
-        }
+        executeQuery(dataSet, QueryParser.processTemplate(sqlquery.getQueryTemplate()));
     }
 
     @Override
@@ -139,9 +95,6 @@ public class DataSourceSQL extends DataSource {
 
     @Override
     public void execute(DataSet data, String statement) throws Exception {
-        if(data.isEmpty())
-            return;
-
         DataSet nds = DataSetTransforms.prepare4statement(data, statement);
         statement = statement.replaceAll("@(?<name>[a-zA-Z0-9]+)","?");
 
@@ -179,8 +132,58 @@ public class DataSourceSQL extends DataSource {
             logger.info("Executing SQL Statement...");
             stmt.executeBatch();
             logger.info("Executed SQL Statement.");
+        } catch (Exception e)
+        {
+            logger.info("Exception "+e.getMessage());
+        }
+        finally {
+            if(cn !=null)
+                cn.close();
+        }
+    }
 
-            cn.close();
+    @Override
+    public DataSet executeQuery(DataSet ds, String query) throws Exception {
+        // default to an extract behavior for SQL
+        // execute the sqlquery
+
+        logger.info("SqlQuery: " + query);
+
+        Connection cn = null;
+
+        try {
+            cn = DriverManager.getConnection(getConnectStr());
+            //cn.setNetworkTimeout(null,160000);
+            // Get the warnings
+            for (SQLWarning warn = cn.getWarnings(); warn != null; warn = warn
+                    .getNextWarning()) {
+                // Note: Printing to Standard Out and putting messages in
+                // Pop-Up.
+                logger.info("Connection Warning:");
+                logger.info("State  : " + warn.getSQLState());
+                logger.info("Message: " + warn.getMessage());
+                logger.info("Error  : " + warn.getErrorCode());
+                warn = warn.getNextWarning();
+            }
+            logger.info("Connected");
+
+            // Get QueryParser
+            String sqlQuery = query;
+            //PreparedStatement stmt = cn.prepareStatement(QueryParser.processTemplate(sqlquery.getQueryTemplate()));
+
+            Statement st = cn.createStatement(ResultSet.TYPE_SCROLL_SENSITIVE,ResultSet.CONCUR_READ_ONLY);
+
+            // store the results
+            dataSet = new DataSetRS();
+
+            dataSet.setConfig(config, masterConfig);
+            // dataSet.set(stmt.executeQuery());
+
+            logger.info("Executing Query="+sqlQuery);
+
+            dataSet.set(st.executeQuery(sqlQuery));
+
+            logger.info("Executed SQL Statement :");
 
         } catch (Exception e)
         {
@@ -190,6 +193,7 @@ public class DataSourceSQL extends DataSource {
             if(cn !=null)
                 cn.close();
         }
+        return dataSet;
     }
 
 

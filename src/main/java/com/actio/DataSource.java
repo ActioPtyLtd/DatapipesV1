@@ -42,19 +42,33 @@ public abstract class DataSource extends DPSystemConfigurable {
     }
 
     public void create(DataSet ds) throws Exception {
-        executeQueryLabel(ds, "create");
-    }
-    public void update(DataSet ds) throws Exception {
-        executeQueryLabel(ds, "update");
-    }
-    public void delete(DataSet ds) throws Exception {
-        executeQueryLabel(ds, "delete");
+        executeLabel(ds, "create");
     }
 
-    public void executeQueryLabel(DataSet ds, String label) throws Exception {
+    public DataSet read(DataSet ds) throws Exception {
+        return executeQueryLabel(ds, "read");
+    }
+
+    public void update(DataSet ds) throws Exception {
+        executeLabel(ds, "update");
+    }
+
+    public void delete(DataSet ds) throws Exception {
+        executeLabel(ds, "delete");
+    }
+
+    public void executeLabel(DataSet ds, String label) throws Exception {
         String query = getConfig().getConfig("query").getString(label);
         execute(ds, query);
     }
+
+    public DataSet executeQueryLabel(DataSet ds, String label) throws Exception {
+        String query = getConfig().getConfig("query").getString(label);
+        return executeQuery(ds, query);
+    }
+
     public abstract void execute(DataSet ds, String query) throws Exception;
+
+    public abstract DataSet executeQuery(DataSet ds, String query) throws Exception;
 
 }

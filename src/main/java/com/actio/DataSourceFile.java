@@ -139,6 +139,11 @@ public class DataSourceFile extends DataSource {
     }
 
     @Override
+    public DataSet executeQuery(DataSet ds, String query) throws Exception {
+        return null;
+    }
+
+    @Override
     public DataSet getLastLoggedDataSet() throws Exception {
         // from directory
 

@@ -164,6 +164,11 @@ public class DataSourceREST extends DataSource {
 
     }
 
+    @Override
+    public DataSet executeQuery(DataSet ds, String query) throws Exception {
+        return null;
+    }
+
     //
 
 

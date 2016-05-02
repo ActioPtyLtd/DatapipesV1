@@ -43,4 +43,12 @@ object DataSetTransforms {
 
   def prepare4statement(ds: DataSet, template: String) = orderCols(ds, "@(?<name>[a-zA-Z0-9]+)".r.findAllMatchIn(template).map(_.group(1)).toList)
 
+  def changes(ds1: DataSet, ds2: DataSet, keyCols: List[String]) = DataSetTableScala(ds1.header, ds1.rows.filter(r => {
+    val option = ds2.rows.find(ri => keyCols.forall(c => ds1.getValue(r, c) == ds2.getValue(ri, c)))
+    if(option.isDefined)
+      !ds1.header.forall(c => ds1.getValue(r,c) == ds2.getValue(option.get, c))
+    else
+      false
+  }))
+
 }

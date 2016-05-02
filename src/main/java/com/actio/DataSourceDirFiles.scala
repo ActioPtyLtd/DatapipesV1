@@ -37,4 +37,6 @@ class DataSourceDirFiles extends DataSource {
   def regex = getConfig.getString("regex")
 
   override def execute(ds: DataSet, query: String): Unit = ???
+
+  override def executeQuery(ds: DataSet, query: String): DataSet = ???
 }

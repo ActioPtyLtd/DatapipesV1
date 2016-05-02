@@ -66,6 +66,18 @@ class DataSetHierarchical(val dSObject: DSObject) extends DataSet {
   }
 }
 
+/*
+
+TODO: These need to map into RECORD, FIELD => Record === to a row, but allows for Hiearachical records
+
+-- a record has fields.
+-- fields are addressable by their ordinal position with a record, or by their label
+
+-- fields can be records
+-- a hierarchy of fields within records can be addressed by a 'dot' notation.
+
+
+ */
 
 case class DSField(name: String, value: DSValue)
 case class DSObject(fields: List[DSField]) extends DSValue

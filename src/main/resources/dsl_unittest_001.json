@@ -93,14 +93,14 @@
     },
     "services": {
       "name001": {
-        "path": "/api/store/id",
+        "path": "/api/store/*/id",
         "get" : "upload001",
         "put" : "p0055",
         "post": "p9999",
         "port": "12311"
       },
       "name002" : {
-        "path": "/x/y/z",
+        "path": "/x/y/*/z",
         "get" : "p000",
         "put" : "p0055",
         "post": "p9999",

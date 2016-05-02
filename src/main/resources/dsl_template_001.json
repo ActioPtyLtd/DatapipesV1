@@ -3,9 +3,17 @@
 
   "script" : {
 
-    "schema" : {  },
+    "comments" : "What to do in script",
 
-    "tasks"  : { }
+    "schema" : {
+      "comments" : "What to do in schema"
+
+    },
+
+    "tasks"  : {
+      "comments" : "What to do in tasks"
+
+    }
 
 
   }

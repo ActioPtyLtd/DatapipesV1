@@ -45,6 +45,21 @@
           "Table": "invoice"
         }
       },
+      "invoiceupdate": {
+        "type": "datasourceupdate",
+        "behavior" : "",
+        "dataSource": {
+          "type": "sql",
+          "behavior" : "",
+          "jdbcDriver": "org.postgresql.Driver",
+          "connect": "jdbc:postgresql://localhost/test?user=postgres&password=postgres",
+          "query": {
+            "queryTemplate": "",
+            "create": "insert into invoice values (@code,@patientid,@specialistid,@status,@invoiceissued,@total::numeric)",
+            "update": "update invoice set patientid = @patientid, specialistid = @specialistid, status = @status, invoiceissued = @invoiceissued, total = @total::numeric where code = @code"
+          }
+        }
+      },
       "dirfiles": {
         "type": "extract",
         "behavior": "",
@@ -71,7 +86,9 @@
                     "split2cols,col1",
                     "row1header",
                     "sum,sungamt,confee,clensamt,specamt,frameamt,miscamt",
-                    "rename,accnum,code,accdate,invoiceissued,sum1,total,refnum,patientid,optom,specialistid"]
+                    "rename,accnum,code,accdate,invoiceissued,sum1,total,refnum,patientid,optom,specialistid",
+                    "keep,code,patientid,specialistid,status,invoiceissued,total"
+        ]
       },
       "webtask02": {
         "type": "load",
@@ -105,7 +122,7 @@
         "pipe": "postgres_extract-1 | postgres_load-1"
       },
       "p001" : {
-        "pipe" : "fileinput01 | csv | postgres_load-1"
+        "pipe" : "fileinput01 | csv | invoiceupdate"
       },
       "p003" : {
         "pipe" : " {p000} | {upload001} "

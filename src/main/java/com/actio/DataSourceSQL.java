@@ -137,10 +137,13 @@ public class DataSourceSQL extends DataSource {
         throw new Exception(FUNCTION_UNIMPLEMENTED_MSG);
     }
 
+    @Override
     public void execute(DataSet data, String statement) throws Exception {
+        if(data.isEmpty())
+            return;
 
         DataSet nds = DataSetTransforms.prepare4statement(data, statement);
-        statement = statement.replaceAll("@(?<name>[a-zA-z0-9]+)","?");
+        statement = statement.replaceAll("@(?<name>[a-zA-Z0-9]+)","?");
 
         Connection cn = null;
 

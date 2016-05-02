@@ -175,4 +175,6 @@ abstract class DataSet extends DPSystemConfigurable {
 
   def getValue(row: List[String], columnName: String) = row(getOrdinalOfColumn(columnName))
 
+  def isEmpty = rows.isEmpty
+
 }

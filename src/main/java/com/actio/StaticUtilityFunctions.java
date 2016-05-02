@@ -4,7 +4,6 @@ import com.actio.dpsystem.DPSystemConfigurable;
 import com.typesafe.config.Config;
 import org.joda.time.LocalDate;
 
-
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -29,24 +28,30 @@ public class StaticUtilityFunctions extends DPSystemConfigurable {
 
     public static DataSet execute(DataSet theSet, CompiledTemplateFunctionSet fns) throws Exception
     {
-        // iterate over the functions, processing the source
-        DataSet  newSource = new DataSetTabular();
-        List<List<String>> newRows = new LinkedList<List<String>>();
+        DataSet newSource = theSet;
 
-        // process for each line
-        List<List<String>> ds = theSet.getAsListOfColumns();
+        if (fns.getFunctions().containsKey(ROW_FUNCTIONS_KEY)) {
+            // iterate over the functions, processing the source
+            newSource = new DataSetTabular();
+            List<List<String>> newRows = new LinkedList<List<String>>();
 
-        for (List<String> row : ds)
-        {
-            newRows.add(execute(row,fns));
+
+
+            // process for each line
+            List<List<String>> ds = theSet.getAsListOfColumns();
+
+            for (List<String> row : ds) {
+                newRows.add(execute(row, fns));
+            }
+
+            // copy across into the new DataSet
+            newSource.setWithFields(newRows);
         }
 
-        // copy across into the new DataSet
-        newSource.setWithFields(newRows);
-
-        for (TransformFunction tf : fns.getFunctions().get(BATCH_FUNCTIONS_KEY)){
-            newSource = execute(newSource, tf);
+        if (fns.getFunctions().containsKey(GLOBAL_FUNCTIONS_KEY)) {
+            return UtilityFunctions.execute(newSource, fns.getFunctions().get(GLOBAL_FUNCTIONS_KEY));
         }
+
         return newSource;
     }
 
@@ -119,12 +124,6 @@ public class StaticUtilityFunctions extends DPSystemConfigurable {
         }
 
         return newSource;
-    }
-
-    private static DataSet execute(DataSet set, TransformFunction fn) throws Exception {
-        List<Object> ps = Arrays.asList(fn.getParameters()).stream().map(m -> (Object)m).collect(Collectors.toList());
-        ps.add(0, set);
-        return UtilityFunctions.execute(fn.getName(), ps);
     }
 
     private static List<String> execute(List<String> source, TransformFunction fn) throws Exception {

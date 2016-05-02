@@ -41,9 +41,6 @@ object DataSetTransforms {
   def templateMerge(ds: DataSet, template: String) =
     DataSetTableScala(ds.getNextAvailableColumnName("template") :: ds.header, ds.rows.map(r => ds.header.foldLeft(template)((c,t) => t.replaceAll("@" + c, ds.getValue(r, c))) :: r))
 
-  // @(?<name>[^:]+):(?<type>[a-zA-z]+)
   def prepare4statement(ds: DataSet, template: String) = orderCols(ds, "@(?<name>[a-zA-Z0-9]+)".r.findAllMatchIn(template).map(_.group(1)).toList)
-
-
 
 }

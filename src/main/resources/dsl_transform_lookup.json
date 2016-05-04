@@ -56,7 +56,7 @@
           "connect": "jdbc:postgresql://localhost/test?user=postgres&password=postgres",
           "query": {
             "queryTemplate": "",
-            "create": "insert into invoice values (@code,@patientid,@specialistid,@status,@invoiceissued,@total::numeric)",
+            "create": "insert into invoice (code,patientid,specialistid,status,invoiceissued,total) values (@code,@patientid,@specialistid,@status,@invoiceissued,@total::numeric)",
             "read": "select * from invoice",
             "update": "update invoice set patientid = @patientid, specialistid = @specialistid, status = @status, invoiceissued = @invoiceissued, total = @total::numeric where code = @code"
           }

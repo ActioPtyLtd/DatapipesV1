@@ -17,26 +17,17 @@ class TaskDataSourceUpdate extends Task {
     val dataSource = DPSystemFactory.newDataSource(dataSourceConfig.withValue("query.read", ConfigValueFactory.fromAnyRef(query)), masterConfig)
     dataSource.read(new DataSetTableScala())
 
-    // this really doesn't look necessary. DataSetRS seems to lose the header. hardcoding the workaround right now
     dataSource.dataSet.initBatch
 
-    // reportset doesn't return an empty row with header, probably shouldn't be like that
-    if(dataSource.dataSet.isEmpty) {
-      val dataSourceds = new DataSetTableScala(List("id", "code", "patientid", "specialistid", "status", "invoiceissued", "total"), Nil)
-
-      val newDataSet = DataSetTransforms.newRows(dataSet, dataSourceds, keyColumns())
-      if (!newDataSet.isEmptyDataSet)
-        dataSource.create(newDataSet)
-    }
+    if(dataSource.dataSet.isEmpty)
+        dataSource.create(dataSet)
     else {
       for (ds <- dataSource.dataSet) {
-        val dataSourceds = DataSetTransforms.addHeader(ds, List("id", "code", "patientid", "specialistid", "status", "invoiceissued", "total"))
-
-        val newDataSet = DataSetTransforms.newRows(dataSet, dataSourceds, keyColumns())
+        val newDataSet = DataSetTransforms.newRows(dataSet, ds, keyColumns())
         if (!newDataSet.isEmptyDataSet)
           dataSource.create(newDataSet)
 
-        val updatedDataSet = DataSetTransforms.changes(dataSet, dataSourceds, keyColumns())
+        val updatedDataSet = DataSetTransforms.changes(dataSet, ds, keyColumns())
         if (!updatedDataSet.isEmptyDataSet)
           dataSource.update(updatedDataSet)
       }

@@ -174,17 +174,18 @@ public class DataSourceSQL extends DataSource {
             Statement st = cn.createStatement(ResultSet.TYPE_SCROLL_SENSITIVE,ResultSet.CONCUR_READ_ONLY);
 
             // store the results
-            dataSet = new DataSetRS();
+            //dataSet = new DataSetRS();
 
-            dataSet.setConfig(config, masterConfig);
-            // dataSet.set(stmt.executeQuery());
+            ////dataSet.setConfig(config, masterConfig);
+            //// dataSet.set(stmt.executeQuery());
 
             logger.info("Executing Query="+sqlQuery);
 
-            dataSet.set(st.executeQuery(sqlQuery));
+            //dataSet.set(st.executeQuery(sqlQuery));
+
+            dataSet = new DataSetDBStream(st.executeQuery(sqlQuery));
 
             logger.info("Executed SQL Statement :");
-
         } catch (Exception e)
         {
             logger.info("Exception "+e.getMessage());

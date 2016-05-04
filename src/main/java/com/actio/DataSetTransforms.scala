@@ -51,4 +51,8 @@ object DataSetTransforms {
       false
   }))
 
+  def newRows(ds1: DataSet, ds2: DataSet, keyCols: List[String]) = {
+    val ds2KeysOnly = keep(ds2, keyCols)
+    DataSetTableScala(ds1.header, ds1.rows.filterNot(r => ds2KeysOnly.rows.contains(keyCols.map(ds1.getValue(r,_)))))
+  }
 }

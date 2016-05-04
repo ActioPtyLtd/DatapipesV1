@@ -3,7 +3,6 @@ package com.actio;
 import com.typesafe.config.Config;
 
 import org.apache.commons.lang.StringEscapeUtils;
-import org.apache.commons.lang3.StringEscapeUtils.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -92,7 +91,7 @@ public class DataSetRS extends DataSetTabular {
         DataSetTabular batchDS = new DataSetTabular();
         batchDS.setRsc(batch);
 
-        logger.info("getNextBatch:"+batchDS.size());
+        logger.info("getNextBatch:"+batchDS.sizeOfBatch());
 
         return batchDS;
     }

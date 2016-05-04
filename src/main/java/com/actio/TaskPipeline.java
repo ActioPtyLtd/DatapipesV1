@@ -12,8 +12,6 @@ import org.slf4j.LoggerFactory;
 
 import java.io.InputStream;
 import java.util.*;
-import java.util.stream.Collector;
-import java.util.stream.Collectors;
 
 
 public class TaskPipeline extends Task implements Runnable
@@ -124,7 +122,7 @@ public class TaskPipeline extends Task implements Runnable
         }
 
         logger.info("--------------------------------------Exit recursive "+
-                currentNode.getName()+"  "+resultSet.size()+"---");
+                currentNode.getName()+"  "+resultSet.sizeOfBatch()+"---");
     }
 
     private List<DataSet> getSubDataSets(DataSet dataSet, LinkedList<DPFnNode> tasks, int keyIndex) throws Exception {

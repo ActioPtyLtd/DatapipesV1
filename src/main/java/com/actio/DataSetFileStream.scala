@@ -11,7 +11,7 @@ class DataSetFileStream(val reader: InputStream) extends DataSet {
   var lineheader: String = null
   var iterable: Iterator[Seq[String]] = null
 
-  def size(): Int = 0
+  override def sizeOfBatch(): Int = 0
 
   def dump() = { }
 

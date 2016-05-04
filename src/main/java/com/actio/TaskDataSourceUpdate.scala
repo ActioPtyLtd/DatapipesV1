@@ -19,17 +19,18 @@ class TaskDataSourceUpdate extends Task {
 
     // this really doesn't look necessary. DataSetRS seems to lose the header.
     dataSource.dataSet.initBatch
-    val dataSourceFullds = DataSetTransforms.addHeader(dataSource.dataSet.getNextBatch, List("code", "patientid", "specialistid", "status", "invoiceissued", "total"))
-    val dataSourceKeyOnlyds = DataSetTransforms.keep(dataSourceFullds, keyColumns())
 
-    val newDataSet = DataSetTableScala(dataSet.header, dataSet.rows.filterNot(r => dataSourceKeyOnlyds.rows.contains(keyColumns().map(dataSet.getValue(r,_)))))
-    if(!newDataSet.isEmpty)
-      dataSource.create(newDataSet)
+    for (ds <- dataSource.dataSet) {
+      val dataSourceds = DataSetTransforms.addHeader(ds, List("code", "patientid", "specialistid", "status", "invoiceissued", "total"))
 
-    val updatedDataSet = DataSetTransforms.changes(dataSet, dataSourceFullds, keyColumns())
+      val newDataSet = DataSetTransforms.newRows(dataSet, dataSourceds, keyColumns())
+      if (!newDataSet.isEmptyDataSet)
+        dataSource.create(newDataSet)
 
-    if(!updatedDataSet.isEmpty)
-      dataSource.update(updatedDataSet)
+      val updatedDataSet = DataSetTransforms.changes(dataSet, dataSourceds, keyColumns())
+      if (!updatedDataSet.isEmptyDataSet)
+        dataSource.update(updatedDataSet)
+    }
   }
 
   override def load(): Unit = ???

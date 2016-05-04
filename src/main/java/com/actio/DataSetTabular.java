@@ -33,7 +33,7 @@ public class DataSetTabular extends DataSet {
     }
 
     @Override
-    public int size() throws Exception {
+    public int sizeOfBatch() throws Exception {
         return getRs().size();
     }
 
@@ -169,7 +169,7 @@ public class DataSetTabular extends DataSet {
     public void initBatch() throws Exception{
         // Set row number
         rowNumber = 0;
-        if (size() == 0)
+        if (sizeOfBatch() == 0)
             emptySet = true;
         else
             emptySet = false;
@@ -183,7 +183,7 @@ public class DataSetTabular extends DataSet {
     @Override
     public boolean isNextBatch() throws Exception
     {
-        if (rowNumber < size() || emptySet)
+        if (rowNumber < sizeOfBatch() || emptySet)
             return true;
         else
             return false;
@@ -206,13 +206,13 @@ public class DataSetTabular extends DataSet {
             return newSet;
         }
 
-        if (rowNumber >= 0 && rowNumber < size()) {
+        if (rowNumber >= 0 && rowNumber < sizeOfBatch()) {
             int index = rowNumber+getBatchSize();
             List<String> sublist = getAsList().subList(rowNumber,
-                    index<size()?index:size());
+                    index< sizeOfBatch()?index: sizeOfBatch());
 
             // increment the row number so it moves to next batch
-            rowNumber += (rowNumber + getBatchSize() > size())? rowNumber+getBatchSize():size();
+            rowNumber += (rowNumber + getBatchSize() > sizeOfBatch())? rowNumber+getBatchSize(): sizeOfBatch();
 
 
             logger.info("Exiting getNextBatch new rowNumber"+rowNumber);

@@ -31,7 +31,7 @@ object DataSet {
   }
 }
 
-abstract class DataSet extends DPSystemConfigurable {
+abstract class DataSet extends DPSystemConfigurable with Iterator[DataSet] {
   var key: DataSetKey = new DataSetKey
 
   def setKey(_key: DataSetKey) {
@@ -48,7 +48,7 @@ abstract class DataSet extends DPSystemConfigurable {
   var customHeader: String = null
 
   @throws(classOf[Exception])
-  def size: Int
+  def sizeOfBatch: Int
 
   def getSchema: Schema = {
     return schema
@@ -174,6 +174,14 @@ abstract class DataSet extends DPSystemConfigurable {
 
   def getValue(row: List[String], columnName: String) = row(getOrdinalOfColumn(columnName))
 
-  def isEmpty = rows.isEmpty
+  def isEmptyDataSet = rows.isEmpty
 
+  def hasNext = isNextBatch
+
+  def next = getNextBatch
+
+  override def minBy[B](f: DataSet => B)(implicit cmp: Ordering[B]): DataSet = null
+  override def maxBy[B](f: DataSet => B)(implicit cmp: Ordering[B]): DataSet = null
+  override def max[B >: DataSet](implicit cmp: Ordering[B]): DataSet = null
+  override def min[B >: DataSet](implicit cmp: Ordering[B]): DataSet = null
 }

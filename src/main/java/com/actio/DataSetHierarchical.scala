@@ -9,7 +9,7 @@ import java.util
   */
 class DataSetHierarchical(val dSObject: DSObject) extends DataSet {
 
-  def size(): Int = 0
+  override def sizeOfBatch(): Int = 0
 
   def dump() = {}
 

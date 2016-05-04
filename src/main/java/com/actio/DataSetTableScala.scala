@@ -15,7 +15,7 @@ class DataSetTableScala(var header1: List[String], var rows1: List[List[String]]
 
   import scala.collection.JavaConverters._
 
-  def size() = rows1.length
+  override def sizeOfBatch() = rows1.length
 
   def dump() = {}
 

@@ -56,9 +56,26 @@
           "connect": "jdbc:postgresql://localhost/test?user=postgres&password=postgres",
           "query": {
             "queryTemplate": "",
-            "create": "insert into invoice (code,patientid,specialistid,status,invoiceissued,total) values (@code,@patientid,@specialistid,@status,@invoiceissued,@total::numeric)",
+            "create": "insert into invoice (code,patientid,specialistid,status,invoiceissued,total) values (@code,@patientid,@specialistid,@status,@invoiceissued::timestamp,@total::numeric)",
             "read": "select * from invoice",
-            "update": "update invoice set patientid = @patientid, specialistid = @specialistid, status = @status, invoiceissued = @invoiceissued, total = @total::numeric where code = @code"
+            "update": "update invoice set patientid = @patientid, specialistid = @specialistid, status = @status, invoiceissued = @invoiceissued::timestamp, total = @total::numeric where code = @code"
+          }
+        }
+      },
+      "invoiceitem-fact": {
+        "type": "sql",
+        "behavior" : "",
+        "keys": ["code"],
+        "dataSource": {
+          "type": "sql",
+          "behavior" : "",
+          "jdbcDriver": "org.postgresql.Driver",
+          "connect": "jdbc:postgresql://localhost/test?user=postgres&password=postgres",
+          "query": {
+            "queryTemplate": "insert into invoiceitem (code,patientid,specialistid,status,invoiceissued,total) values (@code,@patientid,@specialistid,@status,@invoiceissued::timestamp,@total::numeric)",
+            "create": "insert into invoiceitem (code,patientid,specialistid,status,invoiceissued,total) values (@code,@patientid,@specialistid,@status,@invoiceissued::timestamp,@total::numeric)",
+            "read": "select * from invoiceitem",
+            "update": "update invoice set patientid = @patientid, specialistid = @specialistid, status = @status, invoiceissued = @invoiceissued::timestamp, total = @total::numeric where code = @code"
           }
         }
       },
@@ -72,7 +89,7 @@
           "regex": "(?<name>^VACC[^.]*).*"
         }
       },
-      "fileinput01": {
+      "fileinput-invoice": {
         "type": "extract",
         "behavior": "simple",
         "dataSource": {
@@ -82,14 +99,34 @@
           "filenameTemplate": "VACCOUNT.CSV"
         }
       },
-      "csv": {
+      "fileinput-invoiceitem": {
+        "type": "extract",
+        "behavior": "simple",
+        "dataSource": {
+          "behavior": "regex",
+          "directory": "C:\\Users\\mauri\\bitbucket\\gandm-data\\gmdata_CSV\\CSV",
+          "type":"file",
+          "filenameTemplate": "VACCITEM.CSV"
+        }
+      },
+      "invoice-transform": {
         "type" : "transform",
         "batch" :  ["addheader,col1",
                     "split2cols,col1",
                     "row1header",
                     "sum,sungamt,confee,clensamt,specamt,frameamt,miscamt",
-                    "rename,accnum,code,accdate,invoiceissued,sum1,total,refnum,patientid,optom,specialistid",
+                    "convdate,accdate,MM/dd/yyyy,yyyy-MM-dd",
+                    "rename,accnum,code,accdate1,invoiceissued,sum1,total,refnum,patientid,optom,specialistid",
                     "keep,code,patientid,specialistid,status,invoiceissued,total"
+        ]
+      },
+      "invoiceitem-transform": {
+        "type" : "transform",
+        "batch" :  ["addheader,col1",
+          "split2cols,col1",
+          "row1header",
+          "rename,accnum,invoiceid,qty,quantity,itemamt,itemprice",
+          "keep,invoiceid,itemcode,quantity,itemprice"
         ]
       },
       "webtask02": {
@@ -120,14 +157,11 @@
       }
     },
     "pipelines": {
-      "p000": {
-        "pipe": "postgres_extract-1 | postgres_load-1"
-      },
       "p001" : {
-        "pipe" : "fileinput01 | csv | invoiceupdate"
+        "pipe" : "fileinput-invoice | invoice-transform | invoiceupdate"
       },
-      "p003" : {
-        "pipe" : " {p000} | {upload001} "
+      "p002" : {
+        "pipe" : "fileinput-invoiceitem | invoiceitem-transform | invoiceitem-fact"
       },
       "p004" : {
         "pipe" : "{{{p000}} | {{p003}} | p000 } "
@@ -140,7 +174,7 @@
       }
     },
     "startup": {
-      "exec": "p001"
+      "exec": "p002"
     }
   }
 }

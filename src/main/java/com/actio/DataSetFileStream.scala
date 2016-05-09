@@ -16,7 +16,7 @@ class DataSetFileStream(val reader: InputStream) extends DataSetTableScala {
 
     if(lineheader == null) {
       lineheader = lines.head
-      rows1 = (lines.tail) map (List(_))
+      rows1 = lines.tail map (List(_))
       header1 = List(lineheader)
       new DataSetTableScala(lines)
     }

@@ -76,9 +76,9 @@ object DataSetTransforms {
 
   def mergeCols(ds1: DataSet, ds2: DataSet) = DataSetTableScala(ds1.header ::: ds2.header, (ds1.rows zip ds2.rows) map(r => r._2 ::: r._1))
 
-  def convDateRow(value: String, in: String, out: String) = LocalDate.parse(value, DateTimeFormatter.ofPattern(in)).format(DateTimeFormatter.ofPattern(out))
-  def convDate(ds: DataSet, col: String, in: String, out: String) = valueFunc(ds, col, convDateRow(_, in, out))
+  def convDateValue(value: String, in: String, out: String) = LocalDate.parse(value, DateTimeFormatter.ofPattern(in)).format(DateTimeFormatter.ofPattern(out))
+  def convDate(ds: DataSet, col: String, in: String, out: String) = valueFunc(ds, col, convDateValue(_, in, out))
 
-  def defaultIfBlankRow(value: String, default: String) = if(value.trim.isEmpty) default else value
-  def defaultIfBlank(ds: DataSet, cols: List[String], default: String) = cols.foldLeft(ds)((d,c) => valueFunc(d, c, defaultIfBlankRow(_,default)))
+  def defaultIfBlankValue(value: String, default: String) = if(value.trim.isEmpty) default else value
+  def defaultIfBlank(ds: DataSet, cols: List[String], default: String) = cols.foldLeft(ds)((d,c) => valueFunc(d, c, defaultIfBlankValue(_,default)))
 }

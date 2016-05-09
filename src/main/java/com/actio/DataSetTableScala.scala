@@ -15,9 +15,9 @@ class DataSetTableScala(var header1: List[String], var rows1: List[List[String]]
 
   import scala.collection.JavaConverters._
 
-  override def sizeOfBatch() = rows1.length
+  override def sizeOfBatch = rows1.length
 
-  def dump() = {}
+  def dump = {}
 
   def set(_results: ResultSet) = ???
 
@@ -39,15 +39,15 @@ class DataSetTableScala(var header1: List[String], var rows1: List[List[String]]
     bn
   }
 
-  def GetRow(): Array[String] = rows.head.toArray
+  def GetRow: Array[String] = rows.head.toArray
 
   def getAsList: util.List[String] = ???
 
   def setWithFields(_results: java.util.List[java.util.List[String]]) = { rows1 = _results.asScala.map(_.asScala.toList).toList}
 
-  def NextRow(): Boolean = false
+  def NextRow: Boolean = false
 
-  def initBatch(): Unit = { }
+  def initBatch: Unit = { }
 
   def FromRowGetField(rowIndex: Int, label: String): String = rows(rowIndex)(header.indexWhere(_ == label))
 
@@ -57,37 +57,25 @@ class DataSetTableScala(var header1: List[String], var rows1: List[List[String]]
 
   override def toString = (header1 mkString ", ") + "\n" + ("-" * (header1.map(_.length + 2).sum - 2)) + "\n" + (rows1 map (_ mkString ", ") mkString "\n") + "\n\n" + rows1.length + " rows.\n"
 }
-/*
-trait TableScala {
-
-
-  def transformRowsOnColumn(columnName: String, valFunc: String => String, default: String) = transformWithRowFunction(getNextAvailableColumnName(columnName), v => try { valFunc(getValue(v, columnName)) } catch { case _: Exception => default })
-
-  def transformWithRowFunction(selectorFunc : String => Boolean, columnRenameFunc: String => String, valueFunc : String => String) =  DataSetTableScala(header ::: (header filter selectorFunc map columnRenameFunc), rows map(r => r ::: getOrdinalsWithPredicate(selectorFunc).map(o => valueFunc(r(o)))))
-
-  def transformSelectByOrdinal(columnOrdinals: List[Int]) = DataSetTableScala(columnOrdinals map (header(_)), rows map(r => columnOrdinals map(r(_))))
-  def transformSelectByOrdinal(f: TransformFunction): DataSet = transformSelectByOrdinal(f.getParameters.map(_.toInt).toList)
-
-  def transformFilter(filter: List[String] => Boolean) = DataSetTableScala(header, rows filter filter)
-
-  def transformLookup(t2: TableScala, condition: (List[String],List[String]) => Boolean, lookupSelectorFunc: String => Boolean) = DataSetTableScala(header ::: t2.header.filter(lookupSelectorFunc),
-    rows.map(r1 => r1 ::: t2.rows.find(condition(r1,_)).getOrElse(t2.getEmptyRow).zipWithIndex.filter(f => t2.getOrdinalsWithPredicate(lookupSelectorFunc).contains(f._2)).map(_._1)))
-*/
-
 
 object DataSetTableScala {
   def apply(text: String) = new DataSetTableScala(List("col1"), List(List(text)))
-  //def apply(rows1: List[String]) = new TableScala(List("col1"), rows1.map(List(_)))
 
   def apply(rows2: List[List[String]]) = new DataSetTableScala(rows2.head.zipWithIndex map ("col" + _), rows2)
 
   def apply(header: List[String], rows: List[List[String]]) = new DataSetTableScala(header, rows)
 
   def inPredicate[T](list: List[T]) = (i: T) => list.contains(i)
-
-  import scala.language.implicitConversions
-  import scala.collection.JavaConverters._
-
-  implicit def toDataSetTableScala(dataSet : DataSet): DataSetTableScala = DataSetTableScala(dataSet.header, dataSet.rows)
-
 }
+
+
+/*
+trait TableScala {
+
+  def transformSelectByOrdinal(columnOrdinals: List[Int]) = DataSetTableScala(columnOrdinals map (header(_)), rows map(r => columnOrdinals map(r(_))))
+
+  def transformFilter(filter: List[String] => Boolean) = DataSetTableScala(header, rows filter filter)
+
+  def transformLookup(t2: TableScala, condition: (List[String],List[String]) => Boolean, lookupSelectorFunc: String => Boolean) = DataSetTableScala(header ::: t2.header.filter(lookupSelectorFunc),
+    rows.map(r1 => r1 ::: t2.rows.find(condition(r1,_)).getOrElse(t2.getEmptyRow).zipWithIndex.filter(f => t2.getOrdinalsWithPredicate(lookupSelectorFunc).contains(f._2)).map(_._1)))
+*/

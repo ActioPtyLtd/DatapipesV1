@@ -1,0 +1,91 @@
+{
+  "script": {
+    "schema": {},
+    "tasks": {
+      "read-product-csv": {
+        "type": "extract",
+        "behavior": "simple",
+        "dataSource": {
+          "behavior": "regex",
+          "directory": "C:\\Users\\mauri\\bitbucket\\gandm-data",
+          "type":"file",
+          "filenameTemplate": "2016-05-08_19.30.01_stock-master.txt"
+        }
+      },
+      "split-product-csv": {
+        "type" : "transform",
+        "batch" :  ["addheader,col1"]
+      },
+      "stage-product-db": {
+        "type": "load",
+        "behavior" : "insert",
+        "dataSource": {
+          "type": "sql",
+          "behavior" : "insert",
+          "jdbcDriver": "org.postgresql.Driver",
+          "connect": "jdbc:postgresql://localhost/test?user=postgres&password=postgres",
+          "query": {
+            "queryTemplate": "",
+            "create": "insert into psa.product (col1) values (@col1)"
+          },
+          "inputDelimiter": ","
+        }
+      },
+      "read-stage-product-db": {
+        "type": "extract",
+        "dataSource": {
+          "type": "sql",
+          "jdbcDriver": "org.postgresql.Driver",
+          "connect": "jdbc:postgresql://localhost/test?user=postgres&password=postgres",
+          "query": {
+            "queryTemplate": "select * from psa.product"
+          },
+          "inputDelimiter": ","
+        }
+      },
+      "parse-stage-product-db": {
+        "type" : "transform",
+        "batch" :  ["split2colsD,col1,\\|",
+                    "rename,col2,group,col3,code,col4,status,col5,model,col6,rx,col7,online-frame-colour,col8,frame-colour,col9,lens-colour,col10,Olens-width,col11,Onose-bridge,col12,Otemple-length,col13,Oframe-depth,col14,category,col15,Owhole-sale-price,col16,Orrp,col17,Oapn,col18,gender,col19,shape,col20,frame-type,col21,frame-material,col22,lens-material",
+                    "defaultIfBlank,Olens-width,Onose-bridge,Otemple-length,Oframe-depth,Owhole-sale-price,Orrp,Oapn,0",
+                    "rename,Olens-width1,lens-width,Onose-bridge1,nose-bridge,Otemple-length1,temple-length,Oframe-depth1,frame-depth,Owhole-sale-price1,whole-sale-price,Orrp1,rrp,Oapn1,apn",
+                    "keep,group,code,status,model,rx,online-frame-colour,frame-colour,lens-colour,lens-width,nose-bridge,temple-length,frame-depth,category,whole-sale-price,rrp,apn,gender,shape,frame-type,frame-material,lens-material"
+        ]
+      },
+      "update-product-db": {
+        "type": "datasourceupdate",
+        "behavior" : "",
+        "keys": ["code"],
+        "dataSource": {
+          "type": "sql",
+          "behavior" : "",
+          "jdbcDriver": "org.postgresql.Driver",
+          "connect": "jdbc:postgresql://localhost/test?user=postgres&password=postgres",
+          "query": {
+            "queryTemplate": "",
+            "create": "insert into product (\"group\",code,status,model,rx,\"online-frame-colour\",\"frame-colour\",\"lens-colour\",\"lens-width\",\"nose-bridge\",\"temple-length\",\"frame-depth\",category,\"whole-sale-price\",rrp,apn,gender,shape,\"frame-type\",\"frame-material\",\"lens-material\") values (@group,@code,@status,@model,@rx,@online-frame-colour,@frame-colour,@lens-colour,@lens-width::numeric,@nose-bridge::numeric,@temple-length::numeric,@frame-depth::numeric,@category,@whole-sale-price::numeric,@rrp::numeric,@apn::bigint,@gender,@shape,@frame-type,@frame-material,@lens-material)",
+            "read": "select * from product",
+            "update": "update product set \"group\"=@group,status=@status,model=@model,rx=@rx,\"online-frame-colour\"=@online-frame-colour,\"frame-colour\"=@frame-colour,\"lens-colour\"=@lens-colour,\"lens-width\"=@lens-width,\"nose-bridge\"=@nose-bridge,\"temple-length\"=@temple-length,\"frame-depth\"=@frame-depth,category=@category,\"whole-sale-price\"=@whole-sale-price,rrp=@rrp,apn=@apn,gender=@gender,shape=@shape,\"frame-type\"=@frame-type,\"frame-material\"=@frame-material,\"lens-material\"=@lens-material) where code = @code"
+          }
+        }
+      }
+    },
+    "pipelines": {
+      "stage-product" : {
+        "pipe" : "read-product-csv | split-product-csv | stage-product-db"
+      },
+      "load-product" : {
+        "pipe": "read-stage-product-db | parse-stage-product-db | update-product-db"
+      }
+    },
+    "services": {
+      "name001": {
+        "path": "/a/b/c",
+        "pipe": "p00411"
+      }
+    },
+    "startup": {
+      "exec": "load-product"
+    }
+  }
+}

@@ -96,7 +96,7 @@ public class DataSourceSQL extends DataSource {
     @Override
     public void execute(DataSet data, String statement) throws Exception {
         DataSet nds = DataSetTransforms.prepare4statement(data, statement);
-        statement = statement.replaceAll("@(?<name>[a-zA-Z0-9]+)","?");
+        statement = statement.replaceAll("@(?<name>[-a-zA-Z0-9]+)","?");
 
         Connection cn = null;
 

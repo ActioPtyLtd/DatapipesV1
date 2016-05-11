@@ -8,20 +8,22 @@
         "dataSource": {
           "behavior": "regex",
           "directory": "C:\\Users\\mauri\\bitbucket\\gandm-data",
-          "type":"file",
+          "type": "file",
           "filenameTemplate": "2016-05-08_19.30.01_stock-master.txt"
         }
       },
       "split-product-csv": {
-        "type" : "transform",
-        "batch" :  ["addheader,col1"]
+        "type": "transform",
+        "batch": [
+          "addheader,col1"
+        ]
       },
       "stage-product-db": {
         "type": "load",
-        "behavior" : "insert",
+        "behavior": "insert",
         "dataSource": {
           "type": "sql",
-          "behavior" : "insert",
+          "behavior": "insert",
           "jdbcDriver": "org.postgresql.Driver",
           "connect": "jdbc:postgresql://localhost/test?user=postgres&password=postgres",
           "query": {
@@ -44,21 +46,24 @@
         }
       },
       "parse-stage-product-db": {
-        "type" : "transform",
-        "batch" :  ["split2colsD,col1,\\|",
-                    "rename,col2,group,col3,code,col4,status,col5,model,col6,rx,col7,online-frame-colour,col8,frame-colour,col9,lens-colour,col10,Olens-width,col11,Onose-bridge,col12,Otemple-length,col13,Oframe-depth,col14,category,col15,Owhole-sale-price,col16,Orrp,col17,Oapn,col18,gender,col19,shape,col20,frame-type,col21,frame-material,col22,lens-material",
-                    "defaultIfBlank,Olens-width,Onose-bridge,Otemple-length,Oframe-depth,Owhole-sale-price,Orrp,Oapn,0",
-                    "rename,Olens-width1,lens-width,Onose-bridge1,nose-bridge,Otemple-length1,temple-length,Oframe-depth1,frame-depth,Owhole-sale-price1,whole-sale-price,Orrp1,rrp,Oapn1,apn",
-                    "keep,group,code,status,model,rx,online-frame-colour,frame-colour,lens-colour,lens-width,nose-bridge,temple-length,frame-depth,category,whole-sale-price,rrp,apn,gender,shape,frame-type,frame-material,lens-material"
+        "type": "transform",
+        "batch": [
+          "split2colsD,col1,\\|",
+          "rename,col2,group,col3,code,col4,status,col5,model,col6,rx,col7,online-frame-colour,col8,frame-colour,col9,lens-colour,col10,Olens-width,col11,Onose-bridge,col12,Otemple-length,col13,Oframe-depth,col14,category,col15,Owhole-sale-price,col16,Orrp,col17,Oapn,col18,gender,col19,shape,col20,frame-type,col21,frame-material,col22,lens-material",
+          "defaultIfBlank,Olens-width,Onose-bridge,Otemple-length,Oframe-depth,Owhole-sale-price,Orrp,Oapn,0",
+          "rename,Olens-width1,lens-width,Onose-bridge1,nose-bridge,Otemple-length1,temple-length,Oframe-depth1,frame-depth,Owhole-sale-price1,whole-sale-price,Orrp1,rrp,Oapn1,apn",
+          "keep,group,code,status,model,rx,online-frame-colour,frame-colour,lens-colour,lens-width,nose-bridge,temple-length,frame-depth,category,whole-sale-price,rrp,apn,gender,shape,frame-type,frame-material,lens-material"
         ]
       },
       "update-product-db": {
         "type": "datasourceupdate",
-        "behavior" : "",
-        "keys": ["code"],
+        "behavior": "",
+        "keys": [
+          "code"
+        ],
         "dataSource": {
           "type": "sql",
-          "behavior" : "",
+          "behavior": "",
           "jdbcDriver": "org.postgresql.Driver",
           "connect": "jdbc:postgresql://localhost/test?user=postgres&password=postgres",
           "query": {
@@ -66,6 +71,141 @@
             "create": "insert into product (\"group\",code,status,model,rx,\"online-frame-colour\",\"frame-colour\",\"lens-colour\",\"lens-width\",\"nose-bridge\",\"temple-length\",\"frame-depth\",category,\"whole-sale-price\",rrp,apn,gender,shape,\"frame-type\",\"frame-material\",\"lens-material\") values (@group,@code,@status,@model,@rx,@online-frame-colour,@frame-colour,@lens-colour,@lens-width::numeric,@nose-bridge::numeric,@temple-length::numeric,@frame-depth::numeric,@category,@whole-sale-price::numeric,@rrp::numeric,@apn::bigint,@gender,@shape,@frame-type,@frame-material,@lens-material)",
             "read": "select * from product",
             "update": "update product set \"group\"=@group,status=@status,model=@model,rx=@rx,\"online-frame-colour\"=@online-frame-colour,\"frame-colour\"=@frame-colour,\"lens-colour\"=@lens-colour,\"lens-width\"=@lens-width,\"nose-bridge\"=@nose-bridge,\"temple-length\"=@temple-length,\"frame-depth\"=@frame-depth,category=@category,\"whole-sale-price\"=@whole-sale-price,rrp=@rrp,apn=@apn,gender=@gender,shape=@shape,\"frame-type\"=@frame-type,\"frame-material\"=@frame-material,\"lens-material\"=@lens-material) where code = @code"
+          }
+        }
+      },
+      "read-patient-csv": {
+        "type": "extract",
+        "behavior": "simple",
+        "dataSource": {
+          "behavior": "regex",
+          "directory": "C:\\Users\\mauri\\bitbucket\\gandm-data\\gmdata_CSV\\CSV",
+          "type": "file",
+          "filenameTemplate": "VPATIENT.CSV"
+        }
+      },
+      "split-patient-csv": {
+        "type": "transform",
+        "batch": [
+          "addheader,col1",
+          "const,1"
+        ]
+      },
+      "stage-patient-db": {
+        "type": "load",
+        "behavior": "insert",
+        "dataSource": {
+          "type": "sql",
+          "behavior": "insert",
+          "jdbcDriver": "org.postgresql.Driver",
+          "connect": "jdbc:postgresql://localhost/test?user=postgres&password=postgres",
+          "query": {
+            "queryTemplate": "",
+            "create": "insert into psa.patient (col1,const1) values (@col1,@const1)"
+          },
+          "inputDelimiter": ","
+        }
+      },
+      "read-stage-patient-db": {
+        "type": "extract",
+        "dataSource": {
+          "type": "sql",
+          "jdbcDriver": "org.postgresql.Driver",
+          "connect": "jdbc:postgresql://localhost/test?user=postgres&password=postgres",
+          "query": {
+            "queryTemplate": "select * from psa.patient"
+          }
+        }
+      },
+      "parse-stage-patient-db": {
+        "type": "transform",
+        "batch": [
+          "addheader,col1",
+          "split2cols,col1",
+          "row1header",
+          "const,",
+          "const,",
+          "const,",
+          "const,",
+          "const,61",
+          "const,",
+          "const,1",
+          "const,1",
+          "const,1",
+          "const,1",
+          "const,HANKS",
+          "concat,const11,refnum,-",
+          "rename,concat1,externalref,given_name,firstname,surname,lastname,sex,gender,birthday,birthdate,phone3,phonenumber",
+          "rename,const1,comments,const2,middlename,const3,preferredname,const4,preferredcontactmethod,const5,phonecountryid,const6,phonerawnumber,const7,phonesmsenabled,const8,phonefax,const9,phonelandline,const10,phonemobile"]
+      },
+      "update-customer-db": {
+        "type": "datasourceupdate",
+        "behavior": "",
+        "keys": [
+          "externalref"
+        ],
+        "dataSource": {
+          "type": "sql",
+          "behavior": "",
+          "jdbcDriver": "org.postgresql.Driver",
+          "connect": "jdbc:postgresql://localhost/test?user=postgres&password=postgres",
+          "query": {
+            "queryTemplate": "",
+            "create": "insert into customer (createddate,externalref,comments,firstname,lastname,middlename,title,gender,birthdate,preferredname,preferredcontactmethod,email,phonecountryid,phonenumber,phonerawnumber,phonemobile,phonesmsenabled,phonefax,phonelandline) values (current_date,@externalref,@comments,@firstname,@lastname,@middlename,@title,@gender,@birthdate,@preferredname,@preferredcontactmethod,@email,@phonecountryid::int,@phonenumber,@phonerawnumber,@phonemobile::bit,@phonesmsenabled::bit,@phonefax::bit,@phonelandline::bit)",
+            "read": "select * from customer",
+            "update": "update customer set \"group\"=@group,status=@status,model=@model,rx=@rx,\"online-frame-colour\"=@online-frame-colour,\"frame-colour\"=@frame-colour,\"lens-colour\"=@lens-colour,\"lens-width\"=@lens-width,\"nose-bridge\"=@nose-bridge,\"temple-length\"=@temple-length,\"frame-depth\"=@frame-depth,category=@category,\"whole-sale-price\"=@whole-sale-price,rrp=@rrp,apn=@apn,gender=@gender,shape=@shape,\"frame-type\"=@frame-type,\"frame-material\"=@frame-material,\"lens-material\"=@lens-material) where code = @code"
+          }
+        }
+      },
+      "read-doctor-csv": {
+        "type": "extract",
+        "behavior": "simple",
+        "dataSource": {
+          "behavior": "regex",
+          "directory": "C:\\Users\\mauri\\bitbucket\\gandm-data\\gmdata_CSV\\CSV",
+          "type": "file",
+          "filenameTemplate": "VDOCTOR.CSV"
+        }
+      },
+      "parse-doctor-csv": {
+        "type": "transform",
+        "batch": [
+          "addheader,col1",
+          "split2cols,col1",
+          "row1header",
+          "const,specialist",
+          "const,",
+          "const,",
+          "const,",
+          "const,61",
+          "const,",
+          "const,1",
+          "const,1",
+          "const,1",
+          "const,1",
+          "const,HANKS",
+          "concat,const11,code,-",
+          "const,?",
+          "const,1900-01-01",
+          "rename,concat1,externalref,gname,firstname,sname,lastname,phone,phonenumber",
+          "rename,const1,employeetype,const2,middlename,const3,preferredname,const4,preferredcontactmethod,const5,phonecountryid,const6,phonerawnumber,const7,phonesmsenabled,const8,phonefax,const9,phonelandline,const10,phonemobile,const12,gender,const13,birthdate"]
+      },
+      "update-employee-db": {
+        "type": "datasourceupdate",
+        "behavior": "",
+        "keys": [
+          "externalref"
+        ],
+        "dataSource": {
+          "type": "sql",
+          "behavior": "",
+          "jdbcDriver": "org.postgresql.Driver",
+          "connect": "jdbc:postgresql://localhost/test?user=postgres&password=postgres",
+          "query": {
+            "queryTemplate": "",
+            "create": "insert into employee (createddate,externalref,employeetype,employmentstartdate,employmentenddate,firstname,lastname,middlename,title,gender,birthdate,preferredname,preferredcontactmethod,email,phonecountryid,phonenumber,phonerawnumber,phonemobile,phonesmsenabled,phonefax,phonelandline) values (current_date,@externalref,@employeetype,current_date,current_date,@firstname,@lastname,@middlename,@title,@gender,@birthdate,@preferredname,@preferredcontactmethod,@email,@phonecountryid::int,@phonenumber,@phonerawnumber,@phonemobile::bit,@phonesmsenabled::bit,@phonefax::bit,@phonelandline::bit)",
+            "read": "select * from employee",
+            "update": "update employee set \"group\"=@group,status=@status,model=@model,rx=@rx,\"online-frame-colour\"=@online-frame-colour,\"frame-colour\"=@frame-colour,\"lens-colour\"=@lens-colour,\"lens-width\"=@lens-width,\"nose-bridge\"=@nose-bridge,\"temple-length\"=@temple-length,\"frame-depth\"=@frame-depth,category=@category,\"whole-sale-price\"=@whole-sale-price,rrp=@rrp,apn=@apn,gender=@gender,shape=@shape,\"frame-type\"=@frame-type,\"frame-material\"=@frame-material,\"lens-material\"=@lens-material) where code = @code"
           }
         }
       }
@@ -76,6 +216,15 @@
       },
       "load-product" : {
         "pipe": "read-stage-product-db | parse-stage-product-db | update-product-db"
+      },
+      "stage-patient" : {
+        "pipe" : "read-patient-csv | split-patient-csv | stage-patient-db"
+      },
+      "load-patient" : {
+        "pipe" : "read-patient-csv | parse-stage-patient-db | update-customer-db"
+      },
+      "load-doctor" : {
+        "pipe" : "read-doctor-csv | parse-doctor-csv | update-employee-db"
       }
     },
     "services": {
@@ -85,7 +234,7 @@
       }
     },
     "startup": {
-      "exec": "load-product"
+      "exec": "load-doctor"
     }
   }
 }

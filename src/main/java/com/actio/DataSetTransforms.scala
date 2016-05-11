@@ -72,7 +72,7 @@ object DataSetTransforms {
   def concatFunc(ds: DataSet, selectorFunc: String => Boolean, delim: String = "") = rowFunc(ds, ds.getNextAvailableColumnName("concat"), r => ds.getOrdinalsWithPredicate(selectorFunc) map(r(_)) mkString delim)
   def concat(ds: DataSet, cols: List[String], delim: String): DataSet = concatFunc(ds, c => cols.contains(c), delim)
 
-  def const(ds: DataSet, value: String) = rowFunc(ds, ds.getNextAvailableColumnName("const"), _ => value)
+  def const(ds: DataSet, value: List[String]) = DataSetTableScala(ds.getNextAvailableColumnName("const", value.length) ::: ds.header, ds.rows map (value ::: _) ) //rowFunc(ds, ds.getNextAvailableColumnName("const"), _ => value)
 
   def mergeCols(ds1: DataSet, ds2: DataSet) = DataSetTableScala(ds1.header ::: ds2.header, (ds1.rows zip ds2.rows) map(r => r._2 ::: r._1))
 
@@ -81,4 +81,10 @@ object DataSetTransforms {
 
   def defaultIfBlankValue(value: String, default: String) = if(value.trim.isEmpty) default else value
   def defaultIfBlank(ds: DataSet, cols: List[String], default: String) = cols.foldLeft(ds)((d,c) => valueFunc(d, c, defaultIfBlankValue(_,default)))
+
+  def filterIfNotBlank(ds: DataSet, cols: List[String]) = DataSetTableScala(ds.header, ds.rows filter (r => cols.forall(!ds.getValue(r,_).trim.isEmpty)))
+
+  def transformLookupFunc(ds1: DataSet, ds2: DataSet, condition: (List[String],List[String]) => Boolean, lookupSelectorFunc: String => Boolean) =
+    DataSetTableScala((ds2.header.filter(lookupSelectorFunc) map ds1.getNextAvailableColumnName) ::: ds1.header,
+    ds1.rows.map(r1 => ds2.rows.find(condition(r1,_)).getOrElse(ds2.getEmptyRow).zipWithIndex.filter(f => ds2.getOrdinalsWithPredicate(lookupSelectorFunc).contains(f._2)).map(_._1) ::: r1))
 }

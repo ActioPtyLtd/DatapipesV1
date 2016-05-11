@@ -20,13 +20,18 @@ class TaskLookup extends Task {
     val inClause = dataSet.getColumnValues(lookupColumn1).distinct.map("\'" + _ + "\'") mkString ","
 
     val dataSource = DPSystemFactory.newDataSource(dataSourceConfig.withValue("query.queryTemplate", ConfigValueFactory.fromAnyRef(query.replaceAllLiterally("$1", inClause))), masterConfig)
+
     dataSource.execute()
+    dataSource.dataSet.initBatch
 
-    val condition = (row1: List[String], row2: List[String]) => row1(dataSet.getOrdinalOfColumn(lookupColumn1)) == row2(dataSource.dataSet.getOrdinalOfColumn(lookupColumn2))
+    val condition = (row1: List[String], row2: List[String]) =>
+      if(row2 == Nil) false else row1(dataSet.getOrdinalOfColumn(lookupColumn1)) == row2(dataSource.dataSet.getOrdinalOfColumn(lookupColumn2))
 
-    //TODO: fix lookup transform
-    //dataSet = dataSet.transformLookup(dataSource.dataSet, condition, _ => true)
+    for(ds <- dataSource.dataSet) {
+      // should maybe union the resultsets
 
+      dataSet = DataSetTransforms.transformLookupFunc(dataSet, ds, condition, _ => true)
+    }
   }
 
   def load(): Unit = ???

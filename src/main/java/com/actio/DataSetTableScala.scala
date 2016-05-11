@@ -76,6 +76,4 @@ trait TableScala {
 
   def transformFilter(filter: List[String] => Boolean) = DataSetTableScala(header, rows filter filter)
 
-  def transformLookup(t2: TableScala, condition: (List[String],List[String]) => Boolean, lookupSelectorFunc: String => Boolean) = DataSetTableScala(header ::: t2.header.filter(lookupSelectorFunc),
-    rows.map(r1 => r1 ::: t2.rows.find(condition(r1,_)).getOrElse(t2.getEmptyRow).zipWithIndex.filter(f => t2.getOrdinalsWithPredicate(lookupSelectorFunc).contains(f._2)).map(_._1)))
 */

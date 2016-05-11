@@ -19,10 +19,10 @@ class TaskDataSourceUpdate extends Task {
 
     dataSource.dataSet.initBatch
 
-    if(dataSource.dataSet.isEmpty)
+    for (ds <- dataSource.dataSet) {
+      if (ds.isEmptyDataSet)
         dataSource.create(dataSet)
-    else {
-      for (ds <- dataSource.dataSet) {
+      else {
         val newDataSet = DataSetTransforms.newRows(dataSet, ds, keyColumns())
         if (!newDataSet.isEmptyDataSet)
           dataSource.create(newDataSet)

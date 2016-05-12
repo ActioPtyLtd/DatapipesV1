@@ -217,7 +217,9 @@
           "const,HANKS,1,1,0,0,0,0,1900-01-01",
           "concat,const1,conrefnum,-",
           "concat,const1,refnum,-",
-          "rename,date,createddate,concat1,externalref,const2,storeid,const3,employeeid,const4,totalcost,const5,originalcost,const6,discountcodeif,const7,returnshippinglocationid,const8,expecteddeliverydate"
+          "concat,const1,optom,-",
+          "convdate,date,MM/dd/yyyy,yyyy-MM-dd",
+          "rename,date1,createddate,concat1,externalref,const2,storeid,const4,totalcost,const5,originalcost,const6,discountcodeid,const7,returnshippinglocationid,const8,expecteddeliverydate"
           ]
       },
       "lookup-customer": {
@@ -234,6 +236,27 @@
           }
         }
       },
+      "lookup-employee": {
+        "type": "lookup",
+        "behavior": "lookup-merge",
+        "lookup1": "concat3",
+        "lookup2": "externalref",
+        "dataSource": {
+          "type": "sql",
+          "jdbcDriver": "org.postgresql.Driver",
+          "connect": "jdbc:postgresql://localhost/test?user=postgres&password=postgres",
+          "query": {
+            "queryTemplate": "select id,externalref from employee where externalref in ($1)"
+          }
+        }
+      },
+      "prep-productorder": {
+        "type": "transform",
+        "batch": [
+          "defaultIfBlank,id1,id2,0",
+          "rename,id3,customerid,id4,employeeid"
+         ]
+      },
       "update-productorder-db": {
         "type": "datasourceupdate",
         "behavior": "",
@@ -247,7 +270,7 @@
           "connect": "jdbc:postgresql://localhost/test?user=postgres&password=postgres",
           "query": {
             "queryTemplate": "",
-            "create": "insert into productorder (createddate,externalref,storeid,customerid,employeeid,totalcost,originalcost,discountcodeid,returnshippinglocationid,expecteddeliverydate) values (@createddate,@externalref,@storeid,@customerid,@employeeid,@totalcost,@originalcost,@discountcodeid,@returnshippinglocationid,@expecteddeliverydate)",
+            "create": "insert into productorder (createddate,externalref,storeid,customerid,employeeid,totalcost,originalcost,discountcodeid,returnshippinglocationid,expecteddeliverydate) values (@createddate::timestamp,@externalref,@storeid::int,@customerid::int,@employeeid::int,@totalcost::money,@originalcost::money,@discountcodeid::int,@returnshippinglocationid::int,@expecteddeliverydate::timestamp)",
             "read": "select * from productorder",
             "update": "update productorder set \"group\"=@group,status=@status,model=@model,rx=@rx,\"online-frame-colour\"=@online-frame-colour,\"frame-colour\"=@frame-colour,\"lens-colour\"=@lens-colour,\"lens-width\"=@lens-width,\"nose-bridge\"=@nose-bridge,\"temple-length\"=@temple-length,\"frame-depth\"=@frame-depth,category=@category,\"whole-sale-price\"=@whole-sale-price,rrp=@rrp,apn=@apn,gender=@gender,shape=@shape,\"frame-type\"=@frame-type,\"frame-material\"=@frame-material,\"lens-material\"=@lens-material) where code = @code"
           }
@@ -271,7 +294,7 @@
         "pipe" : "read-doctor-csv | parse-doctor-csv | update-employee-db"
       },
       "load-productorder" : {
-        "pipe" : "read-consult-csv | parse-consult-csv | lookup-customer | update-productorder-db"
+        "pipe" : "read-consult-csv | parse-consult-csv | lookup-customer | lookup-employee | prep-productorder | update-productorder-db"
       }
     },
     "services": {

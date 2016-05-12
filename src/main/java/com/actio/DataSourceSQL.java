@@ -135,6 +135,9 @@ public class DataSourceSQL extends DataSource {
         } catch (Exception e)
         {
             logger.info("Exception "+e.getMessage());
+            Throwable c = e.getCause();
+            if(c!=null)
+                logger.info(c.getMessage());
         }
         finally {
             if(cn !=null)

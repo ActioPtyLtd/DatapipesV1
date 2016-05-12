@@ -32,6 +32,8 @@ class TaskLookup extends Task {
 
       dataSet = DataSetTransforms.transformLookupFunc(dataSet, ds, condition, _ => true)
     }
+
+    val test = false
   }
 
   def load(): Unit = ???

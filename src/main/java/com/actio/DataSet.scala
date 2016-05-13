@@ -153,7 +153,7 @@ abstract class DataSet extends DPSystemConfigurable with Iterator[DataSet] {
 
 
   def getOrdinalOfColumn(columnName: String) = { val i = header.indexWhere(_ == columnName)
-                                                  if(i < 0) println(columnName)
+                                                  if(i < 0) throw new Exception("Column " + columnName + " doesn't exist")
                                                   i }
 
   def getOrdinalsWithPredicate(predicate: String => Boolean) = header.zipWithIndex filter(c => predicate(c._1)) map(_._2)

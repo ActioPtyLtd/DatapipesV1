@@ -1,0 +1,99 @@
+{
+  "script": {
+    "schema": {},
+    "tasks": {
+      "read-invoice-csv": {
+        "type": "extract",
+        "behavior": "simple",
+        "dataSource": {
+          "behavior": "regex",
+          "directory": "C:\\Users\\mauri\\bitbucket\\gandm-data\\gmdata_CSV\\CSV",
+          "type": "file",
+          "filenameTemplate": "VACCOUNT.CSV"
+        }
+      },
+      "parse-invoice-csv": {
+        "type": "transform",
+        "batch": [
+          "addheader,col1",
+          "split2cols,col1",
+          "row1header",
+          "const,HANKS,0",
+          "concat,const1,accnum,-",
+          "concat,const1,refnum,-",
+          "concat,const1,optom,-",
+          "sum,sungamt,confee,clensamt,specamt,frameamt,miscamt",
+          "convdate,accdate,MM/dd/yyyy,yyyy-MM-dd",
+          "rename,concat1,externalref,accdate1,createddate,sum1,total,const2,orderid"]
+      },
+      "lookup-customer": {
+        "type": "lookup",
+        "behavior": "lookup-merge",
+        "lookup1": "concat2",
+        "lookup2": "externalref",
+        "dataSource": {
+          "type": "sql",
+          "jdbcDriver": "org.postgresql.Driver",
+          "connect": "jdbc:postgresql://localhost/test?user=postgres&password=postgres",
+          "query": {
+            "queryTemplate": "select id,externalref from customer where externalref in ($1)"
+          }
+        }
+      },
+      "lookup-employee": {
+        "type": "lookup",
+        "behavior": "lookup-merge",
+        "lookup1": "concat3",
+        "lookup2": "externalref",
+        "dataSource": {
+          "type": "sql",
+          "jdbcDriver": "org.postgresql.Driver",
+          "connect": "jdbc:postgresql://localhost/test?user=postgres&password=postgres",
+          "query": {
+            "queryTemplate": "select id,externalref from employee where externalref in ($1)"
+          }
+        }
+      },
+      "prep-invoice": {
+        "type": "transform",
+        "batch": [
+          "defaultIfBlank,id1,id2,0",
+          "rename,id3,customerid,id4,employeeid"
+        ]
+      },
+      "update-invoice-db": {
+        "type": "datasourceupdate",
+        "behavior": "",
+        "keys": [
+          "externalref"
+        ],
+        "dataSource": {
+          "type": "sql",
+          "behavior": "",
+          "jdbcDriver": "org.postgresql.Driver",
+          "connect": "jdbc:postgresql://localhost/test?user=postgres&password=postgres",
+          "query": {
+            "create": "insert into invoice (externalref,orderid,createddate,customerid,employeeid,total) values (@externalref,@orderid::int,@createddate::timestamp,@customerid::int,@employeeid::int,@total::money)",
+            "read": "select * from invoice",
+            "update": "",
+            "queryTemplate": ""
+          }
+        }
+      }
+    },
+    "pipelines": {
+      "load-invoice" : {
+        "pipe": "read-invoice-csv | parse-invoice-csv | lookup-customer | lookup-employee | prep-invoice | update-invoice-db"
+      }
+    },
+    "services": {
+      "name001": {
+        "path": "/a/b/c",
+        "pipe": "p00411"
+      }
+    },
+    "startup": {
+      "exec": "load-invoice"
+    }
+  }
+}

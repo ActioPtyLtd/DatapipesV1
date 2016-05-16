@@ -50,7 +50,10 @@ object DataSetTransforms {
   def changes(ds1: DataSet, ds2: DataSet, keyCols: List[String]) = DataSetTableScala(ds1.header, ds1.rows.filter(r => {
     val option = ds2.rows.find(ri => keyCols.forall(c => ds1.getValue(r, c) == ds2.getValue(ri, c)))
     if(option.isDefined)
-      !ds1.header.forall(c => ds1.getValue(r,c) == ds2.getValue(option.get, c))
+      !ds1.header.forall(c => {val equal = ds1.getValue(r,c) == ds2.getValue(option.get, c)
+        if(!equal)
+          printf(c) //TODO remove side-effect. I needed this to test diffs
+        equal})
     else
       false
   }))

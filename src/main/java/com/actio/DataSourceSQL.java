@@ -98,10 +98,9 @@ public class DataSourceSQL extends DataSource {
         DataSet nds = DataSetTransforms.prepare4statement(data, statement);
         statement = statement.replaceAll("@(?<name>[-_a-zA-Z0-9]+)","?");
 
-        Connection cn = null;
+        logger.info("Connecting to database...");
 
-        try {
-            cn = DriverManager.getConnection(getConnectStr());
+        try(Connection cn = DriverManager.getConnection(getConnectStr())) {
             //cn.setNetworkTimeout(null,160000);
             // Get the warnings
             for (SQLWarning warn = cn.getWarnings(); warn != null; warn = warn
@@ -116,7 +115,7 @@ public class DataSourceSQL extends DataSource {
             }
             logger.info("Connected");
 
-            logger.info("CREATE TABLE T1 (" + String.join(",", nds.getColumnHeader().stream().map(f -> f + " text").collect(Collectors.toList())) + ");");
+            //logger.info("CREATE TABLE T1 (" + String.join(",", nds.getColumnHeader().stream().map(f -> f + " text").collect(Collectors.toList())) + ");");
 
             PreparedStatement stmt = cn.prepareStatement(statement);
 
@@ -129,25 +128,21 @@ public class DataSourceSQL extends DataSource {
 
                 stmt.addBatch();
             }
-            logger.info("Executing SQL Statement...");
+            logger.info("Executing SQL batch statement...");
             stmt.executeBatch();
-            logger.info("Executed SQL Statement.");
+            logger.info("Successfully executed statement.");
         }
         catch(BatchUpdateException e) {
             SQLException se = e.getNextException();
             if(se!=null)
-                logger.info("Exception "+se.getMessage());
+                logger.error("Exception "+se.getMessage());
         }
         catch (Exception e)
         {
-            logger.info("Exception "+e.getMessage());
+            logger.error("Exception "+e.getMessage());
             Throwable c = e.getCause();
             if(c!=null)
-                logger.info(c.getMessage());
-        }
-        finally {
-            if(cn !=null)
-                cn.close();
+                logger.error(c.getMessage());
         }
     }
 
@@ -156,12 +151,9 @@ public class DataSourceSQL extends DataSource {
         // default to an extract behavior for SQL
         // execute the sqlquery
 
-        logger.info("SqlQuery: " + query);
+        logger.info("Connecting to database...");
 
-        Connection cn = null;
-
-        try {
-            cn = DriverManager.getConnection(getConnectStr());
+        try(Connection cn = DriverManager.getConnection(getConnectStr())) {
             //cn.setNetworkTimeout(null,160000);
             // Get the warnings
             for (SQLWarning warn = cn.getWarnings(); warn != null; warn = warn
@@ -180,7 +172,7 @@ public class DataSourceSQL extends DataSource {
             String sqlQuery = query;
             //PreparedStatement stmt = cn.prepareStatement(QueryParser.processTemplate(sqlquery.getQueryTemplate()));
 
-            Statement st = cn.createStatement(ResultSet.TYPE_SCROLL_SENSITIVE,ResultSet.CONCUR_READ_ONLY);
+            Statement st = cn.createStatement(ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_READ_ONLY);
 
             // store the results
             //dataSet = new DataSetRS();
@@ -188,20 +180,16 @@ public class DataSourceSQL extends DataSource {
             ////dataSet.setConfig(config, masterConfig);
             //// dataSet.set(stmt.executeQuery());
 
-            logger.info("Executing Query="+sqlQuery);
+            logger.info("Executing Query: " + sqlQuery);
 
             //dataSet.set(st.executeQuery(sqlQuery));
 
             dataSet = new DataSetDBStream(st.executeQuery(sqlQuery));
 
-            logger.info("Executed SQL Statement :");
-        } catch (Exception e)
-        {
-            logger.info("Exception "+e.getMessage());
+            logger.info("Successfully executed statement.");
         }
-        finally {
-            if(cn !=null)
-                cn.close();
+        catch (Exception e) {
+            logger.error("Exception "+e.getMessage());
         }
         return dataSet;
     }

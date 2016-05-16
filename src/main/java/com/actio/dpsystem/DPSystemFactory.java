@@ -57,6 +57,10 @@ public class DPSystemFactory extends DPSystemConfigurable {
         }
 
         File myConfigFile = new File(configFile);
+
+        if(!myConfigFile.exists())
+            logger.error("File " + configFile + " does not exist.");
+
         config = ConfigFactory.parseFile(myConfigFile);
         masterConfig = config;
 

@@ -45,7 +45,7 @@ object DataSetTransforms {
   def templateMerge(ds: DataSet, template: String) =
     DataSetTableScala(ds.getNextAvailableColumnName("template") :: ds.header, ds.rows.map(r => ds.header.foldLeft(template)((c,t) => t.replaceAll("@" + c, ds.getValue(r, c))) :: r))
 
-  def prepare4statement(ds: DataSet, template: String) = orderCols(ds, "@(?<name>[-a-zA-Z0-9]+)".r.findAllMatchIn(template).map(_.group(1)).toList)
+  def prepare4statement(ds: DataSet, template: String) = orderCols(ds, "@(?<name>[-_a-zA-Z0-9]+)".r.findAllMatchIn(template).map(_.group(1)).toList)
 
   def changes(ds1: DataSet, ds2: DataSet, keyCols: List[String]) = DataSetTableScala(ds1.header, ds1.rows.filter(r => {
     val option = ds2.rows.find(ri => keyCols.forall(c => ds1.getValue(r, c) == ds2.getValue(ri, c)))
@@ -94,5 +94,14 @@ object DataSetTransforms {
   def transformLookupFunc(ds1: DataSet, ds2: DataSet, condition: (List[String],List[String]) => Boolean, lookupSelectorFunc: String => Boolean) =
     DataSetTableScala((ds2.header.filter(lookupSelectorFunc) map ds1.getNextAvailableColumnName) ::: ds1.header,
       ds1.rows.map(r1 => ds2.rows.find(condition(r1,_)).getOrElse(ds2.getEmptyRow).zipWithIndex.filter(f => ds2.getOrdinalsWithPredicate(lookupSelectorFunc).contains(f._2)).map(_._1) ::: r1))
+
+  def trimValue(value: String) = value.trim
+  def trim(ds: DataSet, cols: List[String]) = cols.foldLeft(ds)((d,c) => valueFunc(d, c, trimValue))
+
+  def mapOrElseValue(value: String, colPairs: Map[String,String], orElse: String) =  colPairs.getOrElse(value, orElse)
+  def mapOrElse(ds: DataSet, col: String, colPairs: List[String], orElse: String) = {
+    val pairMap = colPairs.grouped(2).map(g => (g.head, g.tail.headOption.getOrElse(""))).toMap
+    valueFunc(ds, col, v => mapOrElseValue(v, pairMap, orElse))
+  }
 
 }

@@ -18,11 +18,15 @@ object UtilityFunctions extends Logging {
   def execute(methodName: String, params: java.util.List[Any]) = {
     val method = Class.forName("com.actio.DataSetTransforms").getDeclaredMethods.find(_.getName.equalsIgnoreCase(methodName))
 
-    if(method.isDefined)
+    if(method.isDefined) {
+      logger.info("Invoking method " + methodName)
       // assume return one data set right now
-      method.get.invoke(null, getParamValues(method.get.getParameters, params) map (_.asInstanceOf[Object]) : _*).asInstanceOf[DataSet]
-    else
+      method.get.invoke(null, getParamValues(method.get.getParameters, params) map (_.asInstanceOf[Object]): _*).asInstanceOf[DataSet]
+    }
+    else {
+      logger.error("Cannot find transform name: " + methodName)
       new DataSetTableScala() // returns an empty dataset if we cant find the method name
+    }
   }
 
   def getParamValues(methodParams: Array[Parameter], paramValues: java.util.List[Any]): List[Any] =

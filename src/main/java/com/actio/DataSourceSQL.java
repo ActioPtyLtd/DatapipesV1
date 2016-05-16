@@ -96,7 +96,7 @@ public class DataSourceSQL extends DataSource {
     @Override
     public void execute(DataSet data, String statement) throws Exception {
         DataSet nds = DataSetTransforms.prepare4statement(data, statement);
-        statement = statement.replaceAll("@(?<name>[-a-zA-Z0-9]+)","?");
+        statement = statement.replaceAll("@(?<name>[-_a-zA-Z0-9]+)","?");
 
         Connection cn = null;
 
@@ -132,7 +132,13 @@ public class DataSourceSQL extends DataSource {
             logger.info("Executing SQL Statement...");
             stmt.executeBatch();
             logger.info("Executed SQL Statement.");
-        } catch (Exception e)
+        }
+        catch(BatchUpdateException e) {
+            SQLException se = e.getNextException();
+            if(se!=null)
+                logger.info("Exception "+se.getMessage());
+        }
+        catch (Exception e)
         {
             logger.info("Exception "+e.getMessage());
             Throwable c = e.getCause();

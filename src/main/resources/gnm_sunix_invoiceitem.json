@@ -1,0 +1,88 @@
+{
+  "script": {
+    "schema": {},
+    "tasks": {
+      "read-invoiceitem-csv": {
+        "type": "extract",
+        "behavior": "simple",
+        "dataSource": {
+          "behavior": "regex",
+          "directory": "C:\\Users\\mauri\\bitbucket\\gandm-data\\Sunix\\PHHEW",
+          "type": "file",
+          "filenameTemplate": "VACCITEM.CSV"
+        }
+      },
+      "parse-invoiceitem-csv": {
+        "type": "transform",
+        "batch": [
+          "addheader,col1",
+          "split2cols,col1",
+          "row1header",
+          "const,PHHEW,",
+          "concat,const1,accnum,-",
+          "concat,const1,code,-",
+          "rename,qty,quantity,cost,originalcost,itemamt,cost"
+        ]
+      },
+      "lookup-invoice": {
+        "type": "lookup",
+        "behavior": "lookup-merge",
+        "lookup1": "concat1",
+        "lookup2": "externalref",
+        "dataSource": {
+          "type": "sql",
+          "jdbcDriver": "org.postgresql.Driver",
+          "connect": "jdbc:postgresql://localhost/test?user=postgres&password=postgres",
+          "query": {
+            "queryTemplate": "select id,externalref,createddate,storeid,employeeid,customerid from invoice where externalref in ($1)"
+          }
+        }
+      },
+      "lookup-product": {
+        "type": "lookup",
+        "behavior": "lookup-merge",
+        "lookup1": "concat2",
+        "lookup2": "external_id",
+        "dataSource": {
+          "type": "sql",
+          "jdbcDriver": "org.postgresql.Driver",
+          "connect": "jdbc:postgresql://localhost/test?user=postgres&password=postgres",
+          "query": {
+            "queryTemplate": "select productid,external_id from product where external_id in ($1)"
+          }
+        }
+      },
+      "prep-invoiceitem": {
+        "type": "transform",
+        "batch": [
+          "defaultIfBlank,id1,productid1,0",
+          "rename,id2,invoiceid,productid2,productid,storeid1,storeid,employeeid1,employeeid,customerid1,customerid,createddate1,createddate",
+          "keep,invoiceid,productid,storeid,employeeid,customerid,createddate,quantity,originalcost,cost"
+        ]
+      },
+      "update-invoiceitem-db": {
+        "type": "load",
+        "behavior": "",
+        "dataSource": {
+          "type": "sql",
+          "behavior": "",
+          "jdbcDriver": "org.postgresql.Driver",
+          "connect": "jdbc:postgresql://localhost/test?user=postgres&password=postgres",
+          "query": {
+            "queryTemplate" : "",
+            "create": "insert into invoiceitem (invoiceid,productid,storeid,employeeid,serviceemployeeid,customerid,createddate,quantity,originalcost,cost) values (@invoiceid::int,@productid::int,@storeid::int,@employeeid::int,@employeeid::int,@customerid::int,@createddate::timestamp,@quantity::int,@originalcost::money,@cost::money)"
+          }
+        }
+      }
+    },
+    "pipelines": {
+      "load-invoiceitem" : {
+        "pipe": "read-invoiceitem-csv | parse-invoiceitem-csv | lookup-invoice | lookup-product | prep-invoiceitem | update-invoiceitem-db"
+      }
+    },
+    "services": { },
+    "startup": {
+      "exec": "load-invoiceitem"
+    }
+  }
+}

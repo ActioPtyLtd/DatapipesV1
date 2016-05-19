@@ -6,9 +6,9 @@
         "type": "extract",
         "behavior": "simple",
         "dataSource": {
-          "directory": "C:\\Users\\mauri\\bitbucket\\gandm-data\\Sunix\\Hanks-TNV",
+          "directory": "C:\\Users\\mauri\\bitbucket\\gandm-data\\Sunix\\PHHEW",
           "type": "file",
-          "filenameTemplate": "VPATIENT.CSV.xls"
+          "filenameTemplate": "VPATIENT.CSV"
         }
       },
       "parse-patient-csv": {
@@ -18,7 +18,7 @@
           "split2cols,col1",
           "row1header",
           "trim,refnum",
-          "const,,,,,61,,true,true,true,true,TNV",
+          "const,,,,,61,,true,true,true,true,PHHEW",
           "concat,const11,refnum1,-",
           "maporelse,sex,M,M,F,F,-",
           "convdate,birthday,MM/dd/yyyy,yyyy-MM-dd",

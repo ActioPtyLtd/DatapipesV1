@@ -7,9 +7,9 @@
         "behavior": "simple",
         "dataSource": {
           "behavior": "regex",
-          "directory": "C:\\Users\\mauri\\bitbucket\\gandm-data\\Sunix\\ASC",
+          "directory": "C:\\Users\\mauri\\bitbucket\\gandm-data\\Sunix\\PHHEW",
           "type": "file",
-          "filenameTemplate": "VDOCTOR.CSV.xls"
+          "filenameTemplate": "VDOCTOR.CSV"
         }
       },
       "parse-doctor-csv": {
@@ -18,7 +18,7 @@
           "addheader,col1",
           "split2cols,col1",
           "row1header",
-          "const,Specialist,,,,61,,true,true,true,true,ASC,-,1900-01-01",
+          "const,Specialist,,,,61,,true,true,true,true,PHHEW,-,1900-01-01",
           "concat,const11,code,-",
           "rename,concat1,externalref,gname,firstname,sname,lastname,phone,phonenumber",
           "rename,const1,employeetype,const2,middlename,const3,preferredname,const4,preferredcontactmethod,const5,phonecountryid,const6,phonerawnumber,const7,phonesmsenabled,const8,phonefax,const9,phonelandline,const10,phonemobile,const12,gender,const13,birthdate",

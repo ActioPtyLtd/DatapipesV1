@@ -1,0 +1,80 @@
+{
+  "script": {
+    "schema": {},
+    "tasks": {
+      "read-frame-csv": {
+        "type": "extract",
+        "behavior": "simple",
+        "dataSource": {
+          "behavior": "regex",
+          "directory": "C:\\Users\\mauri\\bitbucket\\gandm-data\\Sunix\\HAASC",
+          "type": "file",
+          "filenameTemplate": "VFRAME.CSV"
+        }
+      },
+      "parse-frame-csv": {
+        "type": "transform",
+        "batch": [
+          "addheader,col1",
+          "split2cols,col1",
+          "row1header",
+          "const,HAASC,Frame,1900-01-01",
+          "concat,const1,framenum,-",
+          "concat,manufact,model,-",
+          "rename,concat1,external_id,const2,type,concat2,name,listprice,wholesaleprice,rrp,retailprice,const3,datecreated",
+          "keep,datecreated,type,external_id,name,wholesaleprice,retailprice"]
+      },
+      "read-contactlens-csv": {
+        "type": "extract",
+        "behavior": "simple",
+        "dataSource": {
+          "behavior": "regex",
+          "directory": "C:\\Users\\mauri\\bitbucket\\gandm-data\\Sunix\\HAASC",
+          "type": "file",
+          "filenameTemplate": "VCLCODE.CSV.xls"
+        }
+      },
+      "parse-contactlens-csv": {
+        "type": "transform",
+        "batch": [
+          "addheader,col1",
+          "split2cols,col1",
+          "row1header",
+          "const,HAASC,Contact Lens,1900-01-01,0",
+          "rename,clcode,external_id,const2,type,cldesc,name,const4,wholesaleprice,lensrrp,retailprice,const3,datecreated",
+          "keep,datecreated,type,external_id,name,wholesaleprice,retailprice"]
+      },
+      "update-product-db": {
+        "type": "datasourceupdate",
+        "behavior": "",
+        "keys": [
+          "external_id"
+        ],
+        "dataSource": {
+          "type": "sql",
+          "behavior": "",
+          "jdbcDriver": "org.postgresql.Driver",
+          "connect": "jdbc:postgresql://localhost/test?user=postgres&password=postgres",
+          "query": {
+            "queryTemplate": "",
+            "create": "insert into product (datecreated,\"type\",external_id,name,wholesaleprice,retailprice) values (@datecreated::timestamp,@type,@external_id,@name,@wholesaleprice::numeric,@retailprice::numeric)",
+            "read": "select * from product",
+            "update": "update product set datecreated=@datecreated::timestamp,\"type\"=@type,name=@name,wholesaleprice=@wholesaleprice::numeric,retailprice=@retailprice::numeric where external_id=@external_id"
+          }
+        }
+      }
+    },
+    "pipelines": {
+      "load-frame" : {
+        "pipe": "read-frame-csv | parse-frame-csv | update-product-db"
+      },
+      "load-contactlens" : {
+        "pipe": "read-contactlens-csv | parse-contactlens-csv | update-product-db"
+      }
+    },
+    "services": { },
+    "startup": {
+      "exec": "load-contactlens"
+    }
+  }
+}

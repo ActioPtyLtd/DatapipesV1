@@ -73,7 +73,7 @@ object DataSetTransforms {
   }))
 
   def concatFunc(ds: DataSet, selectorFunc: String => Boolean, delim: String = "") = rowFunc(ds, ds.getNextAvailableColumnName("concat"), r => ds.getOrdinalsWithPredicate(selectorFunc) map(r(_)) mkString delim)
-  def concat(ds: DataSet, cols: List[String], delim: String): DataSet = concatFunc(ds, c => cols.contains(c), delim)
+  def concat(ds: DataSet, cols: List[String], delim: String): DataSet = rowFunc(ds, ds.getNextAvailableColumnName("concat"), r => cols map(ds.getValue(r,_)) mkString delim)
 
   def const(ds: DataSet, value: List[String]) = DataSetTableScala(ds.getNextAvailableColumnName("const", value.length) ::: ds.header, ds.rows map (value ::: _) ) //rowFunc(ds, ds.getNextAvailableColumnName("const"), _ => value)
 

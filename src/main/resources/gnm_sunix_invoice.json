@@ -7,7 +7,7 @@
         "behavior": "simple",
         "dataSource": {
           "behavior": "regex",
-          "directory": "C:\\Users\\mauri\\bitbucket\\gandm-data\\gmdata_CSV\\CSV",
+          "directory": "C:\\Users\\mauri\\bitbucket\\gandm-data\\Sunix\\PHHEW",
           "type": "file",
           "filenameTemplate": "VACCOUNT.CSV"
         }
@@ -18,13 +18,28 @@
           "addheader,col1",
           "split2cols,col1",
           "row1header",
-          "const,HANKS,0",
+          "const,PHHEW,0",
+          "trim,refnum",
           "concat,const1,accnum,-",
-          "concat,const1,refnum,-",
+          "concat,const1,refnum1,-",
           "concat,const1,optom,-",
           "sum,sungamt,confee,clensamt,specamt,frameamt,miscamt",
           "convdate,accdate,MM/dd/yyyy,yyyy-MM-dd",
-          "rename,concat1,externalref,accdate1,createddate,sum1,total,const2,orderid"]
+          "rename,concat1,externalref,accdate1,createddate,sum1,totalcost,const2,orderid"]
+      },
+      "lookup-store": {
+        "type": "lookup",
+        "behavior": "lookup-merge",
+        "lookup1": "const1",
+        "lookup2": "code",
+        "dataSource": {
+          "type": "sql",
+          "jdbcDriver": "org.postgresql.Driver",
+          "connect": "jdbc:postgresql://localhost/test?user=postgres&password=postgres",
+          "query": {
+            "queryTemplate": "select id,code from store"
+          }
+        }
       },
       "lookup-customer": {
         "type": "lookup",
@@ -57,8 +72,8 @@
       "prep-invoice": {
         "type": "transform",
         "batch": [
-          "defaultIfBlank,id1,id2,0",
-          "rename,id3,customerid,id4,employeeid"
+          "defaultIfBlank,id1,id2,id3,0",
+          "rename,id4,storeid,id5,customerid,id6,employeeid"
         ]
       },
       "update-invoice-db": {
@@ -73,7 +88,7 @@
           "jdbcDriver": "org.postgresql.Driver",
           "connect": "jdbc:postgresql://localhost/test?user=postgres&password=postgres",
           "query": {
-            "create": "insert into invoice (externalref,orderid,createddate,customerid,employeeid,total) values (@externalref,@orderid::int,@createddate::timestamp,@customerid::int,@employeeid::int,@total::money)",
+            "create": "insert into invoice (externalref,orderid,createddate,storeid,customerid,employeeid,totalcost) values (@externalref,@orderid::int,@createddate::timestamp,@storeid::int,@customerid::int,@employeeid::int,@totalcost::money)",
             "read": "select * from invoice",
             "update": "",
             "queryTemplate": ""
@@ -83,15 +98,10 @@
     },
     "pipelines": {
       "load-invoice" : {
-        "pipe": "read-invoice-csv | parse-invoice-csv | lookup-customer | lookup-employee | prep-invoice | update-invoice-db"
+        "pipe": "read-invoice-csv | parse-invoice-csv | lookup-store | lookup-customer | lookup-employee | prep-invoice | update-invoice-db"
       }
     },
-    "services": {
-      "name001": {
-        "path": "/a/b/c",
-        "pipe": "p00411"
-      }
-    },
+    "services": { },
     "startup": {
       "exec": "load-invoice"
     }

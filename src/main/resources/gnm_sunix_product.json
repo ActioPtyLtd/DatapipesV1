@@ -9,7 +9,7 @@
           "behavior": "regex",
           "directory": "C:\\Users\\mauri\\bitbucket\\gandm-data\\Sunix\\HAASC",
           "type": "file",
-          "filenameTemplate": "VFRAME.CSV"
+          "filenameTemplate": "VFRAME.CSV.xls"
         }
       },
       "parse-frame-csv": {
@@ -18,20 +18,22 @@
           "addheader,col1",
           "split2cols,col1",
           "row1header",
-          "const,HAASC,Frame,1900-01-01",
-          "concat,const1,framenum,-",
+          "const,HAASC,Frame,1900-01-01 00:00:00.0,PF",
+          "concat,const1,const4,framenum,-",
           "concat,manufact,model,-",
-          "rename,concat1,external_id,const2,type,concat2,name,listprice,wholesaleprice,rrp,retailprice,const3,datecreated",
-          "keep,datecreated,type,external_id,name,wholesaleprice,retailprice"]
+          "rename,fcolour,frame_colour,frametype,frame_type",
+          "jsonObject,frame_colour,model,frame_type",
+          "rename,concat1,external_id,const2,type,concat2,name,listprice,wholesaleprice,rrp,retailprice,const3,datecreated,json1,extend",
+          "keep,datecreated,type,external_id,name,wholesaleprice,retailprice,extend"]
       },
       "read-contactlens-csv": {
         "type": "extract",
         "behavior": "simple",
         "dataSource": {
           "behavior": "regex",
-          "directory": "C:\\Users\\mauri\\bitbucket\\gandm-data\\Sunix\\HAASC",
+          "directory": "C:\\Users\\mauri\\bitbucket\\gandm-data\\Sunix\\PHHEW",
           "type": "file",
-          "filenameTemplate": "VCLCODE.CSV.xls"
+          "filenameTemplate": "VCLCODE.CSV"
         }
       },
       "parse-contactlens-csv": {
@@ -40,8 +42,72 @@
           "addheader,col1",
           "split2cols,col1",
           "row1header",
-          "const,HAASC,Contact Lens,1900-01-01,0",
-          "rename,clcode,external_id,const2,type,cldesc,name,const4,wholesaleprice,lensrrp,retailprice,const3,datecreated",
+          "const,PC,Contact Lens,1900-01-01 00:00:00.0,0.0000",
+          "concat,const1,clcode,-",
+          "rename,concat1,external_id,const2,type,cldesc,name,const4,wholesaleprice,lensrrp,retailprice,const3,datecreated",
+          "keep,datecreated,type,external_id,name,wholesaleprice,retailprice"]
+      },
+      "read-speclens-csv": {
+        "type": "extract",
+        "behavior": "simple",
+        "dataSource": {
+          "behavior": "regex",
+          "directory": "C:\\Users\\mauri\\bitbucket\\gandm-data\\Sunix\\PHHEW",
+          "type": "file",
+          "filenameTemplate": "VLENCODE.CSV"
+        }
+      },
+      "parse-speclens-csv": {
+        "type": "transform",
+        "batch": [
+          "addheader,col1",
+          "split2cols,col1",
+          "row1header",
+          "const,PL,Spectacle Lens,1900-01-01 00:00:00.0",
+          "concat,const1,lencode,-",
+          "rename,concat1,external_id,const2,type,supdesc,name,costprice,wholesaleprice,rrp,retailprice,const3,datecreated",
+          "keep,datecreated,type,external_id,name,wholesaleprice,retailprice"]
+      },
+      "read-bulkbill-csv": {
+        "type": "extract",
+        "behavior": "simple",
+        "dataSource": {
+          "behavior": "regex",
+          "directory": "C:\\Users\\mauri\\bitbucket\\gandm-data\\Sunix\\HAASC",
+          "type": "file",
+          "filenameTemplate": "VITEM.CSV.xls"
+        }
+      },
+      "parse-bulkbill-csv": {
+        "type": "transform",
+        "batch": [
+          "addheader,col1",
+          "split2cols,col1",
+          "row1header",
+          "const,-,Bulk Bill,1900-01-01 00:00:00.0,0.0000",
+          "concat,type,itemno,-",
+          "rename,concat1,external_id,const2,type,descptn,name,const4,wholesaleprice,amount,retailprice,const3,datecreated",
+          "keep,datecreated,type,external_id,name,wholesaleprice,retailprice"]
+      },
+      "read-sundry-csv": {
+        "type": "extract",
+        "behavior": "simple",
+        "dataSource": {
+          "behavior": "regex",
+          "directory": "C:\\Users\\mauri\\bitbucket\\gandm-data\\Sunix\\HAASC",
+          "type": "file",
+          "filenameTemplate": "VPRODUCT.CSV.xls"
+        }
+      },
+      "parse-sundry-csv": {
+        "type": "transform",
+        "batch": [
+          "addheader,col1",
+          "split2cols,col1",
+          "row1header",
+          "const,HAASC,Sundry,1900-01-01 00:00:00.0,0.0000,PS",
+          "concat,const5,const1,prodcode,-",
+          "rename,concat1,external_id,const2,type,desc,name,costprice,wholesaleprice,rrp,retailprice,const3,datecreated",
           "keep,datecreated,type,external_id,name,wholesaleprice,retailprice"]
       },
       "update-product-db": {
@@ -57,9 +123,9 @@
           "connect": "jdbc:postgresql://localhost/test?user=postgres&password=postgres",
           "query": {
             "queryTemplate": "",
-            "create": "insert into product (datecreated,\"type\",external_id,name,wholesaleprice,retailprice) values (@datecreated::timestamp,@type,@external_id,@name,@wholesaleprice::numeric,@retailprice::numeric)",
-            "read": "select * from product",
-            "update": "update product set datecreated=@datecreated::timestamp,\"type\"=@type,name=@name,wholesaleprice=@wholesaleprice::numeric,retailprice=@retailprice::numeric where external_id=@external_id"
+            "create": "insert into product (datecreated,\"type\",external_id,name,wholesaleprice,retailprice,extend) values (@datecreated::timestamp,@type,@external_id,@name,@wholesaleprice::numeric,@retailprice::numeric,@extend::json)",
+            "read": "SELECT productid, external_id, type, datecreated, name, description, retailprice, wholesaleprice, extend::text as extend FROM product",
+            "update": "update product set datecreated=@datecreated::timestamp,\"type\"=@type,name=@name,wholesaleprice=@wholesaleprice::numeric,retailprice=@retailprice::numeric,extend=@extend::json where external_id=@external_id"
           }
         }
       }
@@ -70,11 +136,20 @@
       },
       "load-contactlens" : {
         "pipe": "read-contactlens-csv | parse-contactlens-csv | update-product-db"
+      },
+      "load-speclens" : {
+        "pipe": "read-speclens-csv | parse-speclens-csv | update-product-db"
+      },
+      "load-bulkbill" : {
+        "pipe": "read-bulkbill-csv | parse-bulkbill-csv | update-product-db"
+      },
+      "load-sundry" : {
+        "pipe": "read-sundry-csv | parse-sundry-csv | update-product-db"
       }
     },
     "services": { },
     "startup": {
-      "exec": "load-contactlens"
+      "exec": "load-frame"
     }
   }
 }

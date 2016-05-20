@@ -14,7 +14,7 @@ class DataSetDBStream(val rs: ResultSet) extends DataSetTableScala {
     var i = 0
     if(more) {
       do {
-        rows1 = header.map(rs.getObject(_).toString).toList :: rows1
+        rows1 = header.map(h => Option(rs.getObject(h))).map(v => if (v.isEmpty) null else v.get.toString).toList :: rows1
         i += 1
         more = rs.next()
       } while(more && i < getBatchSize)

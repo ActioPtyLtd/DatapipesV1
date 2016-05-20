@@ -50,9 +50,9 @@ object DataSetTransforms {
   def changes(ds1: DataSet, ds2: DataSet, keyCols: List[String]) = DataSetTableScala(ds1.header, ds1.rows.filter(r => {
     val option = ds2.rows.find(ri => keyCols.forall(c => ds1.getValue(r, c) == ds2.getValue(ri, c)))
     if(option.isDefined)
-      !ds1.header.forall(c => {val equal = ds1.getValue(r,c) == ds2.getValue(option.get, c)
+      !ds1.header.forall(c => {val equal = ds1.getValue(r,c) == ds2.getValue(option.get, c) //TODO string equality doesn't work nicely for numerics & dates
         if(!equal)
-          printf(c) //TODO remove side-effect. I needed this to test diffs
+          printf(c + ":" + ds1.getValue(r,c)) //TODO remove side-effect. I needed this to test diffs
         equal})
     else
       false
@@ -106,5 +106,7 @@ object DataSetTransforms {
     val pairMap = colPairs.grouped(2).map(g => (g.head, g.tail.headOption.getOrElse(""))).toMap
     valueFunc(ds, col, v => mapOrElseValue(v, pairMap, orElse))
   }
+
+  def jsonObject(ds: DataSet, cols: List[String]) = rowFunc(ds, ds.getNextAvailableColumnName("json"), r => "{" + (cols map (c => "\"" + c + "\": \"" + ds.getValue(r, c) + "\"") mkString ",") + "}")
 
 }

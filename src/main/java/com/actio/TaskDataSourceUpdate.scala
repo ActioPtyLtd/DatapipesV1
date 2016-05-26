@@ -12,7 +12,7 @@ class TaskDataSourceUpdate extends Task {
     super.setConfig(sysconf.getTaskConfig(this.node.getName).toConfig, sysconf.getMasterConfig)
 
     val dataSourceConfig = config.getConfig(DPSystemConfigurable.DATASOURCE_LABEL)
-    val query = dataSourceConfig.getConfig("query").getString("read") + " WHERE " + dataSet.rows.map(r => keyColumns().map(c => c + " = '" + dataSet.getValue(r, c) + "'").mkString(" AND ")).mkString(" OR ")
+    val query = dataSourceConfig.getConfig("query").getString("read") + " WHERE " + dataSet.rows.map(r => keyColumns().map(c => c + " = '" + dataSet.getValue(r, c).replace("'","''") + "'").mkString(" AND ")).mkString(" OR ")
 
     val dataSource = DPSystemFactory.newDataSource(dataSourceConfig.withValue("query.read", ConfigValueFactory.fromAnyRef(query)), masterConfig)
     dataSource.read(new DataSetTableScala())
@@ -20,14 +20,14 @@ class TaskDataSourceUpdate extends Task {
     dataSource.dataSet.initBatch
 
     for (ds <- dataSource.dataSet) {
-      if (ds.isEmptyDataSet)
+      if (ds.isEmpty)
         dataSource.create(dataSet)
       else {
-        val newDataSet = DataSetTransforms.newRows(dataSet, ds, keyColumns())
+        val newDataSet = DataSetTransforms.newRows(dataSet, DataSetTableScala(ds), keyColumns())
         if (!newDataSet.isEmptyDataSet)
           dataSource.create(newDataSet)
 
-        val updatedDataSet = DataSetTransforms.changes(dataSet, ds, keyColumns())
+        val updatedDataSet = DataSetTransforms.changes(dataSet, DataSetTableScala(ds), keyColumns())
         if (!updatedDataSet.isEmptyDataSet)
           dataSource.update(updatedDataSet)
       }

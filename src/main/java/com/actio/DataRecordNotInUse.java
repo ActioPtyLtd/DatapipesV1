@@ -9,7 +9,7 @@ import com.typesafe.config.Config;
 
 import java.util.List;
 
-public abstract class DataRecord extends DPSystemConfigurable {
+public abstract class DataRecordNotInUse extends DPSystemConfigurable {
     private String customHeader;
 
     public List<String> getRow() {

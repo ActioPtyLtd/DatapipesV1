@@ -30,7 +30,7 @@ class TaskLookup extends Task {
     for(ds <- dataSource.dataSet) {
       // should maybe union the resultsets
 
-      dataSet = DataSetTransforms.transformLookupFunc(dataSet, ds, condition, _ => true)
+      dataSet = DataSetTransforms.transformLookupFunc(dataSet, DataSetTableScala(ds), condition, _ => true)
     }
 
     val test = false

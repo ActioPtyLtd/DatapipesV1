@@ -65,6 +65,8 @@ object DataSetTableScala {
 
   def apply(header: List[String], rows: List[List[String]]) = new DataSetTableScala(header, rows)
 
+  def apply(d: Data) = new DataSetTableScala(d("properties").asInstanceOf[DataRecord].fields.map(_.name).toList, d("data").values.map(_.asInstanceOf[DataRecord].fields.map(_.Data.asInstanceOf[DataString].str).toList).toList)
+
   def inPredicate[T](list: List[T]) = (i: T) => list.contains(i)
 }
 

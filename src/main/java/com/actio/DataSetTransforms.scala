@@ -107,6 +107,8 @@ object DataSetTransforms {
     valueFunc(ds, col, v => mapOrElseValue(v, pairMap, orElse))
   }
 
-  def jsonObject(ds: DataSet, cols: List[String]) = rowFunc(ds, ds.getNextAvailableColumnName("json"), r => "{" + (cols map (c => "\"" + c + "\": \"" + ds.getValue(r, c) + "\"") mkString ",") + "}")
+  def jsonObject(ds: DataSet, cols: List[String]) = rowFunc(ds, ds.getNextAvailableColumnName("json"), r => "{" + (cols filter (f => ds.getValue(r,f) !=null && ds.getValue(r,f).nonEmpty) map (c => "\"" + c + "\": \"" + ds.getValue(r, c) + "\"") mkString ",") + "}")
+
+  def copy(ds: DataSet, from: String, to: List[String]) = DataSetTableScala(to ::: ds.header, ds.rows map (r => List.fill(to.size)(ds.getValue(r, from) ) ::: r))
 
 }

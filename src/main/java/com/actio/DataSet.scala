@@ -31,7 +31,7 @@ object DataSet {
   }
 }
 
-abstract class DataSet extends DPSystemConfigurable with Iterator[DataSet] {
+abstract class DataSet extends DPSystemConfigurable with Iterator[Data] {
   var key: DataSetKey = new DataSetKey
 
   def setKey(_key: DataSetKey) {
@@ -180,10 +180,14 @@ abstract class DataSet extends DPSystemConfigurable with Iterator[DataSet] {
 
   def hasNext = isNextBatch
 
-  def next = getNextBatch
+  def next = getNextBatch.toData
 
-  override def minBy[B](f: DataSet => B)(implicit cmp: Ordering[B]): DataSet = null
-  override def maxBy[B](f: DataSet => B)(implicit cmp: Ordering[B]): DataSet = null
-  override def max[B >: DataSet](implicit cmp: Ordering[B]): DataSet = null
-  override def min[B >: DataSet](implicit cmp: Ordering[B]): DataSet = null
+  def toData = DataRecord(List(DataField("properties", DataRecord(header.map(DataField(_,NoData)).toList).asInstanceOf[Data]),
+                          DataField("data",DataArray(rows.map(r => DataRecord(
+                            header.map(h => DataField(h,DataString(this.getValue(r, h)).asInstanceOf[Data])).toList).asInstanceOf[Data]).toList)))).asInstanceOf[Data]
+
+  override def minBy[B](f: Data => B)(implicit cmp: Ordering[B]): Data = null
+  override def maxBy[B](f: Data => B)(implicit cmp: Ordering[B]): Data = null
+  override def max[B >: Data](implicit cmp: Ordering[B]): Data = null
+  override def min[B >: Data](implicit cmp: Ordering[B]): Data = null
 }

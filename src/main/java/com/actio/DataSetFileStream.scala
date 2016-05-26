@@ -39,9 +39,6 @@ class DataSetFileStream(val reader: InputStream) extends DataSet {
   override def sizeOfBatch: Int = 100
 
   @throws(classOf[Exception])
-  override def set(_results: ResultSet): Unit = ???
-
-  @throws(classOf[Exception])
   override def set(_results: util.List[String]): Unit = ???
 
   import scala.collection.JavaConverters._
@@ -53,9 +50,6 @@ class DataSetFileStream(val reader: InputStream) extends DataSet {
   override def getAsListOfColumnsBatch(batchLen: Int): util.List[util.List[String]] = ???
 
   @throws(classOf[Exception])
-  override def getResultSet: ResultSet = ???
-
-  @throws(classOf[Exception])
   override def getColumnHeaderStr: String = ???
 
   @throws(classOf[Exception])
@@ -63,12 +57,6 @@ class DataSetFileStream(val reader: InputStream) extends DataSet {
 
   @throws(classOf[Exception])
   override def setWithFields(_results: util.List[util.List[String]]): Unit = ???
-
-  @throws(classOf[Exception])
-  override def FromRowGetField(rowIndex: Int, label: String): String = ???
-
-  @throws(classOf[Exception])
-  override def FromRowGetField(rowIndex: Int, label: Int): String = ???
 
   @throws(classOf[Exception])
   override def getAsListOfColumns: util.List[util.List[String]] = ???

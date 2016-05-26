@@ -19,7 +19,7 @@ class DataSetDBStream(val rs: ResultSet) extends DataSet {
         rows1 = header.map(h => Option(rs.getObject(h))).map(v => if (v.isEmpty) null else v.get.toString).toList :: rows1
         i += 1
         more = rs.next()
-      } while(more && i < getBatchSize)
+      } while(more && i < batchSize)
     }
     DataSetTableScala(header1, rows1).toData
   }
@@ -44,10 +44,7 @@ class DataSetDBStream(val rs: ResultSet) extends DataSet {
   // really hope to be able to remove most of these
 
   @throws(classOf[Exception])
-  override def sizeOfBatch: Int = getBatchSize
-
-  @throws(classOf[Exception])
-  override def set(_results: ResultSet): Unit = ???
+  override def sizeOfBatch: Int = batchSize
 
   @throws(classOf[Exception])
   override def set(_results: util.List[String]): Unit = ???
@@ -62,9 +59,6 @@ class DataSetDBStream(val rs: ResultSet) extends DataSet {
   override def getAsListOfColumnsBatch(batchLen: Int): util.List[util.List[String]] = ???
 
   @throws(classOf[Exception])
-  override def getResultSet: ResultSet = ???
-
-  @throws(classOf[Exception])
   override def getColumnHeaderStr: String = ???
 
   @throws(classOf[Exception])
@@ -72,12 +66,6 @@ class DataSetDBStream(val rs: ResultSet) extends DataSet {
 
   @throws(classOf[Exception])
   override def setWithFields(_results: util.List[util.List[String]]): Unit = ???
-
-  @throws(classOf[Exception])
-  override def FromRowGetField(rowIndex: Int, label: String): String = ???
-
-  @throws(classOf[Exception])
-  override def FromRowGetField(rowIndex: Int, label: Int): String = ???
 
   @throws(classOf[Exception])
   override def getAsListOfColumns: util.List[util.List[String]] = ???

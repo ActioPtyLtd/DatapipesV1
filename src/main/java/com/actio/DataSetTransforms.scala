@@ -96,7 +96,9 @@ object DataSetTransforms {
 
   def transformLookupFunc(ds1: DataSet, ds2: DataSet, condition: (List[String],List[String]) => Boolean, lookupSelectorFunc: String => Boolean) =
     DataSetTableScala((ds2.header.filter(lookupSelectorFunc) map ds1.getNextAvailableColumnName) ::: ds1.header,
-      ds1.rows.map(r1 => ds2.rows.find(condition(r1,_)).getOrElse(ds2.getEmptyRow).zipWithIndex.filter(f => ds2.getOrdinalsWithPredicate(lookupSelectorFunc).contains(f._2)).map(_._1) ::: r1))
+      ds1.rows.map(r1 => ds2.rows.find(condition(r1,_)).getOrElse(getEmptyRow(ds2)).zipWithIndex.filter(f => ds2.getOrdinalsWithPredicate(lookupSelectorFunc).contains(f._2)).map(_._1) ::: r1))
+
+
 
   def trimValue(value: String) = value.trim
   def trim(ds: DataSet, cols: List[String]) = cols.foldLeft(ds)((d,c) => valueFunc(d, c, trimValue))
@@ -110,5 +112,11 @@ object DataSetTransforms {
   def jsonObject(ds: DataSet, cols: List[String]) = rowFunc(ds, ds.getNextAvailableColumnName("json"), r => "{" + (cols filter (f => ds.getValue(r,f) !=null && ds.getValue(r,f).nonEmpty) map (c => "\"" + c + "\": \"" + ds.getValue(r, c) + "\"") mkString ",") + "}")
 
   def copy(ds: DataSet, from: String, to: List[String]) = DataSetTableScala(to ::: ds.header, ds.rows map (r => List.fill(to.size)(ds.getValue(r, from) ) ::: r))
+
+
+
+  // helpers
+  def getEmptyRow(ds: DataSet) = List.fill(ds.header.length)(null)
+  def isEmptyDataSet(ds: DataSet) = ds.rows.isEmpty
 
 }

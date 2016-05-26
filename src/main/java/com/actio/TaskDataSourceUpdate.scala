@@ -24,11 +24,11 @@ class TaskDataSourceUpdate extends Task {
         dataSource.create(dataSet)
       else {
         val newDataSet = DataSetTransforms.newRows(dataSet, DataSetTableScala(ds), keyColumns())
-        if (!newDataSet.isEmptyDataSet)
+        if (!DataSetTransforms.isEmptyDataSet(newDataSet))
           dataSource.create(newDataSet)
 
         val updatedDataSet = DataSetTransforms.changes(dataSet, DataSetTableScala(ds), keyColumns())
-        if (!updatedDataSet.isEmptyDataSet)
+        if (!DataSetTransforms.isEmptyDataSet(updatedDataSet))
           dataSource.update(updatedDataSet)
       }
     }

@@ -37,7 +37,6 @@ public class DataSetRS extends DataSetTabular {
         return;
     }
 
-    @Override
     public ResultSet getResultSet(){
 
         return dataRS;
@@ -74,7 +73,7 @@ public class DataSetRS extends DataSetTabular {
     @Override
     public DataSet getNextBatch() throws Exception
     {
-        List<List<String>> batch = getAsListOfColumnsBatch(getBatchSize());
+        List<List<String>> batch = getAsListOfColumnsBatch(batchSize());
 
         DataSetTabular batchDS = new DataSetTabular();
         batchDS.setRsc(batch);
@@ -152,6 +151,19 @@ public class DataSetRS extends DataSetTabular {
         setRs(outList);
 
         return getAsList();
+    }
+
+    private String columnsToRow(List<String> columns, String _outputDelimiter) {
+        String row = "";
+        int count = 1;
+        int maxCols = columns.size();
+
+        for (String field : columns) {
+            row = row + field;
+            if (count++ < maxCols)
+                row = row + _outputDelimiter;
+        }
+        return row;
     }
 
     @Override

@@ -8,35 +8,10 @@ import com.actio.dpsystem.DPSystemConfigurable
 import com.typesafe.config.Config
 import java.sql.ResultSet
 
-object DataSet {
-  def flattenRows(rows: java.util.List[java.util.List[String]], _outputDelimiter: String): java.util.List[String] = {
-    val newRows: java.util.List[String] = new java.util.LinkedList[String]
-    import scala.collection.JavaConversions._
-    for (columns <- rows) newRows.add(columnsToRow(columns, _outputDelimiter))
-    return newRows
-  }
-
-  def columnsToRow(columns: java.util.List[String], _outputDelimiter: String): String = {
-    var row: String = ""
-    var count: Int = 1
-    val maxCols: Int = columns.size
-    import scala.collection.JavaConversions._
-    for (field <- columns) {
-      row = row + field
-      if (({
-        count += 1; count - 1
-      }) < maxCols) row = row + _outputDelimiter
-    }
-    return row
-  }
-}
-
-abstract class DataSet extends DPSystemConfigurable with Iterator[Data] {
+abstract class DataSet(val batchSize: Int) extends DPSystemConfigurable with Iterator[Data] {
   var key: DataSetKey = new DataSetKey
 
-  def setKey(_key: DataSetKey) {
-    key = _key
-  }
+  def this() = this(500)
 
   def setChunk(chunkStart: Int, chunkEnd: Int, maxChunk: Int) {
     key.chunkStart = chunkStart
@@ -78,27 +53,11 @@ abstract class DataSet extends DPSystemConfigurable with Iterator[Data] {
 
   private[actio] var outputDelimiter: String = ","
 
-  private[actio] def getBatchSize: Int = {
-    return batchSize
-  }
-
-  def setBatchSize(batchSize: Int) {
-    this.batchSize = batchSize
-  }
-
-  private[actio] var batchSize: Int = 500
-
-  @throws(classOf[Exception])
-  def set(_results: ResultSet)
-
   @throws(classOf[Exception])
   def set(_results: java.util.List[String])
 
   @throws(classOf[Exception])
   def setWithFields(_results: java.util.List[java.util.List[String]])
-
-  @throws(classOf[Exception])
-  def getResultSet: ResultSet
 
   @throws(classOf[Exception])
   def getAsList: java.util.List[String]
@@ -109,12 +68,6 @@ abstract class DataSet extends DPSystemConfigurable with Iterator[Data] {
   @throws(classOf[Exception])
   def initBatch
 
-  //@throws(classOf[Exception])
-  //def isNextBatch: Boolean
-
-  //@throws(classOf[Exception])
-  //def getNextBatch: DataSet
-
   @throws(classOf[Exception])
   def getAsListOfColumnsBatch(batchLen: Int): java.util.List[java.util.List[String]]
 
@@ -123,12 +76,6 @@ abstract class DataSet extends DPSystemConfigurable with Iterator[Data] {
 
   @throws(classOf[Exception])
   def getColumnHeaderStr: String
-
-  @throws(classOf[Exception])
-  def FromRowGetField(rowIndex: Int, label: String): String
-
-  @throws(classOf[Exception])
-  def FromRowGetField(rowIndex: Int, label: Int): String
 
   @throws(classOf[Exception])
   override def setConfig(_conf: Config, _master: Config) {
@@ -163,14 +110,7 @@ abstract class DataSet extends DPSystemConfigurable with Iterator[Data] {
   }
   def getNextAvailableColumnName(columnName: String): String = getNextAvailableColumnName(columnName, 1).head
 
-
-  def getNumberOfColumns = header.length
-
-  def getEmptyRow = List.fill(getNumberOfColumns)(null)
-
   def getValue(row: List[String], columnName: String) = row(getOrdinalOfColumn(columnName))
-
-  def isEmptyDataSet = rows.isEmpty
 
   def hasNext: Boolean
 
@@ -180,6 +120,9 @@ abstract class DataSet extends DPSystemConfigurable with Iterator[Data] {
                           DataField("data",DataArray(rows.map(r => DataRecord(
                             header.map(h => DataField(h,DataString(this.getValue(r, h)).asInstanceOf[Data])).toList).asInstanceOf[Data]).toList)))).asInstanceOf[Data]
 
+
+
+  // not sure why I need this, but it prevents a compiler errors
   override def minBy[B](f: Data => B)(implicit cmp: Ordering[B]): Data = null
   override def maxBy[B](f: Data => B)(implicit cmp: Ordering[B]): Data = null
   override def max[B >: Data](implicit cmp: Ordering[B]): Data = null

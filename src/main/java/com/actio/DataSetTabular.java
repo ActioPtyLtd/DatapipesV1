@@ -109,11 +109,6 @@ public class DataSetTabular extends DataSet {
     }
 
     @Override
-    public ResultSet getResultSet() {
-        return null;
-    }
-
-    @Override
     public List<String> getAsList() throws Exception {
         if (rs != null && rs.size() != 0)
             return rs;
@@ -194,7 +189,7 @@ public class DataSetTabular extends DataSet {
     //@Override
     public DataSet getNextBatch() throws Exception{
 
-        logger.info("Entered getNextBatch rowNumber"+rowNumber+", batchSize="+getBatchSize());
+        logger.info("Entered getNextBatch rowNumber"+rowNumber+", batchSize="+batchSize());
 
         DataSet newSet =  new DataSetTabular();
 
@@ -204,12 +199,12 @@ public class DataSetTabular extends DataSet {
         }
 
         if (rowNumber >= 0 && rowNumber < sizeOfBatch()) {
-            int index = rowNumber+getBatchSize();
+            int index = rowNumber+batchSize();
             List<String> sublist = getAsList().subList(rowNumber,
                     index< sizeOfBatch()?index: sizeOfBatch());
 
             // increment the row number so it moves to next batch
-            rowNumber += (rowNumber + getBatchSize() > sizeOfBatch())? rowNumber+getBatchSize(): sizeOfBatch();
+            rowNumber += (rowNumber + batchSize() > sizeOfBatch())? rowNumber+batchSize(): sizeOfBatch();
 
 
             logger.info("Exiting getNextBatch new rowNumber"+rowNumber);

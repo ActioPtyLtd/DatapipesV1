@@ -84,8 +84,9 @@ public class DataSourceFile extends DataSource {
     @Override
     public void extract(DataSet dataSet) throws Exception {
         if(dataSet.sizeOfBatch()>0) {
-            directory = dataSet.FromRowGetField(1, "directory");
-            compiledFilename = dataSet.FromRowGetField(1, "filename");
+            Data d = dataSet.next();
+            directory = d.apply("data").apply(0).apply("directory").valueOption().get();
+            compiledFilename = d.apply("data").apply(0).apply("filename").valueOption().get();
         }
         extract();
     }

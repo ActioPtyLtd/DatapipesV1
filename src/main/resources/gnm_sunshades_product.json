@@ -1,0 +1,64 @@
+{
+  "script": {
+    "schema": {},
+    "tasks": {
+      "read-product-eyeware-csv": {
+        "type": "extract",
+        "behavior": "simple",
+        "dataSource": {
+          "behavior": "regex",
+          "directory": "C:\\Users\\mauri\\bitbucket\\gandm-data",
+          "type": "file",
+          "filenameTemplate": "2016-05-08_19.30.01_stock-master.txt"
+        }
+      },
+      "parse-product-eyeware-csv": {
+        "type": "transform",
+        "batch": [
+          "addheader,col1",
+          "split2colsD,col1,\\|",
+          "const,eye_ware,2016-01-01",
+          "rename,col2,product_group,col3,external_id,col4,external_status,col5,model,col6,rx,col7,online_frame_colour,col8,frame_colour,col9,lens_colour,col10,Olens_width,col11,Onose_bridge,col12,Otemple_length,col13,Oframe_depth,col14,category,col15,Owholesaleprice,col16,Oretailprice,col17,Oapn,col18,gender,col19,shape,col20,frame_type,col21,frame_material,col22,lens_material",
+          "rename,const1,type,const2,datecreated",
+          "defaultIfBlank,Olens_width,Onose_bridge,Otemple_length,Oframe_depth,Owholesaleprice,Oretailprice,Oapn,0",
+          "rename,Olens_width1,lens_width,Onose_bridge1,nose_bridge,Otemple_length1,temple_length,Oframe_depth1,frame_depth,Owholesaleprice1,wholesaleprice,Oretailprice1,retailprice,Oapn1,apn"
+        ],
+        "_comment": "keep,product_group,external_id,external_status,model,rx,online_frame_colour,frame_colour,lens_colour,lens_width,nose_bridge,temple_length,frame_depth,category,wholesaleprice,retailprice,apn,gender,shape,frame_type,frame_material,lens_material"
+      },
+      "update-product-eyeware-db": {
+        "type": "datasourceupdate",
+        "behavior": "",
+        "keys": [
+          "external_id"
+        ],
+        "dataSource": {
+          "type": "sql",
+          "behavior": "",
+          "jdbcDriver": "org.postgresql.Driver",
+          "connect": "jdbc:postgresql://localhost/test?user=postgres&password=postgres",
+          "query": {
+            "maxid": "select max(productid) from product_eyeware",
+            "queryTemplate": "",
+            "create": "insert into product_eyeware (datecreated,\"type\",\"product_group\",external_id,external_status,model,rx,\"online_frame_colour\",\"frame_colour\",\"lens_colour\",\"lens_width\",\"nose_bridge\",\"temple_length\",\"frame_depth\",category,\"wholesaleprice\",retailprice,apn,gender,shape,\"frame_type\",\"frame_material\",\"lens_material\") values (@datecreated::timestamp,@type,@product_group,@external_id,@external_status,@model,@rx,@online_frame_colour,@frame_colour,@lens_colour,@lens_width::numeric,@nose_bridge::numeric,@temple_length::numeric,@frame_depth::numeric,@category,@wholesaleprice::numeric,@retailprice::numeric,@apn::bigint,@gender,@shape,@frame_type,@frame_material,@lens_material)",
+            "read": "select * from product_eyeware",
+            "update": ""
+          }
+        }
+      }
+    },
+    "pipelines": {
+      "load-product-eyeware" : {
+        "pipe": "read-product-eyeware-csv | parse-product-eyeware-csv | update-product-eyeware-db"
+      }
+    },
+    "services": {
+      "name001": {
+        "path": "/a/b/c",
+        "pipe": "p00411"
+      }
+    },
+    "startup": {
+      "exec": "load-product-eyeware"
+    }
+  }
+}

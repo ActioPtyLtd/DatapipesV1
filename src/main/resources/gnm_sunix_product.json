@@ -18,22 +18,24 @@
           "addheader,col1",
           "split2cols,col1",
           "row1header",
-          "const,HAASC,Frame,1900-01-01 00:00:00.0,PF",
+          "const,HAASC,Frame,1900-01-01 00:00:00.0,PF,-,-",
           "concat,const1,const4,framenum,-",
           "concat,manufact,model,-",
-          "rename,fcolour,frame_colour,frametype,frame_type",
-          "jsonObject,frame_colour,model,frame_type",
-          "rename,concat1,external_id,const2,type,concat2,name,listprice,wholesaleprice,rrp,retailprice,const3,datecreated,json1,extend",
-          "keep,datecreated,type,external_id,name,wholesaleprice,retailprice,extend"]
+          "split2colsd,size,-",
+          "maporelse,sungrx,Y,Y,N,N,-",
+          "rename,fcolour,frame_colour,frametype,frame_type,temple,temple_length,size1,eye_size,size2,bridge_size,sungrx1,rx,const5,gender,const6,material",
+          "jsonObject,frame_colour,model,frame_type,bridge_size,temple_length,eye_size,rx,depth,gender,material",
+          "rename,concat1,external_id,const2,type,concat2,name,framenum,description,listprice,wholesaleprice,rrp,retailprice,const3,datecreated,json1,extend",
+          "keep,datecreated,type,external_id,name,wholesaleprice,retailprice,extend,description"]
       },
       "read-contactlens-csv": {
         "type": "extract",
         "behavior": "simple",
         "dataSource": {
           "behavior": "regex",
-          "directory": "C:\\Users\\mauri\\bitbucket\\gandm-data\\Sunix\\PHHEW",
+          "directory": "C:\\Users\\mauri\\bitbucket\\gandm-data\\Sunix\\HAASC",
           "type": "file",
-          "filenameTemplate": "VCLCODE.CSV"
+          "filenameTemplate": "VCLCODE.CSV.xls"
         }
       },
       "parse-contactlens-csv": {
@@ -42,19 +44,21 @@
           "addheader,col1",
           "split2cols,col1",
           "row1header",
-          "const,PC,Contact Lens,1900-01-01 00:00:00.0,0.0000",
-          "concat,const1,clcode,-",
-          "rename,concat1,external_id,const2,type,cldesc,name,const4,wholesaleprice,lensrrp,retailprice,const3,datecreated",
-          "keep,datecreated,type,external_id,name,wholesaleprice,retailprice"]
+          "const,HAASC,Contact Lens,1900-01-01 00:00:00.0,0.0000,PC",
+          "concat,const1,const5,clcode,-",
+          "rename,cltype,clens_type,design,clens_design,feature,clens_feature,material,clens_material,watercont,water_content,dia0,clens_diameter,wearday,wear_day,packsize,pack_size,tint,clens_tint",
+          "jsonObject,clens_type,clens_design,clens_feature,clens_material,water_content,clens_diameter,wear_day,pack_size,clens_tint",
+          "rename,concat1,external_id,const2,type,cldesc,description,clcode,name,const4,wholesaleprice,lensrrp,retailprice,const3,datecreated,json1,extend",
+          "keep,datecreated,type,external_id,name,wholesaleprice,retailprice,extend,description"]
       },
       "read-speclens-csv": {
         "type": "extract",
         "behavior": "simple",
         "dataSource": {
           "behavior": "regex",
-          "directory": "C:\\Users\\mauri\\bitbucket\\gandm-data\\Sunix\\PHHEW",
+          "directory": "C:\\Users\\mauri\\bitbucket\\gandm-data\\Sunix\\HAASC",
           "type": "file",
-          "filenameTemplate": "VLENCODE.CSV"
+          "filenameTemplate": "VLENCODE.CSV.xls"
         }
       },
       "parse-speclens-csv": {
@@ -63,10 +67,12 @@
           "addheader,col1",
           "split2cols,col1",
           "row1header",
-          "const,PL,Spectacle Lens,1900-01-01 00:00:00.0",
-          "concat,const1,lencode,-",
-          "rename,concat1,external_id,const2,type,supdesc,name,costprice,wholesaleprice,rrp,retailprice,const3,datecreated",
-          "keep,datecreated,type,external_id,name,wholesaleprice,retailprice"]
+          "const,HAASC,Spectacle Lens,1900-01-01 00:00:00.0,PL,,,,-",
+          "concat,const1,const4,lencode,-",
+          "rename,lensgroup,lens_group,type,lens_type,material,lens_material,lenssize,lens_width,const5,lens_colour,const6,lens_shape,const7,lens_usage",
+          "jsonObject,lens_group,lens_type,lens_colour,lens_width,lens_material,lens_shape,lens_usage",
+          "rename,concat1,external_id,const2,type,lencode,name,supdesc,description,costprice,wholesaleprice,rrp,retailprice,const3,datecreated,json1,extend",
+          "keep,datecreated,type,external_id,name,wholesaleprice,retailprice,extend,description"]
       },
       "read-bulkbill-csv": {
         "type": "extract",
@@ -123,9 +129,9 @@
           "connect": "jdbc:postgresql://localhost/test?user=postgres&password=postgres",
           "query": {
             "queryTemplate": "",
-            "create": "insert into product (datecreated,\"type\",external_id,name,wholesaleprice,retailprice,extend) values (@datecreated::timestamp,@type,@external_id,@name,@wholesaleprice::numeric,@retailprice::numeric,@extend::json)",
+            "create": "insert into product (datecreated,\"type\",external_id,name,description,wholesaleprice,retailprice,extend) values (@datecreated::timestamp,@type,@external_id,@name,@description,@wholesaleprice::numeric,@retailprice::numeric,@extend::json)",
             "read": "SELECT productid, external_id, type, datecreated, name, description, retailprice, wholesaleprice, extend::text as extend FROM product",
-            "update": "update product set datecreated=@datecreated::timestamp,\"type\"=@type,name=@name,wholesaleprice=@wholesaleprice::numeric,retailprice=@retailprice::numeric,extend=@extend::json where external_id=@external_id"
+            "update": "update product set datecreated=@datecreated::timestamp,\"type\"=@type,name=@name,description=@description,wholesaleprice=@wholesaleprice::numeric,retailprice=@retailprice::numeric,extend=@extend::json where external_id=@external_id"
           }
         }
       }
@@ -149,7 +155,7 @@
     },
     "services": { },
     "startup": {
-      "exec": "load-frame"
+      "exec": "load-speclens"
     }
   }
 }

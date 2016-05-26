@@ -1,0 +1,58 @@
+{
+  "script": {
+    "schema": {},
+    "tasks": {
+      "read-supplier-csv": {
+        "type": "extract",
+        "behavior": "simple",
+        "dataSource": {
+          "behavior": "regex",
+          "directory": "C:\\Users\\mauri\\bitbucket\\gandm-data\\Sunix\\PHHEW",
+          "type": "file",
+          "filenameTemplate": "VSUPPLIR.CSV"
+        }
+      },
+      "parse-supplier-csv": {
+        "type": "transform",
+        "batch": [
+          "addheader,col1",
+          "split2cols,col1",
+          "row1header",
+          "const,PHHEW",
+          "concat,const1,sup_code,-",
+          "copy,sup_name,trading_name,business_name,entity_name",
+          "copy,abn,acn",
+          "rename,concat1,externalref,email1,email",
+          "keep,externalref,abn,acn,trading_name,business_name,entity_name,addr1,addr2,state,postcode,phone,fax,email"]
+      },
+      "update-supplier-db": {
+        "type": "datasourceupdate",
+        "behavior": "",
+        "keys": [
+          "externalref"
+        ],
+        "dataSource": {
+          "type": "sql",
+          "behavior": "",
+          "jdbcDriver": "org.postgresql.Driver",
+          "connect": "jdbc:postgresql://localhost/test?user=postgres&password=postgres",
+          "query": {
+            "queryTemplate": "",
+            "create": "insert into supplier (externalref,abn,acn,trading_name,business_name,entity_name,addr1,addr2,state,postcode,phone,fax,email) values (@externalref,@abn,@acn,@trading_name,@business_name,@entity_name,@addr1,@addr2,@state,@postcode,@phone,@fax,@email)",
+            "read": "select * from supplier",
+            "update": "update supplier set abn=@abn,acn=@acn,trading_name=@trading_name,business_name=@business_name,entity_name=@entity_name,addr1=@addr1,addr2=@addr2,state=@state,postcode=@postcode,phone=@phone,fax=@fax,email=@email where externalref=@externalref"
+          }
+        }
+      }
+    },
+    "pipelines": {
+      "load-supplier" : {
+        "pipe" : "read-supplier-csv | parse-supplier-csv | update-supplier-db"
+      }
+    },
+    "services": { },
+    "startup": {
+      "exec": "load-supplier"
+    }
+  }
+}

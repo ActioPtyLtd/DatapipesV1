@@ -90,14 +90,6 @@ public class DataSetTabular extends DataSet {
 
     private int currentColumnIndex = 0;
 
-    public String[] GetRow() {
-        return null;
-    }
-
-    public boolean NextRow() {
-        return false;
-    }
-
     public void set(ResultSet _rs) {
         return;
     }
@@ -181,12 +173,17 @@ public class DataSetTabular extends DataSet {
 
 
     @Override
-    public boolean isNextBatch() throws Exception
+    public boolean hasNext()
     {
-        if (rowNumber < sizeOfBatch() || emptySet)
-            return true;
-        else
-            return false;
+        int s = 0;
+        try {
+            s = sizeOfBatch();
+        }
+        catch(Exception e) {
+            s = 0;
+        }
+
+        return (rowNumber < s || emptySet);
     }
 
 
@@ -194,7 +191,7 @@ public class DataSetTabular extends DataSet {
     // Could use a flywheel pattern such that each DataSet is a bounded index
     // over the underlying Master RS list, such that there is only ever one copy
 
-    @Override
+    //@Override
     public DataSet getNextBatch() throws Exception{
 
         logger.info("Entered getNextBatch rowNumber"+rowNumber+", batchSize="+getBatchSize());
@@ -281,6 +278,7 @@ public class DataSetTabular extends DataSet {
         return null;
     }
 
+    @Override
     public void dump() throws Exception
     {
         logger.info("=== dataSource set dump======");
@@ -291,5 +289,10 @@ public class DataSetTabular extends DataSet {
         for (String line: getRs())
             logger.info(line);
 
+    }
+
+    @Override
+    public Data next() {
+        return this.toData();
     }
 }

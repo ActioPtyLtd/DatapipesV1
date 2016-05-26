@@ -11,8 +11,6 @@ class DataSetHierarchical(val dSObject: DSObject) extends DataSet {
 
   override def sizeOfBatch(): Int = 0
 
-  def dump() = {}
-
   def set(_results: ResultSet): Unit = ???
 
   def set(_results: util.List[String]): Unit = ???
@@ -27,15 +25,11 @@ class DataSetHierarchical(val dSObject: DSObject) extends DataSet {
 
   def getColumnHeaderStr: String = ???
 
-  def isNextBatch = ???
-
-  def GetRow(): Array[String] = ???
+  def hasNext = ???
 
   def getAsList: util.List[String] = ???
 
   def setWithFields(_results: util.List[util.List[String]]): Unit = ???
-
-  def NextRow(): Boolean = ???
 
   def FromRowGetField(rowIndex: Int, label: String): String = ???
 
@@ -64,6 +58,8 @@ class DataSetHierarchical(val dSObject: DSObject) extends DataSet {
     })
     case _ => Nil
   }
+
+  override def next: Data = ???
 }
 
 /*

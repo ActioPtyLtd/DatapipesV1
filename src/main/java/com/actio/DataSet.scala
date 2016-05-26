@@ -89,12 +89,6 @@ abstract class DataSet extends DPSystemConfigurable with Iterator[Data] {
   private[actio] var batchSize: Int = 500
 
   @throws(classOf[Exception])
-  def GetRow: Array[String]
-
-  @throws(classOf[Exception])
-  def NextRow: Boolean
-
-  @throws(classOf[Exception])
   def set(_results: ResultSet)
 
   @throws(classOf[Exception])
@@ -115,11 +109,11 @@ abstract class DataSet extends DPSystemConfigurable with Iterator[Data] {
   @throws(classOf[Exception])
   def initBatch
 
-  @throws(classOf[Exception])
-  def isNextBatch: Boolean
+  //@throws(classOf[Exception])
+  //def isNextBatch: Boolean
 
-  @throws(classOf[Exception])
-  def getNextBatch: DataSet
+  //@throws(classOf[Exception])
+  //def getNextBatch: DataSet
 
   @throws(classOf[Exception])
   def getAsListOfColumnsBatch(batchLen: Int): java.util.List[java.util.List[String]]
@@ -144,7 +138,7 @@ abstract class DataSet extends DPSystemConfigurable with Iterator[Data] {
   }
 
   @throws(classOf[Exception])
-  def dump
+  def dump = { }
 
   import scala.collection.JavaConverters._
 
@@ -178,9 +172,9 @@ abstract class DataSet extends DPSystemConfigurable with Iterator[Data] {
 
   def isEmptyDataSet = rows.isEmpty
 
-  def hasNext = isNextBatch
+  def hasNext: Boolean
 
-  def next = getNextBatch.toData
+  def next: Data //= getNextBatch.toData
 
   def toData = DataRecord(List(DataField("properties", DataRecord(header.map(DataField(_,NoData)).toList).asInstanceOf[Data]),
                           DataField("data",DataArray(rows.map(r => DataRecord(

@@ -26,16 +26,6 @@ public class DataSetRS extends DataSetTabular {
 
     private List<List<String>> currentBatchCache = new LinkedList<List<String>>();
 
-    public String[] GetRow()
-    {
-        return null;
-    }
-
-    public boolean NextRow()
-    {
-        return false;
-    }
-
     @Override
     public void set(ResultSet _result){
 
@@ -77,9 +67,7 @@ public class DataSetRS extends DataSetTabular {
 
     private boolean resultSetCursorState = false;
 
-
-    @Override
-    public boolean isNextBatch(){
+    public boolean hasNext(){
         return resultSetCursorState;
     }
 

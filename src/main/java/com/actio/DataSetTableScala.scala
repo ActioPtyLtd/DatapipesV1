@@ -17,8 +17,6 @@ class DataSetTableScala(var header1: List[String], var rows1: List[List[String]]
 
   override def sizeOfBatch = rows1.length
 
-  def dump = {}
-
   def set(_results: ResultSet) = ???
 
   def set(_results: util.List[String]) = ???
@@ -33,19 +31,15 @@ class DataSetTableScala(var header1: List[String], var rows1: List[List[String]]
 
   def getColumnHeaderStr: String = header mkString ","
 
-  def isNextBatch: Boolean = {
+  def hasNext: Boolean = {
     val bn = boolNext
     boolNext = false
     bn
   }
 
-  def GetRow: Array[String] = rows.head.toArray
-
   def getAsList: util.List[String] = ???
 
   def setWithFields(_results: java.util.List[java.util.List[String]]) = { rows1 = _results.asScala.map(_.asScala.toList).toList}
-
-  def NextRow: Boolean = false
 
   def initBatch: Unit = { }
 
@@ -56,6 +50,8 @@ class DataSetTableScala(var header1: List[String], var rows1: List[List[String]]
   def getAsListOfColumns: util.List[util.List[String]] = rows1.map(_.asJava).asJava
 
   override def toString = (header1 mkString ", ") + "\n" + ("-" * (header1.map(_.length + 2).sum - 2)) + "\n" + (rows1 map (_ mkString ", ") mkString "\n") + "\n\n" + rows1.length + " rows.\n"
+
+  override def next: Data = this.toData
 }
 
 object DataSetTableScala {

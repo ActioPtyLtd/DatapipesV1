@@ -16,19 +16,6 @@ public abstract class DataSetHierarchical_java extends DataSet {
 
     // tab
 
-
-
-
-    public String[] GetRow() throws Exception
-    {
-        throw new Exception("Unimplemented");
-    }
-
-    public boolean NextRow() throws Exception
-    {
-        throw new Exception("Unimplemented");
-    }
-
     public void set(ResultSet _results) throws Exception
     {
         throw new Exception("Unimplemented");

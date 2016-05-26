@@ -108,8 +108,8 @@ public class TaskPipeline extends Task implements Runnable
         resultSet.initBatch();
 
         logger.info("Calling Batch Recursively::"+currentNode.getName()+"("+keyIndex + "/"+tasksInPipeline.size()+")");
-        while ( resultSet.isNextBatch() && tasksInPipeline.size() > keyIndex ) {
-            DataSet subResultSet = resultSet.getNextBatch();
+        while ( resultSet.hasNext() && tasksInPipeline.size() > keyIndex ) {
+            DataSet subResultSet = DataSetTableScala.apply(resultSet.next()); // change this later to datset with single generic data
             // recursively traverse the rest of the pipeline batching up the ResultSet
             subResultSet.dump();
 
@@ -126,8 +126,9 @@ public class TaskPipeline extends Task implements Runnable
     }
 
     private List<DataSet> getSubDataSets(DataSet dataSet, LinkedList<DPFnNode> tasks, int keyIndex) throws Exception {
-        if(iterateOverDataSet(tasks, keyIndex))
-            return iterateDataSetItems(dataSet);
+        //if(iterateOverDataSet(tasks, keyIndex))
+        //    return iterateDataSetItems(dataSet);
+        // we'll do this better
 
         return Collections.singletonList(dataSet);
     }

@@ -16,11 +16,12 @@ trait SingleValueIterator {
   }
 }
 
-class DataSetSingleData(d: Data) extends DataSet with SingleValueIterator {
+class DataSetSingleData(private val myschema: SchemaDefinition,val data: Data) extends DataSet with SingleValueIterator {
   @throws(classOf[Exception])
-  override def sizeOfBatch: Int = ???
+  override def sizeOfBatch: Int = 0
 
-  override def next: Data = d
+  override def next = data
+  override def schema = myschema
 
   @throws(classOf[Exception])
   override def set(_results: util.List[String]): Unit = ???
@@ -41,7 +42,7 @@ class DataSetSingleData(d: Data) extends DataSet with SingleValueIterator {
   override def setWithFields(_results: util.List[util.List[String]]): Unit = ???
 
   @throws(classOf[Exception])
-  override def initBatch: Unit = ???
+  override def initBatch: Unit = { }
 
   @throws(classOf[Exception])
   override def getAsListOfColumns: util.List[util.List[String]] = ???

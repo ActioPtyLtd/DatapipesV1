@@ -95,7 +95,7 @@ public class DataSourceSQL extends DataSource {
 
     @Override
     public void execute(DataSet data, String statement) throws Exception {
-        DataSet nds = DataSetTransforms.prepare4statement(data, statement);
+        DataSet nds = DataSetTransforms.prepare4statement(DataSetTableScala.apply(data.schema(),data.next()), statement);   // assuming one batch again
         statement = statement.replaceAll("@(?<name>[-_a-zA-Z0-9]+)","?");
 
         logger.info("Connecting to database...");
@@ -184,7 +184,10 @@ public class DataSourceSQL extends DataSource {
 
             //dataSet.set(st.executeQuery(sqlQuery));
 
-            dataSet = new DataSetDBStream(st.executeQuery(sqlQuery));
+            DataSetDBStream stream = new DataSetDBStream(st.executeQuery(sqlQuery));
+            stream.initBatch();
+            dataSet = stream;
+
 
             logger.info("Successfully executed statement.");
         }

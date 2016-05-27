@@ -17,23 +17,23 @@ class TaskLookup extends Task {
     val dataSourceConfig = config.getConfig(DPSystemConfigurable.DATASOURCE_LABEL)
     val query = dataSourceConfig.getString("query.queryTemplate")
 
-    val inClause = dataSet.getColumnValues(lookupColumn1).distinct.map("\'" + _ + "\'") mkString ","
+    val tabledataset = DataSetTableScala(dataSet.schema, dataSet.next) //assuming one batch
+
+    val inClause = tabledataset.getColumnValues(lookupColumn1).distinct.map("\'" + _ + "\'") mkString ","
 
     val dataSource = DPSystemFactory.newDataSource(dataSourceConfig.withValue("query.queryTemplate", ConfigValueFactory.fromAnyRef(query.replaceAllLiterally("$1", inClause))), masterConfig)
 
     dataSource.execute()
-    dataSource.dataSet.initBatch
+
+    val ord = dataSource.dataSet.schema.asInstanceOf[SchemaArray].content.asInstanceOf[SchemaRecord].fields.map(_.name).indexOf(lookupColumn2)  // assuming tablular
 
     val condition = (row1: List[String], row2: List[String]) =>
-      if(row2 == Nil) false else row1(dataSet.getOrdinalOfColumn(lookupColumn1)) == row2(dataSource.dataSet.getOrdinalOfColumn(lookupColumn2))
+      if(row2 == Nil) false else row1(tabledataset.getOrdinalOfColumn(lookupColumn1)) == row2(ord)
 
-    for(ds <- dataSource.dataSet) {
-      // should maybe union the resultsets
-
-      dataSet = DataSetTransforms.transformLookupFunc(dataSet, DataSetTableScala(ds), condition, _ => true)
+    for(data <- dataSource.dataSet.toList) {
+      //TODO: union the resultsets instead of overwriting them here
+      dataSet = DataSetTransforms.transformLookupFunc(tabledataset, DataSetTableScala(dataSource.dataSet.schema, data), condition, _ => true)
     }
-
-    val test = false
   }
 
   def load(): Unit = ???

@@ -12,8 +12,17 @@ import scala.collection.JavaConverters._
 
 object UtilityFunctions extends Logging {
 
-  def execute(ds: DataSet, fs: java.util.List[TransformFunction]): DataSet =
-    fs.asScala.foldLeft[DataSet](ds)((s,f) => execute(f.getName, (s.asInstanceOf[Any] :: f.getParameters.toList).asJava))
+  def execute(ds: DataSet, fs: java.util.List[TransformFunction]): DataSet = {
+    val dsadj: DataSetTableScala = ds match {
+      case t: DataSetTableScala => t
+      case _ => DataSetTableScala.getTable(ds.schema, ds.next) match
+        {
+        case Left(e) => new DataSetTableScala() //TODO: incoming schema is not table, returning empty table for now, change behaviour to support hierarchical functions
+        case Right(table) => table
+      }
+    }
+    fs.asScala.foldLeft[DataSet](dsadj)((s,f) => execute(f.getName, (s.asInstanceOf[Any] :: f.getParameters.toList).asJava))
+  }
 
   def execute(methodName: String, params: java.util.List[Any]) = {
     val method = Class.forName("com.actio.DataSetTransforms").getDeclaredMethods.find(_.getName.equalsIgnoreCase(methodName))
@@ -39,7 +48,7 @@ object UtilityFunctions extends Logging {
       case pv => methodParams match {
         case Nil => result.reverse
         case h :: t =>
-          if (h.getType == classOf[String] || h.getType == classOf[DataSet])
+          if (h.getType == classOf[String] || h.getType == classOf[DataSetTableScala])
             getParamValues(t, pv.tail, pv.head :: result)
           else if (h.getType == classOf[List[String]]) {
             val l = pv.splitAt(pv.length - methodParams.length + 1)

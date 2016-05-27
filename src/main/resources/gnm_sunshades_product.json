@@ -44,11 +44,24 @@
             "update": ""
           }
         }
+      },
+      "update-product-api": {
+        "type": "load",
+        "behavior": "",
+        "dataSource": {
+          "type": "rest",
+          "behavior": "simple",
+          "path": "https://dev-api-gnm.actio.com.au:8443/api/product/",
+          "credential": {
+            "user": "admin",
+            "password": "password"
+          }
+        }
       }
     },
     "pipelines": {
       "load-product-eyeware" : {
-        "pipe": "read-product-eyeware-csv | parse-product-eyeware-csv | update-product-eyeware-db"
+        "pipe": "read-product-eyeware-csv | parse-product-eyeware-csv | update-product-api"
       }
     },
     "services": {

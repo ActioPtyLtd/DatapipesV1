@@ -1,44 +1,46 @@
 package com.actio
 
-import java.sql.ResultSet
+import java.sql.{ResultSetMetaData, ResultSet, Types}
 import java.util
 
 /**
   * Created by mauri on 4/05/2016.
   */
+
 class DataSetDBStream(val rs: ResultSet) extends DataSet {
-  var first = 0
-  var more = true
-  var header1: List[String] = Nil
+  private var header1: List[String] = Nil
+  private var myschema:SchemaDefinition = SchemaUnknown
 
   def next = {
     var i = 0
     var rows1: List[List[String]] = Nil
-    if(more) {
       do {
-        rows1 = header.map(h => Option(rs.getObject(h))).map(v => if (v.isEmpty) null else v.get.toString).toList :: rows1
+        rows1 = header1.map(h => Option(rs.getObject(h))).map(v => if (v.isEmpty) null else v.get.toString).toList :: rows1
         i += 1
-        more = rs.next()
-      } while(more && i < batchSize)
-    }
-    DataSetTableScala(header1, rows1).toData
+      } while(rs.next() && i < batchSize)
+
+    //TODO: change this to create Data instead of this
+    DataSetTableScala(header1, rows1).next
   }
 
-  def hasNext = {
-    if (!more)
-      false
-    else {
-      more = rs.next()
-      first += 1
-      (first==1) || more
-    }
-  }
+  def hasNext = rs.next()
 
   override def initBatch = {
     val metaData= rs.getMetaData
     val ordinals = 1 to metaData.getColumnCount
     header1 = (ordinals map metaData.getColumnName).toList
+    myschema = SchemaArray(SchemaRecord(ordinals.map(o => SchemaField(metaData.getColumnName(o), true, {
+      val t = metaData.getColumnType(o)
+      if(t == Types.BIGINT || t == Types.DECIMAL || t == Types.DOUBLE || t == Types.FLOAT || t == Types.INTEGER || t == Types.NUMERIC)
+        SchemaNumber(metaData.getColumnDisplaySize(o))
+      else if(t == Types.DATE || t == Types.TIME || t == Types.TIMESTAMP)
+        SchemaDate("yyyy-MM-dd")
+      else
+        SchemaString(metaData.getColumnDisplaySize(o))
+    })).toList))
   }
+
+  override def schema: SchemaDefinition = myschema
 
 
   // really hope to be able to remove most of these
@@ -69,4 +71,6 @@ class DataSetDBStream(val rs: ResultSet) extends DataSet {
 
   @throws(classOf[Exception])
   override def getAsListOfColumns: util.List[util.List[String]] = ???
+
+
 }

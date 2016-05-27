@@ -24,10 +24,6 @@ public abstract class DataRecordNotInUse extends DPSystemConfigurable {
         return customHeader;
     }
 
-    public void setCustomHeader(String customHeader) {
-        this.customHeader = customHeader;
-    }
-
     private List<String> row;
 
     public Schema getSchema() {

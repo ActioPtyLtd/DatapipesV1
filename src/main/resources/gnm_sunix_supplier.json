@@ -15,7 +15,6 @@
       "parse-supplier-csv": {
         "type": "transform",
         "batch": [
-          "addheader,col1",
           "split2cols,col1",
           "row1header",
           "const,PHHEW",

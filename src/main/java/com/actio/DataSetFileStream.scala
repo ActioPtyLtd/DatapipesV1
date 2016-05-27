@@ -8,9 +8,10 @@ import java.util
   * Created by mauri on 14/04/2016.
   */
 class DataSetFileStream(val reader: InputStream) extends DataSet {
-  var lineheader: String = null
-  var iterable: Iterator[Seq[String]] = null
-  var header1: List[String] = Nil
+  private var lineheader: String = null
+  private var iterable: Iterator[Seq[String]] = null
+  private var header1: List[String] = Nil
+  private val col1 = "col1"
 
   def next = {
     val lines = iterable.next().toList
@@ -19,19 +20,25 @@ class DataSetFileStream(val reader: InputStream) extends DataSet {
       lineheader = lines.head
       //rows1 = lines.tail map (List(_))
       header1 = List(lineheader)
-      new DataSetTableScala(lines).toData
+      //TODO: change this to create Data instead of this
+      lines2data(lines)
     }
     else {
       //rows1 = lines map (List(_))
-      new DataSetTableScala(lineheader :: lines).toData
+      //TODO: change this to create Data instead of this
+      lines2data(lineheader :: lines)
     }
   }
+
+  private def lines2data(lines: List[String]) = new DataArray(lines.map(l => new DataRecord(List(DataField(col1, DataString(l))))))
 
   def hasNext = iterable.hasNext
 
   override def initBatch() = {
     iterable = scala.io.Source.fromInputStream(reader,"windows-1252").getLines().grouped(100)
   }
+
+  override def schema = SchemaArray(SchemaRecord(List(SchemaField("col1", true, SchemaString(0)))))
 
   // really hope to be able to remove most of these
 
@@ -60,4 +67,5 @@ class DataSetFileStream(val reader: InputStream) extends DataSet {
 
   @throws(classOf[Exception])
   override def getAsListOfColumns: util.List[util.List[String]] = ???
+
 }

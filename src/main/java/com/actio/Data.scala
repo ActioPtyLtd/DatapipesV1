@@ -45,11 +45,3 @@ case class DataArray(elems: List[Data]) extends Data {
 sealed abstract class Key
 case class Ord(ord: Int) extends Key
 case class Label(label: String) extends Key
-
-object mytest extends App {
-
-    val d: Data = new DataSetTableScala(List("c1","c2"), List(List("13","15"),List("16","17"))).toData
-    val t = DataSetTableScala(d)
-    print(t)
-
-}

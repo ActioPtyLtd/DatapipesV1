@@ -5,6 +5,7 @@ package com.actio;
  */
 
 import com.typesafe.config.Config;
+import org.apache.commons.lang.NotImplementedException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -286,8 +287,7 @@ public class DataSetTabular extends DataSet {
 
     }
 
-    @Override
     public Data next() {
-        return this.toData();
+        throw new NotImplementedException();
     }
 }

@@ -109,7 +109,7 @@ public class TaskPipeline extends Task implements Runnable
 
         logger.info("Calling Batch Recursively::"+currentNode.getName()+"("+keyIndex + "/"+tasksInPipeline.size()+")");
         while ( resultSet.hasNext() && tasksInPipeline.size() > keyIndex ) {
-            DataSet subResultSet = DataSetTableScala.apply(resultSet.next()); // change this later to datset with single generic data
+            DataSet subResultSet = new DataSetSingleData(resultSet.schema(), resultSet.next());
             // recursively traverse the rest of the pipeline batching up the ResultSet
             subResultSet.dump();
 

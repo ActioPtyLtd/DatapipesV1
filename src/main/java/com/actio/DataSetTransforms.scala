@@ -8,6 +8,36 @@ import java.time.format.DateTimeFormatter
   */
 object DataSetTransforms {
 
+  type Batch = (SchemaDefinition, Data)
+
+  def hAddField(batch: Batch, fieldName: String, newBatch: Batch) =
+    (SchemaRecord(SchemaField(fieldName, true, newBatch._1) :: batch._1.asInstanceOf[SchemaRecord].fields), DataRecord(DataField(fieldName, newBatch._2) :: batch._2.asInstanceOf[DataRecord].fields))
+
+  def hKeyValue(df: DataField): DataRecord =
+      DataRecord(List(DataField("name", DataString(df.name)), DataField("value", df.data)))
+      
+  def hFields2KeyValueArray(dr: DataRecord, keys: List[String], property: String) =
+      DataRecord(DataField(property,DataArray(dr.fields.filter(f => keys.contains(f.name)).map(hKeyValue).toList))
+      :: dr.fields.filterNot(f => keys.contains(f.name)).toList)
+
+
+  def numeric(batch: Batch, field: String, precision: Int, scale: Int): DataSet = batch match {
+    case (s, DataRecord(fs)) =>
+      new DataSetSingleData(s, if (fs.map(_.name).contains(field))
+        DataRecord(fs.map(f =>
+          if (f.name == field)
+            DataField(f.name, DataNumeric(BigDecimal(f.data.valueOption.getOrElse("0"))))
+          else
+            f).toList)
+      else
+        DataRecord(fs))
+    case (s, DataArray(a)) =>
+      new DataSetSingleData(s, DataArray(a.map(m => numeric((s, m), field, precision, scale).next)))
+    case (s, d) => new DataSetSingleData(s, d)
+  }
+      
+  // tabular functions, to be refactored
+
   def split2Rows(ds: DataSetTableScala, columnName: String, regex: String) =
     DataSetTableScala(ds.getNextAvailableColumnName(columnName) :: ds.header,
       ds.rows flatMap(r => r(ds.getOrdinalOfColumn(columnName)) split regex map (_ :: r )))

@@ -15,6 +15,7 @@ import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.BasicCredentialsProvider;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
+import scala.collection.Iterator;
 
 import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.HttpsURLConnection;
@@ -224,10 +225,19 @@ public class DataSourceREST extends DataSource {
     @Override
     public void write(DataSet data)  throws Exception
     {
-        for (String line : data.getAsList()) {
-            logger.info("Send:"+line);
-            write(line);
+        while(data.hasNext()) {
+            Iterator<Data> i = data.next().values().toIterator();
+            while(i.hasNext()) {
+                //DataRecord dr = (DataRecord)i.next();
+                write(Data2Json.toJsonString(i.next()));
+            }
         }
+
+
+        //for (String line : data.getAsList()) {
+        //    logger.info("Send:"+line);
+        //    write(line);
+        //}
     }
 
     @Override
@@ -286,7 +296,7 @@ public class DataSourceREST extends DataSource {
         } catch (ClientProtocolException e) {
             logger.info("Unable to send data to xMatters"+ e);
         } catch (IOException e) {
-            logger.info("Unable to send data to xMatters"+ e);
+            logger.info("Unable to send data to xMatters" + e);
         } finally {
             if (httpClient != null) {
                 try {

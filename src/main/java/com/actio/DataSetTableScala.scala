@@ -77,12 +77,13 @@ object DataSetTableScala {
 
   def apply(header: List[String], rows: List[List[String]]) = new DataSetTableScala(header, rows)
 
-  def apply(schema: SchemaDefinition, data: Data) = new DataSetTableScala(schema.asInstanceOf[SchemaArray].content.asInstanceOf[SchemaRecord].fields.map(_.name).toList, data.values.map(_.asInstanceOf[DataRecord].fields.map(_.Data.asInstanceOf[DataString].str).toList).toList)
+  def apply(schema: SchemaDefinition, data: Data) = new DataSetTableScala(schema.asInstanceOf[SchemaArray].content.asInstanceOf[SchemaRecord].fields.map(_.name).toList, 
+    data.values.map(_.values.map(_.valueOption.orNull).toList).toList)
 
   // explicit version with error handling
   def getTable(schema: SchemaDefinition, data: Data): Either[SchemaMatchError, DataSetTableScala] =
     schema match {
-      case SchemaArray(SchemaRecord(fields)) => Try(DataSetTableScala(fields.map(_.name).toList, data.values.map(_.asInstanceOf[DataRecord].fields.map(_.Data.asInstanceOf[DataString].str).toList).toList)).map(Right(_)).getOrElse(Left(DataDoesntMatchSchema))
+      case SchemaArray(SchemaRecord(fields)) => Try(DataSetTableScala(fields.map(_.name).toList, data.values.map(_.values.map(_.valueOption.orNull).toList).toList)).map(Right(_)).getOrElse(Left(DataDoesntMatchSchema))
       case SchemaArray(_) => Left(SchemaMatchRecordExpected)
       case _ => Left(SchemaMatchArrayExpected)
     }

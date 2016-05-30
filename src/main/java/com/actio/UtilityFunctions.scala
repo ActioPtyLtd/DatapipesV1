@@ -2,6 +2,7 @@ package com.actio
 
 import java.lang.reflect.Method
 import java.lang.reflect.Parameter
+import com.actio.DataSetTransforms.Batch
 import com.actio.dpsystem.Logging
 import scala.annotation.tailrec
 import scala.collection.JavaConverters._
@@ -13,15 +14,8 @@ import scala.collection.JavaConverters._
 object UtilityFunctions extends Logging {
 
   def execute(ds: DataSet, fs: java.util.List[TransformFunction]): DataSet = {
-    val dsadj: DataSetTableScala = ds match {
-      case t: DataSetTableScala => t
-      case _ => DataSetTableScala.getTable(ds.schema, ds.next) match
-        {
-        case Left(e) => new DataSetTableScala() //TODO: incoming schema is not table, returning empty table for now, change behaviour to support hierarchical functions
-        case Right(table) => table
-      }
-    }
-    fs.asScala.foldLeft[DataSet](dsadj)((s,f) => execute(f.getName, (s.asInstanceOf[Any] :: f.getParameters.toList).asJava))
+
+    fs.asScala.foldLeft[DataSet](ds)((s,f) => execute(f.getName, (s.asInstanceOf[Any] :: f.getParameters.toList).asJava))
   }
 
   def execute(methodName: String, params: java.util.List[Any]) = {
@@ -48,8 +42,14 @@ object UtilityFunctions extends Logging {
       case pv => methodParams match {
         case Nil => result.reverse
         case h :: t =>
-          if (h.getType == classOf[String] || h.getType == classOf[DataSetTableScala])
+          if (h.getType == classOf[String])
             getParamValues(t, pv.tail, pv.head :: result)
+          else if(h.getType == classOf[Int])
+            getParamValues(t, pv.tail, pv.head.toString.toInt :: result)
+          else if(h.getType == classOf[DataSetTableScala])
+            getParamValues(t, pv.tail, DataSetTableScala(pv.head.asInstanceOf[DataSet].schema,pv.head.asInstanceOf[DataSet].next) :: result)
+          else if(h.getType == classOf[Batch])
+            getParamValues(t, pv.tail, (pv.head.asInstanceOf[DataSet].schema, pv.head.asInstanceOf[DataSet].next) :: result)
           else if (h.getType == classOf[List[String]]) {
             val l = pv.splitAt(pv.length - methodParams.length + 1)
             getParamValues(t, l._2, l._1 :: result)

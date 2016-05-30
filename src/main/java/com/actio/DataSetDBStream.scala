@@ -8,19 +8,19 @@ import java.util
   */
 
 class DataSetDBStream(val rs: ResultSet) extends DataSet {
-  private var header1: List[String] = Nil
+  private var header: List[String] = Nil
   private var myschema:SchemaDefinition = SchemaUnknown
 
   def next = {
     var i = 0
-    var rows1: List[List[String]] = Nil
-      do {
-        rows1 = header1.map(h => Option(rs.getObject(h))).map(v => if (v.isEmpty) null else v.get.toString).toList :: rows1
-        i += 1
-      } while(rs.next() && i < batchSize)
 
-    //TODO: change this to create Data instead of this
-    DataSetTableScala(header1, rows1).next
+    var recs: List[DataRecord] = Nil
+    do {
+      recs = DataRecord(header.map(c => (c,Option(rs.getObject(c)))).map(v => DataField(v._1, if (v._2.isEmpty) NoData else DataString(v._2.toString)))) :: recs
+      i += 1
+    } while(rs.next() && i < batchSize)
+
+    DataArray(recs)
   }
 
   def hasNext = rs.next()
@@ -28,11 +28,14 @@ class DataSetDBStream(val rs: ResultSet) extends DataSet {
   override def initBatch = {
     val metaData= rs.getMetaData
     val ordinals = 1 to metaData.getColumnCount
-    header1 = (ordinals map metaData.getColumnName).toList
+
+    header = (ordinals map metaData.getColumnName).toList
+
     myschema = SchemaArray(SchemaRecord(ordinals.map(o => SchemaField(metaData.getColumnName(o), true, {
       val t = metaData.getColumnType(o)
+
       if(t == Types.BIGINT || t == Types.DECIMAL || t == Types.DOUBLE || t == Types.FLOAT || t == Types.INTEGER || t == Types.NUMERIC)
-        SchemaNumber(metaData.getColumnDisplaySize(o))
+        SchemaNumber(metaData.getColumnDisplaySize(o), 0)
       else if(t == Types.DATE || t == Types.TIME || t == Types.TIMESTAMP)
         SchemaDate("yyyy-MM-dd")
       else
@@ -55,7 +58,7 @@ class DataSetDBStream(val rs: ResultSet) extends DataSet {
   import scala.collection.JavaConverters._
 
   @throws(classOf[Exception])
-  override def getColumnHeader: util.List[String] = header1.asJava
+  override def getColumnHeader: util.List[String] = header.asJava
 
   @throws(classOf[Exception])
   override def getAsListOfColumnsBatch(batchLen: Int): util.List[util.List[String]] = ???

@@ -16,8 +16,8 @@ sealed abstract class Data {
 
   def value(keys: List[Key]): Data = keys match {
     case Nil => this
-    case Ord(ord)::t => this.apply(ord).value(t)
-    case Label(label)::t => this.apply(label).value(t)
+    case Ord(ord)::t => this(ord).value(t)
+    case Label(label)::t => this(label).value(t)
     case _ => NoData }
 
   def values: Iterable[Data] = Iterable.empty
@@ -30,11 +30,16 @@ case object NoData extends Data
 case class DataString(str: String) extends Data {
   override def valueOption = Option(str)
 }
-case class DataField(name: String, Data: Data)
+
+case class DataNumeric(num: BigDecimal) extends Data {
+  override def valueOption = Some(num.toString())
+}
+
+case class DataField(name: String, data: Data)
 
 case class DataRecord(fields: List[DataField]) extends Data {
-  override def apply(field: String) = fields.find(f => f.name == field).map(_.Data).getOrElse(NoData)
-  override def values = fields.map(_.asInstanceOf[Data])
+  override def apply(field: String) = fields.find(f => f.name == field).map(_.data).getOrElse(NoData)
+  override def values = fields.map(_.data)
 }
 
 case class DataArray(elems: List[Data]) extends Data {
@@ -45,3 +50,18 @@ case class DataArray(elems: List[Data]) extends Data {
 sealed abstract class Key
 case class Ord(ord: Int) extends Key
 case class Label(label: String) extends Key
+
+
+
+
+object Data2Json {
+  def toJsonString(data: Data): String = data match {
+    case DataString(s) => "\"" + s + "\""
+    case DataRecord(fs) => "{" + fs.map(f => "\"" + f.name + "\": " + toJsonString(f.data)).mkString(",") + "}"
+    case DataArray(ds) => "[" + ds.map(d => toJsonString(d)).mkString(",") + "]"
+    case NoData => "null"
+    case DataNumeric(num) => num.setScale(2).toString()
+  }
+
+
+}

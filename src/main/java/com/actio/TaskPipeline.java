@@ -105,13 +105,13 @@ public class TaskPipeline extends Task implements Runnable
         else
             resultSet = evokeTask(currentNode, initDataSet);
 
-        resultSet.initBatch();
+        //dont think we need this. initalise straight awy resultSet.initBatch();
 
         logger.info("Calling Batch Recursively::"+currentNode.getName()+"("+keyIndex + "/"+tasksInPipeline.size()+")");
         while ( resultSet.hasNext() && tasksInPipeline.size() > keyIndex ) {
             DataSet subResultSet = new DataSetSingleData(resultSet.schema(), resultSet.next());
             // recursively traverse the rest of the pipeline batching up the ResultSet
-            subResultSet.dump();
+            //subResultSet.dump();
 
             for (DataSet iteratedDatSet : getSubDataSets(subResultSet, tasksInPipeline, keyIndex)) {
                 processPipeLineRE(tasksInPipeline, keyIndex, iteratedDatSet);
@@ -122,14 +122,10 @@ public class TaskPipeline extends Task implements Runnable
         }
 
         logger.info("--------------------------------------Exit recursive "+
-                currentNode.getName()+"  "+resultSet.sizeOfBatch()+"---");
+                currentNode.getName()+"  "+"---");
     }
 
     private List<DataSet> getSubDataSets(DataSet dataSet, LinkedList<DPFnNode> tasks, int keyIndex) throws Exception {
-        //if(iterateOverDataSet(tasks, keyIndex))
-        //    return iterateDataSetItems(dataSet);
-        // we'll do this better
-
         return Collections.singletonList(dataSet);
     }
 
@@ -138,23 +134,6 @@ public class TaskPipeline extends Task implements Runnable
             return sysconf.getTask(tasks.get(keyIndex).getName()).toConfig().hasPath("iterate");
 
         return false;
-    }
-
-    private List<DataSet> iterateDataSetItems(DataSet dataSet) throws Exception {
-        List<DataSet> ret = new ArrayList<DataSet>();
-
-        List<String> header = dataSet.getColumnHeader();
-
-        for(List<String> row : dataSet.getAsListOfColumns()) {
-            List<List<String>> rows = new ArrayList<List<String>>();
-            rows.add(header);
-            rows.add(row);
-
-            DataSetTabular ds = new DataSetTabular();
-            ds.setRsc(rows);
-            ret.add(ds);
-        }
-        return ret;
     }
 
     //

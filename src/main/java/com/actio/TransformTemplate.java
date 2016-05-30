@@ -55,12 +55,15 @@ public class TransformTemplate extends TaskTransform {
         }
 
         // Create a New Data set Record to store the new results
-        dataSet = new DataSetTabular();
+        DataSetTabular ndataSet = new DataSetTabular();
 
-        dataSet.setConfig(getConfig(),getMasterConfig());
+        ndataSet.setConfig(getConfig(),getMasterConfig());
 
         // Store the New Result in the DataSet!!!
-        dataSet.set(newData);
+        ndataSet.set(newData);
+
+        dataSet = ndataSet;
+
     }
 
 

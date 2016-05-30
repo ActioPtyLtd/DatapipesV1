@@ -184,8 +184,7 @@ public class DataSourceSQL extends DataSource {
 
             //dataSet.set(st.executeQuery(sqlQuery));
 
-            DataSetDBStream stream = new DataSetDBStream(st.executeQuery(sqlQuery));
-            stream.initBatch();
+            DataSetDBStream stream = new DataSetDBStream(st.executeQuery(sqlQuery), 100);
             dataSet = stream;
 
 

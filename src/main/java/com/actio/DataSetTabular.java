@@ -18,6 +18,9 @@ import java.util.List;
 public class DataSetTabular extends DataSet {
 
     private static final Logger logger = LoggerFactory.getLogger(DataSetTabular.class);
+    private String outputDelimiter = ",";
+    private int batchSize = 500;
+    private String customHeader = "";
 
     public DataSetTabular(List<String> _rs)
     {
@@ -33,7 +36,6 @@ public class DataSetTabular extends DataSet {
 
     }
 
-    @Override
     public int sizeOfBatch() throws Exception {
         return getRs().size();
     }
@@ -99,7 +101,6 @@ public class DataSetTabular extends DataSet {
 
     private boolean emptySet = true;
 
-    @Override
     public void set(List<String> _rs) {
         rs = _rs;
     }
@@ -109,8 +110,7 @@ public class DataSetTabular extends DataSet {
         rsc = _rsc;
     }
 
-    @Override
-    public List<String> getAsList() throws Exception {
+    public List<String> getAsList() {
         if (rs != null && rs.size() != 0)
             return rs;
 
@@ -125,7 +125,7 @@ public class DataSetTabular extends DataSet {
 
             for (String column : columnRow){
                 if (flattenedRow.length() > 0)
-                     flattenedRow.append(getOutputDelimiter());
+                     flattenedRow.append(outputDelimiter);
 
                 flattenedRow.append(column);
             }
@@ -135,8 +135,7 @@ public class DataSetTabular extends DataSet {
         return rs;
     }
 
-    @Override
-    public List<List<String>> getAsListOfColumns() throws Exception {
+    public List<List<String>> getAsListOfColumns() {
 
         // if it's already been called and assigned get the cached version
         if (rsc != null)
@@ -153,7 +152,6 @@ public class DataSetTabular extends DataSet {
         return rsc;
     }
 
-    @Override
     public void initBatch() throws Exception{
         // Set row number
         rowNumber = 0;
@@ -168,7 +166,6 @@ public class DataSetTabular extends DataSet {
     }
 
 
-    @Override
     public boolean hasNext()
     {
         int s = 0;
@@ -190,9 +187,9 @@ public class DataSetTabular extends DataSet {
     //@Override
     public DataSet getNextBatch() throws Exception{
 
-        logger.info("Entered getNextBatch rowNumber"+rowNumber+", batchSize="+batchSize());
+        logger.info("Entered getNextBatch rowNumber"+rowNumber+", batchSize="+batchSize);
 
-        DataSet newSet =  new DataSetTabular();
+        DataSetTabular newSet =  new DataSetTabular();
 
         if (emptySet) {
             emptySet = false;
@@ -200,12 +197,12 @@ public class DataSetTabular extends DataSet {
         }
 
         if (rowNumber >= 0 && rowNumber < sizeOfBatch()) {
-            int index = rowNumber+batchSize();
+            int index = rowNumber+batchSize;
             List<String> sublist = getAsList().subList(rowNumber,
                     index< sizeOfBatch()?index: sizeOfBatch());
 
             // increment the row number so it moves to next batch
-            rowNumber += (rowNumber + batchSize() > sizeOfBatch())? rowNumber+batchSize(): sizeOfBatch();
+            rowNumber += (rowNumber + batchSize > sizeOfBatch())? rowNumber+batchSize: sizeOfBatch();
 
 
             logger.info("Exiting getNextBatch new rowNumber"+rowNumber);
@@ -216,15 +213,13 @@ public class DataSetTabular extends DataSet {
         return newSet;
     }
 
-    @Override
     public List<String> getColumnHeader() throws Exception {
         // not supported
         return getAsListOfColumns().get(0);
     }
 
-    @Override
-    public String getColumnHeaderStr() throws Exception {
-        if (getCustomHeader() == null) {
+    public String getColumnHeaderStr() {
+        if (customHeader == null) {
             // assume first line is header - piss poor assumption
             if (rs!= null)
                 return rs.get(1);
@@ -233,7 +228,7 @@ public class DataSetTabular extends DataSet {
 
         } else {
 
-            return getCustomHeader();
+            return customHeader;
         }
 
     }
@@ -274,7 +269,6 @@ public class DataSetTabular extends DataSet {
         return null;
     }
 
-    @Override
     public void dump() throws Exception
     {
         logger.info("=== dataSource set dump======");

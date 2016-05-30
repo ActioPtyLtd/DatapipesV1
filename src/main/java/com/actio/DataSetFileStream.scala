@@ -12,6 +12,7 @@ class DataSetFileStream(val reader: InputStream) extends DataSet {
   private var iterable: Iterator[Seq[String]] = null
   private var header1: List[String] = Nil
   private val col1 = "col1"
+  init()
 
   def next = {
     val lines = iterable.next().toList
@@ -34,38 +35,10 @@ class DataSetFileStream(val reader: InputStream) extends DataSet {
 
   def hasNext = iterable.hasNext
 
-  override def initBatch() = {
+  def init() = {
     iterable = scala.io.Source.fromInputStream(reader,"windows-1252").getLines().grouped(100)
   }
 
   override def schema = SchemaArray(SchemaRecord(List(SchemaField("col1", true, SchemaString(0)))))
-
-  // really hope to be able to remove most of these
-
-  @throws(classOf[Exception])
-  override def sizeOfBatch: Int = 100
-
-  @throws(classOf[Exception])
-  override def set(_results: util.List[String]): Unit = ???
-
-  import scala.collection.JavaConverters._
-
-  @throws(classOf[Exception])
-  override def getColumnHeader: util.List[String] = header1.asJava
-
-  @throws(classOf[Exception])
-  override def getAsListOfColumnsBatch(batchLen: Int): util.List[util.List[String]] = ???
-
-  @throws(classOf[Exception])
-  override def getColumnHeaderStr: String = ???
-
-  @throws(classOf[Exception])
-  override def getAsList: util.List[String] = ???
-
-  @throws(classOf[Exception])
-  override def setWithFields(_results: util.List[util.List[String]]): Unit = ???
-
-  @throws(classOf[Exception])
-  override def getAsListOfColumns: util.List[util.List[String]] = ???
 
 }

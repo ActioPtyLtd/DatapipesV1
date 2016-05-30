@@ -7,46 +7,43 @@ import java.util
 
 import scala.util.Try
 
-class DataSetTableScala(val header1: List[String], val rows1: List[List[String]]) extends DataSet with SingleValueIterator {
-  def this() = this(List(), List(List()))
-  def this(rows: List[String]) = this(List(rows.head), rows.tail.map(List(_)))
+class DataSetTableScala(val myschema: SchemaDefinition,val data: Data) extends DataSet {
+  def this() = this(SchemaUnknown, NoData)
+  val rows: List[List[String]] = data.values.map(_.values.map(_.valueOption.orNull).toList).toList
+  val header: List[String] = schema.asInstanceOf[SchemaArray].content.asInstanceOf[SchemaRecord].fields.map(_.name).toList
+
+
+  private var boolNext = true
 
   import scala.collection.JavaConverters._
 
-  override def sizeOfBatch = rows1.length
-
-  def set(_results: util.List[String]) = ???
+  def sizeOfBatch = rows.length
 
   def getNextBatch: DataSet = this
 
-  def getColumnHeader: util.List[String] = header1.asJava
+  def getColumnHeader: util.List[String] = header.asJava
 
-  def getAsListOfColumnsBatch(batchLen: Int): util.List[util.List[String]] = rows1.map(_.asJava).asJava
+  def getAsListOfColumnsBatch(batchLen: Int): util.List[util.List[String]] = rows.map(_.asJava).asJava
 
   def getColumnHeaderStr: String = header mkString ","
 
-  def getAsList: util.List[String] = ???
+  def getAsList: util.List[String] = rows.map(r => r.map(Option(_).getOrElse("")) mkString ",").asJava
 
-  def setWithFields(_results: java.util.List[java.util.List[String]]) = ??? //{ rows1 = _results.asScala.map(_.asScala.toList).toList}
+  override def getAsListOfColumns(): util.List[util.List[String]] = rows.map(_.asJava).asJava
 
-  def initBatch: Unit = { }
+  override def toString = (header mkString ", ") + "\n" + ("-" * (header.map(_.length + 2).sum - 2)) + "\n" + (rows map (_ mkString ", ") mkString "\n") + "\n\n" + rows.length + " rows.\n"
 
-  def getAsListOfColumns: util.List[util.List[String]] = rows1.map(_.asJava).asJava
+  def next: Data = {
+    boolNext = false
+    DataArray(rows.map(r => DataRecord(header.map(h => DataField(h,DataString(this.getValue(r, h)).asInstanceOf[Data])).toList).asInstanceOf[Data]).toList)
+  }
 
-  override def toString = (header1 mkString ", ") + "\n" + ("-" * (header1.map(_.length + 2).sum - 2)) + "\n" + (rows1 map (_ mkString ", ") mkString "\n") + "\n\n" + rows1.length + " rows.\n"
+  override def schema = myschema
 
-  def next: Data = DataArray(rows.map(r => DataRecord(header.map(h => DataField(h,DataString(this.getValue(r, h)).asInstanceOf[Data])).toList).asInstanceOf[Data]).toList)
-
-  override def schema = SchemaArray(SchemaRecord(header1.map(h => new SchemaField(h, true, SchemaString(0))).toList))
-
-
-
-  // moved from dataset
+  def hasNext = boolNext
 
   import scala.collection.JavaConverters._
 
-  def rows: List[List[String]] = getAsListOfColumns.asScala.map(_.asScala.toList).toList
-  def header: List[String] = getColumnHeader.asScala.toList
 
 
   def getOrdinalOfColumn(columnName: String) = { val i = header.indexWhere(_ == columnName)
@@ -71,14 +68,17 @@ class DataSetTableScala(val header1: List[String], val rows1: List[List[String]]
 }
 
 object DataSetTableScala {
-  def apply(text: String) = new DataSetTableScala(List("col1"), List(List(text)))
+  def apply(schema: SchemaDefinition, data: Data) = new DataSetTableScala(schema, data)
 
-  def apply(rows2: List[List[String]]) = new DataSetTableScala(rows2.head.zipWithIndex map ("col" + _), rows2)
+  def apply(text: String): DataSetTableScala = apply(List("col1"), List(List(text)))
 
-  def apply(header: List[String], rows: List[List[String]]) = new DataSetTableScala(header, rows)
+  def apply(rows2: List[List[String]]): DataSetTableScala = apply(rows2.head.zipWithIndex map ("col" + _), rows2)
 
-  def apply(schema: SchemaDefinition, data: Data) = new DataSetTableScala(schema.asInstanceOf[SchemaArray].content.asInstanceOf[SchemaRecord].fields.map(_.name).toList, 
-    data.values.map(_.values.map(_.valueOption.orNull).toList).toList)
+  def apply(header: List[String], rows: List[List[String]]): DataSetTableScala = new DataSetTableScala(
+    SchemaArray(SchemaRecord(header.map(SchemaField(_,true,SchemaString(0))).toList)),
+    DataArray(rows.map(r => DataRecord((header zip r).map(p => DataField(p._1, if (p._2 == null) NoData else DataString(p._2))).toList)).toList))
+
+  def apply(ds: DataSet): DataSetTableScala = new DataSetTableScala(ds.schema, ds.next)
 
   // explicit version with error handling
   def getTable(schema: SchemaDefinition, data: Data): Either[SchemaMatchError, DataSetTableScala] =

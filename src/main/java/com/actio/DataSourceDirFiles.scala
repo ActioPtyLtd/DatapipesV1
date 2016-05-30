@@ -26,8 +26,8 @@ class DataSourceDirFiles extends DataSource {
 
   def read(queryParser: QueryParser): DataSet = ???
 
-  def extract = {
-    dataSet = new DataSetTableScala(List("directory","filename"), new File(dir).listFiles.filter(f => Pattern.compile(regex).matcher(f.getName).matches).toList.map(m => List(dir, m.getName))) }
+  def extract() = {
+    dataSet = DataSetTableScala(List("directory","filename"), new File(dir).listFiles.filter(f => Pattern.compile(regex).matcher(f.getName).matches).toList.map(m => List(dir, m.getName))) }
 
   def LogNextDataSet(theSet: DataSet): Unit = ???
 

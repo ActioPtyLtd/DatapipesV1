@@ -40,8 +40,8 @@ public class DiffSet extends DPSystemConfigurable {
 
     public DataSet getChangedList() throws Exception
     {
-        DataSet add = getAddList();
-        DataSet mod = getModList(true);
+        DataSetTabular add = getAddList();
+        DataSetTabular mod = getModList(true);
         List<String> combinedList = add.getAsList();
 
         combinedList.addAll(mod.getAsList());
@@ -49,7 +49,7 @@ public class DiffSet extends DPSystemConfigurable {
         return new DataSetTabular(combinedList);
     }
 
-    public DataSet getAddList() {
+    public DataSetTabular getAddList() {
         List<String> thelist = new LinkedList<>();
         for (Delta d : addLines) {
             for (Object line : d.getRevised().getLines())
@@ -58,7 +58,7 @@ public class DiffSet extends DPSystemConfigurable {
         return new DataSetTabular(thelist);
     }
 
-    public DataSet getDelList() {
+    public DataSetTabular getDelList() {
         List<String> thelist = new LinkedList<>();
         for (Delta d : deleteLines) {
             for (Object line : d.getOriginal().getLines())
@@ -67,7 +67,7 @@ public class DiffSet extends DPSystemConfigurable {
         return new DataSetTabular(thelist);
     }
 
-    public DataSet getModList(boolean getRevised) {
+    public DataSetTabular getModList(boolean getRevised) {
         List<String> thelist = new LinkedList<>();
         for (Delta d : modifyLines) {
             List<Objects> objList;
@@ -113,7 +113,7 @@ public class DiffSet extends DPSystemConfigurable {
         return patch;
     }
 
-    public void trackDiffs(DataSet original, DataSet revised, int depth) throws Exception {
+    public void trackDiffs(DataSetTableScala original, DataSetTableScala revised, int depth) throws Exception {
 
         Patch<String> patch = diff(original.getAsList(),revised.getAsList());
 

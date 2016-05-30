@@ -8,81 +8,36 @@ import com.actio.dpsystem.DPSystemConfigurable
 import com.typesafe.config.Config
 import java.sql.ResultSet
 
-abstract class DataSet(val batchSize: Int) extends DPSystemConfigurable with Iterator[Data] {
-  var key: DataSetKey = new DataSetKey
+//TODO: update this when we start using it to capture multiple datasets
+case class DataSetArray(dataSets: List[DataSet]) extends DataSet {
+  override def get(ord: Int): Option[DataSet] = None
+  override def get(field: String): Option[DataSet] = None
 
-  def this() = this(500)
+  override def values: Iterable[DataSet] = dataSets
 
-  def setChunk(chunkStart: Int, chunkEnd: Int, maxChunk: Int) {
-    key.chunkStart = chunkStart
-    key.chunkEnd = chunkEnd
-    key.maxChunk = maxChunk
-  }
+  override def schema: SchemaDefinition = SchemaUnknown
 
-  // TODO: change to protected later
-  var customHeader: String = null
+  override def hasNext: Boolean = ???
 
-  @throws(classOf[Exception])
-  def sizeOfBatch: Int
+  override def next(): Data = ???
+}
+
+abstract class DataSet extends DPSystemConfigurable with Iterator[Data] {
+
+  def get(ord: Int): Option[DataSet] = None
+  def get(field: String): Option[DataSet] = None
+
+  def values: Iterable[DataSet] = List(this)
 
   def schema: SchemaDefinition = SchemaUnknown
 
-  private[actio] def getOutputDelimiter: String = {
-    return outputDelimiter
-  }
-
-  def setOutputDelimiter(outputDelimiter: String) {
-    this.outputDelimiter = outputDelimiter
-  }
-
-  def getCustomHeader: String = {
-    return customHeader
-  }
-
-  private[actio] var outputDelimiter: String = ","
-
-  @throws(classOf[Exception])
-  def set(_results: java.util.List[String])
-
-  @throws(classOf[Exception])
-  def setWithFields(_results: java.util.List[java.util.List[String]])
-
-  @throws(classOf[Exception])
-  def getAsList: java.util.List[String]
-
-  @throws(classOf[Exception])
-  def getAsListOfColumns: java.util.List[java.util.List[String]]
-
-  @throws(classOf[Exception])
-  def initBatch
-
-  @throws(classOf[Exception])
-  def getAsListOfColumnsBatch(batchLen: Int): java.util.List[java.util.List[String]]
-
-  @throws(classOf[Exception])
-  def getColumnHeader: java.util.List[String]
-
-  @throws(classOf[Exception])
-  def getColumnHeaderStr: String
-
-  @throws(classOf[Exception])
-  override def setConfig(_conf: Config, _master: Config) {
-    super.setConfig(_conf, _master)
-    if (config.hasPath("customHeader")) customHeader = config.getString("customHeader")
-    if (config.hasPath("outputDelimiter")) outputDelimiter = config.getString("outputDelimiter")
-  }
-
-  @throws(classOf[Exception])
-  def dump = { }
+  def getRecords = this.flatMap(d => d.values)
 
 
+  //TODO: get rid of these and replace the data methods
+  def getAsListOfColumns(): java.util.List[java.util.List[String]] = ???
 
-  def hasNext: Boolean
-
-  def next: Data //= getNextBatch.toData
-
-
-
+  def getCustomHeader(): String = ???
 
 
   // not sure why I need this, but it prevents compiler errors

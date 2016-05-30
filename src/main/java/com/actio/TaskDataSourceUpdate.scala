@@ -46,12 +46,4 @@ class TaskDataSourceUpdate extends Task {
   import scala.collection.JavaConverters._
   def keyColumns() = getConfig.getStringList("keys").asScala.toList
 
-
-  private def getMaxId() = {
-    val cfg = config.getConfig(DPSystemConfigurable.DATASOURCE_LABEL)
-    val dataSource = DPSystemFactory.newDataSource(cfg, masterConfig)
-    dataSource.read(new DataSetTableScala())
-    dataSource.dataSet.initBatch
-  }
-
 }

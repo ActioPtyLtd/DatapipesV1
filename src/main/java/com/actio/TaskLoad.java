@@ -120,7 +120,7 @@ public class TaskLoad extends Task {
         DataSet previousSet = diffLog.getLastLoggedDataSet();
 
         // Compare the previous set to the current set
-        diff.trackDiffs(previousSet, getDataSet(), 0);
+        diff.trackDiffs(DataSetTableScala.apply(previousSet), DataSetTableScala.apply(getDataSet()), 0);
 
         // Write out all the sets
 

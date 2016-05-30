@@ -45,7 +45,9 @@ public class StaticUtilityFunctions extends DPSystemConfigurable {
             }
 
             // copy across into the new DataSet
-            newSource.setWithFields(newRows);
+            DataSetTabular tab = new DataSetTabular();      // maybe needs config?
+            tab.setWithFields(newRows);
+            newSource = tab;
         }
 
         if (fns.getFunctions().containsKey(BATCH_FUNCTIONS_KEY)) {

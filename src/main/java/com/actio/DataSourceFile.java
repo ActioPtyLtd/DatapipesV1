@@ -83,11 +83,11 @@ public class DataSourceFile extends DataSource {
 
     @Override
     public void extract(DataSet dataSet) throws Exception {
-        if(dataSet.sizeOfBatch()>0) {
-            Data d = dataSet.next();
-            directory = d.apply("data").apply(0).apply("directory").valueOption().get();
-            compiledFilename = d.apply("data").apply(0).apply("filename").valueOption().get();
-        }
+        //if(dataSet.sizeOfBatch()>0) {
+        //    Data d = dataSet.next();
+        //    directory = d.apply("data").apply(0).apply("directory").valueOption().get();
+        //    compiledFilename = d.apply("data").apply(0).apply("filename").valueOption().get();
+       // }
         extract();
     }
 
@@ -150,7 +150,7 @@ public class DataSourceFile extends DataSource {
 
         initialiseDeltaFiles();
         List<String> file = fileToLines(lastFileName);
-        DataSet returnSet = new DataSetTabular();
+        DataSetTabular returnSet = new DataSetTabular();
         returnSet.set(file);
 
         return returnSet;
@@ -166,12 +166,12 @@ public class DataSourceFile extends DataSource {
     @Override
     public void write(DataSet data) throws Exception {
         String outFileName = getFilename();
-        WriteWorker(outFileName, data, data.getColumnHeaderStr(), data.getCustomHeader());
+        WriteWorker(outFileName, data, DataSetTableScala.apply(data).getColumnHeaderStr(), data.getCustomHeader());
     }
 
     @Override
     public void write(DataSet data, String qualifier) throws Exception {
-        List<String> rowList = data.getAsList();
+        List<String> rowList = DataSetTableScala.apply(data).getAsList();
 
         logger.info("Entered writeListSet " + qualifier);
         if (rowList.isEmpty()) {
@@ -181,14 +181,14 @@ public class DataSourceFile extends DataSource {
 
         String outFileName = generateFilenameByLabel(qualifier);
         logger.info("   DiffOutputFile=" + outFileName);
-        WriteWorker(outFileName, data, data.getColumnHeaderStr(), data.getCustomHeader());
+        WriteWorker(outFileName, data, DataSetTableScala.apply(data).getColumnHeaderStr(), data.getCustomHeader());
 
     }
 
     private void WriteWorker(String outFileName, DataSet data,
                              String header, String preamble) throws Exception {
 
-        List<String> rowList = data.getAsList();
+        List<String> rowList = DataSetTableScala.apply(data).getAsList();
 
         logger.info("Writing File=" + getFilename() + "No.Lines=" + rowList.size());
 

@@ -7,9 +7,10 @@ import java.util
   * Created by mauri on 4/05/2016.
   */
 
-class DataSetDBStream(val rs: ResultSet) extends DataSet {
+class DataSetDBStream(val rs: ResultSet, val batchSize: Int) extends DataSet {
   private var header: List[String] = Nil
   private var myschema:SchemaDefinition = SchemaUnknown
+  init()
 
   def next = {
     var i = 0
@@ -25,7 +26,7 @@ class DataSetDBStream(val rs: ResultSet) extends DataSet {
 
   def hasNext = rs.next()
 
-  override def initBatch = {
+  def init() = {
     val metaData= rs.getMetaData
     val ordinals = 1 to metaData.getColumnCount
 
@@ -44,36 +45,6 @@ class DataSetDBStream(val rs: ResultSet) extends DataSet {
   }
 
   override def schema: SchemaDefinition = myschema
-
-
-  // really hope to be able to remove most of these
-
-  @throws(classOf[Exception])
-  override def sizeOfBatch: Int = batchSize
-
-  @throws(classOf[Exception])
-  override def set(_results: util.List[String]): Unit = ???
-
-
-  import scala.collection.JavaConverters._
-
-  @throws(classOf[Exception])
-  override def getColumnHeader: util.List[String] = header.asJava
-
-  @throws(classOf[Exception])
-  override def getAsListOfColumnsBatch(batchLen: Int): util.List[util.List[String]] = ???
-
-  @throws(classOf[Exception])
-  override def getColumnHeaderStr: String = ???
-
-  @throws(classOf[Exception])
-  override def getAsList: util.List[String] = ???
-
-  @throws(classOf[Exception])
-  override def setWithFields(_results: util.List[util.List[String]]): Unit = ???
-
-  @throws(classOf[Exception])
-  override def getAsListOfColumns: util.List[util.List[String]] = ???
 
 
 }

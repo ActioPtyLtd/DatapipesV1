@@ -19,7 +19,7 @@ class TaskDataSourceUpdate extends Task {
       val query = dataSourceConfig.getConfig("query").getString("read") + " WHERE " + datasetdata.values.map(r => keyColumns().map(c => c + " = '" + r(c).valueOption.getOrElse("").replace("'", "''") + "'").mkString(" AND ")).mkString(" OR ")
 
       val dataSource = DPSystemFactory.newDataSource(dataSourceConfig.withValue("query.read", ConfigValueFactory.fromAnyRef(query)), masterConfig)
-      dataSource.read(new DataSetTableScala())
+      dataSource.read(tabledataset) // ds doesn't matter here, our query doesn't need any parameters
 
       val fulldata = dataSource.dataSet.toList
 

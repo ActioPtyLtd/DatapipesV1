@@ -19,7 +19,7 @@ class TaskLookup extends Task {
 
     val tabledataset = DataSetTableScala(dataSet.schema, dataSet.next) //assuming one batch
 
-    val inClause = tabledataset.getColumnValues(lookupColumn1).distinct.map("\'" + _ + "\'") mkString ","
+    val inClause = tabledataset.getColumnValues(lookupColumn1).distinct.map("\'" + _.replace("'","''") + "\'") mkString ","
 
     val dataSource = DPSystemFactory.newDataSource(dataSourceConfig.withValue("query.queryTemplate", ConfigValueFactory.fromAnyRef(query.replaceAllLiterally("$1", inClause))), masterConfig)
 

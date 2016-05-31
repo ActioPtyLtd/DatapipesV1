@@ -17,7 +17,7 @@ class DataSetDBStream(val rs: ResultSet, val batchSize: Int) extends DataSet {
 
     var recs: List[DataRecord] = Nil
     do {
-      recs = DataRecord(header.map(c => (c,Option(rs.getObject(c)))).map(v => DataField(v._1, if (v._2.isEmpty) NoData else DataString(v._2.toString)))) :: recs
+      recs = DataRecord(header.map(c => (c,Option(rs.getObject(c)))).map(v => DataField(v._1, if (v._2.isEmpty) NoData else DataString(v._2.get.toString)))) :: recs
       i += 1
     } while(rs.next() && i < batchSize)
 

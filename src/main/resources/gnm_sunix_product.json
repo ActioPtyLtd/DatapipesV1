@@ -15,10 +15,9 @@
       "parse-frame-csv": {
         "type": "transform",
         "batch": [
-          "addheader,col1",
           "split2cols,col1",
           "row1header",
-          "const,HAASC,Frame,1900-01-01 00:00:00.0,PF,-,-",
+          "const,HAASC,Frame,2016-05-01 00:00:00.0,PF,-,-",
           "concat,const1,const4,framenum,-",
           "concat,manufact,model,-",
           "split2colsd,size,-",
@@ -26,7 +25,7 @@
           "rename,fcolour,frame_colour,frametype,frame_type,temple,temple_length,size1,eye_size,size2,bridge_size,sungrx1,rx,const5,gender,const6,material",
           "jsonObject,frame_colour,model,frame_type,bridge_size,temple_length,eye_size,rx,depth,gender,material",
           "rename,concat1,external_id,const2,type,concat2,name,framenum,description,listprice,wholesaleprice,rrp,retailprice,const3,datecreated,json1,extend",
-          "keep,datecreated,type,external_id,name,wholesaleprice,retailprice,extend,description"]
+          "keep,datecreated,type,external_id,name,wholesaleprice,retailprice,extend,description,quantity,const1"]
       },
       "read-contactlens-csv": {
         "type": "extract",
@@ -134,6 +133,55 @@
             "update": "update product set datecreated=@datecreated::timestamp,\"type\"=@type,name=@name,description=@description,wholesaleprice=@wholesaleprice::numeric,retailprice=@retailprice::numeric,extend=@extend::json where external_id=@external_id"
           }
         }
+      },
+      "lookup-product": {
+        "type": "lookup",
+        "behavior": "lookup-merge",
+        "lookup1": "external_id",
+        "lookup2": "external_id",
+        "dataSource": {
+          "type": "sql",
+          "jdbcDriver": "org.postgresql.Driver",
+          "connect": "jdbc:postgresql://localhost/test?user=postgres&password=postgres",
+          "query": {
+            "queryTemplate": "select productid,external_id from product where external_id in ($1)"
+          }
+        }
+      },
+      "lookup-store": {
+        "type": "lookup",
+        "behavior": "lookup-merge",
+        "lookup1": "const1",
+        "lookup2": "code",
+        "dataSource": {
+          "type": "sql",
+          "jdbcDriver": "org.postgresql.Driver",
+          "connect": "jdbc:postgresql://localhost/test?user=postgres&password=postgres",
+          "query": {
+            "queryTemplate": "select id,code from store"
+          }
+        }
+      },
+      "prep-stock": {
+        "type": "transform",
+        "batch": [
+          "defaultIfBlank,productid1,id1,quantity,wholesaleprice,retailprice,0",
+          "rename,productid2,productid,id2,storeid,quantity1,quantity,wholesaleprice1,wholesaleprice,retailprice1,retailprice"
+        ]
+      },
+      "load-stock-db": {
+        "type": "load",
+        "behavior": "",
+        "dataSource": {
+          "type": "sql",
+          "behavior": "",
+          "jdbcDriver": "org.postgresql.Driver",
+          "connect": "jdbc:postgresql://localhost/test?user=postgres&password=postgres",
+          "query": {
+            "queryTemplate" : "",
+            "create": "insert into stock (productid,storeid,quantity,datecreated,wholesaleprice,retailprice) values (@productid::int,@storeid::int,@quantity::int,@datecreated::date,@wholesaleprice::numeric,@retailprice::numeric)"
+          }
+        }
       }
     },
     "pipelines": {
@@ -151,11 +199,14 @@
       },
       "load-sundry" : {
         "pipe": "read-sundry-csv | parse-sundry-csv | update-product-db"
+      },
+      "load-stock-frame" : {
+        "pipe": "read-frame-csv | parse-frame-csv | lookup-product | lookup-store | prep-stock | load-stock-db"
       }
     },
     "services": { },
     "startup": {
-      "exec": "load-speclens"
+      "exec": "load-stock-frame"
     }
   }
 }

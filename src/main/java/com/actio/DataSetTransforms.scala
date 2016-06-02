@@ -8,32 +8,51 @@ import java.time.format.DateTimeFormatter
   */
 object DataSetTransforms {
 
+  def transformEachData(schemaFunc: (SchemaDefinition => SchemaDefinition), dataFunc: (Data => Data) ): (DataSet => DataSet) = (ds: DataSet) =>
+    new DataSet {
+      override def hasNext = ds.hasNext
+
+      override def next() = dataFunc(ds.next())
+
+      override def schema = schemaFunc(ds.schema)
+    }
+
+  def transformEachDataRecord(schemaFunc: (SchemaDefinition => SchemaDefinition), dataRecordFunc: (DataRecord) => (DataRecord)): (DataSet => DataSet) =
+    transformEachData(schemaFunc, (d: Data) => DataArray(d.values.map(r => dataRecordFunc(r.asInstanceOf[DataRecord])).toList))
+
+  def transformDataSets(dsFuncs: (DataSet => DataSet)*): (DataSet => DataSet) = (ds: DataSet) => dsFuncs.foldLeft[DataSet](ds)((s,f) => f(s))
+
+  def transformValue(name: String, key: String, dataFunc: Data => Data) = (ds: DataSet) => transformEachDataRecord(s => s, r =>
+    DataRecord(dataFunc(r(key)) :: r.fields)
+  )
+
+
   type Batch = (SchemaDefinition, Data)
 
-  def hAddField(batch: Batch, fieldName: String, newBatch: Batch) =
-    (SchemaRecord(SchemaField(fieldName, true, newBatch._1) :: batch._1.asInstanceOf[SchemaRecord].fields), DataRecord(DataField(fieldName, newBatch._2) :: batch._2.asInstanceOf[DataRecord].fields))
+//  def hAddField(batch: Batch, fieldName: String, newBatch: Batch) =
+//    (SchemaRecord(SchemaField(fieldName, true, newBatch._1) :: batch._1.asInstanceOf[SchemaRecord].fields), DataRecord(DataField(fieldName, newBatch._2) :: batch._2.asInstanceOf[DataRecord].fields))
 
-  def hKeyValue(df: DataField): DataRecord =
-      DataRecord(List(DataField("name", DataString(df.name)), DataField("value", df.data)))
+//  def hKeyValue(df: DataField): DataRecord =
+//      DataRecord(List(DataField("name", DataString(df.name)), DataField("value", df.data)))
       
-  def hFields2KeyValueArray(dr: DataRecord, keys: List[String], property: String) =
-      DataRecord(DataField(property,DataArray(dr.fields.filter(f => keys.contains(f.name)).map(hKeyValue).toList))
-      :: dr.fields.filterNot(f => keys.contains(f.name)).toList)
+//  def hFields2KeyValueArray(dr: DataRecord, keys: List[String], property: String) =
+//      DataRecord(DataField(property,DataArray(dr.fields.filter(f => keys.contains(f.name)).map(hKeyValue).toList))
+//      :: dr.fields.filterNot(f => keys.contains(f.name)).toList)
 
 
   def numeric(batch: Batch, field: String, precision: Int, scale: Int): DataSet = batch match {
-    case (s, DataRecord(fs)) =>
-      new DataSetSingleData(s, if (fs.map(_.name).contains(field))
+    case (s, DataRecord(fs, key)) =>
+      new DataSetFixedData(s, if (fs.map(_.label).contains(field))
         DataRecord(fs.map(f =>
-          if (f.name == field)
-            DataField(f.name, DataNumeric(BigDecimal(f.data.valueOption.getOrElse("0"))))
+          if (f.label == field)
+            DataNumeric(BigDecimal(f.valueOption.getOrElse("0")), f.label)
           else
-            f).toList)
+            f).toList, key)
       else
-        DataRecord(fs))
-    case (s, DataArray(a)) =>
-      new DataSetSingleData(s, DataArray(a.map(m => numeric((s, m), field, precision, scale).next)))
-    case (s, d) => new DataSetSingleData(s, d)
+        DataRecord(fs, key))
+    case (s, DataArray(a, key)) =>
+      new DataSetFixedData(s, DataArray(a.map(m => numeric((s, m), field, precision, scale).next), key))
+    case (s, d) => new DataSetFixedData(s, d)
   }
       
   // tabular functions, to be refactored

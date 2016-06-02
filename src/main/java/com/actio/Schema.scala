@@ -3,15 +3,25 @@ package com.actio
 /**
   * Created by mauri on 27/05/2016.
   */
-sealed abstract class SchemaDefinition
+sealed abstract class SchemaDefinition(val label: String)
 
-case class SchemaArray(content: SchemaDefinition) extends SchemaDefinition
-case class SchemaNumber(precision: Int, scale: Int) extends SchemaDefinition
-case class SchemaString(maxLength: Int) extends SchemaDefinition
-case class SchemaDate(format: String) extends SchemaDefinition
-case class SchemaField(name: String, required: Boolean, content: SchemaDefinition)
-case class SchemaRecord(fields: List[SchemaField]) extends SchemaDefinition
-case object SchemaUnknown extends SchemaDefinition
+case class SchemaArray(name: String, content: SchemaDefinition) extends SchemaDefinition(name)
+
+object SchemaArray {
+  def apply(content: SchemaDefinition) = new SchemaArray("", content)
+}
+
+case class SchemaRecord(name: String, fields: List[SchemaDefinition]) extends SchemaDefinition(name)
+
+object SchemaRecord {
+  def apply(fields: List[SchemaDefinition]) = new SchemaRecord("", fields)
+}
+
+case class SchemaNumber(name: String, precision: Int, scale: Int) extends SchemaDefinition(name)
+case class SchemaString(name: String, maxLength: Int) extends SchemaDefinition(name)
+case class SchemaDate(name: String, format: String) extends SchemaDefinition(name)
+
+case object SchemaUnknown extends SchemaDefinition("")
 
 sealed abstract class SchemaMatchError
 case object SchemaMatchRecordExpected extends SchemaMatchError

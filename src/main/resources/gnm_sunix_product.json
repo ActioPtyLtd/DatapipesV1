@@ -7,9 +7,9 @@
         "behavior": "simple",
         "dataSource": {
           "behavior": "regex",
-          "directory": "C:\\Users\\mauri\\bitbucket\\gandm-data\\Sunix\\HAASC",
+          "directory": "C:\\Users\\mauri\\bitbucket\\gandm-data\\Sunix\\PHHEW",
           "type": "file",
-          "filenameTemplate": "VFRAME.CSV.xls"
+          "filenameTemplate": "VFRAME.CSV"
         }
       },
       "parse-frame-csv": {
@@ -17,13 +17,13 @@
         "batch": [
           "split2cols,col1",
           "row1header",
-          "const,HAASC,Frame,2016-05-01 00:00:00.0,PF,-,-",
+          "const,PHHEW,Frame,2016-05-01 00:00:00.0,PF,-,-",
           "concat,const1,const4,framenum,-",
           "concat,manufact,model,-",
           "split2colsd,size,-",
           "maporelse,sungrx,Y,Y,N,N,-",
-          "rename,fcolour,frame_colour,frametype,frame_type,temple,temple_length,size1,eye_size,size2,bridge_size,sungrx1,rx,const5,gender,const6,material",
-          "jsonObject,frame_colour,model,frame_type,bridge_size,temple_length,eye_size,rx,depth,gender,material",
+          "rename,fcolour,frame_colour,frametype,frame_type,temple,temple_length,size1,eye_size,size2,bridge_size,sungrx1,rx,const5,gender,const6,material,manufact,brand",
+          "jsonObject,frame_colour,model,frame_type,bridge_size,temple_length,eye_size,rx,depth,gender,material,brand",
           "rename,concat1,external_id,const2,type,concat2,name,framenum,description,listprice,wholesaleprice,rrp,retailprice,const3,datecreated,json1,extend",
           "keep,datecreated,type,external_id,name,wholesaleprice,retailprice,extend,description,quantity,const1"]
       },
@@ -206,7 +206,7 @@
     },
     "services": { },
     "startup": {
-      "exec": "load-stock-frame"
+      "exec": "load-frame"
     }
   }
 }

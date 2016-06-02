@@ -7,10 +7,8 @@ import java.util
 
 import scala.util.Try
 
-class DataSetTableScala(val myschema: SchemaDefinition,val data: Data) extends DataSet {
-  def this() = this(SchemaUnknown, NoData)
-  val rows: List[List[String]] = data.values.map(_.values.map(_.valueOption.orNull).toList).toList
-  val header: List[String] = schema.asInstanceOf[SchemaArray].content.asInstanceOf[SchemaRecord].fields.map(_.name).toList
+class DataSetTableScala(val myschema: SchemaDefinition, val data: Data) extends DataSet {
+  def this() = this(SchemaUnknown, NoData())
 
 
   private var boolNext = true
@@ -35,8 +33,12 @@ class DataSetTableScala(val myschema: SchemaDefinition,val data: Data) extends D
 
   def next: Data = {
     boolNext = false
-    DataArray(rows.map(r => DataRecord(header.map(h => DataField(h,DataString(this.getValue(r, h)).asInstanceOf[Data])).toList).asInstanceOf[Data]).toList)
+    data
   }
+
+  def rows: List[List[String]] = data.values.map(_.values.map(_.valueOption.orNull).toList).toList
+  def header: List[String] = schema.asInstanceOf[SchemaArray].content.asInstanceOf[SchemaRecord].fields.map(_.label).toList
+
 
   override def schema = myschema
 
@@ -75,16 +77,16 @@ object DataSetTableScala {
   def apply(rows2: List[List[String]]): DataSetTableScala = apply(rows2.head.zipWithIndex map ("col" + _), rows2)
 
   def apply(header: List[String], rows: List[List[String]]): DataSetTableScala = new DataSetTableScala(
-    SchemaArray(SchemaRecord(header.map(SchemaField(_,true,SchemaString(0))).toList)),
-    DataArray(rows.map(r => DataRecord((header zip r).map(p => DataField(p._1, if (p._2 == null) NoData else DataString(p._2))).toList)).toList))
+    SchemaArray(SchemaRecord(header.map(SchemaString(_,0)).toList)),
+    DataArray(rows.map(r => DataRecord((header zip r).map(p => if (p._2 == null) NoData(p._1) else DataString(p._2, p._1)).toList)).toList))
 
   def apply(ds: DataSet): DataSetTableScala = new DataSetTableScala(ds.schema, ds.next)
 
   // explicit version with error handling
   def getTable(schema: SchemaDefinition, data: Data): Either[SchemaMatchError, DataSetTableScala] =
     schema match {
-      case SchemaArray(SchemaRecord(fields)) => Try(DataSetTableScala(fields.map(_.name).toList, data.values.map(_.values.map(_.valueOption.orNull).toList).toList)).map(Right(_)).getOrElse(Left(DataDoesntMatchSchema))
-      case SchemaArray(_) => Left(SchemaMatchRecordExpected)
+      case SchemaArray(_,SchemaRecord(_,fields)) => Try(DataSetTableScala(fields.map(_.label).toList, data.values.map(_.values.map(_.valueOption.orNull).toList).toList)).map(Right(_)).getOrElse(Left(DataDoesntMatchSchema))
+      case SchemaArray(_,_) => Left(SchemaMatchRecordExpected)
       case _ => Left(SchemaMatchArrayExpected)
     }
 

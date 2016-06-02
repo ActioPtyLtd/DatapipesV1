@@ -7,20 +7,19 @@
         "behavior": "simple",
         "dataSource": {
           "behavior": "regex",
-          "directory": "C:\\Users\\mauri\\bitbucket\\gandm-data\\Sunix\\PHHEW",
+          "directory": "C:\\Users\\mauri\\bitbucket\\gandm-data\\Sunix\\HAGMP",
           "type": "file",
-          "filenameTemplate": "VACCITEM.CSV"
+          "filenameTemplate": "VACCITEM.CSV.xls"
         }
       },
       "parse-invoiceitem-csv": {
         "type": "transform",
         "batch": [
-          "addheader,col1",
           "split2cols,col1",
           "row1header",
-          "const,PHHEW,",
+          "const,HAGMP,",
           "concat,const1,accnum,-",
-          "concat,const1,code,-",
+          "concat,const1,paidby,code,-",
           "rename,qty,quantity,cost,originalcost,itemamt,cost"
         ]
       },

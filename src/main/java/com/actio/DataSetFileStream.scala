@@ -31,7 +31,7 @@ class DataSetFileStream(val reader: InputStream) extends DataSet {
     }
   }
 
-  private def lines2data(lines: List[String]) = new DataArray(lines.map(l => new DataRecord(List(DataField(col1, DataString(l))))))
+  private def lines2data(lines: List[String]) = new DataArray(lines.map(l => new DataRecord(List(DataString(l, col1)))))
 
   def hasNext = iterable.hasNext
 
@@ -39,6 +39,6 @@ class DataSetFileStream(val reader: InputStream) extends DataSet {
     iterable = scala.io.Source.fromInputStream(reader,"windows-1252").getLines().grouped(100)
   }
 
-  override def schema = SchemaArray(SchemaRecord(List(SchemaField("col1", true, SchemaString(0)))))
+  override def schema = SchemaArray(SchemaRecord(List(SchemaString("col1",0))))
 
 }

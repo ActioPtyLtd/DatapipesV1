@@ -25,15 +25,21 @@ class TaskLookup extends Task {
 
     dataSource.execute()
 
-    val ord = dataSource.dataSet.schema.asInstanceOf[SchemaArray].content.asInstanceOf[SchemaRecord].fields.map(_.name).indexOf(lookupColumn2)  // assuming tablular
+    val ord = dataSource.dataSet.schema.asInstanceOf[SchemaArray].content.asInstanceOf[SchemaRecord].fields.map(_.label).indexOf(lookupColumn2)  // assuming tablular
 
     val condition = (row1: List[String], row2: List[String]) =>
       if(row2 == Nil) false else row1(tabledataset.getOrdinalOfColumn(lookupColumn1)) == row2(ord)
 
-    for(data <- dataSource.dataSet.toList) {
+    val dataList = dataSource.dataSet.toList
+
+    for(data <- dataList) {
       //TODO: union the resultsets instead of overwriting them here
       dataSet = DataSetTransforms.transformLookupFunc(tabledataset, DataSetTableScala(dataSource.dataSet.schema, data), condition, _ => true)
     }
+
+    // nothing found, but make sure columns found in the data source schema gets added to the incoming table
+    if(dataList.isEmpty)
+      dataSet = DataSetTransforms.transformLookupFunc(tabledataset, DataSetTableScala(dataSource.dataSet.schema,DataArray(Nil)), condition, _ => true)
   }
 
   def load(): Unit = ???

@@ -7,7 +7,7 @@
         "behavior": "simple",
         "dataSource": {
           "behavior": "regex",
-          "directory": "C:\\Users\\mauri\\bitbucket\\gandm-data\\Sunix\\PHHEW",
+          "directory": "C:\\Users\\mauri\\bitbucket\\gandm-data\\Sunix\\Hanks-PMQ\\2016-06-02",
           "type": "file",
           "filenameTemplate": "VACCOUNT.CSV"
         }
@@ -15,10 +15,9 @@
       "parse-invoice-csv": {
         "type": "transform",
         "batch": [
-          "addheader,col1",
           "split2cols,col1",
           "row1header",
-          "const,PHHEW,0",
+          "const,HAPMQ,0",
           "trim,refnum",
           "concat,const1,accnum,-",
           "concat,const1,refnum1,-",
@@ -73,7 +72,8 @@
         "type": "transform",
         "batch": [
           "defaultIfBlank,id1,id2,id3,0",
-          "rename,id4,storeid,id5,customerid,id6,employeeid"
+          "rename,id4,storeid,id5,customerid,id6,employeeid",
+          "keep,externalref,orderid,createddate,storeid,customerid,employeeid,totalcost"
         ]
       },
       "update-invoice-db": {
@@ -89,8 +89,8 @@
           "connect": "jdbc:postgresql://localhost/test?user=postgres&password=postgres",
           "query": {
             "create": "insert into invoice (externalref,orderid,createddate,storeid,customerid,employeeid,totalcost) values (@externalref,@orderid::int,@createddate::timestamp,@storeid::int,@customerid::int,@employeeid::int,@totalcost::money)",
-            "read": "select * from invoice",
-            "update": "",
+            "read": "select externalref,orderid,createddate::date as createddate,storeid,customerid,employeeid,totalcost::numeric as totalcost from invoice",
+            "update": "update invoice set orderid=@orderid::int,createddate=@createddate::timestamp,storeid=@storeid::int,customerid=@customerid::int,employeeid=@employeeid::int,totalcost=@totalcost::money where externalref = @externalref",
             "queryTemplate": ""
           }
         }

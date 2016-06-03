@@ -42,9 +42,7 @@ object UtilityFunctions extends Logging {
       case pv => methodParams match {
         case Nil => result.reverse
         case h :: t =>
-          if (h.getType == classOf[String])
-            getParamValues(t, pv.tail, pv.head :: result)
-          else if(h.getType == classOf[Int])
+          if(h.getType == classOf[Int])
             getParamValues(t, pv.tail, pv.head.toString.toInt :: result)
           else if(h.getType == classOf[DataSetTableScala])
             getParamValues(t, pv.tail, DataSetTableScala(pv.head.asInstanceOf[DataSet]) :: result)
@@ -54,6 +52,8 @@ object UtilityFunctions extends Logging {
             val l = pv.splitAt(pv.length - methodParams.length + 1)
             getParamValues(t, l._2, l._1 :: result)
           }
+          else if (h.getType == classOf[String] || h.getType == classOf[DataSet])
+            getParamValues(t, pv.tail, pv.head :: result)
           else
             getParamValues(t, pv.tail, null :: result)
       }

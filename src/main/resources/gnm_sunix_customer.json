@@ -6,7 +6,7 @@
         "type": "extract",
         "behavior": "simple",
         "dataSource": {
-          "directory": "C:\\Users\\mauri\\bitbucket\\gandm-data\\Sunix\\PHHEW",
+          "directory": "C:\\Users\\mauri\\bitbucket\\gandm-data\\Sunix\\Hanks-PHS\\2016-06-02",
           "type": "file",
           "filenameTemplate": "VPATIENT.CSV"
         }
@@ -14,11 +14,10 @@
       "parse-patient-csv": {
         "type": "transform",
         "batch": [
-          "addheader,col1",
           "split2cols,col1",
           "row1header",
           "trim,refnum",
-          "const,,,,,61,,true,true,true,true,PHHEW",
+          "const,,,,,61,,true,true,true,true,HAPHS",
           "concat,const11,refnum1,-",
           "maporelse,sex,M,M,F,F,-",
           "convdate,birthday,MM/dd/yyyy,yyyy-MM-dd",

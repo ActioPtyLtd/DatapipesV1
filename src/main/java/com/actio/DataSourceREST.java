@@ -11,6 +11,7 @@ import org.apache.http.auth.UsernamePasswordCredentials;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.CredentialsProvider;
 import org.apache.http.client.methods.HttpPost;
+import org.apache.http.client.methods.HttpPut;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.BasicCredentialsProvider;
 import org.apache.http.impl.client.CloseableHttpClient;
@@ -280,7 +281,7 @@ public class DataSourceREST extends DataSource {
             httpClient = HttpClientBuilder.create()
                     .setDefaultCredentialsProvider(credentialsProvider).build();
 
-            HttpPost postRequest = new HttpPost(getRoute());
+            HttpPut postRequest = new HttpPut(getRoute());
 
             StringEntity input = null;
             input = new StringEntity(data);

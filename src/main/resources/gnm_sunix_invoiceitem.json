@@ -7,9 +7,9 @@
         "behavior": "simple",
         "dataSource": {
           "behavior": "regex",
-          "directory": "C:\\Users\\mauri\\bitbucket\\gandm-data\\Sunix\\HAGMP",
+          "directory": "C:\\Users\\mauri\\bitbucket\\gandm-data\\Sunix\\Hanks-PMQ\\2016-06-02",
           "type": "file",
-          "filenameTemplate": "VACCITEM.CSV.xls"
+          "filenameTemplate": "VACCITEM.CSV"
         }
       },
       "parse-invoiceitem-csv": {
@@ -17,9 +17,10 @@
         "batch": [
           "split2cols,col1",
           "row1header",
-          "const,HAGMP,",
+          "const,HAPMQ,",
           "concat,const1,accnum,-",
-          "concat,const1,paidby,code,-",
+          "coalesce,code,itemcode",
+          "concat,const1,paidby,coalesce1,-",
           "rename,qty,quantity,cost,originalcost,itemamt,cost"
         ]
       },

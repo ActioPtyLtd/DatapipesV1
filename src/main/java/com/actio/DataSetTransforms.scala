@@ -26,6 +26,15 @@ object DataSetTransforms {
     DataRecord(dataFunc(r(key)) :: r.fields)
   )
 
+  def productSchemaFunc(labels: List[String]) = (schema: SchemaDefinition) => SchemaArray(SchemaRecord(SchemaArray("properties",
+    SchemaRecord(List(SchemaString("name", 0), SchemaString("type", 0), SchemaString("value", 0)))) :: schema.asInstanceOf[SchemaArray].content.asInstanceOf[SchemaRecord].fields.filterNot(f => labels.contains(f.label))))
+
+  def productDataFunc(labels: List[String]) = (data: Data) => DataArray(data.values.map(r => DataRecord(
+    DataArray(r.values.filter(f => labels.contains(f.label)).map(v => DataRecord(List(DataString(v.label,"name"),DataString("string","type"),v.valueOption.map(o => DataString(o,"value")).getOrElse(NoData("value"))))).toList,"attributes")
+    :: r.values.filter(f => !labels.contains(f.label)).toList)).toList)
+
+  def productProperty(ds: DataSet, labels: List[String]): DataSet = transformEachData(productSchemaFunc(labels),productDataFunc(labels))(ds)
+
 
   type Batch = (SchemaDefinition, Data)
 
@@ -162,7 +171,8 @@ object DataSetTransforms {
 
   def copy(ds: DataSetTableScala, from: String, to: List[String]) = DataSetTableScala(to ::: ds.header, ds.rows map (r => List.fill(to.size)(ds.getValue(r, from) ) ::: r))
 
-
+  def coalesceValue(vals: List[String]) = vals.find(v => v.trim().nonEmpty).getOrElse("")
+  def coalesce(ds: DataSetTableScala, cols: List[String]) = rowFunc(ds, ds.getNextAvailableColumnName("coalesce"), r => coalesceValue(cols.map(ds.getValue(r,_)).toList))
 
   // helpers
   def getEmptyRow(ds: DataSetTableScala) = List.fill(ds.header.length)(null)

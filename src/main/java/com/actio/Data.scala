@@ -57,7 +57,11 @@ case class Label(label: String) extends Key
 object Data2Json {
   def toJsonString(data: Data): String = data match {
     case DataString(s, _) => "\"" + s + "\""
-    case DataRecord(fs, key) => toField(key) + "{" + fs.map(f => toField(f.label) + toJsonString(f)).mkString(",") + "}"
+    case DataRecord(fs, key) => toField(key) + "{" + fs.map(f =>
+      (if(!f.isInstanceOf[DataRecord] && !f.isInstanceOf[DataArray])
+        toField(f.label)
+      else "")
+      + toJsonString(f)).mkString(",") + "}"
     case DataArray(ds, key) => toField(key) + "[" + ds.map(d => toJsonString(d)).mkString(",") + "]"
     case NoData(_) => "null"
     case DataNumeric(num, _) => num.setScale(2).toString()

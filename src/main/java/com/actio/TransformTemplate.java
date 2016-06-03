@@ -36,7 +36,7 @@ public class TransformTemplate extends TaskTransform {
     {
 
         // 2. Loop over the dataSet
-        List<List<String>> data = dataSet.getAsListOfColumns();
+        List<List<String>> data = DataSetTableScala.apply(dataSet).getAsListOfColumns();
         List<String> newData = new ArrayList<>();
 
         for (List<String> row: data) {

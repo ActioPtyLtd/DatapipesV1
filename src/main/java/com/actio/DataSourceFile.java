@@ -166,7 +166,8 @@ public class DataSourceFile extends DataSource {
     @Override
     public void write(DataSet data) throws Exception {
         String outFileName = getFilename();
-        WriteWorker(outFileName, data, DataSetTableScala.apply(data).getColumnHeaderStr(), data.getCustomHeader());
+
+        WriteWorker(outFileName, data, DataSetTableScala.apply(data).getColumnHeaderStr(), "");
     }
 
     @Override
@@ -181,7 +182,7 @@ public class DataSourceFile extends DataSource {
 
         String outFileName = generateFilenameByLabel(qualifier);
         logger.info("   DiffOutputFile=" + outFileName);
-        WriteWorker(outFileName, data, DataSetTableScala.apply(data).getColumnHeaderStr(), data.getCustomHeader());
+        WriteWorker(outFileName, data, DataSetTableScala.apply(data).getColumnHeaderStr(), "");
 
     }
 

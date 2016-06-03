@@ -27,7 +27,7 @@ class DataSetTableScala(val myschema: SchemaDefinition, val data: Data) extends 
 
   def getAsList: util.List[String] = rows.map(r => r.map(Option(_).getOrElse("")) mkString ",").asJava
 
-  override def getAsListOfColumns(): util.List[util.List[String]] = rows.map(_.asJava).asJava
+  def getAsListOfColumns(): util.List[util.List[String]] = rows.map(_.asJava).asJava
 
   override def toString = (header mkString ", ") + "\n" + ("-" * (header.map(_.length + 2).sum - 2)) + "\n" + (rows map (_ mkString ", ") mkString "\n") + "\n\n" + rows.length + " rows.\n"
 

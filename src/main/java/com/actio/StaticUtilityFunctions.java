@@ -28,17 +28,13 @@ public class StaticUtilityFunctions extends DPSystemConfigurable {
 
     public static DataSet execute(DataSet theSet, CompiledTemplateFunctionSet fns) throws Exception
     {
-        DataSet newSource = theSet;
-
         if (fns.getFunctions().containsKey(ROW_FUNCTIONS_KEY)) {
             // iterate over the functions, processing the source
-            newSource = new DataSetTabular();
+            DataSetTableScala newSource = DataSetTableScala.apply(theSet);
             List<List<String>> newRows = new LinkedList<List<String>>();
 
-
-
             // process for each line
-            List<List<String>> ds = theSet.getAsListOfColumns();
+            List<List<String>> ds = newSource.getAsListOfColumns();
 
             for (List<String> row : ds) {
                 newRows.add(execute(row, fns));
@@ -47,14 +43,14 @@ public class StaticUtilityFunctions extends DPSystemConfigurable {
             // copy across into the new DataSet
             DataSetTabular tab = new DataSetTabular();      // maybe needs config?
             tab.setWithFields(newRows);
-            newSource = tab;
+            return tab;
         }
 
         if (fns.getFunctions().containsKey(BATCH_FUNCTIONS_KEY)) {
-            return UtilityFunctions.execute(newSource, fns.getFunctions().get(BATCH_FUNCTIONS_KEY));
+            return UtilityFunctions.execute(theSet, fns.getFunctions().get(BATCH_FUNCTIONS_KEY));
         }
 
-        return newSource;
+        return theSet;
     }
 
 

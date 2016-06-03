@@ -31,13 +31,8 @@ abstract class DataSet extends DPSystemConfigurable with Iterator[Data] {
 
   def schema: SchemaDefinition = SchemaUnknown
 
-  def getRecords = this.flatMap(d => d.values)
-
-
   //TODO: get rid of these and replace the data methods
-  def getAsListOfColumns(): java.util.List[java.util.List[String]] = ???
-
-  def getCustomHeader(): String = ???
+  //def getAsListOfColumns(): java.util.List[java.util.List[String]] = ???
 
 
   // not sure why I need this, but it prevents compiler errors

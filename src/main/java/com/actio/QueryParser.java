@@ -202,7 +202,7 @@ public abstract class QueryParser extends DPSystemConfigurable {
         }
 
         // Loop process the set
-        List<List<String>> lines = data.getAsListOfColumns();
+        List<List<String>> lines = DataSetTableScala.apply(data).getAsListOfColumns();
 
         for (List<String> columns : lines){
 

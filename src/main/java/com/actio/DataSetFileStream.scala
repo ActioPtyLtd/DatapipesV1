@@ -7,37 +7,27 @@ import java.util
 /**
   * Created by mauri on 14/04/2016.
   */
-class DataSetFileStream(val reader: InputStream) extends DataSet {
+class DataSetFileStream(private val reader: InputStream) extends DataSet {
+
   private var lineheader: String = null
-  private var iterable: Iterator[Seq[String]] = null
-  private var header1: List[String] = Nil
   private val col1 = "col1"
-  init()
+  private val iterable = scala.io.Source.fromInputStream(reader,"windows-1252").getLines().grouped(100)
 
   def next = {
     val lines = iterable.next().toList
 
     if(lineheader == null) {
       lineheader = lines.head
-      //rows1 = lines.tail map (List(_))
-      header1 = List(lineheader)
-      //TODO: change this to create Data instead of this
       lines2data(lines)
     }
     else {
-      //rows1 = lines map (List(_))
-      //TODO: change this to create Data instead of this
       lines2data(lineheader :: lines)
     }
   }
 
-  private def lines2data(lines: List[String]) = new DataArray(lines.map(l => new DataRecord(List(DataString(l, col1)))))
+  private def lines2data(lines: List[String]) = DataArray(lines.map(l => DataRecord(List(DataString(col1,l)))))
 
   def hasNext = iterable.hasNext
-
-  def init() = {
-    iterable = scala.io.Source.fromInputStream(reader,"windows-1252").getLines().grouped(100)
-  }
 
   override def schema = SchemaArray(SchemaRecord(List(SchemaString("col1",0))))
 

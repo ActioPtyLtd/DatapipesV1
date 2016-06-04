@@ -8,6 +8,7 @@ import java.time.format.DateTimeFormatter
   */
 object DataSetTransforms {
 
+  //TODO: think about error handling. Maybe change next: Either[Error, Data]
   def transformEachData(schemaFunc: (SchemaDefinition => SchemaDefinition), dataFunc: (Data => Data) ): (DataSet => DataSet) = (ds: DataSet) =>
     new DataSet {
       override def hasNext = ds.hasNext
@@ -18,7 +19,7 @@ object DataSetTransforms {
     }
 
   def transformEachDataRecord(schemaFunc: (SchemaDefinition => SchemaDefinition), dataRecordFunc: (DataRecord) => (DataRecord)): (DataSet => DataSet) =
-    transformEachData(schemaFunc, (d: Data) => DataArray(d.values.map(r => dataRecordFunc(r.asInstanceOf[DataRecord])).toList))
+    transformEachData(schemaFunc, (d: Data) => DataArray(d.elems.map(r => dataRecordFunc(r.asInstanceOf[DataRecord])).toList))
 
   def transformDataSets(dsFuncs: (DataSet => DataSet)*): (DataSet => DataSet) = (ds: DataSet) => dsFuncs.foldLeft[DataSet](ds)((s,f) => f(s))
 
@@ -29,38 +30,28 @@ object DataSetTransforms {
   def productSchemaFunc(labels: List[String]) = (schema: SchemaDefinition) => SchemaArray(SchemaRecord(SchemaArray("properties",
     SchemaRecord(List(SchemaString("name", 0), SchemaString("type", 0), SchemaString("value", 0)))) :: schema.asInstanceOf[SchemaArray].content.asInstanceOf[SchemaRecord].fields.filterNot(f => labels.contains(f.label))))
 
-  def productDataFunc(labels: List[String]) = (data: Data) => DataArray(data.values.map(r => DataRecord(
-    DataArray(r.values.filter(f => labels.contains(f.label)).map(v => DataRecord(List(DataString(v.label,"name"),DataString("string","type"),v.valueOption.map(o => DataString(o,"value")).getOrElse(NoData("value"))))).toList,"attributes")
-    :: r.values.filter(f => !labels.contains(f.label)).toList)).toList)
+  def productDataFunc(labels: List[String]) = (data: Data) => DataArray(data.elems.map(r => DataRecord(
+    DataArray("attributes", r.elems.filter(f => labels.contains(f.label)).map(v => DataRecord(List(DataString("name", v.label),DataString("type", "string"),v.stringOption.map(o => DataString("value", o)).getOrElse(NoData("value"))))).toList)
+    :: r.elems.filter(f => !labels.contains(f.label)).toList)).toList)
 
   def productProperty(ds: DataSet, labels: List[String]): DataSet = transformEachData(productSchemaFunc(labels),productDataFunc(labels))(ds)
 
 
+  //TODO: likely will remove Batch, it's confusing
   type Batch = (SchemaDefinition, Data)
 
-//  def hAddField(batch: Batch, fieldName: String, newBatch: Batch) =
-//    (SchemaRecord(SchemaField(fieldName, true, newBatch._1) :: batch._1.asInstanceOf[SchemaRecord].fields), DataRecord(DataField(fieldName, newBatch._2) :: batch._2.asInstanceOf[DataRecord].fields))
-
-//  def hKeyValue(df: DataField): DataRecord =
-//      DataRecord(List(DataField("name", DataString(df.name)), DataField("value", df.data)))
-      
-//  def hFields2KeyValueArray(dr: DataRecord, keys: List[String], property: String) =
-//      DataRecord(DataField(property,DataArray(dr.fields.filter(f => keys.contains(f.name)).map(hKeyValue).toList))
-//      :: dr.fields.filterNot(f => keys.contains(f.name)).toList)
-
-
   def numeric(batch: Batch, field: String, precision: Int, scale: Int): DataSet = batch match {
-    case (s, DataRecord(fs, key)) =>
+    case (s, DataRecord(key,fs)) =>
       new DataSetFixedData(s, if (fs.map(_.label).contains(field))
-        DataRecord(fs.map(f =>
+        DataRecord(key, fs.map(f =>
           if (f.label == field)
-            DataNumeric(BigDecimal(f.valueOption.getOrElse("0")), f.label)
+            DataNumeric(f.label, BigDecimal(f.stringOption.getOrElse("0")))
           else
-            f).toList, key)
+            f).toList)
       else
-        DataRecord(fs, key))
-    case (s, DataArray(a, key)) =>
-      new DataSetFixedData(s, DataArray(a.map(m => numeric((s, m), field, precision, scale).next), key))
+        DataRecord(key, fs))
+    case (s, DataArray(key, a)) =>
+      new DataSetFixedData(s, DataArray(key, a.map(m => numeric((s, m), field, precision, scale).next)))
     case (s, d) => new DataSetFixedData(s, d)
   }
       

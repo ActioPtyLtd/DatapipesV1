@@ -4,10 +4,13 @@ package com.actio
   * Created by mauri on 25/05/2016.
   */
 
-sealed abstract class Data(val label: String) {
+sealed abstract class Data {
+
   def apply(ord: Int): Data = NoData()
+
   def apply(field: String): Data = NoData()
-  def valueOption: Option[String] = None
+
+  def stringOption: Option[String] = None
 
   def toOption: Option[Data] = this match {
     case NoData(_) => None
@@ -17,34 +20,55 @@ sealed abstract class Data(val label: String) {
   def value(keys: List[Key]): Data = keys match {
     case Nil => this
     case Ord(ord)::t => this(ord).value(t)
-    case Label(label)::t => this(label).value(t)
+    case Label(lbl)::t => this(lbl).value(t)
     case _ => NoData() }
 
-  def values: Iterable[Data] = Iterable.empty
+  def elems: Iterable[Data] = Iterable.empty
 
   def isEmpty = this.toOption.isDefined
+
+  def label: String
 }
 
-case class NoData(key: String = "") extends Data(key)
+case class NoData(label: String) extends Data
 
-case class DataString(str: String, key: String = "") extends Data(key) {
-  override def valueOption = Option(str)
+object NoData {
+
+  def apply() = new NoData("")
 }
 
-case class DataNumeric(num: BigDecimal, key: String = "") extends Data(key) {
-  override def valueOption = Some(num.toString())
+case class DataString(label: String = "", str: String) extends Data {
+
+  override def stringOption = Option(str)
 }
 
-//case class DataField(name: String, data: Data)
+case class DataNumeric(label: String, num: BigDecimal) extends Data {
 
-case class DataRecord(fields: List[Data], key: String = "") extends Data(key) {
+  override def stringOption = Some(num.toString())
+}
+
+case class DataRecord(label: String, fields: List[Data]) extends Data {
+
   override def apply(field: String) = fields.find(f => f.label == field).getOrElse(NoData())
-  override def values = fields
+
+  override def elems = fields
 }
 
-case class DataArray(elems: List[Data], key: String = "") extends Data(key) {
-  override def apply(ord: Int) = elems.lift(ord).getOrElse(NoData())
-  override def values = elems
+object DataRecord {
+
+  def apply(fields: List[Data]) = new DataRecord("", fields)
+}
+
+case class DataArray(label: String, arrayElems: List[Data]) extends Data {
+
+  override def apply(ord: Int) = arrayElems.lift(ord).getOrElse(NoData())
+
+  override def elems = arrayElems
+}
+
+object DataArray {
+
+  def apply(arrayElems: List[Data]) = new DataArray("", arrayElems)
 }
 
 sealed abstract class Key
@@ -53,21 +77,21 @@ case class Label(label: String) extends Key
 
 
 
-
+// TODO: could use help of a library to serialise properly
 object Data2Json {
-  def toJsonString(data: Data): String = data match {
-    case DataString(s, _) => "\"" + s + "\""
-    case DataRecord(fs, key) => toField(key) + "{" + fs.map(f =>
-      (if(!f.isInstanceOf[DataRecord] && !f.isInstanceOf[DataArray])
-        toField(f.label)
-      else "")
-      + toJsonString(f)).mkString(",") + "}"
-    case DataArray(ds, key) => toField(key) + "[" + ds.map(d => toJsonString(d)).mkString(",") + "]"
-    case NoData(_) => "null"
-    case DataNumeric(num, _) => num.setScale(2).toString()
-  }
+
+  def toJsonString(data: Data): String =
+    data match {
+      case DataString(_, s) => "\"" + s + "\""
+      case DataRecord(key, fs) => toField(key) + "{" + fs.map(f =>
+        (if (!f.isInstanceOf[DataRecord] && !f.isInstanceOf[DataArray])
+          toField(f.label)
+        else "")
+          + toJsonString(f)).mkString(",") + "}"
+      case DataArray(key, ds) => toField(key) + "[" + ds.map(d => toJsonString(d)).mkString(",") + "]"
+      case NoData(_) => "null"
+      case DataNumeric(_, num) => num.setScale(2).toString()
+    }
 
   def toField(name: String) = if(name.isEmpty) "" else "\"" + name + "\": "
-
-
 }

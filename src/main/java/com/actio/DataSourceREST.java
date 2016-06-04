@@ -10,17 +10,12 @@ import org.apache.http.auth.AuthScope;
 import org.apache.http.auth.UsernamePasswordCredentials;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.CredentialsProvider;
-import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpPut;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.BasicCredentialsProvider;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
 import scala.collection.Iterator;
-
-import javax.net.ssl.HostnameVerifier;
-import javax.net.ssl.HttpsURLConnection;
-import javax.net.ssl.SSLSession;
 
 /**
  * Created by jim on 7/8/2015.
@@ -227,7 +222,7 @@ public class DataSourceREST extends DataSource {
     public void write(DataSet data)  throws Exception
     {
         while(data.hasNext()) {
-            Iterator<Data> i = data.next().values().toIterator();
+            Iterator<Data> i = data.next().elems().toIterator();
             while(i.hasNext()) {
                 //DataRecord dr = (DataRecord)i.next();
                 write(Data2Json.toJsonString(i.next()));

@@ -27,7 +27,7 @@ object DataSetTransforms {
     DataRecord(dataFunc(r(key)) :: r.fields)
   )
 
-  def productSchemaFunc(labels: List[String]) = (schema: SchemaDefinition) => SchemaArray(SchemaRecord(SchemaArray("properties",
+  def productSchemaFunc(labels: List[String]) = (schema: SchemaDefinition) => SchemaArray(SchemaRecord(SchemaArray("attributes",
     SchemaRecord(List(SchemaString("name", 0), SchemaString("type", 0), SchemaString("value", 0)))) :: schema.asInstanceOf[SchemaArray].content.asInstanceOf[SchemaRecord].fields.filterNot(f => labels.contains(f.label))))
 
   def productDataFunc(labels: List[String]) = (data: Data) => DataArray(data.elems.map(r => DataRecord(

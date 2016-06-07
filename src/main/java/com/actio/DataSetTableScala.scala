@@ -12,6 +12,10 @@ import scala.collection.JavaConverters._
 class DataSetTableScala(val myschema: SchemaDefinition, val data: Data) extends DataSet {
   def this() = this(SchemaUnknown, NoData())
 
+  lazy val rows: List[List[String]] = data.elems.map(_.elems.map(_.stringOption.orNull).toList).toList
+
+  lazy val header: List[String] = schema.asInstanceOf[SchemaArray].content.asInstanceOf[SchemaRecord].fields.map(_.label).toList
+
   private var boolNext = true
 
   import scala.collection.JavaConverters._
@@ -40,9 +44,6 @@ class DataSetTableScala(val myschema: SchemaDefinition, val data: Data) extends 
   }
 
   override def schema = myschema
-
-  def rows: List[List[String]] = data.elems.map(_.elems.map(_.stringOption.orNull).toList).toList
-  def header: List[String] = schema.asInstanceOf[SchemaArray].content.asInstanceOf[SchemaRecord].fields.map(_.label).toList
 
   def getOrdinalOfColumn(columnName: String) = { val i = header.indexWhere(_ == columnName)
     if(i < 0) throw new Exception("Column " + columnName + " doesn't exist")

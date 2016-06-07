@@ -22,12 +22,12 @@
           "defaultIfBlank,Olens_width,Onose_bridge,Otemple_length,Oframe_depth,Owholesale_price,Oretail_price,Oapn,0",
           "rename,Olens_width1,lens_width,Onose_bridge1,nose_bridge,Otemple_length1,temple_length,Oframe_depth1,frame_depth,Owholesale_price1,wholesale_price,Oretail_price1,retail_price,Oapn1,apn",
           "copy,model,name",
-          "keep,external_id,type,name,wholesale_price,retail_price,model,frame_colour,product_group",
+          "keep,external_id,type,name,wholesale_price,retail_price,model,frame_colour,product_group,nose_bridge,temple_length,frame_depth,frame_material",
           "numeric,wholesale_price,19,2",
           "numeric,retail_price,19,2",
-          "productProperty,model,frame_colour,product_group"
+          "productProperty,model,frame_colour,product_group,nose_bridge,temple_length,frame_depth,frame_material"
         ],
-        "_comment": "keep,product_group,external_id,external_status,model,rx,online_frame_colour,frame_colour,lens_colour,lens_width,nose_bridge,temple_length,frame_depth,category,wholesale_price,retail_price,apn,gender,shape,frame_type,frame_material,lens_material"
+        "_comment": "keep,product_group,external_id,external_status,model,rx,online_frame_colour,frame_colour,lens_colour,lens_width,nose_bridge,temple_length,frame_depth,category,wholesale_price,retail_price,apn,gender,shape,frame_type,frame_material,frame_material"
       },
       "update-product-eyeware-db": {
         "type": "datasourceupdate",

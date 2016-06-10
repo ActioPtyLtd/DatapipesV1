@@ -90,7 +90,7 @@ public class TaskService extends TaskPipeline {
 
             DataSourceREST datars = DPSystemFactory.newDataSourceREST(serviceName,sysconf);
             // Register datars
-            pathList.put(datars.getRoute(), datars);
+            pathList.put(datars.route(), datars);
 
             registerPathsByFunction(datars);
         }
@@ -99,23 +99,23 @@ public class TaskService extends TaskPipeline {
     private void registerPathsByFunction(DataSourceREST datars) throws Exception
     {
         // setup a generic get function
-        if (datars.getGetfn() != null) {
-            logger.debug(" --- Registering Route::get = "+datars.getRoute());
-            Spark.get(datars.getRoute(), (request, response) -> {
+        if (datars.getfn() != null) {
+            logger.debug(" --- Registering Route::get = "+datars.route());
+            Spark.get(datars.route(), (request, response) -> {
                 return getHandler(request, response);
             });
         }
 
-        if (datars.getPostfn() != null) {
-            logger.debug(" --- Registering Route::post = "+datars.getRoute());
-            Spark.post(datars.getRoute(), (request, response) -> {
+        if (datars.postfn() != null) {
+            logger.debug(" --- Registering Route::post = "+datars.route());
+            Spark.post(datars.route(), (request, response) -> {
                 return getHandler(request, response);
             });
         }
 
-        if (datars.getPutfn() != null) {
-            logger.debug(" --- Registering Route::get = "+datars.getRoute());
-            Spark.put(datars.getRoute(), (request, response) -> {
+        if (datars.putfn() != null) {
+            logger.debug(" --- Registering Route::get = "+datars.route());
+            Spark.put(datars.route(), (request, response) -> {
                 return getHandler(request, response);
             });
         }
@@ -138,9 +138,9 @@ public class TaskService extends TaskPipeline {
         // access to pathlist
         DataSourceREST datars = pathList.get(request.pathInfo());
 
-        sysruntime.execute(datars.getGetfn());
+        sysruntime.execute(datars.getfn());
 
-        return "getHandler-- Calling::"+datars.getGetfn();
+        return "getHandler-- Calling::"+datars.getfn();
     }
 
     public String postHandler(Request request, Response response)  throws Exception{
@@ -149,7 +149,7 @@ public class TaskService extends TaskPipeline {
         logger.info("dump::"+request.raw());
         // access to pathlist
         DataSourceREST datars = pathList.get(request.pathInfo());
-        return "Hello World -- Calling::"+datars.getPostfn();
+        return "Hello World -- Calling::"+datars.postfn();
 
     }
 
@@ -159,7 +159,7 @@ public class TaskService extends TaskPipeline {
         logger.info("dump::"+request.raw());
         // access to pathlist
         DataSourceREST datars = pathList.get(request.pathInfo());
-        return "Hello World -- Calling::"+datars.getPutfn();
+        return "Hello World -- Calling::"+datars.putfn();
     }
 
     public void deleteHandler(Request request, Response response)  throws Exception{

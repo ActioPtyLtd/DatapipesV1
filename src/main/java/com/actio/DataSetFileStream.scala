@@ -29,6 +29,6 @@ class DataSetFileStream(private val reader: InputStream) extends DataSet {
 
   def hasNext = iterable.hasNext
 
-  override def schema = SchemaArray(SchemaRecord(List(SchemaString("col1",0))))
+  override def schema = SchemaArray(SchemaRecord(List(SchemaString(col1,0))))
 
 }

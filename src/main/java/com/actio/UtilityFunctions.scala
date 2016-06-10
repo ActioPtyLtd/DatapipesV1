@@ -59,4 +59,6 @@ object UtilityFunctions extends Logging {
       }
     }
   }
+
+  def clazz: Class[_] = UtilityFunctions.getClass
 }

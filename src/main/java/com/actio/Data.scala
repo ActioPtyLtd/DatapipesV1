@@ -94,4 +94,24 @@ object Data2Json {
     }
 
   def toField(name: String) = if(name.isEmpty) "" else "\"" + name + "\": "
+
+  import org.json4s._
+  import org.json4s.jackson.JsonMethods._
+
+  def fromJson4s2Data(label: String,v: JValue): Data =
+    v match {
+      case(js: JString) => DataString(label, js.s)
+      case(ji: JInt) => DataNumeric(label, BigDecimal(ji.num))
+      case(jdec: JDecimal) => DataNumeric(label, jdec.num)
+      case(jdou: JDouble) => DataNumeric(label, jdou.num)
+      case(ja: JArray) => DataArray(label, ja.arr.map(a => fromJson4s2Data("", a)).toList)
+      case(jo: JObject ) => DataRecord(label, jo.obj.map(o => fromJson4s2Data(o._1, o._2)).toList)
+      case _ => NoData(label)
+
+  }
+
+  def fromJson2Data(string: String) =
+    fromJson4s2Data("", parse(string)) // org.json4s.string2JsonInput(string)
+
+
 }

@@ -49,6 +49,22 @@
           }
         }
       },
+      "read-product-api": {
+        "type": "extract",
+        "behavior": "",
+        "dataSource": {
+          "type": "rest",
+          "behavior": "simple",
+          "path": "https://api.sunshad.es/v1/stock",
+          "credential": {
+            "user": "gm",
+            "password": "83498dd4fa301a3aa2d117b13d371526"
+          },
+          "query": {
+            "read": "https://api.sunshad.es/v1/stock"
+          }
+        }
+      },
       "update-product-api": {
         "type": "load",
         "behavior": "",
@@ -65,7 +81,7 @@
     },
     "pipelines": {
       "load-product-eyeware" : {
-        "pipe": "read-product-eyeware-csv | parse-product-eyeware-csv | update-product-api"
+        "pipe": "read-product-api | parse-product-eyeware-csv | update-product-api"
       }
     },
     "services": {

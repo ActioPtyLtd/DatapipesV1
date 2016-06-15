@@ -1,0 +1,51 @@
+{
+  "script": {
+    "schema": {},
+    "tasks": {
+      "read-order-csv": {
+        "type": "extract",
+        "behavior": "simple",
+        "dataSource": {
+          "behavior": "regex",
+          "directory": "C:\\Users\\mauri\\desktop\\",
+          "type": "file",
+          "filenameTemplate": "order-example.csv"
+        }
+      },
+      "parse-order-csv": {
+        "type": "transform",
+        "batch": [
+          "split2cols,col1",
+          "row1header",
+          "rename,productid,product_id",
+          "keep,product_id,quantity",
+          "numeric,quantity,0,0",
+          "label,order_items",
+          "addDataString,store_id,HAASC"
+          ]
+      },
+      "update-order-api": {
+        "type": "load",
+        "behavior": "simple",
+        "dataSource": {
+          "type": "rest",
+          "behavior": "simple",
+          "path": "https://dev-api-gnm.actio.com.au:8443/service/order",
+          "credential": {
+            "user": "admin",
+            "password": "password"
+          }
+        }
+      }
+    },
+    "pipelines": {
+      "load-invoice" : {
+        "pipe": "read-order-csv | parse-order-csv | update-order-api"
+      }
+    },
+    "services": { },
+    "startup": {
+      "exec": "load-invoice"
+    }
+  }
+}

@@ -15,13 +15,20 @@ object DataSetTransforms {
 
       override def next() = dataFunc(ds.next())
 
-      override def schema = schemaFunc(ds.schema)
+      override lazy val schema = schemaFunc(ds.schema)
     }
 
   def transformEachDataRecord(schemaFunc: (SchemaDefinition => SchemaDefinition), dataRecordFunc: (DataRecord) => (DataRecord)): (DataSet => DataSet) =
     transformEachData(schemaFunc, (d: Data) => DataArray(d.elems.map(r => dataRecordFunc(r.asInstanceOf[DataRecord])).toList))
 
   def transformDataSets(dsFuncs: (DataSet => DataSet)*): (DataSet => DataSet) = (ds: DataSet) => dsFuncs.foldLeft[DataSet](ds)((s,f) => f(s))
+
+  def foldExtend[T](ts: Seq[T => T]): (T => List[T]) = (i: T) => ts match {
+    case Nil => List(i)
+    case (h::t) => val f = h(i) ; f :: foldExtend(t)(f)
+  }
+
+
 
   def transformValue(name: String, key: String, dataFunc: Data => Data) = (ds: DataSet) => transformEachDataRecord(s => s, r =>
     DataRecord(dataFunc(r(key)) :: r.fields)
@@ -36,6 +43,35 @@ object DataSetTransforms {
 
   def productProperty(ds: DataSet, labels: List[String]): DataSet = transformEachData(productSchemaFunc(labels),productDataFunc(labels))(ds)
 
+  def pick(ds: DataSet, labels: List[String]): DataSet = transformEachData(schema => schema.value(labels), data => data.value(labels map Label))(ds)
+
+  //def updateLabel(ds: DataSet, label: String): DataSet =
+
+  def updateLabelDataFunc(l: String) = (d: Data) => d match {
+    case DataArray(_,a) => DataArray(l, a)
+    case DataRecord(_,r) => DataRecord(l,r)
+    case _ => NoData(l)                   // fix this to include all types
+  }
+
+  def updateLabelSchemaFunc(l: String) = (d: SchemaDefinition) => d match {
+    case SchemaArray(_,a) => SchemaArray(l, a)
+    case SchemaRecord(_,r) => SchemaRecord(l,r)
+    case _ => SchemaUnknown(l)                   // fix this to include all types
+  }
+
+  def addDataFunc(data: Data, addData: Data) = data match {
+    case DataRecord(l,fs) => DataRecord(l, addData :: fs)
+    case v => DataRecord(List(v, addData))
+  }
+
+  def addSchemaFunc(schema: SchemaDefinition, addSchema: SchemaDefinition) = schema match {
+    case SchemaRecord(l,fs) => SchemaRecord(l, addSchema :: fs)
+    case SchemaArray(l,es) => SchemaArray(l, es)
+    case v => SchemaRecord(List(v, addSchema))
+  }
+
+  def addDataString(ds: DataSet, label: String, value: String) = transformEachData(schema => addSchemaFunc(schema, SchemaString(label,0)), data => addDataFunc(data,DataString(label,value)))(ds)
+  def label(ds: DataSet, label: String) = transformEachData(updateLabelSchemaFunc(label),updateLabelDataFunc(label))(ds)
 
   //TODO: likely will remove Batch, it's confusing
   type Batch = (SchemaDefinition, Data)

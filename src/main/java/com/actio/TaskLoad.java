@@ -101,7 +101,9 @@ public class TaskLoad extends Task {
             CheckPointDiff();
         }
         else if (behaviour.equals(FULL_CHECKPOINT_DIFF_LABEL)){
-            ProcessAllDiffs();
+            ProcessAllDiffs(); }
+        else if(behaviour == "update") {
+                destination.update(getDataSet());
         } else
             BasicQueryWrite();
     }

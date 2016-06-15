@@ -28,6 +28,8 @@ sealed abstract class Data {
   def isEmpty = this.toOption.isDefined
 
   def label: String
+
+  def schema: SchemaDefinition = SchemaUnknown
 }
 
 case class NoData(label: String) extends Data
@@ -40,11 +42,15 @@ object NoData {
 case class DataString(label: String = "", str: String) extends Data {
 
   override def stringOption = Option(str)
+
+  override def schema = SchemaString(label, 0)
 }
 
 case class DataNumeric(label: String, num: BigDecimal) extends Data {
 
   override def stringOption = Some(num.toString())
+
+  override def schema = SchemaNumber(label,0,0)
 }
 
 case class DataRecord(label: String, fields: List[Data]) extends Data {
@@ -52,6 +58,8 @@ case class DataRecord(label: String, fields: List[Data]) extends Data {
   override def apply(field: String) = fields.find(f => f.label == field).getOrElse(NoData())
 
   override def elems = fields
+
+  override def schema = SchemaRecord(label, fields.map(_.schema))
 }
 
 object DataRecord {
@@ -64,6 +72,8 @@ case class DataArray(label: String, arrayElems: List[Data]) extends Data {
   override def apply(ord: Int) = arrayElems.lift(ord).getOrElse(NoData())
 
   override def elems = arrayElems
+
+  override def schema = SchemaArray(label, arrayElems.head.schema)      // could update this to check for maximum amount of fields rather than just first
 }
 
 object DataArray {
@@ -74,8 +84,6 @@ object DataArray {
 sealed abstract class Key
 case class Ord(ord: Int) extends Key
 case class Label(label: String) extends Key
-
-
 
 // TODO: could use help of a library to serialise properly
 object Data2Json {
@@ -90,7 +98,7 @@ object Data2Json {
           + toJsonString(f)).mkString(",") + "}"
       case DataArray(key, ds) => toField(key) + "[" + ds.map(d => toJsonString(d)).mkString(",") + "]"
       case NoData(_) => "null"
-      case DataNumeric(_, num) => num.setScale(2).toString()
+      case DataNumeric(_, num) => num.setScale(2, BigDecimal.RoundingMode.HALF_UP).underlying().stripTrailingZeros().toPlainString()
     }
 
   def toField(name: String) = if(name.isEmpty) "" else "\"" + name + "\": "

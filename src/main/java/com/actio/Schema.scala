@@ -6,6 +6,13 @@ package com.actio
 sealed abstract class SchemaDefinition
 {
   def label: String
+
+  def apply(field: String): SchemaDefinition = SchemaUnknown
+
+  def value(keys: List[String]): SchemaDefinition =  keys match {
+    case Nil => this
+    case lbl::t => this(lbl).value(t)
+    case _ => SchemaUnknown }
 }
 
 case class SchemaArray(label: String, content: SchemaDefinition) extends SchemaDefinition
@@ -15,11 +22,15 @@ object SchemaArray {
   def apply(content: SchemaDefinition) = new SchemaArray("", content)
 }
 
-case class SchemaRecord(label: String, fields: List[SchemaDefinition]) extends SchemaDefinition
+case class SchemaRecord(label: String, fields: List[SchemaDefinition]) extends SchemaDefinition {
+
+  override def apply(field: String): SchemaDefinition = fields.find(f => f.label == field).getOrElse(SchemaUnknown)
+}
 
 object SchemaRecord {
 
   def apply(fields: List[SchemaDefinition]) = new SchemaRecord("", fields)
+
 }
 
 case class SchemaNumber(label: String, precision: Int, scale: Int) extends SchemaDefinition

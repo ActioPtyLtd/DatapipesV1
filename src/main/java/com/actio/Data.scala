@@ -53,6 +53,13 @@ case class DataNumeric(label: String, num: BigDecimal) extends Data {
   override def schema = SchemaNumber(label,0,0)
 }
 
+case class DataBoolean(label: String, bool: Boolean) extends Data {
+
+  override def stringOption = Some(bool.toString)
+
+  override def schema = SchemaBoolean(label)
+}
+
 case class DataRecord(label: String, fields: List[Data]) extends Data {
 
   override def apply(field: String) = fields.find(f => f.label == field).getOrElse(NoData())
@@ -98,7 +105,8 @@ object Data2Json {
           + toJsonString(f)).mkString(",") + "}"
       case DataArray(key, ds) => toField(key) + "[" + ds.map(d => toJsonString(d)).mkString(",") + "]"
       case NoData(_) => "null"
-      case DataNumeric(_, num) => num.setScale(2, BigDecimal.RoundingMode.HALF_UP).underlying().stripTrailingZeros().toPlainString()
+      case DataNumeric(_, num) => num.setScale(2, BigDecimal.RoundingMode.HALF_UP).underlying().stripTrailingZeros().toPlainString
+      case DataBoolean(_, bool) => bool.toString
     }
 
   def toField(name: String) = if(name.isEmpty) "" else "\"" + name + "\": "
@@ -112,6 +120,7 @@ object Data2Json {
       case(ji: JInt) => DataNumeric(label, BigDecimal(ji.num))
       case(jdec: JDecimal) => DataNumeric(label, jdec.num)
       case(jdou: JDouble) => DataNumeric(label, jdou.num)
+      case(jb: JBool) => DataBoolean(label, jb.value)
       case(ja: JArray) => DataArray(label, ja.arr.map(a => fromJson4s2Data("", a)).toList)
       case(jo: JObject ) => DataRecord(label, jo.obj.map(o => fromJson4s2Data(o._1, o._2)).toList)
       case _ => NoData(label)

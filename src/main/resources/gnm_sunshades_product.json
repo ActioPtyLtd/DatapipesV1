@@ -21,11 +21,15 @@
       "parse-product-api": {
         "type": "transform",
         "batch": [
-          "const,frame,1",
-          "rename,const1,type,productid,external_id,const2,supplier_id,supplier_total",
-          "keep,external_id,type,name,description,retail_price,wholesale_price,frame_brand,frame_bridge_size,frame_colour,frame_depth,frame_eye_size,frame_gender,frame_material,frame_model,frame_temple_length,frame_type",
+          "pick,items",
+          "const,frame",
+          "rename,const1,type,stockid,external_id",
+          "keep,external_id,type,name,discontinued,apn,description,retail_price,retail_price_tax,wholesale_price,wholesale_price_tax,frame_brand,frame_bridge_size,frame_colour,frame_depth,frame_eye_size,frame_gender,frame_material,frame_model,frame_temple_length,frame_type",
           "numeric,retail_price,0,2",
           "numeric,wholesale_price,0,2",
+          "numeric,retail_price_tax,0,2",
+          "numeric,wholesale_price_tax,0,2",
+          "bool,discontinued",
           "productProperty,frame_brand,frame_bridge_size,frame_colour,frame_depth,frame_eye_size,frame_gender,frame_material,frame_model,frame_temple_length,frame_type"
         ]
       },
@@ -45,17 +49,20 @@
       "parse-stock-api": {
         "type": "transform",
         "batch": [
+          "pick,items",
           "const,SUNSHADES",
           "rename,stockid,external_id,const1,supplier_id,supplier_total,quantity",
-          "keep,external_id,supplier_id,retail_price,wholesale_price,quantity",
+          "keep,external_id,supplier_id,retail_price,retail_price_tax,wholesale_price,wholesale_price_tax,quantity",
           "numeric,quantity,0,0",
           "numeric,retail_price,0,2",
-          "numeric,wholesale_price,0,2"
+          "numeric,wholesale_price,0,2",
+          "numeric,retail_price_tax,0,2",
+          "numeric,wholesale_price_tax,0,2"
         ]
       },
       "update-stock-api": {
         "type": "load",
-        "behavior": "",
+        "behavior": "update",
         "dataSource": {
           "type": "rest",
           "behavior": "simple",
@@ -63,12 +70,20 @@
           "credential": {
             "user": "admin",
             "password": "password"
+          },
+          "query": {
+            "create": {
+              "header": "https://dev-api-gnm.actio.com.au:8443/service/product/@external_id/stock"
+            },
+            "update": {
+              "header": "https://dev-api-gnm.actio.com.au:8443/service/product/@external_id/stock"
+            }
           }
         }
       }
     },
     "pipelines": {
-      "load-product-eyeware" : {
+      "load-frame" : {
         "pipe": "read-product-api | parse-product-api | update-product-api"
       },
       "load-stock" : {

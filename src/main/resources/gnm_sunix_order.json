@@ -18,7 +18,8 @@
           "split2cols,col1",
           "row1header",
           "rename,productid,product_id",
-          "keep,product_id,quantity",
+          "keep,product_id,quantity,frame_brand,frame_bridge_size,frame_colour,frame_depth,frame_eye_size,frame_gender,frame_material,frame_model,frame_temple_length,frame_type",
+          "productProperty,frame_brand,frame_bridge_size,frame_colour,frame_depth,frame_eye_size,frame_gender,frame_material,frame_model,frame_temple_length,frame_type",
           "numeric,quantity,0,0",
           "label,order_items",
           "addDataString,store_id,HAASC"
@@ -34,6 +35,14 @@
           "credential": {
             "user": "admin",
             "password": "password"
+          },
+          "query": {
+            "create": {
+              "header": "https://dev-api-gnm.actio.com.au:8443/service/order"
+            },
+            "update": {
+              "header": "https://dev-api-gnm.actio.com.au:8443/service/order"
+            }
           }
         }
       }

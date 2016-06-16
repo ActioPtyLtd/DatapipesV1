@@ -161,22 +161,29 @@ class DataSourceREST extends DataSource with Logging {
   }
 
   override def create(ds: DataSet): Unit = {
-    getRequests(ds, new HttpPost()).foreach(r => sendAndLog(r))
+    getRequests(ds, new HttpPost(), createConfig).foreach(r => sendAndLog(r))
   }
+
+  private lazy val createConfig = config.getConfig("query").getConfig("create").getString("header")
+  private lazy val updateConfig = config.getConfig("query").getConfig("update").getString("header")
+
 
   override def update(ds: DataSet): Unit = {
-    getRequests(ds, new HttpPut()).foreach(r => sendAndLog(r))
+    getRequests(ds, new HttpPut(), updateConfig).foreach(r => sendAndLog(r))
   }
 
-  private def getRequests[T <: HttpEntityEnclosingRequestBase](ds: DataSet, f: => HttpEntityEnclosingRequestBase) =
-    split(ds).map(d => createRequestWithEntity(d, f))
+  private def getRequests[T <: HttpEntityEnclosingRequestBase](ds: DataSet, f: => HttpEntityEnclosingRequestBase, template: String) =
+    split(ds).map(d => createRequestWithEntity(d, f, merge(template, d)))
 
-  private def createRequestWithEntity(data: Data, f: => HttpEntityEnclosingRequestBase): HttpEntityEnclosingRequestBase = {
+  private def merge(template: String, data: Data): String = template.replaceAll("@external_id",data("external_id").stringOption.getOrElse("")) // complete hack, do a proper data merge soon
+
+  private def createRequestWithEntity(data: Data, f: => HttpEntityEnclosingRequestBase, uri: String): HttpEntityEnclosingRequestBase = {
+
     val input: StringEntity = new StringEntity(Data2Json.toJsonString(data))
     input.setContentType(DataSourceREST.CONTENT_TYPE)
 
     val request = f
-    request.setURI(URI.create(route))
+    request.setURI(URI.create(uri))
     request.setEntity(input)
     request.setHeader(HttpHeaders.AUTHORIZATION, authHeader)
     request

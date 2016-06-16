@@ -36,6 +36,7 @@ object SchemaRecord {
 case class SchemaNumber(label: String, precision: Int, scale: Int) extends SchemaDefinition
 case class SchemaString(label: String, maxLength: Int) extends SchemaDefinition
 case class SchemaDate(label: String, format: String) extends SchemaDefinition
+case class SchemaBoolean(label: String) extends SchemaDefinition
 
 case object SchemaUnknown extends SchemaDefinition {
   def label = ""

@@ -43,7 +43,7 @@ object DataSetTransforms {
 
   def productProperty(ds: DataSet, labels: List[String]): DataSet = transformEachData(productSchemaFunc(labels),productDataFunc(labels))(ds)
 
-  def pick(ds: DataSet, labels: List[String]): DataSet = transformEachData(schema => schema.value(labels), data => data.value(labels map Label))(ds)
+  def pick(ds: DataSet, labels: List[String]): DataSet = transformEachData(_.value(labels), _.value(labels map Label))(ds)
 
   //def updateLabel(ds: DataSet, label: String): DataSet =
 
@@ -88,6 +88,21 @@ object DataSetTransforms {
         DataRecord(key, fs))
     case (s, DataArray(key, a)) =>
       new DataSetFixedData(s, DataArray(key, a.map(m => numeric((s, m), field, precision, scale).next)))
+    case (s, d) => new DataSetFixedData(s, d)
+  }
+
+  def bool(batch: Batch, field: String): DataSet = batch match {
+    case (s, DataRecord(key,fs)) =>
+      new DataSetFixedData(s, if (fs.map(_.label).contains(field))
+        DataRecord(key, fs.map(f =>
+          if (f.label == field)
+            DataBoolean(f.label, f.stringOption.map(_.toBoolean).getOrElse(false) )
+          else
+            f).toList)
+      else
+        DataRecord(key, fs))
+    case (s, DataArray(key, a)) =>
+      new DataSetFixedData(s, DataArray(key, a.map(m => bool((s, m), field).next)))
     case (s, d) => new DataSetFixedData(s, d)
   }
       

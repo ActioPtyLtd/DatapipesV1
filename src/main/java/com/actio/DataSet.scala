@@ -7,30 +7,36 @@ package com.actio
 import com.actio.dpsystem.DPSystemConfigurable
 import com.typesafe.config.Config
 
-case class DataSetArray(dataSets: List[DataSet]) extends DataSet {
+class DataSetArray(dataSets: List[DataSet]) extends DataSet {
 
-  override def get(ord: Int): Option[DataSet] = Option(dataSets(ord))
+  override def apply(ord: Int): DataSet = dataSets.lift(ord).getOrElse(new NoDataSet())
 
-  override def get(field: String): Option[DataSet] = None
+  override def apply(field: String): DataSet = new NoDataSet()
 
   override def elems: Iterable[DataSet] = dataSets
 
-  override def schema: SchemaDefinition = SchemaUnknown
+  override def schema: SchemaDefinition = dataSets.headOption.map(_.schema).getOrElse(SchemaUnknown)
 
-  override def hasNext: Boolean = false
+  override def hasNext: Boolean = dataSets.headOption.exists(_.hasNext)
 
-  override def next(): Data = NoData()
+  override def next(): Data = dataSets.headOption.map(_.next()).getOrElse(NoData())
 }
 
-abstract class DataSet extends DPSystemConfigurable with Iterator[Data] {
+abstract class DataSet extends DPSystemConfigurable with Iterator[Data] with DataGeneric[DataSet] {
 
-  def get(ord: Int): Option[DataSet] = None
+  def apply(ord: Int): DataSet = new NoDataSet()
 
-  def get(field: String): Option[DataSet] = None
+  def apply(field: String): DataSet = new NoDataSet()
 
-  def elems: Iterable[DataSet] = List(this)
+  override def elems: Iterable[DataSet] = List(this)
 
-  def schema: SchemaDefinition = SchemaUnknown
+  def label = ""
+
+  def toOption: Option[DataSet] = Some(this) // fix this
+
+  def unknown: DataSet = new NoDataSet()
+
+  override def schema: SchemaDefinition = SchemaUnknown
 
   //not sure why I need this, but it prevents compiler errors
   override def minBy[B](f: Data => B)(implicit cmp: Ordering[B]): Data = null
@@ -40,4 +46,10 @@ abstract class DataSet extends DPSystemConfigurable with Iterator[Data] {
   override def max[B >: Data](implicit cmp: Ordering[B]): Data = null
 
   override def min[B >: Data](implicit cmp: Ordering[B]): Data = null
+}
+
+class NoDataSet extends DataSet {
+  override def hasNext: Boolean = false
+
+  override def next(): Data = NoData()
 }

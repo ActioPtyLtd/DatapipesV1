@@ -4,7 +4,7 @@ package com.actio
   * Created by mauri on 25/05/2016.
   */
 
-sealed abstract class Data {
+sealed abstract class Data extends DataGeneric[Data] {
 
   def apply(ord: Int): Data = NoData()
 
@@ -23,13 +23,7 @@ sealed abstract class Data {
     case Label(lbl)::t => this(lbl).value(t)
     case _ => NoData() }
 
-  def elems: Iterable[Data] = Iterable.empty
-
-  def isEmpty = this.toOption.isDefined
-
-  def label: String
-
-  def schema: SchemaDefinition = SchemaUnknown
+  def unknown = NoData()
 }
 
 case class NoData(label: String) extends Data

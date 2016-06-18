@@ -3,16 +3,25 @@ package com.actio
 /**
   * Created by mauri on 27/05/2016.
   */
-sealed abstract class SchemaDefinition
+sealed abstract class SchemaDefinition extends DataGeneric[SchemaDefinition]
 {
-  def label: String
-
   def apply(field: String): SchemaDefinition = SchemaUnknown
 
   def value(keys: List[String]): SchemaDefinition =  keys match {
     case Nil => this
     case lbl::t => this(lbl).value(t)
     case _ => SchemaUnknown }
+
+  def apply(ord: Int): SchemaDefinition = SchemaUnknown
+
+  def toOption: Option[SchemaDefinition] = this match {
+    case SchemaUnknown => None
+    case schema => Some(schema)
+  }
+
+  def unknown = SchemaUnknown
+
+  override def schema = this
 }
 
 case class SchemaArray(label: String, content: SchemaDefinition) extends SchemaDefinition

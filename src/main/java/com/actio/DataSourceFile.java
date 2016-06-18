@@ -167,12 +167,12 @@ public class DataSourceFile extends DataSource {
     public void write(DataSet data) throws Exception {
         String outFileName = getFilename();
 
-        WriteWorker(outFileName, data, DataSetTableScala.apply(data).getColumnHeaderStr(), "");
+        WriteWorker(outFileName, data, DataSetTableScala$.MODULE$.apply(data).getColumnHeaderStr(), "");
     }
 
     @Override
     public void write(DataSet data, String qualifier) throws Exception {
-        List<String> rowList = DataSetTableScala.apply(data).getAsList();
+        List<String> rowList = DataSetTableScala$.MODULE$.apply(data).getAsList();
 
         logger.info("Entered writeListSet " + qualifier);
         if (rowList.isEmpty()) {
@@ -182,14 +182,14 @@ public class DataSourceFile extends DataSource {
 
         String outFileName = generateFilenameByLabel(qualifier);
         logger.info("   DiffOutputFile=" + outFileName);
-        WriteWorker(outFileName, data, DataSetTableScala.apply(data).getColumnHeaderStr(), "");
+        WriteWorker(outFileName, data, DataSetTableScala$.MODULE$.apply(data).getColumnHeaderStr(), "");
 
     }
 
     private void WriteWorker(String outFileName, DataSet data,
                              String header, String preamble) throws Exception {
 
-        List<String> rowList = DataSetTableScala.apply(data).getAsList();
+        List<String> rowList = DataSetTableScala$.MODULE$.apply(data).getAsList();
 
         logger.info("Writing File=" + getFilename() + "No.Lines=" + rowList.size());
 

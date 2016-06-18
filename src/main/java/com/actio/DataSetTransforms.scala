@@ -3,6 +3,8 @@ package com.actio
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
+import scala.util.Try
+
 /**
   * Created by mauri on 27/04/2016.
   */
@@ -22,13 +24,6 @@ object DataSetTransforms {
     transformEachData(schemaFunc, (d: Data) => DataArray(d.elems.map(r => dataRecordFunc(r.asInstanceOf[DataRecord])).toList))
 
   def transformDataSets(dsFuncs: (DataSet => DataSet)*): (DataSet => DataSet) = (ds: DataSet) => dsFuncs.foldLeft[DataSet](ds)((s,f) => f(s))
-
-  def foldExtend[T](ts: Seq[T => T]): (T => List[T]) = (i: T) => ts match {
-    case Nil => List(i)
-    case (h::t) => val f = h(i) ; f :: foldExtend(t)(f)
-  }
-
-
 
   def transformValue(name: String, key: String, dataFunc: Data => Data) = (ds: DataSet) => transformEachDataRecord(s => s, r =>
     DataRecord(dataFunc(r(key)) :: r.fields)

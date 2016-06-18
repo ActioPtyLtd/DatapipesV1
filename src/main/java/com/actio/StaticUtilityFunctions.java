@@ -30,7 +30,7 @@ public class StaticUtilityFunctions extends DPSystemConfigurable {
     {
         if (fns.getFunctions().containsKey(ROW_FUNCTIONS_KEY)) {
             // iterate over the functions, processing the source
-            DataSetTableScala newSource = DataSetTableScala.apply(theSet);
+            DataSetTableScala newSource = DataSetTableScala$.MODULE$.apply(theSet);
             List<List<String>> newRows = new LinkedList<List<String>>();
 
             // process for each line

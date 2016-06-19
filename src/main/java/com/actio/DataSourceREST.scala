@@ -161,25 +161,34 @@ class DataSourceREST extends DataSource with Logging {
   }
 
   override def create(ds: DataSet): Unit = {
-    getRequests(ds, new HttpPost(), createConfig).foreach(r => sendAndLog(r))
+    getRequests(ds, new HttpPost(), createConfig, createBody).foreach(r => sendAndLog(r))
   }
 
   private lazy val createConfig = config.getConfig("query").getConfig("create").getString("header")
   private lazy val updateConfig = config.getConfig("query").getConfig("update").getString("header")
 
+  private lazy val createBody = if(config.hasPath("query.create.body")) Some(config.getString("query.create.body")) else None
 
   override def update(ds: DataSet): Unit = {
-    getRequests(ds, new HttpPut(), updateConfig).foreach(r => sendAndLog(r))
+    getRequests(ds, new HttpPut(), updateConfig, None).foreach(r => sendAndLog(r))
   }
 
-  private def getRequests[T <: HttpEntityEnclosingRequestBase](ds: DataSet, f: => HttpEntityEnclosingRequestBase, template: String) =
-    split(ds).map(d => createRequestWithEntity(d, f, merge(template, d)))
+  private def getRequests[T <: HttpEntityEnclosingRequestBase](ds: DataSet, f: => HttpEntityEnclosingRequestBase, template: String, templateBody: Option[String]) =
+    split(ds).map(d => {
+      if(templateBody.isDefined)
+        createRequestWithEntity(Template.merge(templateBody.get, d), f, merge(template, d))
+      else
+        createRequestWithEntity(d, f, merge(template, d))
+    })
 
   private def merge(template: String, data: Data): String = template.replaceAll("@external_id",data("external_id").stringOption.getOrElse("")) // complete hack, do a proper data merge soon
 
-  private def createRequestWithEntity(data: Data, f: => HttpEntityEnclosingRequestBase, uri: String): HttpEntityEnclosingRequestBase = {
+  private def createRequestWithEntity(data: Data, f: => HttpEntityEnclosingRequestBase, uri: String): HttpEntityEnclosingRequestBase =
+    createRequestWithEntity(Data2Json.toJsonString(data), f, uri)
 
-    val input: StringEntity = new StringEntity(Data2Json.toJsonString(data))
+  private def createRequestWithEntity(str: String, f: => HttpEntityEnclosingRequestBase, uri: String): HttpEntityEnclosingRequestBase = {
+
+    val input: StringEntity = new StringEntity(str)
     input.setContentType(DataSourceREST.CONTENT_TYPE)
 
     val request = f

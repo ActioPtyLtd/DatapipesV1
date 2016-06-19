@@ -33,7 +33,7 @@ object DataSetTransforms {
     SchemaRecord(List(SchemaString("name", 0), SchemaString("type", 0), SchemaString("value", 0)))) :: schema.asInstanceOf[SchemaArray].content.asInstanceOf[SchemaRecord].fields.filterNot(f => labels.contains(f.label))))
 
   def productDataFunc(labels: List[String]) = (data: Data) => DataArray(data.elems.map(r => DataRecord(
-    DataArray("attributes", r.elems.filter(f => labels.contains(f.label)).map(v => DataRecord(List(DataString("name", v.label),DataString("type", "string"),v.stringOption.map(o => DataString("value", o)).getOrElse(NoData("value"))))).toList)
+    DataArray("attributes", r.elems.filter(f => labels.contains(f.label) && f.stringOption.getOrElse("").nonEmpty).map(v => DataRecord(List(DataString("name", v.label),DataString("type", "string"),v.stringOption.map(o => DataString("value", o)).getOrElse(NoData("value"))))).toList)
     :: r.elems.filter(f => !labels.contains(f.label)).toList)).toList)
 
   def productProperty(ds: DataSet, labels: List[String]): DataSet = transformEachData(productSchemaFunc(labels),productDataFunc(labels))(ds)
@@ -67,6 +67,16 @@ object DataSetTransforms {
 
   def addDataString(ds: DataSet, label: String, value: String) = transformEachData(schema => addSchemaFunc(schema, SchemaString(label,0)), data => addDataFunc(data,DataString(label,value)))(ds)
   def label(ds: DataSet, label: String) = transformEachData(updateLabelSchemaFunc(label),updateLabelDataFunc(label))(ds)
+  def addData(ds: DataSet, template: List[String]) = {
+    val temp = template mkString ","
+    val tFunc = mergeT(temp)
+    transformEachData(schema => schema, data => addDataFunc(data,Data2Json.fromJson2Data(tFunc(data))))(ds)
+  }
+  def mergeT(template: String): Data => String = d => {
+    val ra = "@(.*?)@".r.findAllMatchIn(template).map(_.group(1)).toList
+    val res = ra.foldLeft[String](template)((t,e) => t.replace("@"+e+"@",d.value(e).stringOption.getOrElse("")))
+    res
+  }
 
   //TODO: likely will remove Batch, it's confusing
   type Batch = (SchemaDefinition, Data)

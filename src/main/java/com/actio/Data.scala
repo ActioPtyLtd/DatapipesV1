@@ -23,6 +23,13 @@ sealed abstract class Data extends DataGeneric[Data] {
     case Label(lbl)::t => this(lbl).value(t)
     case _ => NoData() }
 
+  def value(keys: String): Data = value(keys.split("\\.").map(s =>
+    if (s.startsWith("["))
+      Ord(s.replace("[","").replace("]","").toInt)
+    else
+      Label(s)
+  ).toList)
+
   def unknown = NoData()
 }
 

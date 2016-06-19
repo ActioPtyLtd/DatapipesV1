@@ -18,11 +18,10 @@
           "split2cols,col1",
           "row1header",
           "rename,productid,product_id",
-          "keep,product_id,quantity,frame_brand,frame_bridge_size,frame_colour,frame_depth,frame_eye_size,frame_gender,frame_material,frame_model,frame_temple_length,frame_type",
-          "productProperty,frame_brand,frame_bridge_size,frame_colour,frame_depth,frame_eye_size,frame_gender,frame_material,frame_model,frame_temple_length,frame_type",
+          "keep,product_id,quantity,order_date_time,return_address_post,return_address_state,return_address1,return_address_city,invoiceid,customerid,customer_firstname,customer_lastname,customer_phone,frame_brand,frame_bridge_size,frame_colour,frame_depth,frame_eye_size,frame_gender,frame_material,frame_model,frame_temple_length,frame_type",
           "numeric,quantity,0,0",
           "label,order_items",
-          "addDataString,store_id,HAASC"
+          "addDataString,dummy,1"
           ]
       },
       "update-order-api": {
@@ -38,7 +37,8 @@
           },
           "query": {
             "create": {
-              "header": "https://dev-api-gnm.actio.com.au:8443/service/order"
+              "header": "https://dev-api-gnm.actio.com.au:8443/service/order",
+              "body": "{\"store_id\": \"HAASC\", \"submitted_date_time\": \"@data.order_items.[0].order_date_time@\", \"delivery_address\": { \"postcode\": \"@data.order_items.[0].return_address_post@\", \"state\": \"@data.order_items.[0].return_address_state@\", \"street1\": \"@data.order_items.[0].return_address1@\", \"suburb\": \"@data.order_items.[0].return_address_city@\"}, \"customer\": {\"customer_id\": \"@data.order_items.[0].customerid@\",\"first_name\": \"@data.order_items.[0].customer_firstname@\",\"last_name\": \"@data.order_items.[0].customer_lastname@\",\"phone\": \"@data.order_items.[0].customer_phone@\"}, \"invoice_id\": \"@data.order_items.[0].invoiceid@\", \"order_items\": [%{repeat(i,data.order_items){\"attributes\": [{\"name\": \"frame_brand\", \"type\": \"string\", \"value\": \"@i.frame_brand@\"}], \"product_id\": \"@i.product_id@\", \"quantity\": @i.quantity@}%}]}"
             },
             "update": {
               "header": "https://dev-api-gnm.actio.com.au:8443/service/order"
@@ -48,13 +48,13 @@
       }
     },
     "pipelines": {
-      "load-invoice" : {
+      "load-order" : {
         "pipe": "read-order-csv | parse-order-csv | update-order-api"
       }
     },
     "services": { },
     "startup": {
-      "exec": "load-invoice"
+      "exec": "load-order"
     }
   }
 }

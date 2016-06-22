@@ -5,9 +5,8 @@ package com.actio
   */
 object Template  {
   //val template = "{test: [%{repeat(o,data){productid: @o.product_id@}%}]}"
-  //val data = DataArray("order_items",List(DataRecord("",List(DataString("product_id","0"))), DataRecord("",List(DataString("product_id","1")))))
 
-  def merge(template: String, d: Data) = expand(template, Map("data" -> d))
+  def merge(template: String, d: Data) = expand(template, Map("$g" -> d))
 
   def expand(template: String, map: Map[String, Data]): String = {
     val s = split(template)
@@ -47,6 +46,7 @@ object Template  {
     else
       Some((template.substring(0,left),template.substring(left+2,left+right+2),template.substring(left+right+4)))
   }
+
   def indexOfMatchingBracket(str: String, count: Int, add: Int): Int =
     {
       val open = "%{"
@@ -63,5 +63,45 @@ object Template  {
       else
         -1
     }
+
+}
+
+
+abstract class Expression
+case class Function(name: String, param: List[Expression]) extends Expression
+case class Variable(name: String) extends Expression
+case class Constant[C <: Any](value: C) extends Expression
+case class ForEach(expr: Expression, lambdaFuntion: LambdaFuntion) extends Expression
+
+case class LambdaFuntion(varname: String, expr: Expression)   // (x: Data) => Data
+
+abstract class Template extends Expression
+case class Literal(text: String) extends Template
+case class Mix(left: Literal, expression: Expression, right: Template) extends Template
+
+object TemplateEngine {
+
+  def eval(expr: Expression, scope: Map[String, Data]): Data = expr match {
+    case Constant(i: String) => DataString("",i)
+    case Constant(i: Int) => DataNumeric("",i)
+    case Variable(name) => Template.evalExpression(name, scope) // rename this
+    case Function(name, params) => delim("/",params.map(p => eval(p, scope)).tail.head) // reflection invoke
+    case Literal(text) => DataString("", text)
+    case Mix(left, middle, right) => DataString("",left.text + eval(middle, scope).stringOption.get + eval(right, scope).stringOption.get)
+    case ForEach(list,lambda) => DataArray(eval(list, scope).elems.map(e => callLambdaFunction(lambda, e, scope) ).toList)
+  }
+
+  def callMethod(name: String): Data = NoData()
+  def callLambdaFunction(lambda: LambdaFuntion, data: Data, scope: Map[String, Data]) = eval(lambda.expr, scope + (lambda.varname -> data))
+
+  def delim(str: String, d: Data) = DataString("", d.elems.map(_.stringOption.getOrElse("")).mkString(str))
+}
+
+object MyTest extends App {
+  val expr = Mix(Literal(""),Function("delim",List(Constant(""),ForEach(Variable("g"),LambdaFuntion("d", Mix(Literal(""),Variable("d.product_id"),Literal("")))))),Literal(""))
+
+  val data = DataArray("order_items",List(DataRecord("",List(DataString("product_id","0"))), DataRecord("",List(DataString("product_id","1")))))
+
+  println(TemplateEngine.eval(expr, Map("g" -> data)))
 
 }

@@ -98,7 +98,7 @@ class DataSourceREST extends DataSource with Logging {
 
   def sendAndLog(request: HttpUriRequest) = {
 
-    logger.info(s"Calling URI: ${request.getURI}...")
+    logger.info(s"Calling ${request.getMethod} ${request.getURI}...")
 
     val response = send(request)
 
@@ -168,6 +168,7 @@ class DataSourceREST extends DataSource with Logging {
   private lazy val updateConfig = config.getConfig("query").getConfig("update").getString("header")
 
   private lazy val createBody = if(config.hasPath("query.create.body")) Some(config.getString("query.create.body")) else None
+  private lazy val createForEach = if(config.hasPath("query.create.foreach")) Some(config.getString("query.create.foreach")) else None
 
   override def update(ds: DataSet): Unit = {
     getRequests(ds, new HttpPut(), updateConfig, None).foreach(r => sendAndLog(r))
@@ -176,9 +177,9 @@ class DataSourceREST extends DataSource with Logging {
   private def getRequests[T <: HttpEntityEnclosingRequestBase](ds: DataSet, f: => HttpEntityEnclosingRequestBase, template: String, templateBody: Option[String]) =
     split(ds).map(d => {
       if(templateBody.isDefined)
-        createRequestWithEntity(Template.merge(templateBody.get, d), f, merge(template, d))
+        createRequestWithEntity(Template.expand(templateBody.get, Map("$g" -> d._1, "$d" -> d._2)), f, merge(template, d._1))
       else
-        createRequestWithEntity(d, f, merge(template, d))
+        createRequestWithEntity(d._1, f, merge(template, d._1))
     })
 
   private def merge(template: String, data: Data): String = template.replaceAll("@external_id",data("external_id").stringOption.getOrElse("")) // complete hack, do a proper data merge soon
@@ -198,16 +199,12 @@ class DataSourceREST extends DataSource with Logging {
     request
   }
 
-  def split(dataSet: DataSet): Iterator[Data] =
-    dataSet.flatMap(d=> {
-
-      val data = d match {
-        case DataRecord(l, fs) => List(DataRecord(l, fs).asInstanceOf[Data])
-        case d => d.elems
-      }
-
-      data
-    })
+  def split(dataSet: DataSet): Iterator[(Data,Data)] = {
+    if(createForEach.isDefined)
+      dataSet.flatMap(d => d.find(createForEach.get).map((d,_)))
+    else
+      dataSet.map(d => (d,d))
+  }
 
   @throws(classOf[Exception])
   def write(dataSet: DataSet): Unit = {

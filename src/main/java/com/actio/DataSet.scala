@@ -22,7 +22,7 @@ class DataSetArray(dataSets: List[DataSet]) extends DataSet {
   override def next(): Data = dataSets.headOption.map(_.next()).getOrElse(NoData())
 }
 
-abstract class DataSet extends DPSystemConfigurable with Iterator[Data] with DataGeneric[DataSet] {
+abstract class DataSet extends DPSystemConfigurable with Iterator[Data] with LinkedTree[DataSet] {
 
   def apply(ord: Int): DataSet = new NoDataSet()
 

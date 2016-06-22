@@ -3,7 +3,7 @@ package com.actio
 /**
   * Created by mauri on 27/05/2016.
   */
-sealed abstract class SchemaDefinition extends DataGeneric[SchemaDefinition]
+sealed abstract class SchemaDefinition extends LinkedTree[SchemaDefinition]
 {
   def apply(field: String): SchemaDefinition = SchemaUnknown
 

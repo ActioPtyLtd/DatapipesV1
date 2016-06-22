@@ -7,7 +7,7 @@
         "behavior": "simple",
         "dataSource": {
           "behavior": "regex",
-          "directory": "C:\\Users\\mauri\\bitbucket\\gandm-data\\Sunix\\Hanks-PHS\\2016-06-02",
+          "directory": "C:\\Users\\mauri\\bitbucket\\gandm-data\\Sunix\\Hewitt-PHHEW\\2016-06-15",
           "type": "file",
           "filenameTemplate": "VFRAME.CSV"
         }
@@ -17,7 +17,7 @@
         "batch": [
           "split2cols,col1",
           "row1header",
-          "const,HAPHS,Frame,2016-05-01 00:00:00.0,PF,-,-",
+          "const,PHHEW,Frame,2016-05-01 00:00:00.0,PF,-,-",
           "concat,const1,const4,framenum,-",
           "concat,manufact,model,-",
           "split2colsd,size,-",
@@ -33,9 +33,9 @@
         "behavior": "simple",
         "dataSource": {
           "behavior": "regex",
-          "directory": "C:\\Users\\mauri\\bitbucket\\gandm-data\\Sunix\\HAASC",
+          "directory": "C:\\Users\\mauri\\bitbucket\\gandm-data\\Sunix\\Hewitt-PHHEW\\2016-06-15",
           "type": "file",
-          "filenameTemplate": "VCLCODE.CSV.xls"
+          "filenameTemplate": "VCLCODE.CSV"
         }
       },
       "parse-contactlens-csv": {
@@ -44,7 +44,7 @@
           "addheader,col1",
           "split2cols,col1",
           "row1header",
-          "const,HAASC,Contact Lens,1900-01-01 00:00:00.0,0.0000,PC",
+          "const,PHHEW,Contact Lens,1900-01-01 00:00:00.0,0.0000,PC",
           "concat,const1,const5,clcode,-",
           "rename,cltype,clens_type,design,clens_design,feature,clens_feature,material,clens_material,watercont,water_content,dia0,clens_diameter,wearday,wear_day,packsize,pack_size,tint,clens_tint",
           "jsonObject,clens_type,clens_design,clens_feature,clens_material,water_content,clens_diameter,wear_day,pack_size,clens_tint",
@@ -56,7 +56,7 @@
         "behavior": "simple",
         "dataSource": {
           "behavior": "regex",
-          "directory": "C:\\Users\\mauri\\bitbucket\\gandm-data\\Sunix\\Hanks-PHS\\2016-06-02",
+          "directory": "C:\\Users\\mauri\\bitbucket\\gandm-data\\Sunix\\Hewitt-PHHEW\\2016-06-15",
           "type": "file",
           "filenameTemplate": "VLENCODE.CSV"
         }
@@ -66,7 +66,7 @@
         "batch": [
           "split2cols,col1",
           "row1header",
-          "const,HAPHS,Spectacle Lens,1900-01-01 00:00:00.0,PL,,,,-",
+          "const,PHHEW,Spectacle Lens,1900-01-01 00:00:00.0,PL,,,,-",
           "concat,const1,const4,lencode,-",
           "rename,lensgroup,lens_group,type,lens_type,material,lens_material,lenssize,lens_width,const5,lens_colour,const6,lens_shape,const7,lens_usage",
           "jsonObject,lens_group,lens_type,lens_colour,lens_width,lens_material,lens_shape,lens_usage",
@@ -78,7 +78,7 @@
         "behavior": "simple",
         "dataSource": {
           "behavior": "regex",
-          "directory": "C:\\Users\\mauri\\bitbucket\\gandm-data\\Sunix\\Hanks-PHS\\2016-06-02",
+          "directory": "C:\\Users\\mauri\\bitbucket\\gandm-data\\Sunix\\Hewitt-PHHEW\\2016-06-15",
           "type": "file",
           "filenameTemplate": "VITEM.CSV"
         }
@@ -88,7 +88,7 @@
         "batch": [
           "split2cols,col1",
           "row1header",
-          "const,HAPHS,Bulk Bill,1900-01-01 00:00:00.0,0.0000,",
+          "const,PHHEW,Bulk Bill,1900-01-01 00:00:00.0,0.0000,",
           "concat,const1,type,itemno,-",
           "jsonObject,group,type",
           "rename,type,somethingelse",
@@ -101,9 +101,9 @@
         "behavior": "simple",
         "dataSource": {
           "behavior": "regex",
-          "directory": "C:\\Users\\mauri\\bitbucket\\gandm-data\\Sunix\\HAASC",
+          "directory": "C:\\Users\\mauri\\bitbucket\\gandm-data\\Sunix\\Hewitt-PHHEW\\2016-06-15",
           "type": "file",
-          "filenameTemplate": "VPRODUCT.CSV.xls"
+          "filenameTemplate": "VPRODUCT.CSV"
         }
       },
       "parse-sundry-csv": {
@@ -112,7 +112,7 @@
           "addheader,col1",
           "split2cols,col1",
           "row1header",
-          "const,HAASC,Sundry,1900-01-01 00:00:00.0,0.0000,PS",
+          "const,PHHEW,Sundry,1900-01-01 00:00:00.0,0.0000,PS",
           "concat,const5,const1,prodcode,-",
           "rename,concat1,external_id,const2,type,desc,name,costprice,wholesaleprice,rrp,retailprice,const3,datecreated",
           "keep,datecreated,type,external_id,name,wholesaleprice,retailprice"]
@@ -127,7 +127,7 @@
           "type": "sql",
           "behavior": "",
           "jdbcDriver": "org.postgresql.Driver",
-          "connect": "jdbc:postgresql://localhost/test?user=postgres&password=postgres",
+          "connect": "jdbc:postgresql://ec2-54-206-28-87.ap-southeast-2.compute.amazonaws.com/postgres?user=postgres&password=afxQeY3d{Pwvh",
           "query": {
             "queryTemplate": "",
             "create": "insert into product (datecreated,\"type\",external_id,name,description,wholesaleprice,retailprice,extend) values (@datecreated::timestamp,@type,@external_id,@name,@description,@wholesaleprice::numeric,@retailprice::numeric,@extend::json)",
@@ -144,7 +144,7 @@
         "dataSource": {
           "type": "sql",
           "jdbcDriver": "org.postgresql.Driver",
-          "connect": "jdbc:postgresql://localhost/test?user=postgres&password=postgres",
+          "connect": "jdbc:postgresql://ec2-54-206-28-87.ap-southeast-2.compute.amazonaws.com/postgres?user=postgres&password=afxQeY3d{Pwvh",
           "query": {
             "queryTemplate": "select productid,external_id from product where external_id in ($1)"
           }
@@ -158,7 +158,7 @@
         "dataSource": {
           "type": "sql",
           "jdbcDriver": "org.postgresql.Driver",
-          "connect": "jdbc:postgresql://localhost/test?user=postgres&password=postgres",
+          "connect": "jdbc:postgresql://ec2-54-206-28-87.ap-southeast-2.compute.amazonaws.com/postgres?user=postgres&password=afxQeY3d{Pwvh",
           "query": {
             "queryTemplate": "select id,code from store"
           }
@@ -178,7 +178,7 @@
           "type": "sql",
           "behavior": "",
           "jdbcDriver": "org.postgresql.Driver",
-          "connect": "jdbc:postgresql://localhost/test?user=postgres&password=postgres",
+          "connect": "jdbc:postgresql://ec2-54-206-28-87.ap-southeast-2.compute.amazonaws.com/postgres?user=postgres&password=afxQeY3d{Pwvh",
           "query": {
             "queryTemplate" : "",
             "create": "insert into stock (productid,storeid,quantity,datecreated,wholesaleprice,retailprice) values (@productid::int,@storeid::int,@quantity::int,@datecreated::date,@wholesaleprice::numeric,@retailprice::numeric)"
@@ -208,7 +208,7 @@
     },
     "services": { },
     "startup": {
-      "exec": "load-bulkbill"
+      "exec": "load-frame"
     }
   }
 }

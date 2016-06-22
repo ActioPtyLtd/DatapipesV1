@@ -4,7 +4,7 @@ package com.actio
   * Created by mauri on 25/05/2016.
   */
 
-sealed abstract class Data extends DataGeneric[Data] {
+sealed abstract class Data extends LinkedTree[Data] {
 
   def apply(ord: Int): Data = NoData()
 
@@ -24,8 +24,8 @@ sealed abstract class Data extends DataGeneric[Data] {
     case _ => NoData() }
 
   def value(keys: String): Data = value(keys.split("\\.").map(s =>
-    if (s.startsWith("["))
-      Ord(s.replace("[","").replace("]","").toInt)
+    if (s.startsWith("#"))
+      Ord(s.replace("#","").toInt)
     else
       Label(s)
   ).toList)

@@ -179,7 +179,7 @@ class DataSourceREST extends DataSource with Logging {
       if(templateBody.isDefined)
         createRequestWithEntity(Template.expand(templateBody.get, Map("$g" -> d._1, "$d" -> d._2)), f, merge(template, d._1))
       else
-        createRequestWithEntity(d._1, f, merge(template, d._1))
+        createRequestWithEntity(d._2, f, merge(template, d._2))
     })
 
   private def merge(template: String, data: Data): String = template.replaceAll("@external_id",data("external_id").stringOption.getOrElse("")) // complete hack, do a proper data merge soon

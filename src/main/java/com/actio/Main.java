@@ -110,7 +110,7 @@ class Main {
         URL[] urls = ((URLClassLoader)cl).getURLs();
 
         for(URL url: urls){
-            logger.info(url.getFile());
+            logger.debug(url.getFile());
         }
 
     }

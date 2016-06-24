@@ -95,7 +95,7 @@ public class DataSourceSQL extends DataSource {
 
     @Override
     public void execute(DataSet data, String statement) throws Exception {
-        DataSetTableScala nds = DataSetTransforms.prepare4statement(DataSetTableScala$.MODULE$.apply(data.schema(),data.next()), statement);   // assuming one batch again
+        DataSetTableScala nds = DataSetTransforms.prepare4statement(DataSetTableScala$.MODULE$.apply(data.schema(),data.headOption().get()), statement);   // assuming one batch again
         statement = statement.replaceAll("@(?<name>[-_a-zA-Z0-9]+)","?");
 
         logger.info("Connecting to database...");

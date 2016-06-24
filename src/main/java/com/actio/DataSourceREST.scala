@@ -182,9 +182,9 @@ class DataSourceREST extends DataSource with Logging {
         createRequestWithEntity(d._2, f, merge(template, d._2))
     })
 
-  private def merge(template: String, data: Data): String = template.replaceAll("@external_id",data("external_id").stringOption.getOrElse("")) // complete hack, do a proper data merge soon
+  private def merge(template: String, data: DataSet): String = template.replaceAll("@external_id",data("external_id").stringOption.getOrElse("")) // complete hack, do a proper data merge soon
 
-  private def createRequestWithEntity(data: Data, f: => HttpEntityEnclosingRequestBase, uri: String): HttpEntityEnclosingRequestBase =
+  private def createRequestWithEntity(data: DataSet, f: => HttpEntityEnclosingRequestBase, uri: String): HttpEntityEnclosingRequestBase =
     createRequestWithEntity(Data2Json.toJsonString(data), f, uri)
 
   private def createRequestWithEntity(str: String, f: => HttpEntityEnclosingRequestBase, uri: String): HttpEntityEnclosingRequestBase = {
@@ -199,11 +199,11 @@ class DataSourceREST extends DataSource with Logging {
     request
   }
 
-  def split(dataSet: DataSet): Iterator[(Data,Data)] = {
+  def split(dataSet: DataSet): Iterator[(DataSet,DataSet)] = {
     if(createForEach.isDefined)
-      dataSet.flatMap(d => d.find(createForEach.get).map((d,_)))
+      dataSet.elems.flatMap(d => d.find(createForEach.get).map((d,_)))
     else
-      dataSet.map(d => (d,d))
+      dataSet.elems.map(d => (d,d))
   }
 
   @throws(classOf[Exception])

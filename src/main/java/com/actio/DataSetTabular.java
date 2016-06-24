@@ -4,6 +4,7 @@ package com.actio;
  * Created by jim on 7/8/2015.
  */
 
+import com.actio.dpsystem.DPSystemConfigurable;
 import com.typesafe.config.Config;
 import org.apache.commons.lang.NotImplementedException;
 import org.slf4j.Logger;
@@ -26,7 +27,6 @@ public class DataSetTabular extends DataSet {
     {
         set(_rs);
     }
-
 
     // Create an empty valid set
     public DataSetTabular()
@@ -162,7 +162,7 @@ public class DataSetTabular extends DataSet {
     }
 
     public List<List<String>> getAsListOfColumnsBatch(int batchLen) throws Exception{
-        throw new Exception(FUNCTION_UNIMPLEMENTED_MSG);
+        throw new Exception(DPSystemConfigurable.FUNCTION_UNIMPLEMENTED_MSG);
     }
 
 
@@ -233,13 +233,12 @@ public class DataSetTabular extends DataSet {
 
     }
 
-    @Override
     public void setConfig(Config _conf, Config _master) throws Exception {
         // call the parent to initialise configs
-        super.setConfig(_conf, _master);
+        //super.setConfig(_conf, _master);
 
-        if (config.hasPath("inputDelimiter"))
-            inputDelimiter = config.getString("inputDelimiter");
+        if (_conf.hasPath("inputDelimiter"))
+            inputDelimiter = _conf.getString("inputDelimiter");
 
     }
 
@@ -281,7 +280,9 @@ public class DataSetTabular extends DataSet {
 
     }
 
-    public Data next() {
-        throw new NotImplementedException();
+    @Override
+    public String label() {
+        return "";
     }
+
 }

@@ -11,7 +11,7 @@ class TaskDataSourceUpdate extends Task {
   override def execute() = {
     super.setConfig(sysconf.getTaskConfig(this.node.getName).toConfig, sysconf.getMasterConfig)
 
-    for (datasetdata <- dataSet) {
+    for (datasetdata <- dataSet.elems) {
 
       val tabledataset = DataSetTableScala(dataSet.schema, datasetdata)
 
@@ -21,7 +21,7 @@ class TaskDataSourceUpdate extends Task {
       val dataSource = DPSystemFactory.newDataSource(dataSourceConfig.withValue("query.read", ConfigValueFactory.fromAnyRef(query)), masterConfig)
       dataSource.read(tabledataset) // ds doesn't matter here, our query doesn't need any parameters
 
-      val fulldata = dataSource.dataSet.toList
+      val fulldata = dataSource.dataSet.elems.toList
 
       if(fulldata.isEmpty)
         dataSource.create(dataSet)

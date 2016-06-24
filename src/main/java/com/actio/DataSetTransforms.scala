@@ -11,29 +11,29 @@ import scala.util.Try
 object DataSetTransforms {
 
   //TODO: think about error handling. Maybe change next: Either[Error, Data]
-  def transformEachData(schemaFunc: (SchemaDefinition => SchemaDefinition), dataFunc: (Data => Data) ): (DataSet => DataSet) = (ds: DataSet) =>
+  def transformEachData(schemaFunc: (SchemaDefinition => SchemaDefinition), dataFunc: (DataSet => DataSet) ): (DataSet => DataSet) = (ds: DataSet) =>
     new DataSet {
-      override def hasNext = ds.hasNext
-
-      override def next() = dataFunc(ds.next())
+      override def elems = ds.elems map dataFunc
 
       override lazy val schema = schemaFunc(ds.schema)
+
+      override def label: String = ""
     }
 
   def transformEachDataRecord(schemaFunc: (SchemaDefinition => SchemaDefinition), dataRecordFunc: (DataRecord) => (DataRecord)): (DataSet => DataSet) =
-    transformEachData(schemaFunc, (d: Data) => DataArray(d.elems.map(r => dataRecordFunc(r.asInstanceOf[DataRecord])).toList))
+    transformEachData(schemaFunc, (d: DataSet) => DataArray(d.elems.map(r => dataRecordFunc(r.asInstanceOf[DataRecord])).toList))
 
   def transformDataSets(dsFuncs: (DataSet => DataSet)*): (DataSet => DataSet) = (ds: DataSet) => dsFuncs.foldLeft[DataSet](ds)((s,f) => f(s))
 
-  def transformValue(name: String, key: String, dataFunc: Data => Data) = (ds: DataSet) => transformEachDataRecord(s => s, r =>
+  def transformValue(name: String, key: String, dataFunc: DataSet => DataSet) = (ds: DataSet) => transformEachDataRecord(s => s, r =>
     DataRecord(dataFunc(r(key)) :: r.fields)
   )
 
   def productSchemaFunc(labels: List[String]) = (schema: SchemaDefinition) => SchemaArray(SchemaRecord(SchemaArray("attributes",
     SchemaRecord(List(SchemaString("name", 0), SchemaString("type", 0), SchemaString("value", 0)))) :: schema.asInstanceOf[SchemaArray].content.asInstanceOf[SchemaRecord].fields.filterNot(f => labels.contains(f.label))))
 
-  def productDataFunc(labels: List[String]) = (data: Data) => DataArray(data.elems.map(r => DataRecord(
-    DataArray("attributes", r.elems.filter(f => labels.contains(f.label) && f.stringOption.getOrElse("").nonEmpty).map(v => DataRecord(List(DataString("name", v.label),DataString("type", "string"),v.stringOption.map(o => DataString("value", o)).getOrElse(NoData("value"))))).toList)
+  def productDataFunc(labels: List[String]) = (data: DataSet) => DataArray(data.elems.map(r => DataRecord(
+    DataArray("attributes", r.elems.filter(f => labels.contains(f.label) && f.stringOption.getOrElse("").nonEmpty).map(v => DataRecord(List(DataString("name", v.label),DataString("type", "string"),v.stringOption.map(o => DataString("value", o)).getOrElse(Nothin("value"))))).toList)
     :: r.elems.filter(f => !labels.contains(f.label)).toList)).toList)
 
   def productProperty(ds: DataSet, labels: List[String]): DataSet = transformEachData(productSchemaFunc(labels),productDataFunc(labels))(ds)
@@ -42,10 +42,10 @@ object DataSetTransforms {
 
   //def updateLabel(ds: DataSet, label: String): DataSet =
 
-  def updateLabelDataFunc(l: String) = (d: Data) => d match {
+  def updateLabelDataFunc(l: String) = (d: DataSet) => d match {
     case DataArray(_,a) => DataArray(l, a)
     case DataRecord(_,r) => DataRecord(l,r)
-    case _ => NoData(l)                   // fix this to include all types
+    case _ => Nothin(l)                   // fix this to include all types
   }
 
   def updateLabelSchemaFunc(l: String) = (d: SchemaDefinition) => d match {
@@ -54,7 +54,7 @@ object DataSetTransforms {
     case _ => SchemaUnknown(l)                   // fix this to include all types
   }
 
-  def addDataFunc(data: Data, addData: Data) = data match {
+  def addDataFunc(data: DataSet, addData: DataSet) = data match {
     case DataRecord(l,fs) => DataRecord(l, addData :: fs)
     case v => DataRecord(List(v, addData))
   }
@@ -72,14 +72,14 @@ object DataSetTransforms {
     val tFunc = mergeT(temp)
     transformEachData(schema => schema, data => addDataFunc(data,Data2Json.fromJson2Data(tFunc(data))))(ds)
   }
-  def mergeT(template: String): Data => String = d => {
+  def mergeT(template: String): DataSet => String = d => {
     val ra = "@(.*?)@".r.findAllMatchIn(template).map(_.group(1)).toList
     val res = ra.foldLeft[String](template)((t,e) => t.replace("@"+e+"@",d.value(e).stringOption.getOrElse("")))
     res
   }
 
   //TODO: likely will remove Batch, it's confusing
-  type Batch = (SchemaDefinition, Data)
+  type Batch = (SchemaDefinition, DataSet)
 
   def numeric(batch: Batch, field: String, precision: Int, scale: Int): DataSet = batch match {
     case (s, DataRecord(key,fs)) =>
@@ -92,7 +92,7 @@ object DataSetTransforms {
       else
         DataRecord(key, fs))
     case (s, DataArray(key, a)) =>
-      new DataSetFixedData(s, DataArray(key, a.map(m => numeric((s, m), field, precision, scale).next)))
+      new DataSetFixedData(s, DataArray(key, a.map(m => numeric((s, m), field, precision, scale).headOption.get)))
     case (s, d) => new DataSetFixedData(s, d)
   }
 
@@ -107,9 +107,11 @@ object DataSetTransforms {
       else
         DataRecord(key, fs))
     case (s, DataArray(key, a)) =>
-      new DataSetFixedData(s, DataArray(key, a.map(m => bool((s, m), field).next)))
+      new DataSetFixedData(s, DataArray(key, a.map(m => bool((s, m), field).headOption.get)))
     case (s, d) => new DataSetFixedData(s, d)
   }
+
+  def delim(str: String, d: DataSet) = DataString("", d.elems.map(_.stringOption.getOrElse("")).mkString(str))
       
   // tabular functions, to be refactored
 

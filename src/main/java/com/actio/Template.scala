@@ -6,9 +6,9 @@ package com.actio
 object Template  {
   //val template = "{test: [%{repeat(o,data){productid: @o.product_id@}%}]}"
 
-  def merge(template: String, d: Data) = expand(template, Map("$g" -> d))
+  def merge(template: String, d: DataSet) = expand(template, Map("$g" -> d))
 
-  def expand(template: String, map: Map[String, Data]): String = {
+  def expand(template: String, map: Map[String, DataSet]): String = {
     val s = split(template)
 
     if(template.isEmpty)
@@ -23,13 +23,13 @@ object Template  {
     }
   }
 
-  def replaceVariables(template: String, map: Map[String, Data]): String = {
+  def replaceVariables(template: String, map: Map[String, DataSet]): String = {
     val ra = "@(.*?)@".r.findAllMatchIn(template).map(_.group(1)).toList
     val res = ra.foldLeft[String](template)((t,e) => t.replace("@"+e+"@",evalExpression(e, map).stringOption.getOrElse("")))
     res
   }
 
-  def evalExpression(expr: String, map: Map[String, Data]) =
+  def evalExpression(expr: String, map: Map[String, DataSet]) =
     if(expr.indexOf(".") >0)
       map(expr.substring(0,expr.indexOf("."))).value(expr.substring(expr.indexOf(".")+1))
     else
@@ -81,24 +81,24 @@ case class Mix(left: Literal, expression: Expression, right: Template) extends T
 
 object TemplateEngine {
 
-  def eval(expr: Expression, scope: Map[String, Data]): Data = expr match {
+  import scala.collection.JavaConversions._
+
+  def eval(expr: Expression, scope: Map[String, DataSet]): DataSet = expr match {
     case Constant(i: String) => DataString("",i)
     case Constant(i: Int) => DataNumeric("",i)
     case Variable(name) => Template.evalExpression(name, scope) // rename this
-    case Function(name, params) => delim("/",params.map(p => eval(p, scope)).tail.head) // reflection invoke
+    case Function(name, params) => UtilityFunctions.execute(name,params.map(p => eval(p, scope).asInstanceOf[Any])) // reflection invoke
     case Literal(text) => DataString("", text)
     case Mix(left, middle, right) => DataString("",left.text + eval(middle, scope).stringOption.get + eval(right, scope).stringOption.get)
     case ForEach(list,lambda) => DataArray(eval(list, scope).elems.map(e => callLambdaFunction(lambda, e, scope) ).toList)
   }
 
-  def callMethod(name: String): Data = NoData()
-  def callLambdaFunction(lambda: LambdaFuntion, data: Data, scope: Map[String, Data]) = eval(lambda.expr, scope + (lambda.varname -> data))
+  def callLambdaFunction(lambda: LambdaFuntion, data: DataSet, scope: Map[String, DataSet]) = eval(lambda.expr, scope + (lambda.varname -> data))
 
-  def delim(str: String, d: Data) = DataString("", d.elems.map(_.stringOption.getOrElse("")).mkString(str))
 }
 
 object MyTest extends App {
-  val expr = Mix(Literal(""),Function("delim",List(Constant(""),ForEach(Variable("g"),LambdaFuntion("d", Mix(Literal(""),Variable("d.product_id"),Literal("")))))),Literal(""))
+  val expr = Mix(Literal(""),Function("delim",List(Constant(","),ForEach(Variable("g"),LambdaFuntion("d", Mix(Literal(""),Variable("d.product_id"),Literal("")))))),Literal(""))
 
   val data = DataArray("order_items",List(DataRecord("",List(DataString("product_id","0"))), DataRecord("",List(DataString("product_id","1")))))
 

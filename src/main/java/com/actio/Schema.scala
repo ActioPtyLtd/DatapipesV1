@@ -22,6 +22,8 @@ sealed abstract class SchemaDefinition extends LinkedTree[SchemaDefinition]
   def unknown = SchemaUnknown
 
   override def schema = this
+
+  override def elems: Iterator[SchemaDefinition] = Iterator.empty
 }
 
 case class SchemaArray(label: String, content: SchemaDefinition) extends SchemaDefinition

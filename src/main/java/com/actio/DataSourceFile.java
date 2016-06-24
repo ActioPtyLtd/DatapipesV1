@@ -76,7 +76,7 @@ public class DataSourceFile extends DataSource {
 
         // save the results
 
-        dataSet.setConfig(config, masterConfig);
+        //dataSet.setConfig(config, masterConfig);
 
         logger.info("done");
     }

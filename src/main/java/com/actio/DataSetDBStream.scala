@@ -24,19 +24,23 @@ class DataSetDBStream(private val rs: ResultSet, val batchSize: Int) extends Dat
       SchemaString(metaData.getColumnName(o), metaData.getColumnDisplaySize(o))
   }).toList))
 
-  def next = {
-    var i = 0
-    var recs: List[DataRecord] = Nil
+  override lazy val elems = new Iterator[DataSet] {
+    override def hasNext: Boolean = rs.next()
 
-    do {
-      recs = DataRecord(header.map(c => (c,Option(rs.getObject(c)))).map(v => if (v._2.isEmpty) NoData(v._1) else DataString(v._1, v._2.get.toString))) :: recs
-      i += 1
-    } while(rs.next() && i < batchSize)
+    override def next() = {
+      var i = 0
+      var recs: List[DataRecord] = Nil
 
-    DataArray(recs)
+      do {
+        recs = DataRecord(header.map(c => (c,Option(rs.getObject(c)))).map(v => if (v._2.isEmpty) Nothin(v._1) else DataString(v._1, v._2.get.toString))) :: recs
+        i += 1
+      } while(rs.next() && i < batchSize)
+
+      DataArray(recs)
+    }
   }
 
-  def hasNext = rs.next()
-
   override def schema: SchemaDefinition = myschema
+
+  override def label: String = ""
 }

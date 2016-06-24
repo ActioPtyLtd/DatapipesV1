@@ -17,7 +17,7 @@ class TaskLookup extends Task {
     val dataSourceConfig = config.getConfig(DPSystemConfigurable.DATASOURCE_LABEL)
     val query = dataSourceConfig.getString("query.queryTemplate")
 
-    val tabledataset = DataSetTableScala(dataSet.schema, dataSet.next) //assuming one batch
+    val tabledataset = DataSetTableScala(dataSet.schema, dataSet.elems.next) //assuming one batch
 
     val inClause = tabledataset.getColumnValues(lookupColumn1).distinct.map("\'" + _.replace("'","''") + "\'") mkString ","
 
@@ -30,7 +30,7 @@ class TaskLookup extends Task {
     val condition = (row1: List[String], row2: List[String]) =>
       if(row2 == Nil) false else row1(tabledataset.getOrdinalOfColumn(lookupColumn1)) == row2(ord)
 
-    val dataList = dataSource.dataSet.toList
+    val dataList = dataSource.dataSet.elems.toList
 
     for(data <- dataList) {
       //TODO: union the resultsets instead of overwriting them here

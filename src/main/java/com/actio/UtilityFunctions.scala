@@ -47,11 +47,13 @@ object UtilityFunctions extends Logging {
           else if(h.getType == classOf[DataSetTableScala])
             getParamValues(t, pv.tail, DataSetTableScala(pv.head.asInstanceOf[DataSet]) :: result)
           else if(h.getType == classOf[Batch])
-            getParamValues(t, pv.tail, (pv.head.asInstanceOf[DataSet].schema, pv.head.asInstanceOf[DataSet].next) :: result)
+            getParamValues(t, pv.tail, (pv.head.asInstanceOf[DataSet].schema, pv.head.asInstanceOf[DataSet].elems.next) :: result)
           else if (h.getType == classOf[List[String]]) {
             val l = pv.splitAt(pv.length - methodParams.length + 1)
             getParamValues(t, l._2, l._1 :: result)
           }
+          else if (h.getType == classOf[String] && pv.head.isInstanceOf[DataSet])
+            getParamValues(t, pv.tail, pv.head.asInstanceOf[DataSet].stringOption.orNull :: result)
           else if (h.getType == classOf[String] || h.getType == classOf[DataSet])
             getParamValues(t, pv.tail, pv.head :: result)
           else

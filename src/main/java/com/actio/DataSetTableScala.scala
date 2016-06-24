@@ -9,14 +9,12 @@ import scala.util.Try
 import scala.collection.JavaConverters._
 
 
-class DataSetTableScala(val myschema: SchemaDefinition, val data: Data) extends DataSet {
-  def this() = this(SchemaUnknown, NoData())
+case class DataSetTableScala(myschema: SchemaDefinition, data: DataSet) extends DataSet {
+  def this() = this(SchemaUnknown, Nothin())
 
   lazy val rows: List[List[String]] = data.elems.map(_.elems.map(_.stringOption.orNull).toList).toList
 
   lazy val header: List[String] = schema.asInstanceOf[SchemaArray].content.asInstanceOf[SchemaRecord].fields.map(_.label).toList
-
-  private var boolNext = true
 
   import scala.collection.JavaConverters._
 
@@ -36,12 +34,7 @@ class DataSetTableScala(val myschema: SchemaDefinition, val data: Data) extends 
 
   override def toString = (header mkString ", ") + "\n" + ("-" * (header.map(_.length + 2).sum - 2)) + "\n" + (rows map (_ mkString ", ") mkString "\n") + "\n\n" + rows.length + " rows.\n"
 
-  def hasNext = boolNext
-
-  def next: Data = {
-    boolNext = false
-    data
-  }
+  override def elems = List(data).toIterator
 
   override def schema = myschema
 
@@ -63,11 +56,11 @@ class DataSetTableScala(val myschema: SchemaDefinition, val data: Data) extends 
   def getNextAvailableColumnName(columnName: String): String = getNextAvailableColumnName(columnName, 1).head
 
   def getValue(row: List[String], columnName: String) = row(getOrdinalOfColumn(columnName))
+
+  override def label: String = ""
 }
 
 object DataSetTableScala {
-
-  def apply(schema: SchemaDefinition, data: Data) = new DataSetTableScala(schema, data)
 
   def apply(text: String): DataSetTableScala = apply(List("col1"), List(List(text)))
 
@@ -75,17 +68,9 @@ object DataSetTableScala {
 
   def apply(header: List[String], rows: List[List[String]]): DataSetTableScala = new DataSetTableScala(
     SchemaArray(SchemaRecord(header.map(SchemaString(_,0)).toList)),
-    DataArray(rows.map(r => DataRecord((header zip r).map(p => if (p._2 == null) NoData(p._1) else DataString(p._1, p._2)).toList)).toList))
+    DataArray(rows.map(r => DataRecord((header zip r).map(p => if (p._2 == null) Nothin(p._1) else DataString(p._1, p._2)).toList)).toList))
 
-  def apply(ds: DataSet): DataSetTableScala = new DataSetTableScala(ds.schema, ds.next)
-
-  // explicit version with error handling
-  def getTable(schema: SchemaDefinition, data: Data): Either[SchemaMatchError, DataSetTableScala] =
-    schema match {
-      case SchemaArray(_,SchemaRecord(_,fields)) => Try(DataSetTableScala(fields.map(_.label).toList, data.elems.map(_.elems.map(_.stringOption.orNull).toList).toList)).map(Right(_)).getOrElse(Left(DataDoesntMatchSchema))
-      case SchemaArray(_,_) => Left(SchemaMatchRecordExpected)
-      case _ => Left(SchemaMatchArrayExpected)
-    }
+  def apply(ds: DataSet): DataSetTableScala = new DataSetTableScala(ds.schema, ds.headOption.get)
 
   def inPredicate[T](list: List[T]) = (i: T) => list.contains(i)
 }

@@ -46,7 +46,7 @@ class Main {
                 logger.info( configFile );
             }
             if (line.hasOption('p')) {
-                configFile = line.getOptionValue('p');
+                pipelineName = line.getOptionValue('p');
                 logger.info( pipelineName );
             }
             if (line.hasOption('s')){

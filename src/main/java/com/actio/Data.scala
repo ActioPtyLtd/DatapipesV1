@@ -45,7 +45,7 @@ case class DataArray(label: String, arrayElems: List[DataSet]) extends DataSet {
 
   override def elems = arrayElems.toIterator
 
-  override def schema = SchemaArray(label, arrayElems.head.schema)      // could update this to check for maximum amount of fields rather than just first
+  override def schema = SchemaArray(label, arrayElems.headOption.map(_.schema).getOrElse(SchemaUnknown))      // could update this to check for maximum amount of fields rather than just first
 }
 
 object DataArray {

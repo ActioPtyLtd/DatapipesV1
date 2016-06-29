@@ -8,13 +8,13 @@
         "dataSource": {
           "type": "rest",
           "behavior": "simple",
-          "path": "https://dev-api-gnm.actio.com.au:8443/api/job",
+          "path": "https://dev-api-gnm.actio.com.au:8443/api/job?include=product",
           "credential": {
             "user": "admin",
             "password": "password"
           },
           "query": {
-            "read": "https://dev-api-gnm.actio.com.au:8443/api/job"
+            "read": "https://dev-api-gnm.actio.com.au:8443/api/job?include=product"
           }
         }
       },
@@ -32,7 +32,7 @@
           "query": {
             "create": {
               "header": "https://api.sunshad.es/v1/orders",
-              "body": "{ \"batches\": [{ \"batch\": \"@$d.id@\", \"jobs\": [{ \"account\": \"GANDM1\", \"address1\": \"addr1\", \"address2\": \"addr2\", \"carrier\": \"car1\", \"jobid\": \"@$d.id@\", \"lines\": [{ \"quantity\": @$d.attributes.quantity@, \"stockid\": \"CLASSIC10004\"}], \"name\": \"Maurice\", \"postcode\": \"2120\", \"state\": \"NSW\", \"suburb\": \"Thornleigh\"}]}]}",
+              "body": "{ \"batches\": [{ \"batch\": \"@{d.id}\", \"jobs\": [{ \"account\": \"GANDM1\", \"address1\": \"addr1\", \"address2\": \"addr2\", \"carrier\": \"car1\", \"jobid\": \"@{d.id}\", \"lines\": [{ \"quantity\": @{d.attributes.quantity}, \"stockid\": \"@{(firstValue,(filterValue,g.included,'type','product'),'id',d.relationships.product.data.id).attributes.externalId}\"}], \"name\": \"Maurice\", \"postcode\": \"2120\", \"state\": \"NSW\", \"suburb\": \"Thornleigh\"}]}]}",
               "foreach": "data.*"
             }
           }

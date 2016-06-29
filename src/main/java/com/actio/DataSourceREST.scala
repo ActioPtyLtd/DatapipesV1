@@ -176,8 +176,13 @@ class DataSourceREST extends DataSource with Logging {
 
   private def getRequests[T <: HttpEntityEnclosingRequestBase](ds: DataSet, f: => HttpEntityEnclosingRequestBase, template: String, templateBody: Option[String]) =
     split(ds).map(d => {
-      if(templateBody.isDefined)
-        createRequestWithEntity(Template.expand(templateBody.get, Map("$g" -> d._1, "$d" -> d._2)), f, merge(template, d._1))
+      if(templateBody.isDefined) {
+        TemplateParser(templateBody.get) match {
+          case Right(s) => createRequestWithEntity(TemplateEngine.eval(s, Map("g" -> d._1, "d" -> d._2)), f, merge(template, d._1))
+          case Left(s) => createRequestWithEntity(d._2, f, merge(template, d._2)) //TODO: handle this properly, template ignored now
+        }
+
+      }
       else
         createRequestWithEntity(d._2, f, merge(template, d._2))
     })
@@ -185,7 +190,8 @@ class DataSourceREST extends DataSource with Logging {
   private def merge(template: String, data: DataSet): String = template.replaceAll("@external_id",data("external_id").stringOption.getOrElse("")) // complete hack, do a proper data merge soon
 
   private def createRequestWithEntity(data: DataSet, f: => HttpEntityEnclosingRequestBase, uri: String): HttpEntityEnclosingRequestBase =
-    createRequestWithEntity(Data2Json.toJsonString(data), f, uri)
+    createRequestWithEntity(data match { case DataString(_,s) => s
+    case _ => Data2Json.toJsonString(data)}, f, uri)
 
   private def createRequestWithEntity(str: String, f: => HttpEntityEnclosingRequestBase, uri: String): HttpEntityEnclosingRequestBase = {
 

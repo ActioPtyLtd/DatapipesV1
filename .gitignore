@@ -20,6 +20,12 @@ target/
 .idea/dynamic.xml
 .idea/uiDesigner.xml
 
+# Logback
+.idea/modules/log*.txt
+
+# IntelliJ library config
+.idea/libraries/*.xml
+
 # Gradle:
 # .idea/gradle.xml
 # .idea/libraries

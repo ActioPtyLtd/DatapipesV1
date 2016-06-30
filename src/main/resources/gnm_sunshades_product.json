@@ -22,9 +22,9 @@
         "type": "transform",
         "batch": [
           "pick,items",
-          "const,frame",
-          "rename,const1,type,stockid,external_id",
-          "keep,external_id,type,name,discontinued,apn,description,retail_price,retail_price_tax,wholesale_price,wholesale_price_tax,frame_brand,frame_bridge_size,frame_colour,frame_depth,frame_eye_size,frame_gender,frame_material,frame_model,frame_temple_length,frame_type",
+          "const,frame,SUNSHADES",
+          "rename,const1,type,stockid,alias_id,const2,alias_prefix",
+          "keep,alias_prefix,alias_id,type,name,discontinued,apn,description,retail_price,retail_price_tax,wholesale_price,wholesale_price_tax,frame_brand,frame_bridge_size,frame_colour,frame_depth,frame_eye_size,frame_gender,frame_material,frame_model,frame_temple_length,frame_type",
           "numeric,retail_price,0,2",
           "numeric,wholesale_price,0,2",
           "numeric,retail_price_tax,0,2",
@@ -39,18 +39,18 @@
         "dataSource": {
           "type": "rest",
           "behavior": "simple",
-          "path": "https://dev-api-gnm.actio.com.au:8443/service/product",
+          "path": "https://dev-api-gnm.actio.com.au:8443/service/product/",
           "credential": {
             "user": "admin",
             "password": "password"
           },
           "query": {
             "create": {
-              "header": "https://dev-api-gnm.actio.com.au:8443/service/product/@external_id",
+              "header": "https://dev-api-gnm.actio.com.au:8443/service/product/SUNSHADES/@alias_id",
               "foreach": "*"
             },
             "update": {
-              "header": "https://dev-api-gnm.actio.com.au:8443/service/product/@external_id",
+              "header": "https://dev-api-gnm.actio.com.au:8443/service/product/SUNSHADES/@alias_id",
               "foreach": "*"
             }
           }
@@ -76,19 +76,21 @@
         "dataSource": {
           "type": "rest",
           "behavior": "simple",
-          "path": "https://dev-api-gnm.actio.com.au:8443/service/stock",
+          "path": "-",
           "credential": {
             "user": "admin",
             "password": "password"
           },
           "query": {
             "create": {
-              "header": "https://dev-api-gnm.actio.com.au:8443/service/product/@external_id/stock",
-              "foreach": "*"
+              "header": "https://dev-api-gnm.actio.com.au:8443/service/product/SUNSHADES/@{d.stockid}/stock",
+              "body": "{\"supplier_id\": \"SUNSHADES\",\"retail_price\": @{d.retail_price},\"retail_price_tax\": @{d.retail_price_tax},\"alias_prefix\":\"SUNSHADES\",\"alias_id\": \"@{d.stockid}\",\"quantity\": @{d.supplier_total},\"wholesale_price\": @{d.wholesale_price},\"wholesale_price_tax\": @{d.wholesale_price_tax}}",
+              "foreach": "items.*"
             },
             "update": {
-              "header": "https://dev-api-gnm.actio.com.au:8443/service/product/@external_id/stock",
-              "foreach": "*"
+              "header": "https://dev-api-gnm.actio.com.au:8443/service/product/SUNSHADES/@{d.stockid}/stock",
+              "body": "{\"supplier_id\": \"SUNSHADES\",\"retail_price\": @{d.retail_price},\"retail_price_tax\": @{d.retail_price_tax},\"alias_prefix\":\"SUNSHADES\",\"alias_id\": \"@{d.stockid}\",\"quantity\": @{d.supplier_total},\"wholesale_price\": @{d.wholesale_price},\"wholesale_price_tax\": @{d.wholesale_price_tax}}",
+              "foreach": "items.*"
             }
           }
         }
@@ -99,7 +101,7 @@
         "pipe": "read-product-api | parse-product-api | update-product-api"
       },
       "load-stock" : {
-        "pipe": "read-product-api | parse-stock-api | update-stock-api"
+        "pipe": "read-product-api | update-stock-api"
       }
     },
     "services": {

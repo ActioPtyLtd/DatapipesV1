@@ -7,7 +7,7 @@
         "behavior": "simple",
         "dataSource": {
           "behavior": "regex",
-          "directory": "C:\\Users\\mauri\\bitbucket\\gandm-data\\Sunix\\Hanks-PMQ\\2016-06-02",
+          "directory": "C:\\Users\\mauri\\bitbucket\\gandm-data\\Sunix\\Hewitt-PHHEW\\2016-06-15",
           "type": "file",
           "filenameTemplate": "VACCOUNT.CSV"
         }
@@ -17,7 +17,7 @@
         "batch": [
           "split2cols,col1",
           "row1header",
-          "const,HAPMQ,0",
+          "const,PHHEW,0",
           "trim,refnum",
           "concat,const1,accnum,-",
           "concat,const1,refnum1,-",

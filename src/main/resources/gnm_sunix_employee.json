@@ -33,7 +33,7 @@
           "type": "sql",
           "behavior": "",
           "jdbcDriver": "org.postgresql.Driver",
-          "connect": "jdbc:postgresql://ec2-54-206-28-87.ap-southeast-2.compute.amazonaws.com/postgres?user=postgres&password=afxQeY3d{Pwvh",
+          "connect": "jdbc:postgresql://localhost/test?user=postgres&password=postgres",
           "query": {
             "queryTemplate": "",
             "create": "insert into employee (createddate,externalref,employeetype,employmentstartdate,employmentenddate,firstname,lastname,middlename,title,gender,birthdate,preferredname,preferredcontactmethod,email,phonecountryid,phonenumber,phonerawnumber,phonemobile,phonesmsenabled,phonefax,phonelandline) values (current_date,@externalref,@employeetype,current_date,current_date,@firstname,@lastname,@middlename,@title,@gender,@birthdate::date,@preferredname,@preferredcontactmethod,@email,@phonecountryid::int,@phonenumber,@phonerawnumber,@phonemobile::bool,@phonesmsenabled::bool,@phonefax::bool,@phonelandline::bool)",

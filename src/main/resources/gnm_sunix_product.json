@@ -41,7 +41,6 @@
       "parse-contactlens-csv": {
         "type": "transform",
         "batch": [
-          "addheader,col1",
           "split2cols,col1",
           "row1header",
           "const,PHHEW,Contact Lens,1900-01-01 00:00:00.0,0.0000,PC",
@@ -109,13 +108,14 @@
       "parse-sundry-csv": {
         "type": "transform",
         "batch": [
-          "addheader,col1",
           "split2cols,col1",
           "row1header",
           "const,PHHEW,Sundry,1900-01-01 00:00:00.0,0.0000,PS",
           "concat,const5,const1,prodcode,-",
-          "rename,concat1,external_id,const2,type,desc,name,costprice,wholesaleprice,rrp,retailprice,const3,datecreated",
-          "keep,datecreated,type,external_id,name,wholesaleprice,retailprice"]
+          "copy,prodcode,name",
+          "jsonObject,group",
+          "rename,concat1,external_id,const2,type,desc,description,costprice,wholesaleprice,rrp,retailprice,const3,datecreated,json1,extend",
+          "keep,datecreated,type,external_id,name,wholesaleprice,retailprice,extend,description"]
       },
       "update-product-db": {
         "type": "datasourceupdate",
@@ -127,7 +127,7 @@
           "type": "sql",
           "behavior": "",
           "jdbcDriver": "org.postgresql.Driver",
-          "connect": "jdbc:postgresql://ec2-54-206-28-87.ap-southeast-2.compute.amazonaws.com/postgres?user=postgres&password=afxQeY3d{Pwvh",
+          "connect": "jdbc:postgresql://localhost/test?user=postgres&password=postgres",
           "query": {
             "queryTemplate": "",
             "create": "insert into product (datecreated,\"type\",external_id,name,description,wholesaleprice,retailprice,extend) values (@datecreated::timestamp,@type,@external_id,@name,@description,@wholesaleprice::numeric,@retailprice::numeric,@extend::json)",
@@ -158,7 +158,7 @@
         "dataSource": {
           "type": "sql",
           "jdbcDriver": "org.postgresql.Driver",
-          "connect": "jdbc:postgresql://ec2-54-206-28-87.ap-southeast-2.compute.amazonaws.com/postgres?user=postgres&password=afxQeY3d{Pwvh",
+          "connect": "jdbc:postgresql://localhost/test?user=postgres&password=postgres",
           "query": {
             "queryTemplate": "select id,code from store"
           }
@@ -178,7 +178,7 @@
           "type": "sql",
           "behavior": "",
           "jdbcDriver": "org.postgresql.Driver",
-          "connect": "jdbc:postgresql://ec2-54-206-28-87.ap-southeast-2.compute.amazonaws.com/postgres?user=postgres&password=afxQeY3d{Pwvh",
+          "connect": "jdbc:postgresql://localhost/test?user=postgres&password=postgres",
           "query": {
             "queryTemplate" : "",
             "create": "insert into stock (productid,storeid,quantity,datecreated,wholesaleprice,retailprice) values (@productid::int,@storeid::int,@quantity::int,@datecreated::date,@wholesaleprice::numeric,@retailprice::numeric)"

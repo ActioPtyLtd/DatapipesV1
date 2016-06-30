@@ -35,7 +35,7 @@ abstract class LinkedTree[D <: LinkedTree[D]] {
     }
   }
 
-  def find(keys: String): Iterator[D] = find(keys.split("\\.").map(s => {
+  def find(keys: String): Iterator[D] = find(keys.split("\\.", -1).map(s => {
     if (s == "*")
       FindAll
     else if(s.startsWith("#"))

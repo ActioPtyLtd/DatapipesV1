@@ -21,7 +21,7 @@ import org.apache.http.impl.client.CloseableHttpClient
 import org.apache.http.impl.client.HttpClientBuilder
 import org.apache.http.util.EntityUtils
 import scala.collection.Iterator
-import scala.util.{Success, Failure, Try}
+import scala.util.{Failure, Success, Try}
 
 /**
   * Created by jim on 7/8/2015.
@@ -85,11 +85,13 @@ class DataSourceREST extends DataSource with Logging {
     cre
   }
 
-  def send(request: HttpUriRequest): Try[(HttpResponse,String)] = {
+  def send(request: HttpUriRequest): Try[(HttpResponse, String)] = {
     val httpClient = HttpClientBuilder.create().build()
 
-    val response = Try({val re = httpClient.execute(request)
-      (re,EntityUtils.toString(re.getEntity,"UTF-8"))})
+    val response = Try({
+      val re = httpClient.execute(request)
+      (re, EntityUtils.toString(re.getEntity, "UTF-8"))
+    })
 
     httpClient.close()
 
@@ -161,55 +163,77 @@ class DataSourceREST extends DataSource with Logging {
   }
 
   override def create(ds: DataSet): Unit = {
-    getRequests(ds, new HttpPost(), createConfig, createBody).foreach(r => sendAndLog(r))
+    getRequests(ds, new HttpPost(), createConfig, createBody).foreach({
+      case Success(s) => sendAndLog(s)
+      case Failure(f) => logger.error(f.getMessage)}
+    )
   }
 
-  private lazy val createConfig = config.getConfig("query").getConfig("create").getString("header")
-  private lazy val updateConfig = config.getConfig("query").getConfig("update").getString("header")
+  private def configOption(config: Config, path: String) = if (config.hasPath(path)) Some(config.getString(path)) else None
 
-  private lazy val createBody = if(config.hasPath("query.create.body")) Some(config.getString("query.create.body")) else None
-  private lazy val createForEach = if(config.hasPath("query.create.foreach")) Some(config.getString("query.create.foreach")) else None
+  private lazy val createConfig = config.getString("query.create.header")
+  private lazy val updateConfig = config.getString("query.update.header")
+
+  private lazy val createBody = configOption(config,"query.create.body")
+  private lazy val updateBody = configOption(config,"query.update.body")
+  private lazy val createForEach = configOption(config,"query.create.foreach")
 
   override def update(ds: DataSet): Unit = {
-    getRequests(ds, new HttpPut(), updateConfig, None).foreach(r => sendAndLog(r))
+    getRequests(ds, new HttpPut(), updateConfig, updateBody).foreach({
+      case Success(s) => sendAndLog(s)
+      case Failure(f) => logger.error(f.getMessage)}
+    )
   }
 
-  private def getRequests[T <: HttpEntityEnclosingRequestBase](ds: DataSet, f: => HttpEntityEnclosingRequestBase, template: String, templateBody: Option[String]) =
-    split(ds).map(d => {
-      if(templateBody.isDefined) {
-        TemplateParser(templateBody.get) match {
-          case Right(s) => createRequestWithEntity(TemplateEngine.eval(s, Map("g" -> d._1, "d" -> d._2)), f, merge(template, d._1))
-          case Left(s) => createRequestWithEntity(d._2, f, merge(template, d._2)) //TODO: handle this properly, template ignored now
-        }
+  private def getRequests[T <: HttpEntityEnclosingRequestBase](ds: DataSet, f: => HttpEntityEnclosingRequestBase, templateHeader: String, templateBody: Option[String]) = {
 
-      }
-      else
-        createRequestWithEntity(d._2, f, merge(template, d._2))
-    })
+    val headerParser = TemplateParser(templateHeader)
 
-  private def merge(template: String, data: DataSet): String = template.replaceAll("@external_id",data("external_id").stringOption.getOrElse("")) // complete hack, do a proper data merge soon
+    if(templateBody.isDefined) {
 
-  private def createRequestWithEntity(data: DataSet, f: => HttpEntityEnclosingRequestBase, uri: String): HttpEntityEnclosingRequestBase =
-    createRequestWithEntity(data match { case DataString(_,s) => s
-    case _ => Data2Json.toJsonString(data)}, f, uri)
+      val bodyParser = TemplateParser(templateBody.get)
 
-  private def createRequestWithEntity(str: String, f: => HttpEntityEnclosingRequestBase, uri: String): HttpEntityEnclosingRequestBase = {
+      split(ds).map(d => {
+            val scope = Map("g" -> d._1, "d" -> d._2)
+            for {
+              a <- TemplateEngine(bodyParser, scope)
+              b <- TemplateEngine(headerParser, scope)
+            } yield createRequest(a, f, b.stringOption.getOrElse(""))
+          })
+    } else {
+      split(ds).map(d => {
+        val scope = Map("g" -> d._1, "d" -> d._2)
+        for {
+          b <- TemplateEngine(headerParser, scope)
+        } yield createRequest(d._2, f, b.stringOption.getOrElse(""))
+      })
+    }
+  }
 
-    val input: StringEntity = new StringEntity(str)
-    input.setContentType(DataSourceREST.CONTENT_TYPE)
+  private def createRequest(body: DataSet, verb: => HttpEntityEnclosingRequestBase, uri: String): HttpEntityEnclosingRequestBase =
+    createRequest(body match { case DataString(_,s) => Some(s)
+    case _ => Some(Data2Json.toJsonString(body))}, verb, uri)
 
-    val request = f
+  private def createRequest(body: Option[String], verb: => HttpEntityEnclosingRequestBase, uri: String): HttpEntityEnclosingRequestBase = {
+
+    val request = verb
     request.setURI(URI.create(uri))
-    request.setEntity(input)
     request.setHeader(HttpHeaders.AUTHORIZATION, authHeader)
+
+    if(body.isDefined) {
+      val input: StringEntity = new StringEntity(body.get)
+      input.setContentType(DataSourceREST.CONTENT_TYPE)
+      request.setEntity(input)
+    }
+
     request
   }
 
   def split(dataSet: DataSet): Iterator[(DataSet,DataSet)] = {
     if(createForEach.isDefined)
-      dataSet.elems.flatMap(d => d.find(createForEach.get).map((d,_)))
+      dataSet.elems.flatMap(d => d.find(createForEach.get).map((d,_))) //TODO: can remove elems part later when datasets have names
     else
-      dataSet.elems.map(d => (d,d))
+      dataSet.elems.map(d => (d,d)) //TODO: dito above
   }
 
   @throws(classOf[Exception])

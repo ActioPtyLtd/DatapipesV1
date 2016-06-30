@@ -3,6 +3,7 @@ package com.actio
 /**
   * Created by mauri on 28/06/2016.
   */
+
 import scala.util.parsing.combinator._
 
 object TemplateParser extends RegexParsers  {
@@ -13,7 +14,7 @@ object TemplateParser extends RegexParsers  {
 
   def literal = "[^@]*".r
 
-  def dataSetGet: Parser[List[Key]] = rep1("." ~ "[a-zA-Z0-9]+".r) ^^ { list => list.map({ case "." ~ prop =>
+  def dataSetGet: Parser[List[Key]] = rep1("." ~ "[a-zA-Z0-9_]+".r) ^^ { list => list.map({ case "." ~ prop =>
     if(prop.headOption.exists(_.isDigit))
       Ord(prop.toInt)
     else
@@ -48,18 +49,10 @@ object TemplateParser extends RegexParsers  {
 
   def expression: Parser[Expression] = constInt | constString | variableWithGet | variable | functionWithGet | function
 
-  def apply(code: String): Either[MyError, Expression] = {
-    parse(template, code) match {
-      case NoSuccess(msg, next) => Left(MyError(msg))
-      case Success(result, next) => Right(result)
-    }
+  def apply(code: String) = parseAll(template, code) match {
+    case Success(s,_) => s
+    case Failure(f,_) => Literal(code)
+    case Error(e,_) => Literal(code)
   }
 
-}
-
-case class MyError(str: String) {}
-
-object PTest extends App {
-  val r = TemplateParser("my literal@{(func,1,2,'my param1').a.b.c} more crap")
-  println(r)
 }

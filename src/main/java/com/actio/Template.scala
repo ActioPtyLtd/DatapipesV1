@@ -1,5 +1,7 @@
 package com.actio
 
+import scala.util.{Failure, Success, Try}
+
 /**
   * Created by mauri on 19/06/2016.
   */
@@ -20,6 +22,9 @@ case class Mix(left: Literal, expression: Expression, right: Template) extends T
 object TemplateEngine {
 
   import scala.collection.JavaConversions._
+
+  def apply(expr: Expression, scope: Map[String, DataSet]): Try[DataSet] =
+    Try(eval(expr,scope))
 
   def eval(expr: Expression, scope: Map[String, DataSet]): DataSet = expr match {
     case Constant(i: String) => DataString("",i)

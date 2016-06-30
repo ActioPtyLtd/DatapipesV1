@@ -16,6 +16,6 @@ libraryDependencies ++= Seq("org.slf4j" % "slf4j-api" % "1.7.19",
 // val json4sJackson = "org.json4s" %% "json4s-jackson" % "{}"
 
 // set the main class for 'sbt run'
-mainClass in (Compile, run) := Some("Main")
+mainClass in (Compile, run) := Some("com.actio.Main")
 
 

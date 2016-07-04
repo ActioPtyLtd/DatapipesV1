@@ -33,7 +33,7 @@ object TemplateEngine {
     case PropsGet(expr, props) => eval(expr, scope).value(props)
     case Function(name, params) => UtilityFunctions.execute(name,params.map(p => eval(p, scope).asInstanceOf[Any])) // reflection invoke
     case Literal(text) => DataString("", text)
-    case Mix(left, middle, right) => DataString("",left.text + eval(middle, scope).stringOption.get + eval(right, scope).stringOption.get)
+    case Mix(left, middle, right) => DataString("",left.text + eval(middle, scope).stringOption.getOrElse("") + eval(right, scope).stringOption.getOrElse("")) // may need to think about what to do with null
     case ForEach(list,lambda) => DataArray(eval(list, scope).elems.map(e => callLambdaFunction(lambda, e, scope) ).toList)
   }
 

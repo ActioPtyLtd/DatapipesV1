@@ -122,6 +122,9 @@ public class DPSystemFactory extends DPSystemConfigurable {
             case "datasourceupdate":
                 t = new TaskDataSourceUpdate();
                 break;
+            case "include":
+                t = new TaskInclude();
+                break;
             default:
                 throw new Exception("DPSystemFactory:Unknown Task Type "+type);
         }

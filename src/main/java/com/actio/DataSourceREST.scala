@@ -122,7 +122,13 @@ class DataSourceREST extends DataSource with Logging {
 
   @throws(classOf[Exception])
   def executeQuery(ds: DataSet, query: String) = {
-    val httpGet = new HttpGet(query)
+
+    val headerParser = TemplateParser(query)
+
+    val scope = Map("g" -> ds)
+    val queryExecuted = TemplateEngine(headerParser, scope).map(e => e.stringOption.getOrElse(query)).getOrElse(query)
+
+    val httpGet = new HttpGet(queryExecuted)
     httpGet.setHeader(HttpHeaders.AUTHORIZATION, authHeader)
     httpGet.setHeader(HttpHeaders.CONTENT_TYPE, DataSourceREST.CONTENT_TYPE)
 

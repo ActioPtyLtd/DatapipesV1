@@ -14,11 +14,13 @@ object TemplateParser extends RegexParsers  {
 
   def literal = "[^@]*".r
 
-  def dataSetGet: Parser[List[Key]] = rep1("." ~ "[a-zA-Z0-9_]+".r) ^^ { list => list.map({ case "." ~ prop =>
+  def dataSetGet: Parser[List[FindCriteria]] = rep1("." ~ "[a-zA-Z0-9_\\*]+".r) ^^ { list => list.map({ case "." ~ prop =>
     if(prop.headOption.exists(_.isDigit))
-      Ord(prop.toInt)
+      FindOrd(prop.toInt)
+    else if(prop == "*")
+      FindAll
     else
-      Label(prop)})
+      FindLabel(prop)})
   }
 
   def constInt: Parser[Constant[Int]] = "[0-9]+".r ^^ { str => Constant(str.toInt)}

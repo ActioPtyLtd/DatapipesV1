@@ -230,5 +230,5 @@ object DataSetTransforms {
 
 
   def filterValue(ds: DataSet, property: String, value: String): DataSet = DataArray(ds.elems.filter(f => f(property).stringOption.getOrElse("") == value).toList)
-  def firstValue(ds: DataSet, property: String, value: String): DataSet = ds.elems.find(f => f(property).stringOption.getOrElse("") == value).getOrElse(Nothin())
+  def firstValue(ds: DataSet, property: String, value: String): DataSet = ds.elems.find(f => f.value(property).stringOption.getOrElse("") == value).getOrElse(Nothin())
 }

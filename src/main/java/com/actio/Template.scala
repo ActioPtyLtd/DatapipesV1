@@ -10,7 +10,7 @@ abstract class Expression
 case class Function(name: String, param: List[Expression]) extends Expression
 case class Variable(name: String) extends Expression
 case class Constant[C <: Any](value: C) extends Expression
-case class PropsGet(expr: Expression, props: List[Key]) extends Expression
+case class PropsGet(expr: Expression, props: List[FindCriteria]) extends Expression
 case class ForEach(expr: Expression, lambdaFuntion: LambdaFuntion) extends Expression
 
 case class LambdaFuntion(varname: String, expr: Expression)   // (x: Data) => Data
@@ -30,7 +30,11 @@ object TemplateEngine {
     case Constant(i: String) => DataString("",i)
     case Constant(i: Int) => DataNumeric("",i)
     case Variable(name) => scope(name) // rename this
-    case PropsGet(expr, props) => eval(expr, scope).value(props)
+    case PropsGet(expr, props) =>
+      if(props.contains(FindAll))
+        DataArray("",eval(expr, scope).find(props).toList)
+      else
+        eval(expr, scope).find(props).toList.headOption.getOrElse(Nothin())
     case Function(name, params) => UtilityFunctions.execute(name,params.map(p => eval(p, scope).asInstanceOf[Any])) // reflection invoke
     case Literal(text) => DataString("", text)
     case Mix(left, middle, right) => DataString("",left.text + eval(middle, scope).stringOption.getOrElse("") + eval(right, scope).stringOption.getOrElse("")) // may need to think about what to do with null

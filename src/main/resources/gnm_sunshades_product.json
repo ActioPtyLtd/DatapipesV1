@@ -56,20 +56,6 @@
           }
         }
       },
-      "parse-stock-api": {
-        "type": "transform",
-        "batch": [
-          "pick,items",
-          "const,SUNSHADES",
-          "rename,stockid,external_id,const1,supplier_id,supplier_total,quantity",
-          "keep,external_id,supplier_id,retail_price,retail_price_tax,wholesale_price,wholesale_price_tax,quantity",
-          "numeric,quantity,0,0",
-          "numeric,retail_price,0,2",
-          "numeric,wholesale_price,0,2",
-          "numeric,retail_price_tax,0,2",
-          "numeric,wholesale_price_tax,0,2"
-        ]
-      },
       "update-stock-api": {
         "type": "load",
         "behavior": "update",

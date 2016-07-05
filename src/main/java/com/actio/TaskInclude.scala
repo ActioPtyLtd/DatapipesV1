@@ -16,9 +16,9 @@ class TaskInclude extends Task {
 
     val findResult = dataSet.elems.toList.head.find(foreach).toSet.toList
 
-    val include = DataArray(attribute,findResult.map(f => dataSource.read(f)).toList)
+    val include = DataArray(attribute,findResult.map(f => dataSource.read(f).elems.toList.head).toList)
 
-    dataSet = new DataSetFixedData(dataSet.schema,DataRecord("", include :: dataSet.elems.toList))
+    dataSet = new DataSetFixedData(dataSet.schema,DataRecord("", include :: dataSet.elems.toList.head.elems.toList))
   }
 
   override def load(): Unit = ???
@@ -27,5 +27,5 @@ class TaskInclude extends Task {
 
 
   lazy val foreach = "data.*.relationships.product.data"
-  lazy val attribute = "products"
+  lazy val attribute = "productalias"
 }

@@ -27,10 +27,18 @@
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="library" name="SBT: org.scala-lang:scala-library:2.11.7:jar" level="project" />
-    <orderEntry type="library" name="SBT: org.scala-lang.modules:scala-parser-combinators_2.11:1.0.4:jar" level="project" />
-    <orderEntry type="library" name="SBT: org.slf4j:slf4j-api:1.7.20:jar" level="project" />
-    <orderEntry type="library" name="SBT: ch.qos.logback:logback-core:1.1.7:jar" level="project" />
-    <orderEntry type="library" name="SBT: ch.qos.logback:logback-classic:1.1.7:jar" level="project" />
+    <orderEntry type="library" name="SBT: org.scala-lang.modules:scala-xml_2.11:1.0.5:jar" level="project" />
+    <orderEntry type="library" name="SBT: org.json4s:json4s-scalap_2.11:3.3.0:jar" level="project" />
+    <orderEntry type="library" name="SBT: org.json4s:json4s-jackson_2.11:3.3.0:jar" level="project" />
+    <orderEntry type="library" name="SBT: org.json4s:json4s-ext_2.11:3.3.0:jar" level="project" />
+    <orderEntry type="library" name="SBT: org.json4s:json4s-core_2.11:3.3.0:jar" level="project" />
+    <orderEntry type="library" name="SBT: org.json4s:json4s-ast_2.11:3.3.0:jar" level="project" />
+    <orderEntry type="library" name="SBT: org.joda:joda-convert:1.7:jar" level="project" />
+    <orderEntry type="library" name="SBT: joda-time:joda-time:2.8.2:jar" level="project" />
+    <orderEntry type="library" name="SBT: com.thoughtworks.paranamer:paranamer:2.8:jar" level="project" />
+    <orderEntry type="library" name="SBT: com.fasterxml.jackson.core:jackson-databind:2.6.2:jar" level="project" />
+    <orderEntry type="library" name="SBT: com.fasterxml.jackson.core:jackson-core:2.6.2:jar" level="project" />
+    <orderEntry type="library" name="SBT: com.fasterxml.jackson.core:jackson-annotations:2.6.0:jar" level="project" />
     <orderEntry type="module-library">
       <library name="SBT: unmanaged-jars">
         <CLASSES>
@@ -115,17 +123,9 @@
         <SOURCES />
       </library>
     </orderEntry>
-    <orderEntry type="library" name="SBT: com.fasterxml.jackson.core:jackson-annotations:2.6.0:jar" level="project" />
-    <orderEntry type="library" name="SBT: com.fasterxml.jackson.core:jackson-core:2.6.2:jar" level="project" />
-    <orderEntry type="library" name="SBT: com.fasterxml.jackson.core:jackson-databind:2.6.2:jar" level="project" />
-    <orderEntry type="library" name="SBT: com.thoughtworks.paranamer:paranamer:2.8:jar" level="project" />
-    <orderEntry type="library" name="SBT: joda-time:joda-time:2.8.2:jar" level="project" />
-    <orderEntry type="library" name="SBT: org.joda:joda-convert:1.7:jar" level="project" />
-    <orderEntry type="library" name="SBT: org.json4s:json4s-ast_2.11:3.3.0:jar" level="project" />
-    <orderEntry type="library" name="SBT: org.json4s:json4s-core_2.11:3.3.0:jar" level="project" />
-    <orderEntry type="library" name="SBT: org.json4s:json4s-ext_2.11:3.3.0:jar" level="project" />
-    <orderEntry type="library" name="SBT: org.json4s:json4s-jackson_2.11:3.3.0:jar" level="project" />
-    <orderEntry type="library" name="SBT: org.json4s:json4s-scalap_2.11:3.3.0:jar" level="project" />
-    <orderEntry type="library" name="SBT: org.scala-lang.modules:scala-xml_2.11:1.0.5:jar" level="project" />
+    <orderEntry type="library" name="SBT: ch.qos.logback:logback-classic:1.1.7:jar" level="project" />
+    <orderEntry type="library" name="SBT: ch.qos.logback:logback-core:1.1.7:jar" level="project" />
+    <orderEntry type="library" name="SBT: org.slf4j:slf4j-api:1.7.20:jar" level="project" />
+    <orderEntry type="library" name="SBT: org.scala-lang.modules:scala-parser-combinators_2.11:1.0.4:jar" level="project" />
   </component>
 </module>

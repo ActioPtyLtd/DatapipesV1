@@ -7,19 +7,6 @@ package com.actio
 import com.actio.dpsystem.DPSystemConfigurable
 import com.typesafe.config.Config
 
-class DataSetArray(dataSets: List[DataSet]) extends DataSet {
-
-  override def apply(ord: Int): DataSet = dataSets.lift(ord).getOrElse(Nothin())
-
-  override def apply(field: String): DataSet = Nothin()
-
-  override def elems: Iterator[DataSet] = dataSets.toIterator
-
-  override def schema: SchemaDefinition = dataSets.headOption.map(_.schema).getOrElse(SchemaUnknown)
-
-  def label: String = ""
-}
-
 abstract class DataSet extends LinkedTree[DataSet]{
 
   def apply(ord: Int): DataSet = Nothin()

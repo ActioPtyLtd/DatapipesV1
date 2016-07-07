@@ -23,8 +23,7 @@ object TemplateEngine {
 
   import scala.collection.JavaConversions._
 
-  def apply(expr: Expression, scope: Map[String, DataSet]): Try[DataSet] =
-    Try(eval(expr,scope))
+  def apply(expr: Expression, ds: DataSet): DataSet = eval(expr,Map("d" -> ds))
 
   def eval(expr: Expression, scope: Map[String, DataSet]): DataSet = expr match {
     case Constant(i: String) => DataString("",i)

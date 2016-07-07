@@ -8,7 +8,7 @@ import com.typesafe.config.Config
 import java.io.IOException
 import java.io.UnsupportedEncodingException
 import org.apache.commons.codec.binary.Base64
-import org.apache.http.{HttpHeaders, HttpResponse}
+import org.apache.http._
 import org.apache.http.auth.AuthScope
 import org.apache.http.auth.UsernamePasswordCredentials
 import org.apache.http.client.ClientProtocolException
@@ -28,6 +28,17 @@ import scala.util.{Failure, Success, Try}
   */
 object DataSourceREST {
   private val CONTENT_TYPE: String = "application/json"
+
+  def createHttpRequest(label: String): HttpRequestBase = {
+    if (label=="create")
+      new HttpPost()
+    else if(label=="update")
+      new HttpPut()
+    else if(label=="patch")
+      new HttpPatch()
+    else
+      new HttpGet()
+  }
 }
 
 class DataSourceREST extends DataSource with Logging {
@@ -85,62 +96,47 @@ class DataSourceREST extends DataSource with Logging {
     cre
   }
 
-  def send(request: HttpUriRequest): Try[(HttpResponse, String)] = {
-    val httpClient = HttpClientBuilder.create().build()
+  type HttpClient = HttpUriRequest => (StatusLine, Array[Header], String)
 
-    val response = Try({
-      val re = httpClient.execute(request)
-      (re, EntityUtils.toString(re.getEntity, "UTF-8"))
-    })
-
-    httpClient.close()
-
-    response
+  def sendRequest(request: HttpUriRequest) = {
+    val response = HttpClientBuilder.create().build().execute(request)
+    val ret =(response.getStatusLine, response.getAllHeaders, EntityUtils.toString(response.getEntity, "UTF-8"))
+    response.close()
+    ret
   }
 
-  def sendAndLog(request: HttpUriRequest) = {
+  def getResponseDataSet(request: HttpUriRequest)(implicit httpClient: HttpClient): DataSetHttpResponse = {
+    val re = httpClient(request)
 
-    logger.info(s"Calling ${request.getMethod} ${request.getURI}...")
+    val dsBody = Data2Json.fromJson2Data(re._3) // TODO: assuming the body is in json, may not want to make assumption
 
-    val response = send(request)
-
-    response match {
-      case Success(s) => {
-        val statusCode = s._1.getStatusLine.getStatusCode
-        logger.info(s"Server status code: $statusCode")
-        if (statusCode != 200)
-          logger.error(s._2)
-      }
-      case Failure(f) => {
-        logger.error(f.getMessage)
-      }
-    }
-    response
+    DataSetHttpResponse("response",request.getURI.toString, re._1.getStatusCode, re._2.map(h => h.getName -> h.getValue).toMap, dsBody)
   }
 
   def authHeader = "Basic " + new String(Base64.encodeBase64((user + ":" + password).getBytes(Charset.forName("ISO-8859-1"))))
 
   @throws(classOf[Exception])
+  override def executeQueryLabel(ds: DataSet, label: String): DataSet = {
+    val requestQuery =
+      getRequest(ds,
+        DataSourceREST.createHttpRequest(label),
+        config.getString(s"query.$label.uri"),
+        configOption(config,s"query.$label.body"))
+
+    logger.info(s"Calling ${requestQuery.getMethod} ${requestQuery.getURI}")
+
+    val element = getResponseDataSet(requestQuery)(sendRequest)
+    new DataSetFixedData(element.schema, element)
+  }
+
+  @throws(classOf[Exception])
   def executeQuery(ds: DataSet, query: String) = {
-
-    val headerParser = TemplateParser(query)
-
-    val scope = Map("g" -> ds)
-    val queryExecuted = TemplateEngine(headerParser, scope).map(e => e.stringOption.getOrElse(query)).getOrElse(query)
-
-    val httpGet = new HttpGet(queryExecuted)
-    httpGet.setHeader(HttpHeaders.AUTHORIZATION, authHeader)
-    httpGet.setHeader(HttpHeaders.CONTENT_TYPE, DataSourceREST.CONTENT_TYPE)
-
-    val response = sendAndLog(httpGet).get // may log and throw an exception
-    val responseData = Data2Json.fromJson2Data(response._2) // this can fail too, if json isn't returned
-
-    new DataSetFixedData(responseData.schema, responseData)
+    Nothin()
   }
 
   @throws(classOf[Exception])
   def extract: Unit = {
-    dataSet = read(new DataSetTableScala()) // doesn't really need a dataset
+    dataSet = read(Nothin()) // doesn't really need a dataset
   }
 
   @throws(classOf[Exception])
@@ -169,58 +165,36 @@ class DataSourceREST extends DataSource with Logging {
   }
 
   override def create(ds: DataSet): Unit = {
-    getRequests(ds, new HttpPost(), createConfig, createBody).foreach({
-      case Success(s) => sendAndLog(s)
-      case Failure(f) => logger.error(f.getMessage)}
-    )
+    executeQueryLabel(ds.elems.toList.head, "create")
   }
 
   private def configOption(config: Config, path: String) = if (config.hasPath(path)) Some(config.getString(path)) else None
 
-  private lazy val createConfig = config.getString("query.create.header")
-  private lazy val updateConfig = config.getString("query.update.header")
+  override def update(ds: DataSet): Unit = { }
 
-  private lazy val createBody = configOption(config,"query.create.body")
-  private lazy val updateBody = configOption(config,"query.update.body")
-  private lazy val createForEach = configOption(config,"query.create.foreach")
-
-  override def update(ds: DataSet): Unit = {
-    getRequests(ds, new HttpPut(), updateConfig, updateBody).foreach({
-      case Success(s) => sendAndLog(s)
-      case Failure(f) => logger.error(f.getMessage)}
-    )
-  }
-
-  private def getRequests[T <: HttpEntityEnclosingRequestBase](ds: DataSet, f: => HttpEntityEnclosingRequestBase, templateHeader: String, templateBody: Option[String]) = {
-
+  private def getRequest[T <: HttpRequestBase](ds: DataSet, f: => HttpRequestBase, templateHeader: String, templateBody: Option[String]) = {
     val headerParser = TemplateParser(templateHeader)
+    val headerExpression = TemplateEngine(headerParser, ds)
 
     if(templateBody.isDefined) {
-
       val bodyParser = TemplateParser(templateBody.get)
+      val bodyExpression = TemplateEngine(bodyParser, ds)
 
-      split(ds).map(d => {
-            val scope = Map("g" -> d._1, "d" -> d._2)
-            for {
-              a <- TemplateEngine(bodyParser, scope)
-              b <- TemplateEngine(headerParser, scope)
-            } yield createRequest(a, f, b.stringOption.getOrElse(""))
-          })
-    } else {
-      split(ds).map(d => {
-        val scope = Map("g" -> d._1, "d" -> d._2)
-        for {
-          b <- TemplateEngine(headerParser, scope)
-        } yield createRequest(d._2, f, b.stringOption.getOrElse(""))
-      })
+      createRequest(bodyExpression, f, headerExpression.stringOption.getOrElse(""))
     }
+    else
+      createRequest(ds, f, headerExpression.stringOption.getOrElse(""))
   }
 
-  private def createRequest(body: DataSet, verb: => HttpEntityEnclosingRequestBase, uri: String): HttpEntityEnclosingRequestBase =
-    createRequest(body match { case DataString(_,s) => Some(s)
-    case _ => Some(Data2Json.toJsonString(body))}, verb, uri)
+  private def createRequest(body: DataSet, verb: => HttpRequestBase, uri: String): HttpRequestBase =
+    verb match {
+      case postput: HttpEntityEnclosingRequestBase => createRequest(body match {
+        case DataString(_, s) => Some(s)
+        case _ => Some(Data2Json.toJsonString(body))}, verb, uri)
+      case _ => createRequest(None, verb, uri)
+    }
 
-  private def createRequest(body: Option[String], verb: => HttpEntityEnclosingRequestBase, uri: String): HttpEntityEnclosingRequestBase = {
+  private def createRequest(body: Option[String], verb: => HttpRequestBase, uri: String): HttpRequestBase = {
 
     val request = verb
     request.setURI(URI.create(uri))
@@ -229,17 +203,10 @@ class DataSourceREST extends DataSource with Logging {
     if(body.isDefined) {
       val input: StringEntity = new StringEntity(body.get)
       input.setContentType(DataSourceREST.CONTENT_TYPE)
-      request.setEntity(input)
+      request.asInstanceOf[HttpEntityEnclosingRequestBase].setEntity(input)
     }
 
     request
-  }
-
-  def split(dataSet: DataSet): Iterator[(DataSet,DataSet)] = {
-    if(createForEach.isDefined)
-      dataSet.elems.flatMap(d => d.find(createForEach.get).map((d,_))) //TODO: can remove elems part later when datasets have names
-    else
-      dataSet.elems.map(d => (d,d)) //TODO: dito above
   }
 
   @throws(classOf[Exception])

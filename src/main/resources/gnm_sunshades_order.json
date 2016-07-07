@@ -14,13 +14,17 @@
             "password": "password"
           },
           "query": {
-            "read": "https://dev-api-gnm.actio.com.au:8443/api/job?include=address&filter[job.status]=CREATED&filter[job.supplier.id]=2"
+            "read": {
+              "uri": "https://dev-api-gnm.actio.com.au:8443/api/job?filter[job.status]=CREATED&filter[job.supplier.id]=2"
+            }
           }
         }
       },
       "include-products": {
         "type": "include",
         "behavior": "",
+        "foreach": "body.data.*.relationships.product.data",
+        "attribute": "productalias",
         "dataSource": {
           "type": "rest",
           "behavior": "simple",
@@ -30,13 +34,16 @@
             "password": "password"
           },
           "query": {
-            "read": "https://dev-api-gnm.actio.com.au:8443/api/productAlias?filter[productAlias.aliasPrefix]=SUNSHADES&filter[productAlias.product.productId]=@{g.id}&page[size]=1"
+            "read": {
+              "uri": "https://dev-api-gnm.actio.com.au:8443/api/productAlias?filter[productAlias.aliasPrefix]=SUNSHADES&filter[productAlias.product.productId]=@{d.local.id}&page[size]=1"
+            }
           }
         }
       },
-      "update-job-api": {
-        "type": "load",
+      "include-job-api": {
+        "type": "include",
         "behavior": "simple",
+        "foreach": "response.body.data.*",
         "dataSource": {
           "type": "rest",
           "behavior": "simple",
@@ -47,9 +54,28 @@
           },
           "query": {
             "create": {
-              "header": "https://api.sunshad.es/v1/orders",
-              "body": "{ \"batches\": [{ \"batch\": \"@{d.id}\", \"jobs\": [{ \"account\": \"GANDM1\", \"address1\": \"@{(firstValue,(filterValue,g.included,'type','address'),'id',d.relationships.address.data.id).attributes.street1}\", \"address2\": \"@{(firstValue,(filterValue,g.included,'type','address'),'id',d.relationships.address.data.id).attributes.street2}\", \"carrier\": \"car1\", \"jobid\": \"@{d.id}\", \"lines\": [{ \"quantity\": @{d.attributes.quantity}, \"stockid\": \"@{(firstValue,g.productalias.*.data.*,'relationships.product.data.id',d.relationships.product.data.id).attributes.aliasId}\"}], \"name\": \"Maurice\", \"postcode\": \"@{(firstValue,(filterValue,g.included,'type','address'),'id',d.relationships.address.data.id).attributes.postcode}\", \"state\": \"@{(firstValue,(filterValue,g.included,'type','address'),'id',d.relationships.address.data.id).attributes.state}\", \"suburb\": \"@{(firstValue,(filterValue,g.included,'type','address'),'id',d.relationships.address.data.id).attributes.suburb}\"}]}]}",
-              "foreach": "data.*"
+              "uri": "https://api.sunshad.es/v1/orders",
+              "body": "{ \"jobid\": \"@{d.local.id}\"}",
+              "body2": "{ \"batches\": [{ \"batch\": \"@{d.id}\", \"jobs\": [{ \"account\": \"GANDM1\", \"address1\": \"@{(firstValue,(filterValue,g.responses.0.body.included,'type','address'),'id',d.relationships.address.data.id).attributes.street1}\", \"address2\": \"@{(firstValue,(filterValue,g.responses.0.body.included,'type','address'),'id',d.relationships.address.data.id).attributes.street2}\", \"carrier\": \"car1\", \"jobid\": \"@{d.id}\", \"lines\": [{ \"quantity\": @{d.attributes.quantity}, \"stockid\": \"@{(firstValue,g.productalias.responses.*.body.data.*,'relationships.product.data.id',d.relationships.product.data.id).attributes.aliasId}\"}], \"name\": \"Maurice\", \"postcode\": \"@{(firstValue,(filterValue,g.responses.0.body.included,'type','address'),'id',d.relationships.address.data.id).attributes.postcode}\", \"state\": \"@{(firstValue,(filterValue,g.responses.0.body.included,'type','address'),'id',d.relationships.address.data.id).attributes.state}\", \"suburb\": \"@{(firstValue,(filterValue,g.responses.0.body.included,'type','address'),'id',d.relationships.address.data.id).attributes.suburb}\"}]}]}"
+            }
+          }
+        }
+      },
+      "update-job-status-api": {
+        "type": "load",
+        "behavior": "simple",
+        "dataSource": {
+          "type": "rest",
+          "behavior": "simple",
+          "path": "-",
+          "credential": {
+            "user": "gm",
+            "password": "83498dd4fa301a3aa2d117b13d371526"
+          },
+          "query": {
+            "create": {
+              "uri": "https://dev-api-gnm.actio.com.au:8443/service/job/@{d.item.local.id}/status",
+              "body": "{\"action\": \"-\",\"comment\": \"@{d.response.response.body.txid}\"}"
             }
           }
         }
@@ -57,7 +83,7 @@
     },
     "pipelines": {
       "load-job" : {
-        "pipe": "read-job-api | include-products | update-job-api"
+        "pipe": "read-job-api | include-products | include-job-api | update-job-status-api"
       }
     },
     "services": { },

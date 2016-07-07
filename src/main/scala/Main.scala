@@ -6,8 +6,7 @@ import org.slf4j.{Logger, LoggerFactory}
 /**
   * Created by jim on 28/03/2016.
   */
-
-
+/*
 object Main {
   private val logger: Logger = LoggerFactory.getLogger(this.getClass)
 
@@ -46,3 +45,4 @@ object Main {
   }
 
 }
+*/

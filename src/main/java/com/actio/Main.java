@@ -23,7 +23,7 @@ class Main {
 
     public static void main(String[] args) throws Exception {
 
-        logger.info("======First logging.info");
+        logger.info("======First logging.info ***");
         Path currentRelativePath = Paths.get("");
         String s = currentRelativePath.toAbsolutePath().toString();
         System.out.println("Current relative path is: " + s);
@@ -60,6 +60,9 @@ class Main {
 
             exit(-1);
         }
+
+
+        logger.info("loadingConfigFile=" + configFile);
 
         debug();
 

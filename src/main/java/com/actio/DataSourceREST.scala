@@ -201,6 +201,7 @@ class DataSourceREST extends DataSource with Logging {
     request.setHeader(HttpHeaders.AUTHORIZATION, authHeader)
 
     if(body.isDefined) {
+      logger.info(body.get)
       val input: StringEntity = new StringEntity(body.get)
       input.setContentType(DataSourceREST.CONTENT_TYPE)
       request.asInstanceOf[HttpEntityEnclosingRequestBase].setEntity(input)

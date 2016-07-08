@@ -231,4 +231,6 @@ object DataSetTransforms {
 
   def filterValue(ds: DataSet, property: String, value: String): DataSet = DataArray(ds.elems.filter(f => f(property).stringOption.getOrElse("") == value).toList)
   def firstValue(ds: DataSet, property: String, value: String): DataSet = ds.elems.find(f => f.value(property).stringOption.getOrElse("") == value).getOrElse(Nothin())
+
+  def convertDateFormat(ds: DataSet, in: String, out: String) = DataString("",convDateValue(ds.stringOption.getOrElse(""), in, out))
 }

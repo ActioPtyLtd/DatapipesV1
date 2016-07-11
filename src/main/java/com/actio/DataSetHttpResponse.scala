@@ -5,7 +5,7 @@ package com.actio
   */
 case class DataSetHttpResponse(label: String, uri: String, statusCode: Int, headers: Map[String,String], body: DataSet) extends DataSet {
 
-  override def apply(field: String): DataSet = if(field=="body")
+  override def apply(field: String): DataSet = if(field==body.label)
     body
   else
     headers.get(field).map(DataString(field,_)).getOrElse(Nothin())

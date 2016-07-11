@@ -15,7 +15,7 @@
           },
           "query": {
             "read": {
-              "uri": "https://dev-api-gnm.actio.com.au:8443/api/job?filter[job.status]=CREATED&filter[job.supplier.id]=2"
+              "uri": "https://dev-api-gnm.actio.com.au:8443/api/job?filter[job.status]=CREATED&filter[job.supplier.id]=2&include=address"
             }
           }
         }
@@ -23,7 +23,7 @@
       "include-products": {
         "type": "include",
         "behavior": "",
-        "foreach": "body.data.*.relationships.product.data",
+        "foreach": "root.data.*.relationships.product.data",
         "attribute": "productalias",
         "dataSource": {
           "type": "rest",
@@ -43,7 +43,7 @@
       "include-job-api": {
         "type": "include",
         "behavior": "simple",
-        "foreach": "response.body.data.*",
+        "foreach": "response.root.data.*",
         "dataSource": {
           "type": "rest",
           "behavior": "simple",
@@ -55,8 +55,8 @@
           "query": {
             "create": {
               "uri": "https://api.sunshad.es/v1/orders",
-              "body": "{ \"jobid\": \"@{d.local.id}\"}",
-              "body2": "{ \"batches\": [{ \"batch\": \"@{d.id}\", \"jobs\": [{ \"account\": \"GANDM1\", \"address1\": \"@{(firstValue,(filterValue,g.responses.0.body.included,'type','address'),'id',d.relationships.address.data.id).attributes.street1}\", \"address2\": \"@{(firstValue,(filterValue,g.responses.0.body.included,'type','address'),'id',d.relationships.address.data.id).attributes.street2}\", \"carrier\": \"car1\", \"jobid\": \"@{d.id}\", \"lines\": [{ \"quantity\": @{d.attributes.quantity}, \"stockid\": \"@{(firstValue,g.productalias.responses.*.body.data.*,'relationships.product.data.id',d.relationships.product.data.id).attributes.aliasId}\"}], \"name\": \"Maurice\", \"postcode\": \"@{(firstValue,(filterValue,g.responses.0.body.included,'type','address'),'id',d.relationships.address.data.id).attributes.postcode}\", \"state\": \"@{(firstValue,(filterValue,g.responses.0.body.included,'type','address'),'id',d.relationships.address.data.id).attributes.state}\", \"suburb\": \"@{(firstValue,(filterValue,g.responses.0.body.included,'type','address'),'id',d.relationships.address.data.id).attributes.suburb}\"}]}]}"
+              "body2": "{ \"stockid\": \"@{(firstValue,d.global.productalias.*.root.data.*,'relationships.product.data.id',d.local.relationships.product.data.id).attributes.aliasId}\"}",
+              "body": "{ \"batches\": [{ \"batch\": \"@{d.local.id}\", \"jobs\": [{ \"account\": \"205336\", \"address1\": \"@{(firstValue,(filterValue,d.global.response.root.included,'type','address'),'id',d.local.relationships.address.data.id).attributes.street1}\", \"address2\": \"@{(firstValue,(filterValue,d.global.response.root.included,'type','address'),'id',d.local.relationships.address.data.id).attributes.street2}\", \"carrier\": \"car1\", \"jobid\": \"@{d.local.id}\", \"lines\": [{ \"quantity\": @{d.local.attributes.quantity}, \"stockid\": \"@{(firstValue,d.global.productalias.*.root.data.*,'relationships.product.data.id',d.local.relationships.product.data.id).attributes.aliasId}\"}], \"name\": \"Maurice\", \"postcode\": \"@{(firstValue,(filterValue,d.global.response.root.included,'type','address'),'id',d.local.relationships.address.data.id).attributes.postcode}\", \"state\": \"@{(firstValue,(filterValue,d.global.response.root.included,'type','address'),'id',d.local.relationships.address.data.id).attributes.state}\", \"suburb\": \"@{(firstValue,(filterValue,d.global.response.root.included,'type','address'),'id',d.local.relationships.address.data.id).attributes.suburb}\"}]}]}"
             }
           }
         }

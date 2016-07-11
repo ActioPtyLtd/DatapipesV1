@@ -108,9 +108,11 @@ class DataSourceREST extends DataSource with Logging {
   def getResponseDataSet(request: HttpUriRequest)(implicit httpClient: HttpClient): DataSetHttpResponse = {
     val re = httpClient(request)
 
+    this.logger.info(re._3)
+
     val dsBody = Data2Json.fromJson2Data(re._3) // TODO: assuming the body is in json, may not want to make assumption
 
-    DataSetHttpResponse("response",request.getURI.toString, re._1.getStatusCode, re._2.map(h => h.getName -> h.getValue).toMap, dsBody)
+    DataSetHttpResponse("response",request.getURI.toString, re._1.getStatusCode, re._2.map(h => h.getName -> h.getValue).toMap, DataRecord("root", dsBody.elems.toList))
   }
 
   def authHeader = "Basic " + new String(Base64.encodeBase64((user + ":" + password).getBytes(Charset.forName("ISO-8859-1"))))
@@ -126,6 +128,9 @@ class DataSourceREST extends DataSource with Logging {
     logger.info(s"Calling ${requestQuery.getMethod} ${requestQuery.getURI}")
 
     val element = getResponseDataSet(requestQuery)(sendRequest)
+
+    logger.info(s"Status code ${element.statusCode} returned.")
+
     new DataSetFixedData(element.schema, element)
   }
 

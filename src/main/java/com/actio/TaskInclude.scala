@@ -41,7 +41,7 @@ class TaskInclude extends Task {
 object TaskInclude {
 
   def splitGlobalAndLocal(dsGlobal: DataSet, dsLocal: DataSet) =
-    DataRecord("",List(DataRecord("local",dsLocal.elems.toList), DataRecord("global", dsGlobal.elems.toList.head.elems.toList)))
+    DataRecord("",List(DataRecord("local",dsLocal.elems.toList), DataRecord("global", dsGlobal.elems.toList)))
 
   def split(dataSet: DataSet, forEach: String): List[DataSet] = dataSet.elems.flatMap(g => g.find(forEach).map(splitGlobalAndLocal(g,_))).toList
 

@@ -10,6 +10,29 @@ import scala.util.Try
   */
 object DataSetTransforms {
 
+  def filterValue(ds: DataSet, property: String, value: String): DataSet = DataArray(ds.elems.filter(f => f(property).stringOption.getOrElse("") == value).toList)
+  def firstValue(ds: DataSet, property: String, value: String): DataSet = ds.elems.find(f => f.value(property).stringOption.getOrElse("") == value).getOrElse(Nothin())
+
+  def convertDateFormat(ds: DataSet, in: String, out: String) = DataString("",convDateValue(ds.stringOption.getOrElse(""), in, out))
+
+  def ifNotBlankOrElse(ds: DataSet, other: String) = ds.stringOption.map(s => if(s.trim().isEmpty) DataString("",other) else DataString("",s)).getOrElse(DataString("",other))
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  /* below will need to be replaced when I have time */
+
+
   //TODO: think about error handling. Maybe change next: Either[Error, Data]
   def transformEachData(schemaFunc: (SchemaDefinition => SchemaDefinition), dataFunc: (DataSet => DataSet) ): (DataSet => DataSet) = (ds: DataSet) =>
     new DataSet {
@@ -229,8 +252,5 @@ object DataSetTransforms {
 
 
 
-  def filterValue(ds: DataSet, property: String, value: String): DataSet = DataArray(ds.elems.filter(f => f(property).stringOption.getOrElse("") == value).toList)
-  def firstValue(ds: DataSet, property: String, value: String): DataSet = ds.elems.find(f => f.value(property).stringOption.getOrElse("") == value).getOrElse(Nothin())
 
-  def convertDateFormat(ds: DataSet, in: String, out: String) = DataString("",convDateValue(ds.stringOption.getOrElse(""), in, out))
 }

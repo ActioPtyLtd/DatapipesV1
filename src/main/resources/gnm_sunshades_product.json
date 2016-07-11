@@ -14,51 +14,16 @@
             "password": "83498dd4fa301a3aa2d117b13d371526"
           },
           "query": {
-            "read": "https://api.sunshad.es/v1/stock"
-          }
-        }
-      },
-      "parse-product-api": {
-        "type": "transform",
-        "batch": [
-          "pick,items",
-          "const,frame,SUNSHADES",
-          "rename,const1,type,stockid,alias_id,const2,alias_prefix",
-          "keep,alias_prefix,alias_id,type,name,discontinued,apn,description,retail_price,retail_price_tax,wholesale_price,wholesale_price_tax,frame_brand,frame_bridge_size,frame_colour,frame_depth,frame_eye_size,frame_gender,frame_material,frame_model,frame_temple_length,frame_type",
-          "numeric,retail_price,0,2",
-          "numeric,wholesale_price,0,2",
-          "numeric,retail_price_tax,0,2",
-          "numeric,wholesale_price_tax,0,2",
-          "bool,discontinued",
-          "productProperty,frame_brand,frame_bridge_size,frame_colour,frame_depth,frame_eye_size,frame_gender,frame_material,frame_model,frame_temple_length,frame_type"
-        ]
-      },
-      "update-product-api": {
-        "type": "load",
-        "behavior": "update",
-        "dataSource": {
-          "type": "rest",
-          "behavior": "simple",
-          "path": "https://dev-api-gnm.actio.com.au:8443/service/product/",
-          "credential": {
-            "user": "admin",
-            "password": "password"
-          },
-          "query": {
-            "create": {
-              "header": "https://dev-api-gnm.actio.com.au:8443/service/product/SUNSHADES/@alias_id",
-              "foreach": "*"
-            },
-            "update": {
-              "header": "https://dev-api-gnm.actio.com.au:8443/service/product/SUNSHADES/@alias_id",
-              "foreach": "*"
+            "read": {
+              "uri": "https://api.sunshad.es/v1/stock"
             }
           }
         }
       },
-      "update-stock-api": {
-        "type": "load",
-        "behavior": "update",
+      "update-product-api": {
+        "type": "include",
+        "behavior": "simple",
+        "foreach": "root.items.*",
         "dataSource": {
           "type": "rest",
           "behavior": "simple",
@@ -68,15 +33,29 @@
             "password": "password"
           },
           "query": {
-            "create": {
-              "header": "https://dev-api-gnm.actio.com.au:8443/service/product/SUNSHADES/@{d.stockid}/stock",
-              "body": "{\"supplier_id\": \"SUNSHADES\",\"retail_price\": @{d.retail_price},\"retail_price_tax\": @{d.retail_price_tax},\"alias_prefix\":\"SUNSHADES\",\"alias_id\": \"@{d.stockid}\",\"quantity\": @{d.supplier_total},\"wholesale_price\": @{d.wholesale_price},\"wholesale_price_tax\": @{d.wholesale_price_tax}}",
-              "foreach": "items.*"
-            },
             "update": {
-              "header": "https://dev-api-gnm.actio.com.au:8443/service/product/SUNSHADES/@{d.stockid}/stock",
-              "body": "{\"supplier_id\": \"SUNSHADES\",\"retail_price\": @{d.retail_price},\"retail_price_tax\": @{d.retail_price_tax},\"alias_prefix\":\"SUNSHADES\",\"alias_id\": \"@{d.stockid}\",\"quantity\": @{d.supplier_total},\"wholesale_price\": @{d.wholesale_price},\"wholesale_price_tax\": @{d.wholesale_price_tax}}",
-              "foreach": "items.*"
+              "uri": "https://dev-api-gnm.actio.com.au:8443/service/product/SUNSHADES/@{d.local.stockid}",
+              "body": "{\"alias_id\": \"@{d.local.stockid}\",\"alias_prefix\": \"SUNSHADES\",\"apn\": \"@{d.local.apn}\",\"attributes\": [{\"name\": \"frame_brand\",\"type\": \"string\",\"value\": \"@{(ifNotBlankOrElse,d.local.frame_brand,'-')}\"},{\"name\": \"frame_bridge_size\",\"type\": \"string\",\"value\": \"@{(ifNotBlankOrElse,d.local.frame_bridge_size,'-')}\"},{\"name\": \"frame_colour\",\"type\": \"string\",\"value\": \"@{(ifNotBlankOrElse,d.local.frame_colour,'-')}\"},{\"name\": \"frame_depth\",\"type\": \"string\",\"value\": \"@{(ifNotBlankOrElse,d.local.frame_depth,'-')}\"},{\"name\": \"frame_eye_size\",\"type\": \"string\",\"value\": \"@{(ifNotBlankOrElse,d.local.frame_eye_size,'-')}\"},{\"name\": \"frame_gender\",\"type\": \"string\",\"value\": \"@{(ifNotBlankOrElse,d.local.frame_gender,'-')}\"},{\"name\": \"frame_material\",\"type\": \"string\",\"value\": \"@{(ifNotBlankOrElse,d.local.frame_material,'-')}\"},{\"name\": \"frame_model\",\"type\": \"string\",\"value\": \"@{(ifNotBlankOrElse,d.local.frame_model,'-')}\"},{\"name\": \"frame_temple_length\",\"type\": \"string\",\"value\": \"@{(ifNotBlankOrElse,d.local.frame_temple_length,'-')}\"},{\"name\": \"frame_type\",\"type\": \"string\",\"value\": \"@{(ifNotBlankOrElse,d.local.frame_type,'-')}\"}],\"description\": \"@{d.local.description}\",\"discontinued\": @{d.local.discontinued},\"name\": \"@{d.local.stockid}\",\"retail_price\": @{d.local.retail_price},\"retail_price_tax\": @{d.local.retail_price_tax},\"type\": \"frame\",\"wholesale_price\": @{d.local.wholesale_price},\"wholesale_price_tax\": @{d.local.wholesale_price_tax}}"
+            }
+          }
+        }
+      },
+      "update-stock-api": {
+        "type": "include",
+        "behavior": "simple",
+        "foreach": "root.items.*",
+        "dataSource": {
+          "type": "rest",
+          "behavior": "simple",
+          "path": "-",
+          "credential": {
+            "user": "admin",
+            "password": "password"
+          },
+          "query": {
+            "update": {
+              "uri": "https://dev-api-gnm.actio.com.au:8443/service/product/SUNSHADES/@{d.local.stockid}/stock",
+              "body": "{\"supplier_id\": \"SUNSHADES\",\"retail_price\": @{d.local.retail_price},\"retail_price_tax\": @{d.local.retail_price_tax},\"alias_prefix\":\"SUNSHADES\",\"alias_id\": \"@{d.local.stockid}\",\"quantity\": @{d.local.supplier_total},\"wholesale_price\": @{d.local.wholesale_price},\"wholesale_price_tax\": @{d.local.wholesale_price_tax}}"
             }
           }
         }
@@ -84,7 +63,7 @@
     },
     "pipelines": {
       "load-frame" : {
-        "pipe": "read-product-api | parse-product-api | update-product-api"
+        "pipe": "read-product-api | update-product-api"
       },
       "load-stock" : {
         "pipe": "read-product-api | update-stock-api"

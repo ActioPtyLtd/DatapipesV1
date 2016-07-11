@@ -7,6 +7,8 @@ case class DataSetHttpResponse(label: String, uri: String, statusCode: Int, head
 
   override def apply(field: String): DataSet = if(field==body.label)
     body
+  else if(field=="status")
+    DataString(field, statusCode.toString)
   else
     headers.get(field).map(DataString(field,_)).getOrElse(Nothin())
 

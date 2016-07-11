@@ -110,7 +110,7 @@ class DataSourceREST extends DataSource with Logging {
 
     this.logger.info(re._3)
 
-    val dsBody = Data2Json.fromJson2Data(re._3) // TODO: assuming the body is in json, may not want to make assumption
+    val dsBody = Try(Data2Json.fromJson2Data(re._3)).toOption.getOrElse(Nothin())
 
     DataSetHttpResponse("response",request.getURI.toString, re._1.getStatusCode, re._2.map(h => h.getName -> h.getValue).toMap, DataRecord("root", dsBody.elems.toList))
   }

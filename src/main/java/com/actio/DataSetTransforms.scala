@@ -17,7 +17,9 @@ object DataSetTransforms {
 
   def ifNotBlankOrElse(ds: DataSet, other: String) = ds.stringOption.map(s => if(s.trim().isEmpty) DataString("",other) else DataString("",s)).getOrElse(DataString("",other))
 
+  def concatString(ds: DataSet) = DataString("",ds.elems.map(_.stringOption.getOrElse("")).mkString(","))
 
+  def ifEqualOrElse(ds: DataSet, equal: String, then: String, dsElse: DataSet) = if(ds.stringOption.getOrElse("") == equal) DataString("", then) else dsElse
 
 
 

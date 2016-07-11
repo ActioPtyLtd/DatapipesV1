@@ -69,13 +69,13 @@
           "behavior": "simple",
           "path": "-",
           "credential": {
-            "user": "gm",
-            "password": "83498dd4fa301a3aa2d117b13d371526"
+            "user": "admin",
+            "password": "password"
           },
           "query": {
             "create": {
               "uri": "https://dev-api-gnm.actio.com.au:8443/service/job/@{d.item.local.id}/status",
-              "body": "{\"action\": \"-\",\"comment\": \"@{d.response.response.body.txid}\"}"
+              "body": "{\"action\": \"@{(ifEqualOrElse,d.response.response.status,'200','SUPPLIER_SUBMITTED','SUSPENDED')}\",\"comment\": \"@{(ifEqualOrElse,d.response.response.status,'200',d.response.response.root.txid,(concatString,d.response.response.root.errors.*.message))}\"}"
             }
           }
         }

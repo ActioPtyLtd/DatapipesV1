@@ -21,20 +21,20 @@ import org.apache.http.impl.client.CloseableHttpClient
 import org.apache.http.impl.client.HttpClientBuilder
 import org.apache.http.util.EntityUtils
 import scala.collection.Iterator
-import scala.util.{Failure, Success, Try}
+import scala.util.{ Failure, Success, Try }
 
 /**
-  * Created by jim on 7/8/2015.
-  */
+ * Created by jim on 7/8/2015.
+ */
 object DataSourceREST {
   private val CONTENT_TYPE: String = "application/json"
 
   def createHttpRequest(label: String): HttpRequestBase = {
-    if (label=="create")
+    if (label == "create")
       new HttpPost()
-    else if(label=="update")
+    else if (label == "update")
       new HttpPut()
-    else if(label=="patch")
+    else if (label == "patch")
       new HttpPatch()
     else
       new HttpGet()
@@ -100,7 +100,7 @@ class DataSourceREST extends DataSource with Logging {
 
   def sendRequest(request: HttpUriRequest) = {
     val response = HttpClientBuilder.create().build().execute(request)
-    val ret =(response.getStatusLine, response.getAllHeaders, EntityUtils.toString(response.getEntity, "UTF-8"))
+    val ret = (response.getStatusLine, response.getAllHeaders, EntityUtils.toString(response.getEntity, "UTF-8"))
     response.close()
     ret
   }
@@ -112,7 +112,7 @@ class DataSourceREST extends DataSource with Logging {
 
     val dsBody = Try(Data2Json.fromJson2Data(re._3)).toOption.getOrElse(DataString("", Option(re._3).getOrElse("")))
 
-    DataSetHttpResponse("response",request.getURI.toString, re._1.getStatusCode, re._2.map(h => h.getName -> h.getValue).toMap, DataRecord("root", dsBody.elems.toList))
+    DataSetHttpResponse("response", request.getURI.toString, re._1.getStatusCode, re._2.map(h => h.getName -> h.getValue).toMap, DataRecord("root", dsBody.elems.toList))
   }
 
   def authHeader = "Basic " + new String(Base64.encodeBase64((user + ":" + password).getBytes(Charset.forName("ISO-8859-1"))))
@@ -123,7 +123,7 @@ class DataSourceREST extends DataSource with Logging {
       getRequest(ds,
         DataSourceREST.createHttpRequest(label),
         config.getString(s"query.$label.uri"),
-        configOption(config,s"query.$label.body"))
+        configOption(config, s"query.$label.body"))
 
     logger.info(s"Calling ${requestQuery.getMethod} ${requestQuery.getURI}")
 
@@ -175,19 +175,18 @@ class DataSourceREST extends DataSource with Logging {
 
   private def configOption(config: Config, path: String) = if (config.hasPath(path)) Some(config.getString(path)) else None
 
-  override def update(ds: DataSet): Unit = { }
+  override def update(ds: DataSet): Unit = {}
 
   private def getRequest[T <: HttpRequestBase](ds: DataSet, f: => HttpRequestBase, templateHeader: String, templateBody: Option[String]) = {
     val headerParser = TemplateParser(templateHeader)
     val headerExpression = TemplateEngine(headerParser, ds)
 
-    if(templateBody.isDefined) {
+    if (templateBody.isDefined) {
       val bodyParser = TemplateParser(templateBody.get)
       val bodyExpression = TemplateEngine(bodyParser, ds)
 
       createRequest(bodyExpression, f, headerExpression.stringOption.getOrElse(""))
-    }
-    else
+    } else
       createRequest(ds, f, headerExpression.stringOption.getOrElse(""))
   }
 
@@ -195,7 +194,8 @@ class DataSourceREST extends DataSource with Logging {
     verb match {
       case postput: HttpEntityEnclosingRequestBase => createRequest(body match {
         case DataString(_, s) => Some(s)
-        case _ => Some(Data2Json.toJsonString(body))}, verb, uri)
+        case _ => Some(Data2Json.toJsonString(body))
+      }, verb, uri)
       case _ => createRequest(None, verb, uri)
     }
 
@@ -205,7 +205,7 @@ class DataSourceREST extends DataSource with Logging {
     request.setURI(URI.create(uri))
     request.setHeader(HttpHeaders.AUTHORIZATION, authHeader)
 
-    if(body.isDefined) {
+    if (body.isDefined) {
       logger.info(body.get)
       val input: StringEntity = new StringEntity(body.get)
       input.setContentType(DataSourceREST.CONTENT_TYPE)

@@ -1,8 +1,8 @@
 package com.actio
 
 /**
-  * Created by mauri on 25/05/2016.
-  */
+ * Created by mauri on 25/05/2016.
+ */
 
 case class DataString(label: String = "", str: String) extends DataSet {
 
@@ -15,7 +15,7 @@ case class DataNumeric(label: String, num: BigDecimal) extends DataSet {
 
   override def stringOption = Some(num.toString())
 
-  override def schema = SchemaNumber(label,0,0)
+  override def schema = SchemaNumber(label, 0, 0)
 }
 
 case class DataBoolean(label: String, bool: Boolean) extends DataSet {
@@ -45,7 +45,7 @@ case class DataArray(label: String, arrayElems: List[DataSet]) extends DataSet {
 
   override def elems = arrayElems.toIterator
 
-  override def schema = SchemaArray(label, arrayElems.headOption.map(_.schema).getOrElse(SchemaUnknown))      // could update this to check for maximum amount of fields rather than just first
+  override def schema = SchemaArray(label, arrayElems.headOption.map(_.schema).getOrElse(SchemaUnknown)) // could update this to check for maximum amount of fields rather than just first
 }
 
 object DataArray {
@@ -74,12 +74,12 @@ object Data2Json {
       case DataBoolean(_, bool) => bool.toString
     }
 
-  def toField(name: String) = if(name.isEmpty) "" else "\"" + name + "\": "
+  def toField(name: String) = if (name.isEmpty) "" else "\"" + name + "\": "
 
   import org.json4s._
   import org.json4s.jackson.JsonMethods._
 
-  def fromJson4s2Data(label: String,v: JValue): DataSet =
+  def fromJson4s2Data(label: String, v: JValue): DataSet =
     v match {
       case (js: JString) => DataString(label, js.s)
       case (ji: JInt) => DataNumeric(label, BigDecimal(ji.num))
@@ -93,7 +93,6 @@ object Data2Json {
 
   def fromJson2Data(string: String) =
     fromJson4s2Data("", parse(string)) // org.json4s.string2JsonInput(string)
-
 
 }
 

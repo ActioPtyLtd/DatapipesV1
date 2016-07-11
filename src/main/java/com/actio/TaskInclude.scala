@@ -1,13 +1,13 @@
 package com.actio
 
-import com.actio.dpsystem.{DPSystemConfigurable, DPSystemFactory}
-import com.typesafe.config.{Config, ConfigValueFactory}
+import com.actio.dpsystem.{ DPSystemConfigurable, DPSystemFactory }
+import com.typesafe.config.{ Config, ConfigValueFactory }
 
 import scala.collection.Iterator
 
 /**
-  * Created by mauri on 4/07/2016.
-  */
+ * Created by mauri on 4/07/2016.
+ */
 class TaskInclude extends Task {
 
   override def execute(): Unit = {
@@ -21,11 +21,12 @@ class TaskInclude extends Task {
 
     val allQueryResults = iterate.map(d => (d, dataSource.executeQueryLabel(d, operation).elems.toList.head)).toList
 
-    if (config.hasPath("attribute"))
+    if (config.hasPath("attribute")) {
       dataSet = new DataSetFixedData(dataSet.schema, DataRecord("", List(DataArray(attribute, allQueryResults.map(_._2)), dataSet.elems.toList.head)))
-    else
+    } else {
       dataSet = DataArray("", allQueryResults.map(r =>
         DataRecord("", List(DataRecord("item", r._1.elems.toList), DataRecord("response", List(r._2))))))
+    }
   }
 
   private def configOption(config: Config, path: String) = if (config.hasPath(path)) Some(config.getString(path)) else None

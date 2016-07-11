@@ -1,56 +1,70 @@
 package com.actio
 
+import org.json4s._
+import org.json4s.jackson.JsonMethods._
+
 /**
  * Created by mauri on 25/05/2016.
  */
 
-case class DataString(label: String = "", str: String) extends DataSet {
+case class DataString(label: String, str: String) extends DataSet {
 
-  override def stringOption = Option(str)
+  override def stringOption: Option[String] = Option(str)
 
-  override def schema = SchemaString(label, 0)
+  override def schema: SchemaDefinition = SchemaString(label, 0)
+}
+
+object DataString {
+
+  def apply(str: String): DataString = DataString("", str)
 }
 
 case class DataNumeric(label: String, num: BigDecimal) extends DataSet {
 
-  override def stringOption = Some(num.toString())
+  override def stringOption: Option[String] = Some(num.toString())
 
-  override def schema = SchemaNumber(label, 0, 0)
+  override def schema: SchemaDefinition = SchemaNumber(label, 0, 0)
+}
+
+object DataNumeric {
+
+  def apply(num: BigDecimal): DataNumeric = DataNumeric("", num)
 }
 
 case class DataBoolean(label: String, bool: Boolean) extends DataSet {
 
-  override def stringOption = Some(bool.toString)
+  override def stringOption: Option[String] = Some(bool.toString)
 
-  override def schema = SchemaBoolean(label)
+  override def schema: SchemaDefinition = SchemaBoolean(label)
 }
 
 case class DataRecord(label: String, fields: List[DataSet]) extends DataSet {
 
-  override def apply(field: String) = fields.find(f => f.label == field).getOrElse(Nothin())
+  override def apply(field: String): DataSet = fields.find(f => f.label == field).getOrElse(Nothin())
 
-  override def elems = fields.toIterator
+  override def elems: Iterator[DataSet] = fields.toIterator
 
-  override def schema = SchemaRecord(label, fields.map(_.schema))
+  override def schema: SchemaDefinition = SchemaRecord(label, fields.map(_.schema))
 }
 
 object DataRecord {
 
-  def apply(fields: List[DataSet]) = new DataRecord("", fields)
+  def apply(fields: List[DataSet]): DataRecord = new DataRecord("", fields)
 }
 
 case class DataArray(label: String, arrayElems: List[DataSet]) extends DataSet {
 
-  override def apply(ord: Int) = arrayElems.lift(ord).getOrElse(Nothin())
+  override def apply(ord: Int): DataSet = arrayElems.lift(ord).getOrElse(Nothin())
 
-  override def elems = arrayElems.toIterator
+  override def elems: Iterator[DataSet] = arrayElems.toIterator
 
-  override def schema = SchemaArray(label, arrayElems.headOption.map(_.schema).getOrElse(SchemaUnknown)) // could update this to check for maximum amount of fields rather than just first
+  //TODO: could update this to check for maximum amount of fields rather than just first
+  override def schema: SchemaDefinition = SchemaArray(label, arrayElems.headOption.map(_.schema).getOrElse(SchemaUnknown))
 }
 
 object DataArray {
 
-  def apply(arrayElems: List[DataSet]) = new DataArray("", arrayElems)
+  def apply(arrayElems: List[DataSet]): DataArray = new DataArray("", arrayElems)
 }
 
 sealed abstract class Key
@@ -63,36 +77,34 @@ object Data2Json {
   def toJsonString(data: DataSet): String =
     data match {
       case DataString(_, s) => "\"" + s + "\""
-      case DataRecord(key, fs) => toField(key) + "{" + fs.map(f =>
-        (if (!f.isInstanceOf[DataRecord] && !f.isInstanceOf[DataArray])
-          toField(f.label)
-        else "")
-          + toJsonString(f)).mkString(",") + "}"
-      case DataArray(key, ds) => toField(key) + "[" + ds.map(d => toJsonString(d)).mkString(",") + "]"
+      case DataRecord(key, fs) =>
+        toField(key) +
+          "{" + fs.map(f =>
+            (if (!f.isInstanceOf[DataRecord] && !f.isInstanceOf[DataArray]) toField(f.label) else "")
+              + toJsonString(f)).mkString(",") +
+          "}"
+      case DataArray(key, ds) =>
+        toField(key) +
+          "[" + ds.map(d => toJsonString(d)).mkString(",") + "]"
       case Nothin(_) => "null"
       case DataNumeric(_, num) => num.setScale(2, BigDecimal.RoundingMode.HALF_UP).underlying().stripTrailingZeros().toPlainString
       case DataBoolean(_, bool) => bool.toString
     }
 
-  def toField(name: String) = if (name.isEmpty) "" else "\"" + name + "\": "
-
-  import org.json4s._
-  import org.json4s.jackson.JsonMethods._
+  def toField(name: String): String = if (name.isEmpty) "" else "\"" + name + "\": "
 
   def fromJson4s2Data(label: String, v: JValue): DataSet =
     v match {
       case (js: JString) => DataString(label, js.s)
       case (ji: JInt) => DataNumeric(label, BigDecimal(ji.num))
-      case (jdec: JDecimal) => DataNumeric(label, jdec.num)
-      case (jdou: JDouble) => DataNumeric(label, jdou.num)
+      case (jDecimal: JDecimal) => DataNumeric(label, jDecimal.num)
+      case (jDouble: JDouble) => DataNumeric(label, jDouble.num)
       case (jb: JBool) => DataBoolean(label, jb.value)
       case (ja: JArray) => DataArray(label, ja.arr.map(a => fromJson4s2Data("", a)).toList)
       case (jo: JObject) => DataRecord(label, jo.obj.map(o => fromJson4s2Data(o._1, o._2)).toList)
       case _ => Nothin(label)
     }
 
-  def fromJson2Data(string: String) =
-    fromJson4s2Data("", parse(string)) // org.json4s.string2JsonInput(string)
-
+  def fromJson2Data(string: String): DataSet = fromJson4s2Data("", parse(string))
 }
 

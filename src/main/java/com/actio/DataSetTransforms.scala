@@ -8,19 +8,20 @@ import scala.util.Try
 /**
   * Created by mauri on 27/04/2016.
   */
+
 object DataSetTransforms {
 
   def filterValue(ds: DataSet, property: String, value: String): DataSet = DataArray(ds.elems.filter(f => f(property).stringOption.getOrElse("") == value).toList)
 
   def firstValue(ds: DataSet, property: String, value: String): DataSet = ds.elems.find(f => f.value(property).stringOption.getOrElse("") == value).getOrElse(Nothin())
 
-  def convertDateFormat(ds: DataSet, in: String, out: String) = DataString("", convDateValue(ds.stringOption.getOrElse(""), in, out))
+  def convertDateFormat(ds: DataSet, in: String, out: String): DataSet = DataString(convDateValue(ds.stringOption.getOrElse(""), in, out))
 
-  def ifNotBlankOrElse(ds: DataSet, other: String) = ds.stringOption.map(s => if (s.trim().isEmpty) DataString("", other) else DataString("", s)).getOrElse(DataString("", other))
+  def ifNotBlankOrElse(ds: DataSet, other: String): DataSet = ds.stringOption.map(s => if (s.trim().isEmpty) DataString(other) else DataString(s)).getOrElse(DataString(other))
 
-  def concatString(ds: DataSet) = DataString("", ds.elems.map(_.stringOption.getOrElse("")).mkString(","))
+  def concatString(ds: DataSet): DataSet = DataString(ds.elems.map(_.stringOption.getOrElse("")).mkString(","))
 
-  def ifEqualOrElse(ds: DataSet, equal: String, then: String, dsElse: DataSet) = if (ds.stringOption.getOrElse("") == equal) DataString("", then) else dsElse
+  def ifEqualOrElse(ds: DataSet, equal: String, dsThen: DataSet, dsElse: DataSet): DataSet = if (ds.stringOption.getOrElse("") == equal) dsThen else dsElse
 
 
   /* below will need to be replaced when I have time */
@@ -130,7 +131,7 @@ object DataSetTransforms {
     case (s, d) => new DataSetFixedData(s, d)
   }
 
-  def delim(str: String, d: DataSet) = DataString("", d.elems.map(_.stringOption.getOrElse("")).mkString(str))
+  def delim(str: String, d: DataSet) = DataString(d.elems.map(_.stringOption.getOrElse("")).mkString(str))
 
   // tabular functions, to be refactored
 

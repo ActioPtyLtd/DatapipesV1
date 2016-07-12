@@ -123,13 +123,17 @@ class DataSourceREST extends DataSource with Logging {
 
   def authHeader: String = "Basic " + new String(Base64.encodeBase64((user + ":" + password).getBytes(Charset.forName("ISO-8859-1"))))
 
+  import scala.collection.JavaConverters._
+
   @throws(classOf[Exception])
   override def executeQueryLabel(ds: DataSet, label: String): DataSet = {
     val requestQuery =
       getRequest(ds,
         DataSourceREST.createHttpRequest(label),
         config.getString(s"query.$label.uri"),
-        configOption(config, s"query.$label.body"))
+        configOption(config, s"query.$label.body"),
+        config.getObject(s"query.$label.templates").asScala.map(kv => (kv._1, kv._2.unwrapped().toString)).toList
+      )
 
     logger.info(s"Calling ${requestQuery.getMethod} ${requestQuery.getURI}")
 
@@ -183,13 +187,14 @@ class DataSourceREST extends DataSource with Logging {
 
   override def update(ds: DataSet): Unit = {}
 
-  private def getRequest[T <: HttpRequestBase](ds: DataSet, verb: => HttpRequestBase, templateHeader: String, templateBody: Option[String]) = {
+  private def getRequest[T <: HttpRequestBase](ds: DataSet, verb: => HttpRequestBase, templateHeader: String, templateBody: Option[String], templates: List[(String, String)]) = {
     val headerParser = TemplateParser(templateHeader)
-    val headerExpression = TemplateEngine(headerParser, ds)
+    val scope = (("d" -> (() => ExprDataSet(ds))) :: templates.map(t => (t._1, () => TemplateParser(t._2))).toList).toMap
+    val headerExpression = TemplateEngine.eval(headerParser, scope)
 
     if (templateBody.isDefined) {
       val bodyParser = TemplateParser(templateBody.get)
-      val bodyExpression = TemplateEngine(bodyParser, ds)
+      val bodyExpression = TemplateEngine.eval(bodyParser, scope)
 
       createRequest(bodyExpression, verb, headerExpression.stringOption.getOrElse(""))
     } else {

@@ -35,6 +35,10 @@ object TemplateParser extends RegexParsers {
 
   def variable: Parser[Variable] = "[a-zA-Z0-9]+".r ^^ { str => Variable(str) }
 
+  def array: Parser[ExprArray] = """\[""".r ~ this. repsep(expression, ",") ~ """\]""".r ^^ {
+    case "[" ~ list ~ "]" => ExprArray(list)
+  }
+
   def template: Parser[Template] = (mix | literal) ^^
     {
       case (text: String) ~ "@{" ~ (expr: Expression) ~ "}" ~ (temp: Template) => Mix(Literal(text), expr, temp)
@@ -47,6 +51,10 @@ object TemplateParser extends RegexParsers {
     }))
   }
 
+  def arrayWithGet: Parser[Expression] = (array ~ dataSetGet) ^^ {
+    case expr ~ dataSetGet => PropsGet(expr, dataSetGet)
+  }
+
   def variableWithGet: Parser[Expression] = (variable ~ dataSetGet) ^^ {
     case expr ~ dataSetGet => PropsGet(expr, dataSetGet)
   }
@@ -55,7 +63,7 @@ object TemplateParser extends RegexParsers {
     case expr ~ dataSetGet => PropsGet(expr, dataSetGet)
   }
 
-  def expression: Parser[Expression] = constInt | constString | variableWithGet | variable | functionWithGet | function
+  def expression: Parser[Expression] = constInt | constString | variableWithGet | variable | functionWithGet | function | arrayWithGet | array
 
   def apply(code: String): Template = parseAll(template, code) match {
     case Success(s, _) => s

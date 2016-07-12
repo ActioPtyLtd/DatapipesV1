@@ -54,6 +54,8 @@ object UtilityFunctions extends Logging {
             getParamValues(t, pv.tail, pv.head.asInstanceOf[DataSet].stringOption.orNull :: result)
           } else if (h.getType == classOf[String] || h.getType == classOf[DataSet]) {
             getParamValues(t, pv.tail, pv.head :: result)
+          } else if (h.getType == classOf[Boolean] && pv.head.isInstanceOf[DataBoolean]) {
+            getParamValues(t, pv.tail, pv.head.asInstanceOf[DataBoolean].bool :: result)
           } else {
             getParamValues(t, pv.tail, null :: result)
           }

@@ -12,6 +12,8 @@ case class Variable(name: String) extends Expression
 case class Constant[C <: Any](value: C) extends Expression
 case class PropsGet(expr: Expression, props: List[FindCriteria]) extends Expression
 case class ForEach(expr: Expression, lambdaFunction: LambdaFunction) extends Expression
+case class ExprArray(expressions: List[Expression]) extends Expression
+case class ExprDataSet(ds: DataSet) extends Expression
 
 case class LambdaFunction(varName: String, expr: Expression) // (x: Data) => Data
 
@@ -23,20 +25,20 @@ object TemplateEngine {
 
   import scala.collection.JavaConversions._
 
-  def apply(expr: Expression, ds: DataSet): DataSet = eval(expr, Map("d" -> ds))
-
-  def eval(expr: Expression, scope: Map[String, DataSet]): DataSet = expr match {
+  def eval(expr: Expression, scope: Map[String, () => Expression]): DataSet = expr match {
     case Constant(i: String) => DataString(i)
     case Constant(i: Int) => DataNumeric(i)
-    case Variable(name) => scope(name)
+    case Constant(b: Boolean) => DataBoolean(b)
+    case ExprDataSet(ds) => ds
+    case Variable(name) => eval(scope(name)(), scope)
+    case ExprArray(elems) => DataArray(elems.map(eval(_, scope)).toList)
     case PropsGet(leftExpr, props) =>
       if (props.contains(FindAll)) {
-        DataArray("", eval(leftExpr, scope).find(props).toList)
+        DataArray(eval(leftExpr, scope).find(props).toList)
       } else {
         eval(leftExpr, scope).find(props).toList.headOption.getOrElse(Nothin())
       }
-    case Function(name, params) =>
-      UtilityFunctions.execute(name, params.map(p => eval(p, scope).asInstanceOf[Any])) // reflection invoke
+    case func: Function => evalFunction(func, scope)
     case Literal(text) => DataString(text)
     case Mix(left, middle, right) =>
       DataString(left.text +
@@ -46,5 +48,20 @@ object TemplateEngine {
       DataArray(eval(list, scope).elems.map(e => callLambdaFunction(lambda, e, scope)).toList)
   }
 
-  def callLambdaFunction(lambda: LambdaFunction, data: DataSet, scope: Map[String, DataSet]): DataSet = eval(lambda.expr, scope + (lambda.varName -> data))
+  def evalFunction(func: Function, scope: Map[String, () => Expression]): DataSet = {
+    // handle keyword functions first
+    if (func.name == "if") {
+      if (eval(func.param.head, scope).asInstanceOf[DataBoolean].bool) {
+        eval(func.param(1), scope)
+      } else {
+        eval(func.param(2), scope)
+      }
+    } else {
+      // Fallback to use reflection
+      UtilityFunctions.execute(func.name, func.param.map(p => eval(p, scope).asInstanceOf[Any])) // reflection invoke
+    }
+  }
+
+  def callLambdaFunction(lambda: LambdaFunction, data: DataSet, scope: Map[String, () => Expression]): DataSet =
+    eval(lambda.expr, scope + (lambda.varName -> (() => ExprDataSet(data))))
 }

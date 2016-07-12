@@ -38,6 +38,11 @@ case class DataBoolean(label: String, bool: Boolean) extends DataSet {
   override def schema: SchemaDefinition = SchemaBoolean(label)
 }
 
+object DataBoolean {
+
+  def apply(bool: Boolean): DataBoolean = DataBoolean("", bool)
+}
+
 case class DataRecord(label: String, fields: List[DataSet]) extends DataSet {
 
   override def apply(field: String): DataSet = fields.find(f => f.label == field).getOrElse(Nothin())

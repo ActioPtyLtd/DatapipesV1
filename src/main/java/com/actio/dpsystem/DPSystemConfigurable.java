@@ -2,7 +2,7 @@ package com.actio.dpsystem;
 
 import com.actio.DataSet;
 import com.actio.DataSetTabular;
-import com.jcabi.aspects.Loggable;
+//import com.jcabi.aspects.Loggable;
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigValue;
 import org.slf4j.Logger;
@@ -15,7 +15,7 @@ import java.util.*;
  * Created by dimitarpopov on 24/08/15.
  */
 
-@Loggable(Loggable.DEBUG)
+//@Loggable(Loggable.DEBUG)
 public class DPSystemConfigurable {
 
     protected static final Logger logger = LoggerFactory.getLogger(DPSystemConfigurable.class);

@@ -11,11 +11,17 @@ scalacOptions ++= Seq("-unchecked", "-deprecation", "-Ylog-classpath")
 libraryDependencies ++= Seq(
   "org.scala-lang.modules" %% "scala-xml" % "1.0.4",
   "org.slf4j" % "slf4j-api" % "1.7.19",
-                            //"org.slf4j" % "slf4j-simple" % "1.7.19",
-                            "ch.qos.logback" % "logback-classic" % "1.1.7",
-                            "org.json4s" %% "json4s-jackson" % "3.3.0",
-                            "org.json4s" %% "json4s-ext" % "3.3.0",
-                            "org.scala-lang.modules" %% "scala-parser-combinators" % "1.0.4"
+  "ch.qos.logback" % "logback-classic" % "1.1.7",
+  "org.json4s" %% "json4s-jackson" % "3.3.0",
+  "org.json4s" %% "json4s-ext" % "3.3.0",
+  "org.scala-lang.modules" %% "scala-parser-combinators" % "1.0.4",
+  "com.typesafe" % "config" % "1.3.0",
+  "commons-lang" % "commons-lang" % "2.6",
+  "commons-codec" % "commons-codec" % "1.10",
+  "org.apache.httpcomponents" % "httpclient" % "4.5.2",
+  "com.googlecode.java-diff-utils" % "diffutils" % "1.3.0",
+  "commons-cli" % "commons-cli" % "1.3.1",
+  "com.sparkjava" % "spark-core" % "2.5"
 )
 
 enablePlugins(JavaAppPackaging)

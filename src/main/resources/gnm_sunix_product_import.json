@@ -1,0 +1,51 @@
+{
+  "script": {
+    "schema": {},
+    "tasks": {
+      "read-product-api": {
+        "type": "extract",
+        "behavior": "simple",
+        "dataSource": {
+          "type": "rest",
+          "behavior": "simple",
+          "path": "-",
+          "credential": {
+            "user": "admin",
+            "password": "password"
+          },
+          "query": {
+            "read": {
+              "uri": "https://dev-api-gnm.actio.com.au:8443/api/product?page[number]=1&page[size]=25&page[totals]=true&include=eyewear&filter[product.type]=frame"
+            }
+          }
+        }
+      },
+      "iterate-template": {
+        "type": "iterateTemplate",
+        "behavior": "iterateTemplate",
+        "iterate": "0.root.data.*",
+        "template": "Line ---,@{d.local.id},@{d.local.attributes.description}"
+      },
+      "load-product-csv": {
+        "type": "load",
+        "behavior": "simple",
+        "dataSource": {
+          "behavior" : "append",
+          "directory": "c://tmp//",
+          "type": "file",
+          "filenameTemplate": "test.csv",
+          "outputDelimiter": ","
+        }
+      }
+    },
+    "pipelines": {
+      "load-product" : {
+        "pipe": "read-product-api | iterate-template | load-product-csv"
+      }
+    },
+    "services": { },
+    "startup": {
+      "exec": "load-product"
+    }
+  }
+}

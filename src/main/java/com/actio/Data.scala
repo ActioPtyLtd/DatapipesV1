@@ -69,6 +69,7 @@ case class DataArray(label: String, arrayElems: List[DataSet]) extends DataSet {
 
 object DataArray {
 
+  def apply(arrayElems: DataSet*): DataArray = new DataArray("", arrayElems.toList)
   def apply(arrayElems: List[DataSet]): DataArray = new DataArray("", arrayElems)
 }
 

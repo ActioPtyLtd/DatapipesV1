@@ -132,7 +132,12 @@ class DataSourceREST extends DataSource with Logging {
         DataSourceREST.createHttpRequest(label),
         config.getString(s"query.$label.uri"),
         configOption(config, s"query.$label.body"),
-        config.getObject(s"query.$label.templates").asScala.map(kv => (kv._1, kv._2.unwrapped().toString)).toList
+        if(config.hasPath(s"query.$label.templates")) {
+          config.getObject(s"query.$label.templates").asScala.map(kv => (kv._1, kv._2.unwrapped().toString)).toList
+        }
+        else {
+          Nil
+        }
       )
 
     logger.info(s"Calling ${requestQuery.getMethod} ${requestQuery.getURI}")

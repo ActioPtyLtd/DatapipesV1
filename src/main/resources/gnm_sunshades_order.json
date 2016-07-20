@@ -15,7 +15,7 @@
           },
           "query": {
             "read": {
-              "uri": "https://dev-api-gnm.actio.com.au:8443/api/job?filter[job.status]=CREATED&filter[job.supplier.id]=2&include=address"
+              "uri": "https://dev-api-gnm.actio.com.au:8443/api/job?filter[job.status]=CREATED&filter[job.supplier.id]=2&include=address,order.customer"
             }
           }
         }

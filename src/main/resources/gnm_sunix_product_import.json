@@ -15,7 +15,7 @@
           },
           "query": {
             "read": {
-              "uri": "https://dev-api-gnm.actio.com.au:8443/api/product?page[number]=1&page[size]=25&page[totals]=true&include=eyewear&filter[product.type]=frame"
+              "uri": "https://dev-api-gnm.actio.com.au:8443/api/productAssortment?filter[productAssortment.stores.id]=9&include=products,products.eyewear"
             }
           }
         }
@@ -23,8 +23,8 @@
       "iterate-template": {
         "type": "iterateTemplate",
         "behavior": "iterateTemplate",
-        "iterate": "0.root.data.*",
-        "template": "Line ---,@{d.local.id},@{d.local.attributes.description}"
+        "iterate": "0.root.data.*.relationships.products.data.*",
+        "template": "Line ---,@{d.local.id},@{(firstValue,(filterValue,d.global.response.root.included,'type','productAttributeEyewear'),'id',d.local.id).attributes.brand},@{(firstValue,(filterValue,d.global.response.root.included,'type','productAttributeEyewear'),'id',d.local.id).attributes.frame_model},@{(firstValue,(filterValue,d.global.response.root.included,'type','productAttributeEyewear'),'id',d.local.id).attributes.frame_colour},@{(firstValue,(filterValue,d.global.response.root.included,'type','productAttributeEyewear'),'id',d.local.id).attributes.frame_eye_size},@{(firstValue,(filterValue,d.global.response.root.included,'type','productAttributeEyewear'),'id',d.local.id).attributes.frame_bridge_size},@{(firstValue,(filterValue,d.global.response.root.included,'type','productAttributeEyewear'),'id',d.local.id).attributes.frame_temple_length},@{(firstValue,(filterValue,d.global.response.root.included,'type','productAttributeEyewear'),'id',d.local.id).attributes.frame_depth},f,FALSE,@{(firstValue,(filterValue,d.global.response.root.included,'type','productAttributeEyewear'),'id',d.local.id).attributes.frame_type},@{(firstValue,(filterValue,d.global.response.root.included,'type','product'),'id',d.local.id).attributes.retailPrice},0,@{(firstValue,(filterValue,d.global.response.root.included,'type','product'),'id',d.local.id).attributes.wholesalePriceTax},@{(firstValue,(filterValue,d.global.response.root.included,'type','product'),'id',d.local.id).attributes.wholesalePrice},@{(firstValue,(filterValue,d.global.response.root.included,'type','product'),'id',d.local.id).attributes.apn}"
       },
       "load-product-csv": {
         "type": "load",

@@ -9,8 +9,10 @@ class TransformIterateTemplate extends TaskTransform {
   override def execute(): Unit = {
     val tp = TemplateParser(template)
 
-    dataSet = new DataSetFixedData(SchemaArray("items", SchemaRecord("row", List(SchemaString("", 0)))) ,DataArray("items", dataSet.find(iterate).map(ds =>
-      DataRecord("row", List(TemplateEngine.eval(tp, Map("d" -> (() => ExprDataSet(splitGlobalAndLocal(dataSet, ds)))))))).toList))
+    dataSet = new DataSetFixedData(
+      SchemaArray("items", SchemaRecord("row", List(SchemaString("template", 0)))) ,
+      DataArray("items", dataSet.find(iterate).map(ds =>
+        DataRecord("row", List(TemplateEngine.eval(tp, Map("d" -> (() => ExprDataSet(splitGlobalAndLocal(dataSet, ds)))))))).toList))
   }
 
   lazy val iterate = config.getString("iterate")

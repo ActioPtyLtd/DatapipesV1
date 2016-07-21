@@ -38,8 +38,8 @@ abstract class LinkedTree[D <: LinkedTree[D]] {
   def find(keys: String): Iterator[D] = find(keys.split("\\.", -1).map(s => {
     if (s == "*")
       FindAll
-    else if(s.startsWith("#"))
-      FindOrd(s.replace("#","").toInt)
+    else if(s.head.isDigit)
+      FindOrd(s.toInt)
     else
       FindLabel(s)
   }).toList)
@@ -47,8 +47,8 @@ abstract class LinkedTree[D <: LinkedTree[D]] {
   def value(keys: List[Key]): D = keys.foldLeft[D](this.asInstanceOf[D])((d,k) => d(k))
 
   def value(keys: String): D = value(keys.split("\\.").map(s =>
-    if (s.startsWith("#"))
-      Ord(s.replace("#","").toInt)
+    if (s.head.isDigit)
+      Ord(s.toInt)
     else
       Label(s)
   ).toList)

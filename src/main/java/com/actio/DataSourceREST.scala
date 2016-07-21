@@ -8,7 +8,7 @@ import com.typesafe.config.Config
 import java.io.IOException
 import java.io.UnsupportedEncodingException
 import org.apache.commons.codec.binary.Base64
-import org.apache.http.{HttpHeaders, HttpResponse}
+import org.apache.http._
 import org.apache.http.auth.AuthScope
 import org.apache.http.auth.UsernamePasswordCredentials
 import org.apache.http.client.ClientProtocolException
@@ -21,13 +21,25 @@ import org.apache.http.impl.client.CloseableHttpClient
 import org.apache.http.impl.client.HttpClientBuilder
 import org.apache.http.util.EntityUtils
 import scala.collection.Iterator
-import scala.util.{Failure, Success, Try}
+import scala.util.{ Failure, Success, Try }
 
 /**
-  * Created by jim on 7/8/2015.
-  */
+ * Created by jim on 7/8/2015.
+ */
 object DataSourceREST {
   private val CONTENT_TYPE: String = "application/json"
+
+  def createHttpRequest(label: String): HttpRequestBase = {
+    if (label == "create") {
+      new HttpPost()
+    } else if (label == "update") {
+      new HttpPut()
+    } else if (label == "patch") {
+      new HttpPatch()
+    } else {
+      new HttpGet()
+    }
+  }
 }
 
 class DataSourceREST extends DataSource with Logging {
@@ -45,8 +57,9 @@ class DataSourceREST extends DataSource with Logging {
   @throws(classOf[Exception])
   override def setConfig(_conf: Config, _master: Config) {
     super.setConfig(_conf, _master)
-    if (config.hasPath("url"))
+    if (config.hasPath("url")) {
       route = config.getString("url")
+    }
     if (config.hasPath("credential")) {
       val credConfig: Config = config.getConfig("credential")
       user = credConfig.getString("user")
@@ -79,72 +92,75 @@ class DataSourceREST extends DataSource with Logging {
   def execute(ds: DataSet, query: String) {
   }
 
-  def credentialsProvider = {
+  def credentialsProvider: CredentialsProvider = {
     val cre = new BasicCredentialsProvider
     cre.setCredentials(AuthScope.ANY, new UsernamePasswordCredentials(user, password))
     cre
   }
 
-  def send(request: HttpUriRequest): Try[(HttpResponse, String)] = {
-    val httpClient = HttpClientBuilder.create().build()
+  type HttpClient = HttpUriRequest => (StatusLine, Array[Header], String)
 
-    val response = Try({
-      val re = httpClient.execute(request)
-      (re, EntityUtils.toString(re.getEntity, "UTF-8"))
-    })
-
-    httpClient.close()
-
-    response
+  def sendRequest(request: HttpUriRequest): (StatusLine, Array[Header], String) = {
+    val response = HttpClientBuilder.create().build().execute(request)
+    val ret = (response.getStatusLine, response.getAllHeaders, EntityUtils.toString(response.getEntity, "UTF-8"))
+    response.close()
+    ret
   }
 
-  def sendAndLog(request: HttpUriRequest) = {
+  def getResponseDataSet(request: HttpUriRequest)(implicit httpClient: HttpClient): DataSetHttpResponse = {
+    val response = httpClient(request)
 
-    logger.info(s"Calling ${request.getMethod} ${request.getURI}...")
+    this.logger.info(response._3)
 
-    val response = send(request)
+    val dsBody = Try(Data2Json.fromJson2Data(response._3)).toOption.getOrElse(DataString(Option(response._3).getOrElse("")))
 
-    response match {
-      case Success(s) => {
-        val statusCode = s._1.getStatusLine.getStatusCode
-        logger.info(s"Server status code: $statusCode")
-        if (statusCode != 200)
-          logger.error(s._2)
-      }
-      case Failure(f) => {
-        logger.error(f.getMessage)
-      }
-    }
-    response
+    DataSetHttpResponse("response",
+      request.getURI.toString,
+      response._1.getStatusCode,
+      response._2.map(h => h.getName -> h.getValue).toMap,
+      DataRecord("root", dsBody.elems.toList))
   }
 
-  def authHeader = "Basic " + new String(Base64.encodeBase64((user + ":" + password).getBytes(Charset.forName("ISO-8859-1"))))
+  def authHeader: String = "Basic " + new String(Base64.encodeBase64((user + ":" + password).getBytes(Charset.forName("ISO-8859-1"))))
+
+  import scala.collection.JavaConverters._
 
   @throws(classOf[Exception])
-  def executeQuery(ds: DataSet, query: String) = {
+  override def executeQueryLabel(ds: DataSet, label: String): DataSet = {
+    val requestQuery =
+      getRequest(ds,
+        DataSourceREST.createHttpRequest(label),
+        config.getString(s"query.$label.uri"),
+        configOption(config, s"query.$label.body"),
+        if(config.hasPath(s"query.$label.templates")) {
+          config.getObject(s"query.$label.templates").asScala.map(kv => (kv._1, kv._2.unwrapped().toString)).toList
+        }
+        else {
+          Nil
+        }
+      )
 
-    val headerParser = TemplateParser(query)
+    logger.info(s"Calling ${requestQuery.getMethod} ${requestQuery.getURI}")
 
-    val scope = Map("g" -> ds)
-    val queryExecuted = TemplateEngine(headerParser, scope).map(e => e.stringOption.getOrElse(query)).getOrElse(query)
+    val element = getResponseDataSet(requestQuery)(sendRequest)
 
-    val httpGet = new HttpGet(queryExecuted)
-    httpGet.setHeader(HttpHeaders.AUTHORIZATION, authHeader)
-    httpGet.setHeader(HttpHeaders.CONTENT_TYPE, DataSourceREST.CONTENT_TYPE)
+    logger.info(s"Status code ${element.statusCode} returned.")
 
-    val response = sendAndLog(httpGet).get // may log and throw an exception
-    val responseData = Data2Json.fromJson2Data(response._2) // this can fail too, if json isn't returned
-
-    new DataSetFixedData(responseData.schema, responseData)
+    new DataSetFixedData(element.schema, element)
   }
 
   @throws(classOf[Exception])
-  def extract: Unit = {
-    dataSet = read(new DataSetTableScala()) // doesn't really need a dataset
+  def executeQuery(ds: DataSet, query: String): DataSet = {
+    Nothin()
   }
 
   @throws(classOf[Exception])
-  def load {
+  def extract(): Unit = {
+    dataSet = read(Nothin()) // doesn't really need a dataset
+  }
+
+  @throws(classOf[Exception])
+  def load() {
     if (trans != null) {
       trans.setDataSet(getDataSet)
       trans.execute
@@ -154,7 +170,7 @@ class DataSourceREST extends DataSource with Logging {
   }
 
   @throws(classOf[Exception])
-  def execute {
+  def execute() {
     if (trans != null) {
       trans.setDataSet(getDataSet)
       trans.execute
@@ -169,77 +185,52 @@ class DataSourceREST extends DataSource with Logging {
   }
 
   override def create(ds: DataSet): Unit = {
-    getRequests(ds, new HttpPost(), createConfig, createBody).foreach({
-      case Success(s) => sendAndLog(s)
-      case Failure(f) => logger.error(f.getMessage)}
-    )
+    executeQueryLabel(ds.elems.toList.head, "create")
   }
 
   private def configOption(config: Config, path: String) = if (config.hasPath(path)) Some(config.getString(path)) else None
 
-  private lazy val createConfig = config.getString("query.create.header")
-  private lazy val updateConfig = config.getString("query.update.header")
+  override def update(ds: DataSet): Unit = {}
 
-  private lazy val createBody = configOption(config,"query.create.body")
-  private lazy val updateBody = configOption(config,"query.update.body")
-  private lazy val createForEach = configOption(config,"query.create.foreach")
-
-  override def update(ds: DataSet): Unit = {
-    getRequests(ds, new HttpPut(), updateConfig, updateBody).foreach({
-      case Success(s) => sendAndLog(s)
-      case Failure(f) => logger.error(f.getMessage)}
-    )
-  }
-
-  private def getRequests[T <: HttpEntityEnclosingRequestBase](ds: DataSet, f: => HttpEntityEnclosingRequestBase, templateHeader: String, templateBody: Option[String]) = {
-
+  private def getRequest[T <: HttpRequestBase](ds: DataSet, verb: => HttpRequestBase, templateHeader: String, templateBody: Option[String], templates: List[(String, String)]) = {
     val headerParser = TemplateParser(templateHeader)
+    val scope = (("d" -> (() => ExprDataSet(ds))) :: templates.map(t => (t._1, () => TemplateParser(t._2))).toList).toMap
+    val headerExpression = TemplateEngine.eval(headerParser, scope)
 
-    if(templateBody.isDefined) {
-
+    if (templateBody.isDefined) {
       val bodyParser = TemplateParser(templateBody.get)
+      val bodyExpression = TemplateEngine.eval(bodyParser, scope)
 
-      split(ds).map(d => {
-            val scope = Map("g" -> d._1, "d" -> d._2)
-            for {
-              a <- TemplateEngine(bodyParser, scope)
-              b <- TemplateEngine(headerParser, scope)
-            } yield createRequest(a, f, b.stringOption.getOrElse(""))
-          })
+      createRequest(bodyExpression, verb, headerExpression.stringOption.getOrElse(""))
     } else {
-      split(ds).map(d => {
-        val scope = Map("g" -> d._1, "d" -> d._2)
-        for {
-          b <- TemplateEngine(headerParser, scope)
-        } yield createRequest(d._2, f, b.stringOption.getOrElse(""))
-      })
+      createRequest(ds, verb, headerExpression.stringOption.getOrElse(""))
     }
   }
 
-  private def createRequest(body: DataSet, verb: => HttpEntityEnclosingRequestBase, uri: String): HttpEntityEnclosingRequestBase =
-    createRequest(body match { case DataString(_,s) => Some(s)
-    case _ => Some(Data2Json.toJsonString(body))}, verb, uri)
+  private def createRequest(body: DataSet, verb: => HttpRequestBase, uri: String): HttpRequestBase =
+    verb match {
+      case postput: HttpEntityEnclosingRequestBase => createRequest(body match {
+        case DataString(_, s) => Some(s)
+        case _ => Some(Data2Json.toJsonString(body))
+      }, verb, uri)
+      case _ => createRequest(None, verb, uri)
+    }
 
-  private def createRequest(body: Option[String], verb: => HttpEntityEnclosingRequestBase, uri: String): HttpEntityEnclosingRequestBase = {
-
+  private def createRequest(body: Option[String], verb: => HttpRequestBase, uri: String): HttpRequestBase = {
     val request = verb
     request.setURI(URI.create(uri))
     request.setHeader(HttpHeaders.AUTHORIZATION, authHeader)
 
-    if(body.isDefined) {
+    if (body.isDefined) {
+
+      logger.info(body.get)
+
       val input: StringEntity = new StringEntity(body.get)
       input.setContentType(DataSourceREST.CONTENT_TYPE)
-      request.setEntity(input)
+      request.asInstanceOf[HttpEntityEnclosingRequestBase].setEntity(input)
     }
 
     request
-  }
-
-  def split(dataSet: DataSet): Iterator[(DataSet,DataSet)] = {
-    if(createForEach.isDefined)
-      dataSet.elems.flatMap(d => d.find(createForEach.get).map((d,_))) //TODO: can remove elems part later when datasets have names
-    else
-      dataSet.elems.map(d => (d,d)) //TODO: dito above
   }
 
   @throws(classOf[Exception])
@@ -251,7 +242,7 @@ class DataSourceREST extends DataSource with Logging {
   def read(queryParser: QueryParser): DataSet = ???
 
   override def getDataSet: DataSet = {
-    return dataSet
+    dataSet
   }
 
   override def setDataSet(set: DataSet) {

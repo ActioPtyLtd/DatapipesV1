@@ -7,21 +7,16 @@
         "behavior": "simple",
         "dataSource": {
           "behavior": "regex",
-          "directory": "C:\\Users\\mauri\\desktop\\",
+          "directory": "C:\\Users\\mauri\\bitbucket\\gandm-data",
           "type": "file",
-          "filenameTemplate": "order-example.csv"
+          "filenameTemplate": "gmSpecOrder_sample.csv"
         }
       },
       "parse-order-csv": {
         "type": "transform",
         "batch": [
           "split2cols,col1",
-          "row1header",
-          "rename,productid,product_id",
-          "keep,product_id,quantity,order_date_time,return_address_post,return_address_state,return_address1,return_address_city,invoiceid,customerid,customer_firstname,customer_lastname,customer_phone,frame_brand,frame_bridge_size,frame_colour,frame_depth,frame_eye_size,frame_gender,frame_material,frame_model,frame_temple_length,frame_type",
-          "numeric,quantity,0,0",
-          "label,order_items",
-          "addDataString,dummy,1"
+          "row1header"
           ]
       },
       "update-order-api": {
@@ -37,11 +32,14 @@
           },
           "query": {
             "create": {
-              "header": "https://dev-api-gnm.actio.com.au:8443/service/order",
-              "body": "{\"store_id\": \"HAASC\", \"submitted_date_time\": \"@data.order_items.[0].order_date_time@\", \"delivery_address\": { \"postcode\": \"@data.order_items.[0].return_address_post@\", \"state\": \"@data.order_items.[0].return_address_state@\", \"street1\": \"@data.order_items.[0].return_address1@\", \"suburb\": \"@data.order_items.[0].return_address_city@\"}, \"customer\": {\"customer_id\": \"@data.order_items.[0].customerid@\",\"first_name\": \"@data.order_items.[0].customer_firstname@\",\"last_name\": \"@data.order_items.[0].customer_lastname@\",\"phone\": \"@data.order_items.[0].customer_phone@\"}, \"invoice_id\": \"@data.order_items.[0].invoiceid@\", \"order_items\": [%{repeat(i,data.order_items){\"attributes\": [{\"name\": \"frame_brand\", \"type\": \"string\", \"value\": \"@i.frame_brand@\"}], \"product_id\": \"@i.product_id@\", \"quantity\": @i.quantity@}%}]}"
-            },
-            "update": {
-              "header": "https://dev-api-gnm.actio.com.au:8443/service/order"
+              "uri": "https://dev-api-gnm.actio.com.au:8443/service/order",
+              "body": "{\"customer\": {\"customer_id\": \"@{d.0.patientreference}\",\"first_name\": \"@{d.0.patientgivenname}\",\"last_name\": \"@{d.0.patientsurname}\",\"telephone\": \"1234\"},\"delivery_address\": {\"attention\": \"Peter Hewett\",\"number\": \"799\",\"postcode\": \"2088\",\"state\": \"NSW\",\"street1\": \"Military Road\",\"street2\": \"-\",\"street3\": \"Australia\",\"suburb\": \"Mosman\"},\"invoice_id\": \"0001\", @{products},\"store_id\": \"PHHEW\",\"submitted_date_time\": \"@{(convertDateFormat,d.0.orderdate,'d/MM/yyyy','yyyy-MM-dd')}T00:00:00.000Z\"}",
+              "templates": {
+                "products": "\"order_items\": [@{(concatString,[(if,(isBlank,d.0.spectaclemeasurement_framesuppliercode),(nothing),frame),(if,(isBlank,d.0.leftlens_supplierlenscode),(nothing),leftlens),(if,(isBlank,d.0.rightlens_supplierlenscode),(nothing),rightlens)])}]",
+                "frame": "{\"product_id\": \"@{d.0.spectaclemeasurement_framesuppliercode}\",\"quantity\": 1}",
+                "leftlens": "{\"attributes\": [{\"name\": \"left_lens_size\",\"type\": \"decimal\",\"value\": \"@{d.0.leftlens_lenssize}\"},{\"name\": \"left_lens_sphere\",\"type\": \"string\",\"value\": \"@{d.0.leftlens_sphere}\"},{\"name\": \"left_lens_cylindar\",\"type\": \"string\",\"value\": \"@{d.0.leftlens_cylinder}\"},{\"name\": \"left_lens_axis\",\"type\": \"string\",\"value\": \"@{d.0.leftlens_axis}\"},{\"name\": \"left_lens_seg_size\",\"type\": \"decimal\",\"value\": \"@{d.0.leftlens_segsize}\"},{\"name\": \"left_lens_box_height\",\"type\": \"decimal\",\"value\": \"@{d.0.leftlens_boxheight}\"},{\"name\": \"left_lens_box_width\",\"type\": \"decimal\",\"value\": \"@{d.0.leftlens_boxwidth}\"}], \"product_id\": \"@{d.0.leftlens_supplierlenscode}\",\"quantity\": 1}",
+                "rightlens": "{\"attributes\": [{\"name\": \"right_lens_size\",\"type\": \"decimal\",\"value\": \"@{d.0.rightlens_lenssize}\"},{\"name\": \"right_lens_sphere\",\"type\": \"string\",\"value\": \"@{d.0.rightlens_sphere}\"},{\"name\": \"right_lens_cylindar\",\"type\": \"string\",\"value\": \"@{d.0.rightlens_cylinder}\"},{\"name\": \"right_lens_axis\",\"type\": \"string\",\"value\": \"@{d.0.rightlens_axis}\"},{\"name\": \"right_lens_seg_size\",\"type\": \"decimal\",\"value\": \"@{d.0.rightlens_segsize}\"},{\"name\": \"right_lens_box_height\",\"type\": \"decimal\",\"value\": \"@{d.0.rightlens_boxheight}\"},{\"name\": \"right_lens_box_width\",\"type\": \"decimal\",\"value\": \"@{d.0.rightlens_boxwidth}\"}], \"product_id\": \"@{d.0.rightlens_supplierlenscode}\",\"quantity\": 1}"
+              }
             }
           }
         }

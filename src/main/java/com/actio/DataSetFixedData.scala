@@ -7,11 +7,13 @@ import java.util
   * Created by mauri on 26/05/2016.
   */
 
-class DataSetFixedData(myschema: SchemaDefinition, dataElems: DataSet) extends DataSet{
+class DataSetFixedData(mySchema: SchemaDefinition, dataElems: DataSet) extends DataSet{
 
-  override def schema: SchemaDefinition = myschema
+  override def apply(int: Int): DataSet = dataElems
 
-  override def elems = List(dataElems).toIterator
+  override def schema: SchemaDefinition = mySchema
+
+  override def elems: Iterator[DataSet] = List(dataElems).toIterator
 
   override def label: String = ""
 }

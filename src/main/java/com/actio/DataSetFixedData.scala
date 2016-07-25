@@ -9,7 +9,9 @@ import java.util
 
 class DataSetFixedData(mySchema: SchemaDefinition, dataElems: DataSet) extends DataSet{
 
-  override def apply(int: Int): DataSet = dataElems
+  override def apply(int: Int): DataSet = dataElems(int)
+
+  override def apply(label: String): DataSet = dataElems(label)
 
   override def schema: SchemaDefinition = mySchema
 

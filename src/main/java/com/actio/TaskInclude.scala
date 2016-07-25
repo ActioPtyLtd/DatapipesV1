@@ -20,7 +20,7 @@ class TaskInclude extends Task {
     val dataSource = DPSystemFactory.newDataSource(dataSourceConfig, masterConfig)
 
     val operation = TaskInclude.getOperation(dataSourceConfig)
-    val iterate = TaskInclude.split(dataSet, forEach).toList
+    val iterate = if(forEach.isEmpty) List(dataSet) else TaskInclude.split(dataSet, forEach).toList
 
     val allQueryResults = iterate.map(d => (d, dataSource.executeQueryLabel(d, operation).elems.toList.head)).toList
 

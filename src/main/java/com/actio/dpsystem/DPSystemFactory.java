@@ -128,6 +128,12 @@ public class DPSystemFactory extends DPSystemConfigurable {
             case "iterateTemplate":
                 t = new TransformIterateTemplate();
                 break;
+            case "iterate":
+                t = new TransformIterate();
+                break;
+            case "merge":
+                t = new TaskMerge();
+                break;
             default:
                 throw new Exception("DPSystemFactory:Unknown Task Type "+type);
         }

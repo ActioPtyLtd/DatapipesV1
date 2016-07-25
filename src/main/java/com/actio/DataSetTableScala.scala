@@ -10,11 +10,10 @@ import scala.collection.JavaConverters._
 
 
 case class DataSetTableScala(myschema: SchemaDefinition, data: DataSet) extends DataSet {
+  val rows: List[List[String]] = data.elems.map(_.elems.map(_.stringOption.orNull).toList).toList
+  val header: List[String] = schema.asInstanceOf[SchemaArray].content.asInstanceOf[SchemaRecord].fields.map(_.label).toList
+
   def this() = this(SchemaUnknown, Nothin())
-
-  lazy val rows: List[List[String]] = data.elems.map(_.elems.map(_.stringOption.orNull).toList).toList
-
-  lazy val header: List[String] = schema.asInstanceOf[SchemaArray].content.asInstanceOf[SchemaRecord].fields.map(_.label).toList
 
   import scala.collection.JavaConverters._
 
@@ -38,13 +37,17 @@ case class DataSetTableScala(myschema: SchemaDefinition, data: DataSet) extends 
 
   override def schema = myschema
 
+  def getOrdinalsWithPredicate(predicate: String => Boolean) = header.zipWithIndex filter (c => predicate(c._1)) map (_._2)
+
+  def getColumnValues(columnName: String) = rows map (r => getValue(r, columnName))
+
+  def getValue(row: List[String], columnName: String) = row(getOrdinalOfColumn(columnName))
+
   def getOrdinalOfColumn(columnName: String) = { val i = header.indexWhere(_ == columnName)
     if(i < 0) throw new Exception("Column " + columnName + " doesn't exist")
     i }
 
-  def getOrdinalsWithPredicate(predicate: String => Boolean) = header.zipWithIndex filter(c => predicate(c._1)) map(_._2)
-
-  def getColumnValues(columnName: String) = rows map(r => getValue(r, columnName))
+  def getNextAvailableColumnName(columnName: String): String = getNextAvailableColumnName(columnName, 1).head
 
   def getNextAvailableColumnName(columnName: String, n: Int) = {
     val pair = (columnName :: header) map(c => (c.replaceAll("\\d*$", ""), c.reverse takeWhile Character.isDigit match {
@@ -53,9 +56,6 @@ case class DataSetTableScala(myschema: SchemaDefinition, data: DataSet) extends 
     })) filter(_._1 == columnName.replaceAll("\\d*$", "")) maxBy(_._2)
     (pair._2 until (pair._2 + n)).map(pair._1 + _).toList
   }
-  def getNextAvailableColumnName(columnName: String): String = getNextAvailableColumnName(columnName, 1).head
-
-  def getValue(row: List[String], columnName: String) = row(getOrdinalOfColumn(columnName))
 
   override def label: String = ""
 }

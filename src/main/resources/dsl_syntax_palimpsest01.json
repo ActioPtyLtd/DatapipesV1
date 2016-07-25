@@ -1,5 +1,9 @@
 {
   "script": {
+    "system": {
+      "configServer": "localhost:9999",
+      "eventServer": "localhost:89998"
+    },
     "schema": {},
     "tasks": {
       "sqlrecord01": {

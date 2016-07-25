@@ -7,6 +7,7 @@ import com.actio.dpsystem.Logging
 import com.typesafe.config.Config
 import java.io.IOException
 import java.io.UnsupportedEncodingException
+
 import org.apache.commons.codec.binary.Base64
 import org.apache.http._
 import org.apache.http.auth.AuthScope
@@ -19,9 +20,11 @@ import org.apache.http.impl.auth.BasicScheme
 import org.apache.http.impl.client.BasicCredentialsProvider
 import org.apache.http.impl.client.CloseableHttpClient
 import org.apache.http.impl.client.HttpClientBuilder
+import org.apache.http.message.BasicHeader
 import org.apache.http.util.EntityUtils
+
 import scala.collection.Iterator
-import scala.util.{ Failure, Success, Try }
+import scala.util.{Failure, Success, Try}
 
 /**
  * Created by jim on 7/8/2015.
@@ -43,6 +46,7 @@ object DataSourceREST {
 }
 
 class DataSourceREST extends DataSource with Logging {
+  type HttpClient = HttpUriRequest => (StatusLine, Array[Header], String)
   var route: String = null
   var trans: TaskTransform = null
   var user: String = null
@@ -53,6 +57,7 @@ class DataSourceREST extends DataSource with Logging {
   var deletefn: String = null
   var patchfn: String = null
   var port: String = null
+  var headers: List[(String, String)] = List()
 
   @throws(classOf[Exception])
   override def setConfig(_conf: Config, _master: Config) {
@@ -86,6 +91,16 @@ class DataSourceREST extends DataSource with Logging {
     if (config.hasPath("port")) {
       port = config.getString("port")
     }
+
+    if (config.hasPath("headers")) {
+      import scala.collection.JavaConversions._
+      var headmap = config.getObject("headers").entrySet()
+
+      headmap.foreach(n => {
+        headers = headers ::: List((n.getKey, n.getValue.unwrapped().toString))
+      })
+
+    }
   }
 
   @throws(classOf[Exception])
@@ -98,32 +113,46 @@ class DataSourceREST extends DataSource with Logging {
     cre
   }
 
-  type HttpClient = HttpUriRequest => (StatusLine, Array[Header], String)
-
-  def sendRequest(request: HttpUriRequest): (StatusLine, Array[Header], String) = {
-    val response = HttpClientBuilder.create().build().execute(request)
-    val ret = (response.getStatusLine, response.getAllHeaders, EntityUtils.toString(response.getEntity, "UTF-8"))
-    response.close()
-    ret
+  @throws(classOf[Exception])
+  def executeQuery(ds: DataSet, query: String): DataSet = {
+    Nothin()
   }
 
-  def getResponseDataSet(request: HttpUriRequest)(implicit httpClient: HttpClient): DataSetHttpResponse = {
-    val response = httpClient(request)
-
-    this.logger.info(response._3)
-
-    val dsBody = Try(Data2Json.fromJson2Data(response._3)).toOption.getOrElse(DataString(Option(response._3).getOrElse("")))
-
-    DataSetHttpResponse("response",
-      request.getURI.toString,
-      response._1.getStatusCode,
-      response._2.map(h => h.getName -> h.getValue).toMap,
-      DataRecord("root", dsBody.elems.toList))
+  @throws(classOf[Exception])
+  def extract(): Unit = {
+    dataSet = read(Nothin()) // doesn't really need a dataset
   }
 
-  def authHeader: String = "Basic " + new String(Base64.encodeBase64((user + ":" + password).getBytes(Charset.forName("ISO-8859-1"))))
+  @throws(classOf[Exception])
+  def load() {
+    if (trans != null) {
+      trans.setDataSet(getDataSet)
+      trans.execute
+      setDataSet(trans.getDataSet)
+    }
+    write(getDataSet)
+  }
 
   import scala.collection.JavaConverters._
+
+  @throws(classOf[Exception])
+  def execute() {
+    if (trans != null) {
+      trans.setDataSet(getDataSet)
+      trans.execute
+      setDataSet(trans.getDataSet)
+    }
+    write(dataSet)
+  }
+
+  @throws(classOf[Exception])
+  def write(dataSet: DataSet): Unit = {
+    create(dataSet)
+  }
+
+  override def create(ds: DataSet): Unit = {
+    executeQueryLabel(ds.elems.toList.head, "create")
+  }
 
   @throws(classOf[Exception])
   override def executeQueryLabel(ds: DataSet, label: String): DataSet = {
@@ -149,48 +178,43 @@ class DataSourceREST extends DataSource with Logging {
     new DataSetFixedData(element.schema, element)
   }
 
-  @throws(classOf[Exception])
-  def executeQuery(ds: DataSet, query: String): DataSet = {
-    Nothin()
+  def sendRequest(request: HttpUriRequest): (StatusLine, Array[Header], String) = {
+
+    headers.foreach(t => request.setHeader(new BasicHeader(t._1, t._2.replace("\"", ""))))
+
+    //request.setHeader(new BasicHeader("sfapikey","6ee2ac1c-6045-496f-892e-a0ad3dd5976c"))
+
+    logger.info(">>>>>>>>" + request.toString + "<<<<<<<" + request.getRequestLine)
+
+    import scala.collection.JavaConversions._
+    request.getAllHeaders.foreach(f => logger.info(">>>" + f.getName + ">>" + f.getValue))
+
+    val httpreq = HttpClientBuilder.create()
+
+    val builthttp = httpreq.build()
+
+    val response = builthttp.execute(request)
+
+    val ret = (response.getStatusLine, response.getAllHeaders, EntityUtils.toString(response.getEntity, "UTF-8"))
+    response.close()
+    ret
   }
 
-  @throws(classOf[Exception])
-  def extract(): Unit = {
-    dataSet = read(Nothin()) // doesn't really need a dataset
-  }
+  def getResponseDataSet(request: HttpUriRequest)(implicit httpClient: HttpClient): DataSetHttpResponse = {
+    val response = httpClient(request)
 
-  @throws(classOf[Exception])
-  def load() {
-    if (trans != null) {
-      trans.setDataSet(getDataSet)
-      trans.execute
-      setDataSet(trans.getDataSet)
-    }
-    write(getDataSet)
-  }
+    this.logger.info(response._3)
 
-  @throws(classOf[Exception])
-  def execute() {
-    if (trans != null) {
-      trans.setDataSet(getDataSet)
-      trans.execute
-      setDataSet(trans.getDataSet)
-    }
-    write(dataSet)
-  }
+    val dsBody = Try(Data2Json.fromJson2Data(response._3)).toOption.getOrElse(DataString(Option(response._3).getOrElse("")))
 
-  @throws(classOf[Exception])
-  def write(data: DataSet, suffix: String) {
-    if (suffix.contentEquals("_all")) write(data)
-  }
-
-  override def create(ds: DataSet): Unit = {
-    executeQueryLabel(ds.elems.toList.head, "create")
+    DataSetHttpResponse("response",
+      request.getURI.toString,
+      response._1.getStatusCode,
+      response._2.map(h => h.getName -> h.getValue).toMap,
+      DataRecord("root", dsBody.elems.toList))
   }
 
   private def configOption(config: Config, path: String) = if (config.hasPath(path)) Some(config.getString(path)) else None
-
-  override def update(ds: DataSet): Unit = {}
 
   private def getRequest[T <: HttpRequestBase](ds: DataSet, verb: => HttpRequestBase, templateHeader: String, templateBody: Option[String], templates: List[(String, String)]) = {
     val headerParser = TemplateParser(templateHeader)
@@ -233,13 +257,7 @@ class DataSourceREST extends DataSource with Logging {
     request
   }
 
-  @throws(classOf[Exception])
-  def write(dataSet: DataSet): Unit = {
-    create(dataSet)
-  }
-
-  @throws(classOf[Exception])
-  def read(queryParser: QueryParser): DataSet = ???
+  def authHeader: String = "Basic " + new String(Base64.encodeBase64((user + ":" + password).getBytes(Charset.forName("ISO-8859-1"))))
 
   override def getDataSet: DataSet = {
     dataSet
@@ -248,6 +266,16 @@ class DataSourceREST extends DataSource with Logging {
   override def setDataSet(set: DataSet) {
     dataSet = set
   }
+
+  @throws(classOf[Exception])
+  def write(data: DataSet, suffix: String) {
+    if (suffix.contentEquals("_all")) write(data)
+  }
+
+  override def update(ds: DataSet): Unit = {}
+
+  @throws(classOf[Exception])
+  def read(queryParser: QueryParser): DataSet = ???
 
   @throws(classOf[Exception])
   def getLastLoggedDataSet: DataSet = ???

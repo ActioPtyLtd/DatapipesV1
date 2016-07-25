@@ -34,7 +34,6 @@ class Main {
         String pipelineName = null;
         Boolean runService = false;
 
-
         try {
             // parse the command line arguments
             CommandLine line = parser.parse( options, args );
@@ -113,7 +112,7 @@ class Main {
         URL[] urls = ((URLClassLoader)cl).getURLs();
 
         for(URL url: urls){
-            logger.debug(url.getFile());
+            logger.info(url.getFile());
         }
 
     }

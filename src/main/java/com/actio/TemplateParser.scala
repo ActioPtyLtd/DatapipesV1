@@ -41,7 +41,7 @@ object TemplateParser extends RegexParsers {
 
   def template: Parser[Template] = (mix | literal) ^^
     {
-      case (text: String) ~ "@{" ~ (expr: Expression) ~ "}" ~ (temp: Template) => Mix(Literal(text), expr, temp)
+      case (text: String) ~ "~{" ~ (expr: Expression) ~ "}" ~ (temp: Template) => Mix(Literal(text), expr, temp)
       case (text: String) => Literal(text)
     }
 

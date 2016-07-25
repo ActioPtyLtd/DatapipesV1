@@ -49,7 +49,6 @@ public class StaticUtilityFunctions extends DPSystemConfigurable {
         if (fns.getFunctions().containsKey(BATCH_FUNCTIONS_KEY)) {
             return UtilityFunctions.execute(theSet, fns.getFunctions().get(BATCH_FUNCTIONS_KEY));
         }
-
         return theSet;
     }
 

@@ -9,6 +9,7 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 /**
  * Created by jim on 3/03/2016.
@@ -25,6 +26,9 @@ import java.util.Map;
 
 public class DPSystemConfig extends DPSystemConfigurable {
 
+    //  pipeline name mapping to compiled parse tree
+    private final Map<String, DPFnNode> pipelinesMap = new HashMap<>();
+    private final Map<String, DPFnNode> servicesMap = new HashMap<>();
     private ConfigObject script;
     private ConfigObject schema;
     private ConfigObject pipes;
@@ -33,9 +37,6 @@ public class DPSystemConfig extends DPSystemConfigurable {
     private ConfigObject execs;
     private ConfigObject scheduled;
 
-    //  pipeline name mapping to compiled parse tree
-    private final Map<String,DPFnNode> pipelinesMap = new HashMap<>();
-    private final Map<String,DPFnNode> servicesMap = new HashMap<>();
 
     //  task name mapping to compiled task - TBD when we compileConfig tasks
 
@@ -66,6 +67,7 @@ public class DPSystemConfig extends DPSystemConfigurable {
         services = setconfigsection(script,SERVICES_LABEL,false);
         execs = setconfigsection(script, STARTUP_EXECS_LABEL,false);
         scheduled = setconfigsection(script,SCHEDULED_LABEL,false);
+
     }
 
     public ConfigObject getTaskConfig(String name) throws Exception {
@@ -74,7 +76,7 @@ public class DPSystemConfig extends DPSystemConfigurable {
             return tasks.toConfig().getObject(name);
         }
         else {
-            logger.error("getTaskConfig:: Task not found:" + name);
+            logger.warn("getTaskConfig:: Task not found:" + name);
             return null;
         }
     }
@@ -85,7 +87,7 @@ public class DPSystemConfig extends DPSystemConfigurable {
             return pipes.toConfig().getObject(name);
         }
         else {
-            logger.error("getPipeConfig:: Pipe not found:" + name);
+            logger.warn("getPipeConfig:: Pipe not found:" + name);
             return null;
         }
     }
@@ -120,7 +122,7 @@ public class DPSystemConfig extends DPSystemConfigurable {
             else
                 logger.warn("getType:: Mandatory type label not found" + name);
         }else {
-            // otherwise look to see if it's a pipeline lable
+            // otherwise look to see if it's a pipeline label
             conf = getPipeConfig(name);
             if (conf!=null)
                 return DPSystemConfigurable.PIPE_LABEL;

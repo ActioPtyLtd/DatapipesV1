@@ -9,11 +9,6 @@ import java.util
  */
 class DataSetFileStream(private val reader: InputStream) extends DataSet {
 
-  private var lineHeader: Option[String] = None
-  private val col1 = "col1"
-  private val groupNumberOfLines = 100
-  private val iterable = scala.io.Source.fromInputStream(reader, "windows-1252").getLines().grouped(groupNumberOfLines)
-
   override lazy val elems = new Iterator[DataSet] {
     override def hasNext: Boolean = iterable.hasNext
 
@@ -28,10 +23,14 @@ class DataSetFileStream(private val reader: InputStream) extends DataSet {
       }
     }
   }
-
-  private def lines2data(lines: List[String]) = DataArray(lines.map(l => DataRecord(List(DataString(col1, l)))))
+  private val col1 = "col1"
+  private val groupNumberOfLines = 10000
+  private val iterable = scala.io.Source.fromInputStream(reader, "windows-1252").getLines().grouped(groupNumberOfLines)
+  private var lineHeader: Option[String] = None
 
   override def schema: SchemaDefinition = SchemaArray(SchemaRecord(List(SchemaString(col1, 0))))
 
   override def label: String = ""
+
+  private def lines2data(lines: List[String]) = DataArray(lines.map(l => DataRecord(List(DataString(col1, l)))))
 }

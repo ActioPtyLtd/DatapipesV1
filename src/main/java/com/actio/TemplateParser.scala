@@ -10,9 +10,9 @@ object TemplateParser extends RegexParsers {
 
   def functionParams = "(" ~ "[a-zA-Z]+".r ~ rep("," ~ expression) ~ ")"
 
-  def mix = "[^@]*".r ~ "@{" ~ expression ~ "}" ~ template
+  def mix = "[^~]*".r ~ "~{" ~ expression ~ "}" ~ template
 
-  def literal = "[^@]*".r
+  def literal = "[^~]*".r
 
   def dataSetGet: Parser[List[FindCriteria]] = rep1("." ~ "[a-zA-Z0-9_\\*]+".r) ^^ { list =>
     list.map({

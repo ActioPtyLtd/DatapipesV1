@@ -151,7 +151,7 @@
         "behavior": "simple",
         "dataSource": {
           "type": "file",
-          "directory": "/home/jim/Downloads/",
+          "directory": "C:\\Users\\mauri\\Downloads",
           "filenameTemplate": "exportBurkeMediaCaptureActivityTest.csv",
           "inputDelimiter": ","
         }
@@ -172,8 +172,7 @@
       "create-users": {
         "type": "include",
         "behavior": "simple",
-        "foreach": "root.data.*.",
-        "attribute": "odata",
+        "foreach": "*",
         "dataSource": {
           "type": "rest",
           "behavior": "simple",

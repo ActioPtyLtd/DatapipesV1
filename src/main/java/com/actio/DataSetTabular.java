@@ -22,6 +22,13 @@ public class DataSetTabular extends DataSet {
     private String outputDelimiter = ",";
     private int batchSize = 500;
     private String customHeader = "";
+    //protected String inputDelimiter = ",";
+    private String inputDelimiter = ",";
+    private List<String> rs = null;
+    private List<List<String>> rsc = null;
+    private int currentColumnIndex = 0;
+    private int rowNumber = 0;
+    private boolean emptySet = true;
 
     public DataSetTabular(List<String> _rs)
     {
@@ -39,9 +46,6 @@ public class DataSetTabular extends DataSet {
     public int sizeOfBatch() throws Exception {
         return getRs().size();
     }
-
-    //protected String inputDelimiter = ",";
-    private String inputDelimiter = "\t";
 
     private List<List<String>> getRsc() throws Exception {
 
@@ -72,9 +76,6 @@ public class DataSetTabular extends DataSet {
         this.rs = rs;
     }
 
-    private List<String> rs = null;
-    private List<List<String>> rsc = null;
-
     private int getCurrentColumnIndex() {
         return currentColumnIndex;
     }
@@ -91,15 +92,9 @@ public class DataSetTabular extends DataSet {
         this.inputDelimiter = inputDelimiter;
     }
 
-    private int currentColumnIndex = 0;
-
     public void set(ResultSet _rs) {
         return;
     }
-
-    private int rowNumber = 0;
-
-    private boolean emptySet = true;
 
     public void set(List<String> _rs) {
         rs = _rs;

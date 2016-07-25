@@ -10,6 +10,9 @@ import scala.collection.Iterator
  */
 class TaskInclude extends Task {
 
+  lazy val forEach = config.getString("foreach")
+  lazy val attribute = config.getString("attribute")
+
   override def execute(): Unit = {
 
     super.setConfig(sysconf.getTaskConfig(this.node.getName).toConfig, sysconf.getMasterConfig)
@@ -24,27 +27,23 @@ class TaskInclude extends Task {
     if (config.hasPath("attribute")) {
       dataSet = new DataSetFixedData(dataSet.schema, DataRecord("", List(DataArray(attribute, allQueryResults.map(_._2)), dataSet.elems.toList.head)))
     } else {
-      dataSet = DataArray("", allQueryResults.map(r =>
-        DataRecord("", List(DataRecord("item", r._1.elems.toList), DataRecord("response", List(r._2))))))
+      dataSet = DataArray("", allQueryResults.map(r => DataRecord("", List(DataRecord("item", r._1.elems.toList), DataRecord("response", List(r._2))))))
     }
   }
-
-  private def configOption(config: Config, path: String) = if (config.hasPath(path)) Some(config.getString(path)) else None
 
   override def load(): Unit = ???
 
   override def extract(): Unit = ???
 
-  lazy val forEach = config.getString("foreach")
-  lazy val attribute = config.getString("attribute")
+  private def configOption(config: Config, path: String) = if (config.hasPath(path)) Some(config.getString(path)) else None
 }
 
 object TaskInclude {
 
+  def split(dataSet: DataSet, forEach: String): List[DataSet] = dataSet.elems.flatMap(g => g.find(forEach).map(splitGlobalAndLocal(g, _))).toList
+
   def splitGlobalAndLocal(dsGlobal: DataSet, dsLocal: DataSet) =
     DataRecord("", List(DataRecord("local", dsLocal.elems.toList), DataRecord("global", dsGlobal.elems.toList)))
-
-  def split(dataSet: DataSet, forEach: String): List[DataSet] = dataSet.elems.flatMap(g => g.find(forEach).map(splitGlobalAndLocal(g, _))).toList
 
   def getOperation(config: Config) = {
     if (config.hasPath("query.update"))
@@ -55,10 +54,10 @@ object TaskInclude {
       "read"
   }
 
-  def getAddHeader(ds: DataSet, headers: Seq[(String, String)]) = headers.map(h => h._1 -> ds.value(h._2).stringOption.getOrElse("")).toMap
-
   def getAddHeader(ds: DataSet, item: DataSet, config: Config): DataSet = if (config.hasPath("responseAdd"))
     DataRecord("", ds :: getAddHeader(item, List(("job", "local.id"))).map(h => DataString(h._1, h._2)).toList)
   else
     ds
+
+  def getAddHeader(ds: DataSet, headers: Seq[(String, String)]) = headers.map(h => h._1 -> ds.value(h._2).stringOption.getOrElse("")).toMap
 }

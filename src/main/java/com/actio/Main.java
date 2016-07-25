@@ -34,8 +34,6 @@ class Main {
         String pipelineName = null;
         Boolean runService = false;
 
-        debug();
-
         try {
             // parse the command line arguments
             CommandLine line = parser.parse( options, args );

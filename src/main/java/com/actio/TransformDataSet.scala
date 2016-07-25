@@ -1,4 +1,4 @@
-package com.actio
+/*package com.actio
 
 import scala.meta.Term.Arg.Repeated
 import scala.meta._
@@ -38,3 +38,4 @@ object TestMeta extends App {
     case Term.Interpolate(_, strings, terms) => DataString((strings zip terms).map(p => p._1.toString() + eval(p._2, scope).stringOption.getOrElse("")).mkString + strings.last.toString)
   }
 }
+*/

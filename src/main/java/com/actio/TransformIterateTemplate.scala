@@ -7,16 +7,23 @@ package com.actio
 class TransformIterateTemplate extends TaskTransform {
 
   override def execute(): Unit = {
-    val tp = TemplateParser(template)
 
-    dataSet = new DataSetFixedData(
-      SchemaArray("items", SchemaRecord("row", List(SchemaString("template", 0)))) ,
-      DataArray("items", dataSet.find(iterate).map(ds =>
-        DataRecord("row", List(TemplateEngine.eval(tp, Map("d" -> (() => ExprDataSet(splitGlobalAndLocal(dataSet, ds)))))))).toList))
+    dataSet = if(breakUp) {
+      res
+    }
+    else {
+      new DataSetFixedData(
+        SchemaArray("items", SchemaRecord("row", List(SchemaString("template", 0)))),
+        res)
+    }
   }
+
+  def res: DataSet = DataArray("items", dataSet.find(iterate).map(ds =>
+    DataRecord("row", List(TemplateEngine.eval(TemplateParser(template), Map("d" -> (() => ExprDataSet(splitGlobalAndLocal(dataSet, ds)))))))).toList)
 
   lazy val iterate = config.getString("iterate")
   lazy val template = config.getString("template")
+  def breakUp = config.hasPath("breakup")
 
   private def splitGlobalAndLocal(dsGlobal: DataSet, dsLocal: DataSet) =
     DataRecord("", List(DataRecord("local", dsLocal.elems.toList), DataRecord("global", dsGlobal.elems.toList)))

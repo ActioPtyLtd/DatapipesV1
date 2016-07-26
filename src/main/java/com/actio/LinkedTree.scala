@@ -1,8 +1,8 @@
 package com.actio
 
 /**
-  * Created by mauri on 17/06/2016.
-  */
+ * Created by mauri on 17/06/2016.
+ */
 abstract class LinkedTree[D <: LinkedTree[D]] {
 
   def apply(ord: Int): D
@@ -26,9 +26,9 @@ abstract class LinkedTree[D <: LinkedTree[D]] {
 
   def stringOption: Option[String] = None
 
-  def find(keys: List[FindCriteria]): Iterator[D] = keys match {
+  def find(keys: Seq[FindCriteria]): Iterator[D] = keys match {
     case Nil => List(this.asInstanceOf[D]).toIterator
-    case (h::t) => h match {
+    case (h :: t) => h match {
       case (f: FindOrd) => this(f.ord).find(t)
       case (f: FindLabel) => this(f.label).find(t)
       case FindAll => this.elems.flatMap(e => e.find(t))
@@ -36,25 +36,25 @@ abstract class LinkedTree[D <: LinkedTree[D]] {
   }
 
   def find(keys: String): Iterator[D] = find(keys.split("\\.", -1).map(s => {
-    if (s == "*")
+    if (s == "*") {
       FindAll
-    else if(s.head.isDigit)
+    } else if (s.head.isDigit) {
       FindOrd(s.toInt)
-    else
+    } else {
       FindLabel(s)
+    }
   }).toList)
 
-  def value(keys: List[Key]): D = keys.foldLeft[D](this.asInstanceOf[D])((d,k) => d(k))
+  def value(keys: Seq[Key]): D = keys.foldLeft[D](this.asInstanceOf[D])((d, k) => d(k))
 
   def value(keys: String): D = value(keys.split("\\.").map(s =>
-    if (s.head.isDigit)
+    if (s.head.isDigit) {
       Ord(s.toInt)
-    else
+    } else {
       Label(s)
-  ).toList)
+    }).toList)
 
-
-  def headOption = elems.toList.headOption
+  def headOption: Option[D] = elems.toList.headOption
 }
 
 sealed abstract class FindCriteria

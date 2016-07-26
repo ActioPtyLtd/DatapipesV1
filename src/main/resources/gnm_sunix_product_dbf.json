@@ -1,0 +1,41 @@
+{
+  "script": {
+    "schema": {},
+    "tasks": {
+      "read-frame-db": {
+        "type": "extract",
+        "behavior": "",
+        "dataSource": {
+          "type": "sql",
+          "behavior": "",
+          "jdbcDriver": "com.caigen.sql.dbf.DBFDriver",
+          "connect": "jdbc:dbf:/C:/Users/mauri/bitbucket/gandm-data/Sunix/Hewett Sunix Vision DBF",
+          "query": {
+            "read": "",
+            "queryTemplate": "select * from VFRAME"
+          }
+        }
+      },
+      "load-product-csv": {
+        "type": "load",
+        "behavior": "simple",
+        "dataSource": {
+          "behavior" : "append",
+          "directory": "c://tmp//",
+          "type": "file",
+          "filenameTemplate": "frame.csv",
+          "outputDelimiter": ","
+        }
+      }
+    },
+    "pipelines": {
+      "load-frame" : {
+        "pipe": "read-frame-db  | load-product-csv"
+      }
+    },
+    "services": { },
+    "startup": {
+      "exec": "load-frame"
+    }
+  }
+}

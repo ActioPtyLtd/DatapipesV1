@@ -22,6 +22,7 @@ target/
 
 # Logback
 .idea/modules/log*.txt
+log*.txt
 
 # IntelliJ library config
 .idea/libraries/*.xml

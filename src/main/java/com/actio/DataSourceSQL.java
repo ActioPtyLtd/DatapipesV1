@@ -153,9 +153,11 @@ public class DataSourceSQL extends DataSource {
 
         logger.info("Connecting to database...");
 
-        try(Connection cn = DriverManager.getConnection(getConnectStr())) {
+        try {
             //cn.setNetworkTimeout(null,160000);
             // Get the warnings
+            Connection cn = DriverManager.getConnection(getConnectStr());   //TODO: close connection on query execute exception
+
             for (SQLWarning warn = cn.getWarnings(); warn != null; warn = warn
                     .getNextWarning()) {
                 // Note: Printing to Standard Out and putting messages in

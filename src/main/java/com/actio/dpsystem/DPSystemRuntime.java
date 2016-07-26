@@ -18,14 +18,18 @@ import java.util.List;
 public class DPSystemRuntime extends DPSystemConfigurable {
 
     private final DPFnNode root = new DPFnNode("root", "root");
-    public DPEventAggregator events = null;
     // Collection of Instantiated Pipelines within the System
     private DPSystemConfig sysconf;
 
-    public void setRuntimeConfig(DPSystemConfig sysConf)
+    public DPSystemConfig getSysconf() {
+        return sysconf;
+    }
+
+    public void setRuntimeConfig(DPSystemConfig sysConf) throws Exception
     {
 
         this.sysconf = sysConf;
+        setConfig(sysconf.getConfig(), sysconf.getMasterConfig());
     }
 
     public void execute() throws Exception
@@ -35,13 +39,6 @@ public class DPSystemRuntime extends DPSystemConfigurable {
 
     public void execute(String execName) throws Exception
     {
-        // set the guid for this runtime
-        setRunID(getUUID());
-        sysconf.setRunID(getRunID());
-
-        events = new DPEventAggregator(getRunID());
-        events.setConfig(getConfig(), getMasterConfig());
-
         // by default execute the pipe in exec
         List<DPFnNode> execpipes = sysconf.getExecutables(execName);
 
@@ -64,17 +61,38 @@ public class DPSystemRuntime extends DPSystemConfigurable {
 
             // add to the root node for tracking
             root.add(n);
-            events.addEvent(getInstanceID(), "START", "Started DataPipes Runtime", n.getName());
+            events.info(getInstanceID(), "START", "Started DataPipes Runtime", "run", "", 0);
             // Instantiate the Node Function
             Task t = DPSystemFactory.newTask(sysconf,n);
 
             t.execute();
-            events.addEvent(getInstanceID(), "END", "Ending DataPipes Runtime", n.getName());
+            events.info(getInstanceID(), "END", "Ending DataPipes Runtime", "run", "", 0);
+            n.dump();
         }
 
-
         events.dump();
+
     }
+
+
+    public void sendEvents() throws Exception {
+        // going to instantiate a new factory & runtime
+        // based upon the systemConfig to send the events out of the existing run
+
+        DPSystemFactory eventFactory = new DPSystemFactory();
+        // locate filename
+        String sysconfigfilename = getSysconf().getSystemConfig("eventConfigName").toString();
+        logger.info("trying to load systemconfig" + sysconfigfilename);
+        eventFactory.loadConfig(sysconfigfilename);
+        DPSystemRuntime eventRunTime = eventFactory.newRuntime();
+
+        // Generate the required DataSets
+
+        // 1.
+
+
+    }
+
 
 
     // run as a service

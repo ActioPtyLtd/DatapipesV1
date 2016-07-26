@@ -9,11 +9,12 @@ import java.text.DateFormat
 
 
 case class dpEvent(instanceId: String,
-                   thetype: String,
+                   theType: String,
+                   theAction: String,
                    msg: String,
                    keyName: String = "",
                    counter: String = "",
-                   thecount: Int = 0) {
+                   theCount: Int = 0) {
   def timeStamp: Long = System.currentTimeMillis()
 }
 
@@ -27,7 +28,8 @@ object dpEvents {
   case class Counter (msg : String) extends dpEvents
 }
 */
-class DPEventAggregator(runId: String) extends DPSystemConfigurable {
+
+case class DPEventAggregator(runId: String) {
 
   var eventList: List[dpEvent] = List()
 
@@ -35,25 +37,29 @@ class DPEventAggregator(runId: String) extends DPSystemConfigurable {
 
   // function add event to the list
 
-  def addEvent(instanceId: String, thetype: String, themsg: String, keyName: String): Unit = {
-    addEvent(dpEvent(instanceId, thetype, themsg, keyName))
+  def info(instanceId: String, theAction: String, themsg: String, keyName: String, counter: String = "", count: Int = 0): Unit = {
+    addEvent(dpEvent(instanceId, "Info", theAction, themsg, keyName, counter, count))
   }
 
-  def addEventCounter(instanceId: String, thetype: String, themsg: String, keyName: String, counter: String, thecount: Int): Unit = {
-    addEvent(dpEvent(instanceId, thetype, themsg, keyName, counter, thecount))
+  def err(instanceId: String, theAction: String, themsg: String, keyName: String, counter: String = "", count: Int = 0): Unit = {
+    addEvent(dpEvent(instanceId, "Error", theAction, themsg, keyName, counter, count))
   }
 
   def addEvent(theEntry: dpEvent): Unit = {
     this.eventList = this.eventList ::: List(theEntry)
   }
 
+  def warn(instanceId: String, theAction: String, themsg: String, keyName: String, counter: String = "", count: Int = 0): Unit = {
+    addEvent(dpEvent(instanceId, "Warn", theAction, themsg, keyName, counter, count))
+  }
+
   // ============================================================
 
   def dump(): Unit = {
     eventList.foreach(e => {
-      var sdf: SimpleDateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm'Z'")
+      var sdf: SimpleDateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.s'Z'")
       var resultdate: java.util.Date = new java.util.Date(e.timeStamp)
-      println((sdf.format(resultdate) + "::" + e))
+      println((sdf.format(resultdate) + "::" + runId + "::" + e))
     })
   }
 }

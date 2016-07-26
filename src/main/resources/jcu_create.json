@@ -2,147 +2,9 @@
   "script": {
     "schema": {},
     "system": {
-      "tasks": {
-        "create-config": {
-          "type": "load",
-          "behavior": "simple",
-          "dataSource": {
-            "type": "rest",
-            "behavior": "simple",
-            "path": "-",
-            "credential": {
-              "user": "admin",
-              "password": "password"
-            },
-            "query": {
-              "create": {
-                "uri": "http://dev-api-datapipes.actio.com.au:8080/api/config",
-                "body": "{\"data\": [{\"type\": \"config\",\"attributes\": {\"name\": \"JCU datapipes configuration\",\"description\": \"Defines all the datapipes and tasks that have been configured forJCU\"},\"relationships\": {\"availableTasks\": {\"data\": []},\"pipelines\": {\"data\": []}}}]}"
-              }
-            }
-          }
-        },
-        "create-pipes": {
-          "type": "load",
-          "behavior": "simple",
-          "dataSource": {
-            "type": "rest",
-            "behavior": "simple",
-            "path": "-",
-            "credential": {
-              "user": "admin",
-              "password": "password"
-            },
-            "query": {
-              "create": {
-                "uri": "https://dev-api-gnm.actio.com.au:8443/service/job/@{d.item.local.id}/status",
-                "body": ""
-              }
-            }
-          }
-        },
-        "create-tasks": {
-          "type": "load",
-          "behavior": "simple",
-          "dataSource": {
-            "type": "rest",
-            "behavior": "simple",
-            "path": "-",
-            "credential": {
-              "user": "admin",
-              "password": "password"
-            },
-            "query": {
-              "create": {
-                "uri": "https://dev-api-gnm.actio.com.au:8443/service/job/@{d.item.local.id}/status",
-                "body": ""
-              }
-            }
-          }
-        },
-        "create-run-pipes": {
-          "type": "load",
-          "behavior": "simple",
-          "dataSource": {
-            "type": "rest",
-            "behavior": "simple",
-            "path": "-",
-            "credential": {
-              "user": "admin",
-              "password": "password"
-            },
-            "query": {
-              "create": {
-                "uri": "https://dev-api-gnm.actio.com.au:8443/service/job/@{d.item.local.id}/status",
-                "body": ""
-              }
-            }
-          }
-        },
-        "create-run-tasks": {
-          "type": "load",
-          "behavior": "simple",
-          "dataSource": {
-            "type": "rest",
-            "behavior": "simple",
-            "path": "-",
-            "credential": {
-              "user": "admin",
-              "password": "password"
-            },
-            "query": {
-              "create": {
-                "uri": "https://dev-api-gnm.actio.com.au:8443/service/job/@{d.item.local.id}/status",
-                "body": ""
-              }
-            }
-          }
-        },
-        "load-events": {
-          "type": "load",
-          "behavior": "simple",
-          "dataSource": {
-            "type": "rest",
-            "behavior": "simple",
-            "path": "-",
-            "credential": {
-              "user": "admin",
-              "password": "password"
-            },
-            "query": {
-              "create": {
-                "uri": "https://dev-api-gnm.actio.com.au:8443/service/job/@{d.item.local.id}/status",
-                "body": ""
-              }
-            }
-          }
-        },
-        "load-from-config": {
-          "type": "load",
-          "behavior": "simple",
-          "dataSource": {
-            "type": "sysconfig"
-          }
-        },
-        "load-from-events": {
-          "type": "load",
-          "behavior": "simple",
-          "dataSource": {
-            "type": "sysevents"
-          }
-        }
-      },
-      "pipelines": {
-        "create-config": {
-          "pipe": "load-from-config | create-config"
-        },
-        "create-run": {
-          "pipe": "load-from-config | create-run"
-        },
-        "load-events": {
-          "pipe": "load-from-events | load-events"
-        }
-      }
+      "servername": "",
+      "configTemplateName": "",
+      "eventConfigName": "/home/jim/src/dpipes/src/main/resources/dp_sysevent.json"
     },
     "schedule": {},
     "tasks": {
@@ -151,7 +13,7 @@
         "behavior": "simple",
         "dataSource": {
           "type": "file",
-          "directory": "/home/jim/Downloads/",
+          "directory": "/home/jim/Downloads",
           "filenameTemplate": "exportBurkeMediaCaptureActivityTest.csv",
           "inputDelimiter": ","
         }
@@ -285,25 +147,5 @@
     "startup": {
       "exec": "read-job"
     }
-  },
-  "tst": {
-    "UserName": "jp00021",
-    "DisplayName": "Jim P1",
-    "Email": "jp002@wactio.com.au",
-    "Activated": true,
-    "ModeratorEmail": "jmckinney@webcastcloud.com.au",
-    "ModeratorEmailOptOut": false,
-    "DisablePresentationContentCompleteEmails": false,
-    "DisablePresentationContentFailedEmails": true,
-    "DisablePresentationChangeOwnerEmails": true,
-    "TimeZone": 19,
-    "PresenterFirstName": "First",
-    "PresenterMiddleName": "Middle",
-    "PresenterLastName": "Last",
-    "PresenterEmail": "jmckinney@webcastcloud.com.au",
-    "PresenterPrefix": "null",
-    "PresenterSuffix": "null",
-    "PresenterAdditionalInfo": "null",
-    "PresenterBio": "null"
   }
 }

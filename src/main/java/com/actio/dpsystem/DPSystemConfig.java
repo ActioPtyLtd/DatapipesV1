@@ -36,6 +36,7 @@ public class DPSystemConfig extends DPSystemConfigurable {
     private ConfigObject services ;
     private ConfigObject execs;
     private ConfigObject scheduled;
+    private ConfigObject system;
 
 
     //  task name mapping to compiled task - TBD when we compileConfig tasks
@@ -59,6 +60,10 @@ public class DPSystemConfig extends DPSystemConfigurable {
 
     public void setConfig(Config conf, Config master) throws Exception
     {
+
+        setInstanceID(getUUID());
+        logger.info("---RUNID=" + getRunID() + "----INSTANCEID=" + getInstanceID() + ".");
+
         super.setConfig(conf,master);
         script  = setconfigsection(master.root(),SCRIPT_LABEL,true);
         schema = setconfigsection(script,SCHEMA_LABEL,false);
@@ -67,7 +72,7 @@ public class DPSystemConfig extends DPSystemConfigurable {
         services = setconfigsection(script,SERVICES_LABEL,false);
         execs = setconfigsection(script, STARTUP_EXECS_LABEL,false);
         scheduled = setconfigsection(script,SCHEDULED_LABEL,false);
-
+        system = setconfigsection(script, "system", false);
     }
 
     public ConfigObject getTaskConfig(String name) throws Exception {
@@ -77,6 +82,15 @@ public class DPSystemConfig extends DPSystemConfigurable {
         }
         else {
             logger.warn("getTaskConfig:: Task not found:" + name);
+            return null;
+        }
+    }
+
+    public String getSystemConfig(String name) throws Exception {
+        if (system.containsKey(name)) {
+            return system.toConfig().getString(name);
+        } else {
+            logger.warn("getSystemConfig:: System item not found:" + name);
             return null;
         }
     }
@@ -176,7 +190,8 @@ public class DPSystemConfig extends DPSystemConfigurable {
                 }
 
                 DPFnNode node = compileDataPipe(pipeLineString);
-
+                // set the root names node to the name of the pipeline, not 'pipe' as set by the parser
+                node.name = key;
                 // Check for any other Pipeline variables to be added to the node
                 pipelinesMap.put(key,node);
 

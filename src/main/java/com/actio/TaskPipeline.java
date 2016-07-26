@@ -16,17 +16,21 @@ import java.util.*;
 
 public class TaskPipeline extends Task implements Runnable
 {
-    String result = "";
-    InputStream inputStream;
-
+    static final Logger logger = LoggerFactory.getLogger(TaskPipeline.class);
     protected ConfigObject pipes;
     protected ConfigObject tasks;
-
-    static final Logger logger = LoggerFactory.getLogger(TaskPipeline.class);
+    String result = "";
+    InputStream inputStream;
 
 
     //private String pipelineString;
     //private Map<String, Task> pipeline;
+    private ArrayDeque<DataSet> pipelineResults = null;
+    private List<String> sortedPipes;
+
+    public TaskPipeline() {
+        pipelineResults = new ArrayDeque<DataSet>();
+    }
 
     public ArrayDeque<DataSet> getPipelineResults() {
 
@@ -38,8 +42,6 @@ public class TaskPipeline extends Task implements Runnable
         this.pipelineResults = pipelineResults;
     }
 
-    private ArrayDeque<DataSet> pipelineResults = null;
-
     public List<String> getSortedPipes() {
         return sortedPipes;
     }
@@ -47,12 +49,6 @@ public class TaskPipeline extends Task implements Runnable
     public void setSortedPipes(List<String> sortedPipes) {
 
         this.sortedPipes = sortedPipes;
-    }
-
-    private List<String> sortedPipes;
-
-    public TaskPipeline() {
-        pipelineResults = new ArrayDeque<DataSet>();
     }
 
     public void extract() throws Exception {
@@ -72,7 +68,7 @@ public class TaskPipeline extends Task implements Runnable
     private void processPipe() throws Exception {
 
         logger.info("Entered processPipe, name= '"+node.getName()+"'");
-
+        events.info(getInstanceID(), "START", "ProcessPipeline Started::", node.getName(), "", 0);
         try {
             // get the list of tasks for that pipeline
             LinkedList<DPFnNode> tasksInPipeline = node.getNodeList();
@@ -80,7 +76,9 @@ public class TaskPipeline extends Task implements Runnable
 
         } catch (Exception e) {
             logger.info("processPipeLine Exception::" + e.getMessage());
+            events.err(getInstanceID(), "ERROR", "ProcessPipeline Exception::" + e.getMessage(), node.getName(), "", 0);
         }
+        events.info(getInstanceID(), "END", "ProcessPipeline Started::", node.getName(), "", 0);
     }
 
 
@@ -156,7 +154,13 @@ public class TaskPipeline extends Task implements Runnable
                 t.setDataSet(initDataSet);
 
             // ===========================================
+            events.info(t.getInstanceID(), "START", "Starting Task", t.node.getName(), "", 0);
+            events.info(t.getInstanceID(), "COUNT", "Processing Record Count", t.node.getName(), "Records", t.dataSet.elems().length());
+
             t.execute();
+
+            events.info(t.getInstanceID(), "COUNT", "Processing Record Count", t.node.getName(), "Records", t.dataSet.elems().length());
+            events.info(t.getInstanceID(), "END", "Starting Task", t.node.getName(), "", 0);
 
             return t.getDataSet();
 

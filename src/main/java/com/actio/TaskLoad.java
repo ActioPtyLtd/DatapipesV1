@@ -33,6 +33,9 @@ public class TaskLoad extends Task {
     //
     // =======================================================================================
 
+    public TaskLoad() {
+    }
+
     public void setNode(DPFnNode _node, DPSystemConfig _sysconf) throws Exception
     {
 
@@ -76,11 +79,11 @@ public class TaskLoad extends Task {
             diffProcessRev = config.getBoolean(DIFF_PROCESS_REVISED_LABEL);
 
         diff = new DiffSet();
+
+        setInstanceID(getUUID());
+        logger.info("---RUNID=" + getRunID() + "----INSTANCEID=" + getInstanceID() + ".");
+
     }
-
-
-    public TaskLoad() {}
-
 
     public void execute() throws Exception {
         // for extractor default to extract
@@ -95,6 +98,7 @@ public class TaskLoad extends Task {
 
 
     public void load() throws Exception {
+
         logger.info("Processes for BehaviourType=" + behaviour);
         // determine which subtask to deploy - at this time not going to subclass this
         if (behaviour.equals(CHECKPOINT_DIFF_LABEL)) {

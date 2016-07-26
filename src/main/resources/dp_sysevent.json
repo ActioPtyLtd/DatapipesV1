@@ -1,0 +1,151 @@
+{
+  "script": {
+    "schema": {},
+    "schedule": {},
+    "system": {
+      "servername": "",
+      "configTemplateName": ""
+    },
+    "tasks": {
+      "create-config": {
+        "type": "load",
+        "behavior": "simple",
+        "dataSource": {
+          "type": "rest",
+          "behavior": "simple",
+          "path": "-",
+          "credential": {
+            "user": "admin",
+            "password": "password"
+          },
+          "query": {
+            "create": {
+              "uri": "http://dev-api-datapipes.actio.com.au:8080/api/config",
+              "body": "{\"data\": [{\"type\": \"config\",\"attributes\": {\"name\": \"JCU datapipes configuration\",\"description\": \"Defines all the datapipes and tasks that have been configured forJCU\"},\"relationships\": {\"availableTasks\": {\"data\": []},\"pipelines\": {\"data\": []}}}]}"
+            }
+          }
+        }
+      },
+      "create-pipes": {
+        "type": "load",
+        "behavior": "simple",
+        "dataSource": {
+          "type": "rest",
+          "behavior": "simple",
+          "path": "-",
+          "credential": {
+            "user": "admin",
+            "password": "password"
+          },
+          "query": {
+            "create": {
+              "uri": "https://dev-api-gnm.actio.com.au:8443/service/job/@{d.item.local.id}/status",
+              "body": ""
+            }
+          }
+        }
+      },
+      "create-tasks": {
+        "type": "load",
+        "behavior": "simple",
+        "dataSource": {
+          "type": "rest",
+          "behavior": "simple",
+          "path": "-",
+          "credential": {
+            "user": "admin",
+            "password": "password"
+          },
+          "query": {
+            "create": {
+              "uri": "https://dev-api-gnm.actio.com.au:8443/service/job/@{d.item.local.id}/status",
+              "body": ""
+            }
+          }
+        }
+      },
+      "create-run-pipes": {
+        "type": "load",
+        "behavior": "simple",
+        "dataSource": {
+          "type": "rest",
+          "behavior": "simple",
+          "path": "-",
+          "credential": {
+            "user": "admin",
+            "password": "password"
+          },
+          "query": {
+            "create": {
+              "uri": "https://dev-api-gnm.actio.com.au:8443/service/job/@{d.item.local.id}/status",
+              "body": ""
+            }
+          }
+        }
+      },
+      "create-run-tasks": {
+        "type": "load",
+        "behavior": "simple",
+        "dataSource": {
+          "type": "rest",
+          "behavior": "simple",
+          "path": "-",
+          "credential": {
+            "user": "admin",
+            "password": "password"
+          },
+          "query": {
+            "create": {
+              "uri": "https://dev-api-gnm.actio.com.au:8443/service/job/@{d.item.local.id}/status",
+              "body": ""
+            }
+          }
+        }
+      },
+      "load-events": {
+        "type": "load",
+        "behavior": "simple",
+        "dataSource": {
+          "type": "rest",
+          "behavior": "simple",
+          "path": "-",
+          "credential": {
+            "user": "admin",
+            "password": "password"
+          },
+          "query": {
+            "create": {
+              "uri": "https://dev-api-gnm.actio.com.au:8443/service/job/@{d.item.local.id}/status",
+              "body": ""
+            }
+          }
+        }
+      },
+      "load-from-config": {
+        "type": "load",
+        "behavior": "simple",
+        "dataSource": {
+          "type": "sysconfig"
+        }
+      },
+      "load-from-events": {
+        "type": "load",
+        "behavior": "simple",
+        "dataSource": {
+          "type": "sysevents"
+        }
+      }
+    },
+    "pipelines": {
+      "create-config": {
+        "pipe": "load-from-config | create-config"
+      },
+      "create-run": {
+        "pipe": "load-from-config | create-run"
+      },
+      "load-events": {
+        "pipe": "load-from-events | load-events"
+      }
+    }
+  }
+}

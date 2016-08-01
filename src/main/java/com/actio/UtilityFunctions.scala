@@ -18,6 +18,8 @@ object UtilityFunctions extends Logging {
     fs.asScala.foldLeft[DataSet](ds)((s, f) => execute(f.getName, (s.asInstanceOf[Any] :: f.getParameters.toList).asJava))
   }
 
+  def execute(methodName: String, params: List[Any]): DataSet = execute(methodName, params.asJava)
+
   def execute(methodName: String, params: java.util.List[Any]): DataSet = {
     val method = Class.forName("com.actio.DataSetTransforms").getDeclaredMethods.find(_.getName.equalsIgnoreCase(methodName))
 

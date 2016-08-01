@@ -28,73 +28,11 @@ public class DPSystemFactory extends DPSystemConfigurable {
 
     String result = "";
     InputStream inputStream;
-
-    public List<String> getSortedConfigItems() {
-        return sortedConfigItems;
-    }
-
-    public void setSortedConfigItems(List<String> sortedConfigItems) {
-        this.sortedConfigItems = sortedConfigItems;
-    }
-
     private List<String> sortedConfigItems;
     private DPSystemConfig sysconf;
 
     public DPSystemFactory() {
     }
-
-    private void loadConfig() throws IOException
-    {
-        config = ConfigFactory.load();
-        masterConfig = config;
-    }
-
-    public void loadConfig(String configFile) throws IOException {
-
-        if (configFile == null){
-            this.loadConfig();
-            return;
-        }
-
-        File myConfigFile = new File(configFile);
-
-        if(!myConfigFile.exists())
-            logger.error("File " + configFile + " does not exist.");
-
-        config = ConfigFactory.parseFile(myConfigFile);
-        masterConfig = config;
-
-    }
-
-    private DPSystemConfig compileConfig() throws Exception {
-
-        sysconf = new DPSystemConfig();
-
-        sysconf.setConfig(config,masterConfig);
-
-        sysconf.compile();
-
-        // create top level task pipe
-        return sysconf;
-    }
-
-
-    public DPSystemRuntime newRuntime() throws Exception
-    {
-        DPSystemConfig dpipeConfig = compileConfig();
-        dpipeConfig.dump();
-
-        DPSystemRuntime dprun = new DPSystemRuntime();
-        dprun.setConfig(config, masterConfig);
-
-        dprun.setRuntimeConfig(dpipeConfig);
-
-        return dprun;
-    }
-
-
-    // =====================================================
-    //
 
     static public Task newTask(DPSystemConfig sysconf, DPFnNode node) throws Exception
     {
@@ -128,18 +66,26 @@ public class DPSystemFactory extends DPSystemConfigurable {
             case "iterateTemplate":
                 t = new TransformIterateTemplate();
                 break;
+            case "iterate":
+                t = new TransformIterate();
+                break;
+            case "merge":
+                t = new TaskMerge();
+                break;
             default:
                 throw new Exception("DPSystemFactory:Unknown Task Type "+type);
         }
 
         t.setNode(node, sysconf);
+        // duplicate the instanceID into the Node - for post logging traversal
+        // TODO this means that the Node model should be duplicated each run to represent a different instance
+
+        node.setInstanceID(t.getInstanceID());
+        node.setRunID(t.getRunID());
+        logger.info("---FACTORY----RUNID=" + node.getRunID() + "----INSTANCEID=" + node.getInstanceID() + ".");
 
         return t;
     }
-
-
-
-    // =====================================================
 
     static public DataSourceREST newDataSourceREST(String name, DPSystemConfig sysconf)
             throws Exception
@@ -187,13 +133,6 @@ public class DPSystemFactory extends DPSystemConfigurable {
         return t;
     }
 
-    // =====================================================
-
-
-    // REFACTOR NOTE - currently deal with a single sqlquery
-    // in the future will want to be able to deal with a collection of
-    // queries, that fulfill an API definition
-
     static public QueryParser newQuery(String type, Config config, Config masterConfig)
             throws Exception
     {
@@ -229,10 +168,6 @@ public class DPSystemFactory extends DPSystemConfigurable {
         return t;
     }
 
-    // =====================================================    //
-    // Locate Task Configuration by taskLabelName
-    //
-
     static public Task newTaskByName(Config config, Config masterConfig, String taskName)
             throws Exception
     {
@@ -243,6 +178,8 @@ public class DPSystemFactory extends DPSystemConfigurable {
     }
 
 
+    // =====================================================
+    //
 
     static public TaskTransform newTransform(DPFnNode node, DPSystemConfig sysconf)
             throws Exception
@@ -281,8 +218,8 @@ public class DPSystemFactory extends DPSystemConfigurable {
         return t;
     }
 
-    // This is the binder from Token to actual Function
-    // Refactor this into a proper Inversion of Control Bind
+
+    // =====================================================
 
     public static String CallFunction(TransformFunction func, String param)
     {
@@ -307,10 +244,6 @@ public class DPSystemFactory extends DPSystemConfigurable {
 
         return newField;
     }
-
-    //
-    // Construct New Function Set Structure from config input
-    //
 
     public static CompiledTemplateFunctionSet newFunctionSet(Config config)
     {
@@ -352,7 +285,6 @@ public class DPSystemFactory extends DPSystemConfigurable {
         return newFuncSet;
     }
 
-
     static private List<TransformFunction> buildTransformFunctionsFromList(List<String> rawFunctionList)
     {
         List<TransformFunction> tfl = new LinkedList<>();
@@ -370,6 +302,13 @@ public class DPSystemFactory extends DPSystemConfigurable {
         return tfl;
     }
 
+    // =====================================================
+
+
+    // REFACTOR NOTE - currently deal with a single sqlquery
+    // in the future will want to be able to deal with a collection of
+    // queries, that fulfill an API definition
+
     static public TaskService newService(DPSystemConfig sysconf, DPSystemRuntime runtime) throws Exception
     {
         // locate Service Configuration
@@ -377,6 +316,76 @@ public class DPSystemFactory extends DPSystemConfigurable {
         ts.setNode(sysconf, runtime);
 
         return ts;
+    }
+
+    public List<String> getSortedConfigItems() {
+        return sortedConfigItems;
+    }
+
+    // =====================================================    //
+    // Locate Task Configuration by taskLabelName
+    //
+
+    public void setSortedConfigItems(List<String> sortedConfigItems) {
+        this.sortedConfigItems = sortedConfigItems;
+    }
+
+    private void loadConfig() throws IOException {
+        config = ConfigFactory.load();
+        masterConfig = config;
+    }
+
+    // This is the binder from Token to actual Function
+    // Refactor this into a proper Inversion of Control Bind
+
+    public void loadConfig(String configFile) throws IOException {
+
+        if (configFile == null) {
+            this.loadConfig();
+            return;
+        }
+
+        File myConfigFile = new File(configFile);
+
+        if (!myConfigFile.exists())
+            logger.error("File " + configFile + " does not exist.");
+
+        config = ConfigFactory.parseFile(myConfigFile);
+        masterConfig = config;
+
+    }
+
+    //
+    // Construct New Function Set Structure from config input
+    //
+
+    public void loadConfig(Config _config) throws IOException {
+        config = _config;
+        masterConfig = config;
+    }
+
+    private DPSystemConfig compileConfig() throws Exception {
+
+        sysconf = new DPSystemConfig();
+
+        sysconf.setConfig(config, masterConfig);
+
+        sysconf.compile();
+
+        // create top level task pipe
+        return sysconf;
+    }
+
+    public DPSystemRuntime newRuntime() throws Exception {
+        DPSystemConfig dpipeConfig = compileConfig();
+        dpipeConfig.dump();
+
+        DPSystemRuntime dprun = new DPSystemRuntime();
+        dprun.setConfig(config, masterConfig);
+
+        dprun.setRuntimeConfig(dpipeConfig);
+
+        return dprun;
     }
 
 

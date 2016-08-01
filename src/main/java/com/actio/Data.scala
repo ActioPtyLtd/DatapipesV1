@@ -47,6 +47,8 @@ case class DataRecord(label: String, fields: List[DataSet]) extends DataSet {
 
   override def apply(field: String): DataSet = fields.find(f => f.label == field).getOrElse(Nothin())
 
+  override def apply(ord: Int): DataSet = fields.lift(ord).getOrElse(Nothin())
+
   override def elems: Iterator[DataSet] = fields.toIterator
 
   override def schema: SchemaDefinition = SchemaRecord(label, fields.map(_.schema))

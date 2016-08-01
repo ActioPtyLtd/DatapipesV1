@@ -17,14 +17,13 @@ import java.util.Map;
 public class DPFnNode {
 
     private static final Logger logger = LoggerFactory.getLogger(DPFnNode.class);
-
-    public String name = null;
-
     //private Map<String, DPFnNode> nodes = new HashMap<>();
     private final LinkedList<DPFnNode> nodes = new LinkedList<>();
-
-    private String type;
+    public String name = null;
     public boolean parallel = false;
+    private String runID;
+    private String instanceID;
+    private String type;
 
     public DPFnNode(String name, String type)
     {
@@ -33,31 +32,6 @@ public class DPFnNode {
     }
 
     private DPFnNode() {}
-
-    public LinkedList<DPFnNode> getNodeList(){
-        return nodes;
-    }
-
-    public void add(DPFnNode n){ nodes.add(n);}
-
-    public DPFnNode duplicate(){
-
-        return new DPFnNode(getName(),getType());
-    }
-
-    public String getName(){
-        return name;
-    }
-
-    public String getType()
-    {
-        return type;
-    }
-
-    public void dump(){
-        dump(this,0,"");
-    }
-
 
     private static void dumpOLD(DPFnNode node, int depth, String indent)
     {
@@ -78,10 +52,9 @@ public class DPFnNode {
         logger.info(indent+"}");
     }
 
-
     private static void dump(DPFnNode node, int depth, String indent)
     {
-        System.out.print(indent+"{ \""+node.name+"\" : ");
+        System.out.print(indent + "{ \"" + node.name + "::" + node.getInstanceID() + "\" : ");
 
         if (node.nodes.size() == 0)
             return ;
@@ -98,11 +71,55 @@ public class DPFnNode {
             if (n.nodes.size() > 0)
                 dump(n,++depth,indent+"   ");
             else
-                System.out.print(" \""+n.name+"\" " );
+                System.out.print(" \"" + n.getName() + "::" + n.getInstanceID() + "\" ");
 
         }
 
         System.out.print("] }");
+    }
+
+    public String getRunID() {
+        return runID;
+    }
+
+    public void setRunID(String runID) {
+        this.runID = runID;
+    }
+
+    public String getInstanceID() {
+        return instanceID;
+    }
+
+    public void setInstanceID(String instanceID) {
+        this.instanceID = instanceID;
+    }
+
+    public LinkedList<DPFnNode> getNodeList() {
+        return nodes;
+    }
+
+    public void add(DPFnNode n) {
+        nodes.add(n);
+    }
+
+    public DPFnNode duplicate() {
+
+        return new DPFnNode(getName(), getType());
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public String getType() {
+        return type;
+    }
+
+    public void dump() {
+
+        System.out.print(" \"RUNID::" + getRunID() + "::\" ");
+        dump(this, 0, "");
+        System.out.println();
     }
 
 }

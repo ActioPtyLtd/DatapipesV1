@@ -46,12 +46,13 @@ public abstract class Task extends DPSystemConfigurable {
 
     public void setNode(DPFnNode _node, DPSystemConfig _sysconf) throws Exception
     {
+
         sysconf = _sysconf;
         super.setConfig(sysconf.getConfig(),sysconf.getMasterConfig());
         node = _node;
-        setRunID(_sysconf.getRunID());
-        setInstanceID(getUUID());
 
+        // create the instanceID for this task
+        setInstanceID(getUUID());
         logger.info("---RUNID=" + getRunID() + "----INSTANCEID=" + getInstanceID() + ".");
     }
 

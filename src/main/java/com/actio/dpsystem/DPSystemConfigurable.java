@@ -82,6 +82,7 @@ public class DPSystemConfigurable {
     public DataSet dataSet;
     public Config config;
     public Config masterConfig;
+    public DPEventAggregator events = null;
     private String runID;
     private String instanceID;
 
@@ -104,6 +105,10 @@ public class DPSystemConfigurable {
         return !sc.hasNext();
     }
 
+    public static String getUUID() {
+        return UUID.randomUUID().toString();
+    }
+
     public String getRunID() {
         return runID;
     }
@@ -118,10 +123,6 @@ public class DPSystemConfigurable {
 
     public void setInstanceID(String instanceID) {
         this.instanceID = instanceID;
-    }
-
-    public String getUUID() {
-        return UUID.randomUUID().toString();
     }
 
     public DataSet getDataSet() {
@@ -158,9 +159,13 @@ public class DPSystemConfigurable {
         config = _conf;
         masterConfig = _master;
 
-        // set the RUNID here and also the instanceID for this class
-        // setRunID(getUUID());
+
+        events = DPSoleAggregator.events;
+
+        setRunID(events.runId());
         setInstanceID(getUUID());
+        logger.info("***********---RUNID=" + getRunID() + "----INSTANCEID=" + getInstanceID() + ".");
+
     }
 
     // =======================================================================================

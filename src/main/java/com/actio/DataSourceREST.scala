@@ -39,6 +39,8 @@ object DataSourceREST {
       new HttpPut()
     } else if (label == "patch") {
       new HttpPatch()
+    } else if (label == "delete") {
+      new HttpDelete()
     } else {
       new HttpGet()
     }
@@ -147,11 +149,20 @@ class DataSourceREST extends DataSource with Logging {
 
   @throws(classOf[Exception])
   def write(dataSet: DataSet): Unit = {
-    create(dataSet)
+    if (config.hasPath("iterate")) {
+      dataSet.elems.foreach(d => create(DataArray(List(d))))
+    }
+    else {
+      create(dataSet)
+    }
   }
 
   override def create(ds: DataSet): Unit = {
     executeQueryLabel(ds.elems.toList.head, "create")
+  }
+
+  override def delete(ds: DataSet): Unit = {
+    executeQueryLabel(ds.elems.toList.head, "delete")
   }
 
   @throws(classOf[Exception])
@@ -194,8 +205,12 @@ class DataSourceREST extends DataSource with Logging {
     val builthttp = httpreq.build()
 
     val response = builthttp.execute(request)
+    val respEntity = response.getEntity
 
-    val ret = (response.getStatusLine, response.getAllHeaders, EntityUtils.toString(response.getEntity, "UTF-8"))
+    val ret = (response.getStatusLine,
+      response.getAllHeaders,
+      if (Option(respEntity).isDefined) EntityUtils.toString(response.getEntity, "UTF-8") else "")
+
     response.close()
     ret
   }

@@ -100,6 +100,9 @@ public class TaskPipeline extends Task implements Runnable
         logger.info("===== keyRE::" + currentNode.getName() +" ============== ");
         DataSet resultSet;
 
+        if(currentNode.getType() == null)
+            logger.error("Cannot retrieve task type, ensure the task exists and the type is specified");
+
         if (currentNode.getType().contains(PIPE_LABEL))
             resultSet = evokePipe(currentNode, initDataSet);
         else

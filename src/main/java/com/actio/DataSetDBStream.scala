@@ -17,13 +17,13 @@ class DataSetDBStream(private val rs: ResultSet, val batchSize: Int) extends Dat
     val t = metaData.getColumnType(o)
 
     if (t == Types.BIGINT || t == Types.DECIMAL || t == Types.DOUBLE || t == Types.FLOAT || t == Types.INTEGER || t == Types.NUMERIC) {
-      SchemaNumber(metaData.getColumnName(o), metaData.getColumnDisplaySize(o), 0)
+      SchemaNumber(metaData.getColumnName(o).toLowerCase, metaData.getColumnDisplaySize(o), 0)
     }
     else if (t == Types.DATE || t == Types.TIME || t == Types.TIMESTAMP) {
-      SchemaDate(metaData.getColumnName(o), "yyyy-MM-dd")
+      SchemaDate(metaData.getColumnName(o).toLowerCase, "yyyy-MM-dd")
     }
     else {
-      SchemaString(metaData.getColumnName(o), metaData.getColumnDisplaySize(o))
+      SchemaString(metaData.getColumnName(o).toLowerCase, metaData.getColumnDisplaySize(o))
     }
   }).toList))
 
@@ -36,7 +36,7 @@ class DataSetDBStream(private val rs: ResultSet, val batchSize: Int) extends Dat
 
       do {
         recs = DataRecord(header.map(c => (c, Option(rs.getObject(c)))).map(v =>
-          if (v._2.isEmpty) Nothin(v._1) else DataString(v._1, v._2.get.toString))) :: recs
+          if (v._2.isDefined) DataString(v._1, v._2.get.toString) else Nothin(v._1))) :: recs
         i += 1
       } while (rs.next() && i < batchSize)
 

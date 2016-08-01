@@ -27,7 +27,7 @@ import java.util.UUID;
 public class DPSystemConfig extends DPSystemConfigurable {
 
     //  pipeline name mapping to compiled parse tree
-    private final Map<String, DPFnNode> pipelinesMap = new HashMap<>();
+    public final Map<String, DPFnNode> pipelinesMap = new HashMap<>();
     private final Map<String, DPFnNode> servicesMap = new HashMap<>();
     private ConfigObject script;
     private ConfigObject schema;

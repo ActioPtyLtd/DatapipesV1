@@ -46,7 +46,7 @@
           "query": {
             "create": {
               "uri": "http://devmediasite.webcastcloud.com.au/mediasite/api/v1/UserProfiles",
-              "body": "{ \"UserName\": \"M~{d.local.USERNAME}\",\"DisplayName\": \"~{d.local.FULLNAME}\",\"Email\":\"M~{d.local.USERNAME}@actio.com.au\",\"Activated\": true,\"ModeratorEmail\": \"jmckinney_webcastcloud.com.au\",\"ModeratorEmailOptOut\": false,\"DisablePresentationContentCompleteEmails\": false,\"DisablePresentationContentFailedEmails\": true,\"DisablePresentationChangeOwnerEmails\": true,\"TimeZone\": 19,\"PresenterFirstName\": \"First\",\"PresenterMiddleName\": \"Middle\",\"PresenterLastName\": \"Last\",\"PresenterEmail\": \"jmckinneywebcastcloud.com.au\",\"PresenterPrefix\": \"null\",\"PresenterSuffix\": \"null\",\"PresenterAdditionalInfo\": \"null\",\"PresenterBio\": \"null\" }"
+              "body": "{ \"UserName\": \"ZZ~{d.local.USERNAME}\",\"DisplayName\": \"~{d.local.FULLNAME}\",\"Email\":\"ZZ~{d.local.USERNAME}@actio.com.au\",\"Activated\": true,\"ModeratorEmail\": \"jmckinney_webcastcloud.com.au\",\"ModeratorEmailOptOut\": false,\"DisablePresentationContentCompleteEmails\": false,\"DisablePresentationContentFailedEmails\": true,\"DisablePresentationChangeOwnerEmails\": true,\"TimeZone\": 19,\"PresenterFirstName\": \"First\",\"PresenterMiddleName\": \"Middle\",\"PresenterLastName\": \"Last\",\"PresenterEmail\": \"jmckinneywebcastcloud.com.au\",\"PresenterPrefix\": \"null\",\"PresenterSuffix\": \"null\",\"PresenterAdditionalInfo\": \"null\",\"PresenterBio\": \"null\" }"
             }
           }
         }
@@ -83,7 +83,7 @@
           "query": {
             "create": {
               "uri": "http://devmediasite.webcastcloud.com.au/mediasite/api/v1/Modules",
-              "body": "{ \"ModuleId\": \"P~{d.ModuleName}\", \"Name\": \"P~{d.ModuleName}\", \"Description\": \"~{d.ModuleDescription}\", \"Owner\": \"MediasiteAdmin\"}"
+              "body": "{ \"ModuleId\": \"ZZ~{d.ModuleName}\", \"Name\": \"ZZ~{d.ModuleName}\", \"Description\": \"~{d.ModuleDescription}\", \"Owner\": \"MediasiteAdmin\"}"
             }
           }
         }
@@ -189,13 +189,15 @@
       "read-users": {
         "pipe": "read-data-file | process-user-header | create-users | iterate-users"
       },
-      "read-modules": {
+      "read-modules-demo": {
         "pipe": "read-data-file | process-module-header | iterate-module | create-module-merge | create-folder-merge | owner-folder-merge | create-schedule-merge | assign-schedule-module-merge"
       }
     },
     "services": {},
     "startup": {
-      "exec": "read-modules"
+      "exec": "read-modules-demo"
     }
   }
 }
+
+

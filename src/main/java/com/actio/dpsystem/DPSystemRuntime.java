@@ -1,5 +1,7 @@
 package com.actio.dpsystem;
 
+import com.actio.DataSet;
+import com.actio.DataSourceREST;
 import com.actio.Task;
 import com.actio.TaskService;
 
@@ -39,6 +41,10 @@ public class DPSystemRuntime extends DPSystemConfigurable {
 
     public void execute(String execName) throws Exception
     {
+        execute(execName, null);
+    }
+
+    public void execute(String execName, DataSet ds) throws Exception {
         // by default execute the pipe in exec
         List<DPFnNode> execpipes = sysconf.getExecutables(execName);
 
@@ -61,16 +67,16 @@ public class DPSystemRuntime extends DPSystemConfigurable {
 
             // add to the root node for tracking
             root.add(n);
-            events.info(getInstanceID(), "START", "Started DataPipes Runtime", "run", "", 0);
+            events.info("", "", "START", "Started DataPipes Runtime", "run", "", 0);
             // Instantiate the Node Function
             Task t = DPSystemFactory.newTask(sysconf,n);
-
+            t.dataSet = ds;
             t.execute();
-            events.info(getInstanceID(), "END", "Ending DataPipes Runtime", "run", "", 0);
+            events.info("", "", "FINISH", "Ending DataPipes Runtime", "run", "", 0);
             n.dump();
         }
 
-        events.dump();
+        //events.dump();
 
     }
 
@@ -90,6 +96,22 @@ public class DPSystemRuntime extends DPSystemConfigurable {
 
         // 1.
 
+        DPEventPublisher dppub = new DPEventPublisher(this);
+        DataSet ds = dppub.getRun();
+
+        eventRunTime.execute("create-run", ds);
+
+        DataSet dspipe = dppub.getPipeline();
+
+        eventRunTime.execute("p-create-run-pipelines", dspipe);
+
+        DataSet dstask = dppub.getTasks();
+
+        eventRunTime.execute("p-create-run-tasks", dstask);
+
+        DataSet dsevents = dppub.GetEvents();
+
+        eventRunTime.execute("p-load-events", dsevents);
 
     }
 

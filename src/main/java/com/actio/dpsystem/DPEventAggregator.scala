@@ -8,14 +8,15 @@ import java.text.DateFormat
   */
 
 
-case class dpEvent(instanceId: String,
+case class dpEvent(pipeInstanceId: String,
+                   taskInstanceId: String,
                    theType: String,
                    theAction: String,
                    msg: String,
                    keyName: String = "",
                    counter: String = "",
                    theCount: Int = 0) {
-  def timeStamp: Long = System.currentTimeMillis()
+  val timeStamp: Long = System.currentTimeMillis()
 }
 
 /*
@@ -37,20 +38,20 @@ case class DPEventAggregator(runId: String) {
 
   // function add event to the list
 
-  def info(instanceId: String, theAction: String, themsg: String, keyName: String, counter: String = "", count: Int = 0): Unit = {
-    addEvent(dpEvent(instanceId, "Info", theAction, themsg, keyName, counter, count))
-  }
-
-  def err(instanceId: String, theAction: String, themsg: String, keyName: String, counter: String = "", count: Int = 0): Unit = {
-    addEvent(dpEvent(instanceId, "Error", theAction, themsg, keyName, counter, count))
+  def info(pipeInstanceId: String, taskInstanceId: String, theAction: String, themsg: String, keyName: String, counter: String = "", count: Int = 0): Unit = {
+    addEvent(dpEvent(pipeInstanceId, taskInstanceId, "INFO", theAction, themsg, keyName, counter, count))
   }
 
   def addEvent(theEntry: dpEvent): Unit = {
     this.eventList = this.eventList ::: List(theEntry)
   }
 
-  def warn(instanceId: String, theAction: String, themsg: String, keyName: String, counter: String = "", count: Int = 0): Unit = {
-    addEvent(dpEvent(instanceId, "Warn", theAction, themsg, keyName, counter, count))
+  def err(pipeInstanceId: String, taskInstanceId: String, theAction: String, themsg: String, keyName: String, counter: String = "", count: Int = 0): Unit = {
+    addEvent(dpEvent(pipeInstanceId, taskInstanceId, "ERROR", theAction, themsg, keyName, counter, count))
+  }
+
+  def warn(pipeInstanceId: String, taskInstanceId: String, theAction: String, themsg: String, keyName: String, counter: String = "", count: Int = 0): Unit = {
+    addEvent(dpEvent(pipeInstanceId, taskInstanceId, "WARN", theAction, themsg, keyName, counter, count))
   }
 
   // ============================================================
@@ -61,5 +62,11 @@ case class DPEventAggregator(runId: String) {
       var resultdate: java.util.Date = new java.util.Date(e.timeStamp)
       println((sdf.format(resultdate) + "::" + runId + "::" + e))
     })
+
+  }
+
+  def getTime(time: Long): String = {
+    var sdf: SimpleDateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.s'Z'")
+    sdf.format(new java.util.Date(time))
   }
 }

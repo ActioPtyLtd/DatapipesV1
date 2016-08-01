@@ -24,7 +24,7 @@ class DataSetFileStream(private val reader: InputStream) extends DataSet {
     }
   }
   private val col1 = "col1"
-  private val groupNumberOfLines = 100
+  private val groupNumberOfLines = 10000
   private val iterable = scala.io.Source.fromInputStream(reader, "windows-1252").getLines().grouped(groupNumberOfLines)
   private var lineHeader: Option[String] = None
 

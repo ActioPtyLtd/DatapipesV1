@@ -1,0 +1,179 @@
+{
+  "script": {
+    "schema": {},
+    "schedule": {},
+    "system": {
+      "servername": "",
+      "configTemplateName": ""
+    },
+    "tasks": {
+      "create-config": {
+        "type": "load",
+        "behavior": "simple",
+        "dataSource": {
+          "type": "rest",
+          "behavior": "simple",
+          "path": "-",
+          "credential": {
+            "user": "admin",
+            "password": "password"
+          },
+          "query": {
+            "create": {
+              "uri": "http://dev-api-datapipes.actio.com.au:8080/api/config",
+              "body": "{\"data\": [{\"type\": \"config\",\"attributes\": {\"name\": \"JCU datapipes configuration\",\"description\": \"Defines all the datapipes and tasks that have been configured forJCU\"},\"relationships\": {\"availableTasks\": {\"data\": []},\"pipelines\": {\"data\": []}}}]}"
+            }
+          }
+        }
+      },
+      "create-pipes": {
+        "type": "load",
+        "behavior": "simple",
+        "dataSource": {
+          "type": "rest",
+          "behavior": "simple",
+          "path": "-",
+          "credential": {
+            "user": "admin",
+            "password": "password"
+          },
+          "query": {
+            "create": {
+              "uri": "https://dev-api-gnm.actio.com.au:8443/service/job/@{d.item.local.id}/status",
+              "body": ""
+            }
+          }
+        }
+      },
+      "create-tasks": {
+        "type": "load",
+        "behavior": "simple",
+        "dataSource": {
+          "type": "rest",
+          "behavior": "simple",
+          "path": "-",
+          "credential": {
+            "user": "admin",
+            "password": "password"
+          },
+          "query": {
+            "create": {
+              "uri": "https://dev-api-gnm.actio.com.au:8443/service/job/@{d.item.local.id}/status",
+              "body": ""
+            }
+          }
+        }
+      },
+      "create-run-pipes": {
+        "type": "load",
+        "behavior": "simple",
+        "dataSource": {
+          "type": "rest",
+          "behavior": "simple",
+          "path": "-",
+          "credential": {
+            "user": "admin",
+            "password": "password"
+          },
+          "query": {
+            "create": {
+              "uri": "http://dev-api-datapipes.actio.com.au:8080/service/run",
+              "body": "{ \"config_name\" : \"Publish Lecture data to MediaSite\",\"run_id\" : \"~{d}\"}"
+            }
+          }
+        }
+      },
+      "create-run-pipelines": {
+        "type": "load",
+        "behavior": "simple",
+        "dataSource": {
+          "type": "rest",
+          "behavior": "simple",
+          "path": "-",
+          "credential": {
+            "user": "admin",
+            "password": "password"
+          },
+          "query": {
+            "create": {
+              "uri": "http://dev-api-datapipes.actio.com.au:8080/service/pipelineRun",
+              "body": "{ \"config_name\" : \"Publish Lecture data to MediaSite\",\"run_id\": \"~{d.runId}\",\"pipeline_run_id\" : \"~{d.pipelineRunId}\",\"pipeline_name\" : \"~{d.pipelineName}\"}"
+            }
+          }
+        }
+      },
+
+      "create-run-tasks": {
+        "type": "load",
+        "behavior": "simple",
+        "dataSource": {
+          "type": "rest",
+          "behavior": "simple",
+          "path": "-",
+          "iterate": true,
+          "credential": {
+            "user": "admin",
+            "password": "password"
+          },
+          "query": {
+            "create": {
+              "uri": "http://dev-api-datapipes.actio.com.au:8080/service/taskRun",
+              "body": "{\"config_name\" : \"Publish Lecture data to MediaSite\",\"run_id\": \"~{d.runId}\",\"pipeline_run_id\" : \"~{d.pipelineRunId}\",\"task_run_id\" : \"~{d.taskRunId}\",\"task_name\" : \"~{d.taskName}\"}"
+            }
+          }
+        }
+      },
+      "load-events": {
+        "type": "load",
+        "behavior": "simple",
+        "dataSource": {
+          "type": "rest",
+          "behavior": "simple",
+          "path": "-",
+          "iterate": true,
+          "credential": {
+            "user": "admin",
+            "password": "password"
+          },
+          "query": {
+            "create": {
+              "uri": "http://dev-api-datapipes.actio.com.au:8080/service/event",
+              "body": "{  \"event_id\" : \"~{d.event_id}\",\"config_name\" : \"Publish Lecture data to MediaSite\",\"run_id\": \"~{d.runId}\",\"pipeline_run_id\": \"~{d.pipeline_run_id}\",\"task_run_id\": \"~{d.task_run_id}\",\"event_time\" : \"~{d.event_time}\",\"event_type\" : \"~{d.event_type}\",\"action_type\" : \"~{d.action_type}\",\"message\" : \"~{d.message}\",\"detail\" : \"~{d.keyName}\"}"
+            }
+          }
+        }
+      },
+      "load-from-config": {
+        "type": "load",
+        "behavior": "simple",
+        "dataSource": {
+          "type": "sysconfig"
+        }
+      },
+      "load-from-events": {
+        "type": "load",
+        "behavior": "simple",
+        "dataSource": {
+          "type": "sysevents"
+        }
+      }
+    },
+    "pipelines": {
+      "create-config": {
+        "pipe": "load-from-config | create-config"
+      },
+      "create-run": {
+        "pipe": "create-run-pipes"
+      },
+      "p-create-run-pipelines": {
+        "pipe": "create-run-pipelines"
+      },
+      "p-create-run-tasks": {
+        "pipe": "create-run-tasks"
+      },
+      "p-load-events": {
+        "pipe": "load-events"
+      }
+    }
+  }
+}

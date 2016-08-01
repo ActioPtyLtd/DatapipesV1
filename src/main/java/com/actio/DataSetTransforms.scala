@@ -31,6 +31,7 @@ object DataSetTransforms {
 
   def isBlank(ds: DataSet) = DataBoolean(ds.stringOption.exists(_.isEmpty))
 
+  def quoteOption(ds: DataSet) = ds.stringOption.map(s => if (s.isEmpty) DataString("null") else DataString("\"" + s + "\"")).getOrElse(DataString("null"))
 
   /* below will need to be replaced when I have time */
 
@@ -47,6 +48,17 @@ object DataSetTransforms {
 
   def productProperty(ds: DataSet, labels: List[String]): DataSet = transformEachData(productSchemaFunc(labels), productDataFunc(labels))(ds)
 
+  def productSchemaFunc(labels: List[String]) = (schema: SchemaDefinition) => SchemaArray(SchemaRecord(SchemaArray("attributes",
+    SchemaRecord(List(SchemaString("name", 0), SchemaString("type", 0), SchemaString("value", 0)))) :: schema.asInstanceOf[SchemaArray].content.asInstanceOf[SchemaRecord].fields.filterNot(f => labels.contains(f.label))))
+
+  def productDataFunc(labels: List[String]) = (data: DataSet) => DataArray(data.elems.map(r => DataRecord(
+    DataArray("attributes", r.elems.filter(f => labels.contains(f.label) && f.stringOption.getOrElse("").nonEmpty).map(v => DataRecord(List(DataString("name", v.label), DataString("type", "string"), v.stringOption.map(o => DataString("value", o)).getOrElse(Nothin("value"))))).toList)
+      :: r.elems.filter(f => !labels.contains(f.label)).toList)).toList)
+
+  def pick(ds: DataSet, labels: List[String]): DataSet = transformEachData(_.value(labels), _.value(labels map Label))(ds)
+
+  //def updateLabel(ds: DataSet, label: String): DataSet =
+
   //TODO: think about error handling. Maybe change next: Either[Error, Data]
   def transformEachData(schemaFunc: (SchemaDefinition => SchemaDefinition), dataFunc: (DataSet => DataSet)): (DataSet => DataSet) = (ds: DataSet) =>
     new DataSet {
@@ -57,23 +69,7 @@ object DataSetTransforms {
       override def label: String = ""
     }
 
-  def productSchemaFunc(labels: List[String]) = (schema: SchemaDefinition) => SchemaArray(SchemaRecord(SchemaArray("attributes",
-    SchemaRecord(List(SchemaString("name", 0), SchemaString("type", 0), SchemaString("value", 0)))) :: schema.asInstanceOf[SchemaArray].content.asInstanceOf[SchemaRecord].fields.filterNot(f => labels.contains(f.label))))
-
-  def productDataFunc(labels: List[String]) = (data: DataSet) => DataArray(data.elems.map(r => DataRecord(
-    DataArray("attributes", r.elems.filter(f => labels.contains(f.label) && f.stringOption.getOrElse("").nonEmpty).map(v => DataRecord(List(DataString("name", v.label), DataString("type", "string"), v.stringOption.map(o => DataString("value", o)).getOrElse(Nothin("value"))))).toList)
-      :: r.elems.filter(f => !labels.contains(f.label)).toList)).toList)
-
-  //def updateLabel(ds: DataSet, label: String): DataSet =
-
-  def pick(ds: DataSet, labels: List[String]): DataSet = transformEachData(_.value(labels), _.value(labels map Label))(ds)
-
   def addDataString(ds: DataSet, label: String, value: String) = transformEachData(schema => addSchemaFunc(schema, SchemaString(label, 0)), data => addDataFunc(data, DataString(label, value)))(ds)
-
-  def addDataFunc(data: DataSet, addData: DataSet) = data match {
-    case DataRecord(l, fs) => DataRecord(l, addData :: fs)
-    case v => DataRecord(List(v, addData))
-  }
 
   def addSchemaFunc(schema: SchemaDefinition, addSchema: SchemaDefinition) = schema match {
     case SchemaRecord(l, fs) => SchemaRecord(l, addSchema :: fs)
@@ -99,6 +95,11 @@ object DataSetTransforms {
     val temp = template mkString ","
     val tFunc = mergeT(temp)
     transformEachData(schema => schema, data => addDataFunc(data, Data2Json.fromJson2Data(tFunc(data))))(ds)
+  }
+
+  def addDataFunc(data: DataSet, addData: DataSet) = data match {
+    case DataRecord(l, fs) => DataRecord(l, addData :: fs)
+    case v => DataRecord(List(v, addData))
   }
 
   def mergeT(template: String): DataSet => String = d => {
@@ -146,8 +147,6 @@ object DataSetTransforms {
       ds.rows flatMap (r => r(ds.getOrdinalOfColumn(columnName)) split regex map (_ :: r)))
 
   def keepRegex(ds: DataSetTableScala, regex: String): DataSetTableScala = keepFunc(ds, c => regex.matches(c))
-
-  def keepFunc(ds: DataSetTableScala, selectorFunc: String => Boolean) = DataSetTableScala(ds.header filter selectorFunc, ds.rows map (r => ds.getOrdinalsWithPredicate(selectorFunc) map (r(_))))
 
   def drop(ds: DataSetTableScala, cols: List[String]): DataSetTableScala = dropFunc(ds, c => cols.contains(c))
 
@@ -201,6 +200,8 @@ object DataSetTransforms {
 
   def keep(ds: DataSetTableScala, cols: List[String]): DataSetTableScala = keepFunc(ds, c => cols.contains(c))
 
+  def keepFunc(ds: DataSetTableScala, selectorFunc: String => Boolean) = DataSetTableScala(ds.header filter selectorFunc, ds.rows map (r => ds.getOrdinalsWithPredicate(selectorFunc) map (r(_))))
+
   def match2cols(ds: DataSetTableScala, columnName: String, regexes: List[String]) = DataSetTableScala(ds.getNextAvailableColumnName(columnName, regexes.length) ::: ds.header, ds.rows.map(r => {
     val matches = regexes map (_.r.findFirstMatchIn(ds.getValue(r, columnName)).isDefined)
 
@@ -212,6 +213,8 @@ object DataSetTransforms {
 
   def concatFunc(ds: DataSetTableScala, selectorFunc: String => Boolean, delim: String = "") = rowFunc(ds, ds.getNextAvailableColumnName("concat"), r => ds.getOrdinalsWithPredicate(selectorFunc) map (r(_)) mkString delim)
 
+  def rowFunc(ds: DataSetTableScala, columnName: String, rowFunc: List[String] => String) = DataSetTableScala(columnName :: ds.header, ds.rows map (r => rowFunc(r) :: r))
+
   def concat(ds: DataSetTableScala, cols: List[String], delim: String): DataSet = rowFunc(ds, ds.getNextAvailableColumnName("concat"), r => cols map (ds.getValue(r, _)) mkString delim)
 
   def const(ds: DataSetTableScala, value: List[String]) = DataSetTableScala(ds.getNextAvailableColumnName("const", value.length) ::: ds.header, ds.rows map (value ::: _)) //rowFunc(ds, ds.getNextAvailableColumnName("const"), _ => value)
@@ -219,10 +222,6 @@ object DataSetTransforms {
   def mergeCols(ds1: DataSetTableScala, ds2: DataSetTableScala) = DataSetTableScala(ds1.header ::: ds2.header, (ds1.rows zip ds2.rows) map (r => r._2 ::: r._1))
 
   def convDate(ds: DataSetTableScala, col: String, in: String, out: String) = valueFunc(ds, col, convDateValue(_, in, out))
-
-  def valueFunc(ds: DataSetTableScala, col: String, f: String => String) = rowFunc(ds, ds.getNextAvailableColumnName(col), r => f(ds.getValue(r, col)))
-
-  def rowFunc(ds: DataSetTableScala, columnName: String, rowFunc: List[String] => String) = DataSetTableScala(columnName :: ds.header, ds.rows map (r => rowFunc(r) :: r))
 
   def convDateValue(value: String, in: String, out: String) =
     try {
@@ -253,6 +252,8 @@ object DataSetTransforms {
     val pairMap = colPairs.grouped(2).map(g => (g.head, g.tail.headOption.getOrElse(""))).toMap
     valueFunc(ds, col, v => mapOrElseValue(v, pairMap, orElse))
   }
+
+  def valueFunc(ds: DataSetTableScala, col: String, f: String => String) = rowFunc(ds, ds.getNextAvailableColumnName(col), r => f(ds.getValue(r, col)))
 
   def mapOrElseValue(value: String, colPairs: Map[String, String], orElse: String) = colPairs.getOrElse(value, orElse)
 

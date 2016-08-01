@@ -66,6 +66,8 @@ public class TaskTransform extends Task {
 
         if (config.hasPath("validateColumnCount"))
             setValidColumns(config.getIntList("validateColumnCount"));
+        setInstanceID(getUUID());
+        logger.info("---RUNID=" + getRunID() + "----INSTANCEID=" + getInstanceID() + ".");
     }
 
     public void extract() throws Exception {

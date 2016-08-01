@@ -1,5 +1,6 @@
 package com.actio;
 
+import com.actio.dpsystem.DPEventPublisher;
 import com.actio.dpsystem.DPSystemConfig;
 import com.actio.dpsystem.DPSystemFactory;
 import com.actio.dpsystem.DPSystemRuntime;
@@ -75,6 +76,10 @@ class Main {
                 dprun.execute();
             else
                 dprun.execute(pipelineName);
+
+            ///==========
+            dprun.sendEvents();
+
         }
         else {
             dprun.service();

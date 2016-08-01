@@ -149,7 +149,12 @@ class DataSourceREST extends DataSource with Logging {
 
   @throws(classOf[Exception])
   def write(dataSet: DataSet): Unit = {
-    create(dataSet)
+    if (config.hasPath("iterate")) {
+      dataSet.elems.foreach(d => create(DataArray(List(d))))
+    }
+    else {
+      create(dataSet)
+    }
   }
 
   override def create(ds: DataSet): Unit = {

@@ -39,6 +39,8 @@ object DataSourceREST {
       new HttpPut()
     } else if (label == "patch") {
       new HttpPatch()
+    } else if (label == "delete") {
+      new HttpDelete()
     } else {
       new HttpGet()
     }
@@ -152,6 +154,10 @@ class DataSourceREST extends DataSource with Logging {
 
   override def create(ds: DataSet): Unit = {
     executeQueryLabel(ds.elems.toList.head, "create")
+  }
+
+  override def delete(ds: DataSet): Unit = {
+    executeQueryLabel(ds.elems.toList.head, "delete")
   }
 
   @throws(classOf[Exception])

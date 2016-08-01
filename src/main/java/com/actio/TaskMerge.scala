@@ -42,6 +42,8 @@ object TaskMerge {
       "update"
     else if (config.hasPath("query.create"))
       "create"
+    else if (config.hasPath("query.delete"))
+      "delete"
     else
       "read"
   }

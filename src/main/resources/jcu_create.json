@@ -335,25 +335,5 @@
     "startup": {
       "exec": "read-modules"
     }
-  },
-  "tst": {
-    "UserName": "jp00021",
-    "DisplayName": "Jim P1",
-    "Email": "jp002@wactio.com.au",
-    "Activated": true,
-    "ModeratorEmail": "jmckinney@webcastcloud.com.au",
-    "ModeratorEmailOptOut": false,
-    "DisablePresentationContentCompleteEmails": false,
-    "DisablePresentationContentFailedEmails": true,
-    "DisablePresentationChangeOwnerEmails": true,
-    "TimeZone": 19,
-    "PresenterFirstName": "First",
-    "PresenterMiddleName": "Middle",
-    "PresenterLastName": "Last",
-    "PresenterEmail": "jmckinney@webcastcloud.com.au",
-    "PresenterPrefix": "null",
-    "PresenterSuffix": "null",
-    "PresenterAdditionalInfo": "null",
-    "PresenterBio": "null"
   }
 }

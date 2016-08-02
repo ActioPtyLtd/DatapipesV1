@@ -186,7 +186,7 @@ class DataSourceREST extends DataSource with Logging {
 
     logger.info(s"Status code ${element.statusCode} returned.")
 
-    new DataSetFixedData(element.schema, element)
+    element
   }
 
   def sendRequest(request: HttpUriRequest): (StatusLine, Array[Header], String) = {

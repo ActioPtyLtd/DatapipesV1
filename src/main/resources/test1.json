@@ -1,0 +1,41 @@
+{
+  "script": {
+    "schema": {},
+    "tasks": {
+      "read-frame-csv": {
+        "type": "extract",
+        "behavior": "simple",
+        "dataSource": {
+          "behavior": "regex",
+          "directory": "C:\\Users\\mauri\\bitbucket\\gandm-data\\Sunix\\Hewitt-PHHEW\\2016-06-15",
+          "type": "file",
+          "filenameTemplate": "VFRAME.CSV"
+        }
+      },
+      "transform": {
+        "type": "transformTerm",
+        "term": "ds => row1header(split2cols(ds, \"col1\"))"
+      },
+      "load-product-csv": {
+        "type": "load",
+        "behavior": "simple",
+        "dataSource": {
+          "behavior" : "append",
+          "directory": "c://tmp//",
+          "type": "file",
+          "filenameTemplate": "test1.csv",
+          "outputDelimiter": ","
+        }
+      }
+    },
+    "pipelines": {
+      "load-frame" : {
+        "pipe": "read-frame-csv | transform | load-product-csv"
+      }
+    },
+    "services": { },
+    "startup": {
+      "exec": "load-frame"
+    }
+  }
+}

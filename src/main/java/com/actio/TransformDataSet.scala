@@ -1,4 +1,4 @@
-/*package com.actio
+package com.actio
 
 import scala.meta.Term.Arg.Repeated
 import scala.meta._
@@ -19,6 +19,8 @@ object TestMeta extends App {
 
   println(res)
 
+  def eval(ds: DataSet, text: String): DataSet = eval(ds, text.parse[Term].get)
+
   def eval(ds: DataSet, t: Term): DataSet = t match {
     case Term.Function(Seq(Term.Param(_, Term.Name(name), _, _)), body) => eval(body, Map(name -> ds))
   }
@@ -38,4 +40,3 @@ object TestMeta extends App {
     case Term.Interpolate(_, strings, terms) => DataString((strings zip terms).map(p => p._1.toString() + eval(p._2, scope).stringOption.getOrElse("")).mkString + strings.last.toString)
   }
 }
-*/

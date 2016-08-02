@@ -114,7 +114,7 @@ public class TaskPipeline extends Task implements Runnable
         logger.info("Calling Batch Recursively::"+currentNode.getName()+"("+keyIndex + "/"+tasksInPipeline.size()+")");
         scala.collection.Iterator<DataSet> iterator = resultSet.elems();
         while ( iterator.hasNext() && tasksInPipeline.size() > keyIndex ) {
-            DataSet subResultSet = new DataSetFixedData(resultSet.schema(),iterator.next());
+            DataSet subResultSet = iterator.next();
             // recursively traverse the rest of the pipeline batching up the ResultSet
             //subResultSet.dump();
 

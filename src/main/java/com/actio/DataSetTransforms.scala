@@ -108,6 +108,8 @@ object DataSetTransforms {
     res
   }
 
+  /*
+
   def numeric(batch: Batch, field: String, precision: Int, scale: Int): DataSet = batch match {
     case (s, DataRecord(key, fs)) =>
       new DataSetFixedData(s, if (fs.map(_.label).contains(field))
@@ -136,7 +138,7 @@ object DataSetTransforms {
     case (s, DataArray(key, a)) =>
       new DataSetFixedData(s, DataArray(key, a.map(m => bool((s, m), field).headOption.get)))
     case (s, d) => new DataSetFixedData(s, d)
-  }
+  } */
 
   def delim(str: String, d: DataSet) = DataString(d.elems.map(_.stringOption.getOrElse("")).mkString(str))
 

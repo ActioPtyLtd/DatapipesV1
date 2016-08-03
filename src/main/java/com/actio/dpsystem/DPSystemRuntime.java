@@ -85,7 +85,11 @@ public class DPSystemRuntime extends DPSystemConfigurable {
         // going to instantiate a new factory & runtime
         // based upon the systemConfig to send the events out of the existing run
 
+        if (getSysconf().getSystemConfig("eventConfigName") == null)
+            return;
+
         DPSystemFactory eventFactory = new DPSystemFactory();
+
         // locate filename
         String sysconfigfilename = getSysconf().getSystemConfig("eventConfigName").toString();
         logger.info("trying to load systemconfig" + sysconfigfilename);

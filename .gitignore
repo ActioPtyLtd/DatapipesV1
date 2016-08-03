@@ -37,3 +37,8 @@ log*.txt
 ## File-based project format:
 *.ipr
 *.iws
+.history
+.idea/shelf/
+project/project/
+src/main/scala-2.11/
+src/test/

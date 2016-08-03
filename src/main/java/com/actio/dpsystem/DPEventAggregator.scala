@@ -32,6 +32,7 @@ object dpEvents {
 
 case class DPEventAggregator(runId: String) {
 
+  val addevents: Boolean = true
   var eventList: List[dpEvent] = List()
 
   // ============================================================
@@ -43,7 +44,8 @@ case class DPEventAggregator(runId: String) {
   }
 
   def addEvent(theEntry: dpEvent): Unit = {
-    this.eventList = this.eventList ::: List(theEntry)
+    if (addevents)
+      this.eventList = this.eventList ::: List(theEntry)
   }
 
   def err(pipeInstanceId: String, taskInstanceId: String, theAction: String, themsg: String, keyName: String, counter: String = "", count: Int = 0): Unit = {

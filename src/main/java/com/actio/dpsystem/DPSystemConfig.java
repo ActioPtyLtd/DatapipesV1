@@ -87,7 +87,9 @@ public class DPSystemConfig extends DPSystemConfigurable {
     }
 
     public String getSystemConfig(String name) throws Exception {
-        if (system.containsKey(name)) {
+        if (system == null)
+            return null;
+        else if (system.containsKey(name)) {
             return system.toConfig().getString(name);
         } else {
             logger.warn("getSystemConfig:: System item not found:" + name);

@@ -25,6 +25,7 @@ public class DataSourceFile extends DataSource {
     private String generatedFilename;
     private String prefixDiffFile;
     private String filenameTemplate;
+    private String readStrategy;
 
     private String getCompiledFilename() throws Exception {
 
@@ -71,8 +72,10 @@ public class DataSourceFile extends DataSource {
 
         // execute the sqlquery
         logger.info("ReadFile: " + fname);
-
-        dataSet = new DataSetFileStream(new FileInputStream(new File(fname)));
+        if(!behaviour.equalsIgnoreCase(READ_JSON_FROM_FILE))
+            dataSet = new DataSetFileStream(new FileInputStream(new File(fname)));
+        else
+            dataSet = Data2Json.fromFileStream2Json2Data(new FileInputStream(new File(fname)));
 
         // save the results
 

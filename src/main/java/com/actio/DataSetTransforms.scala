@@ -9,11 +9,20 @@ import scala.util.Try
 /**
   * Created by mauri on 27/04/2016.
   */
+//noinspection ScalaStyle,ScalaStyle
 
 object DataSetTransforms {
 
   //TODO: likely will remove Batch, it's confusing
   type Batch = (SchemaDefinition, DataSet)
+
+  def orderBy(ds: DataSet, property: String, direction: String): DataSet = {
+    for(elem <- ds.elems)
+      println(elem.value(property))
+    ds
+  }
+
+  def take(ds: DataSet, numberOfItems: Int): DataSet = DataArray(ds.elems.take(numberOfItems).toList)
 
   def filterValue(ds: DataSet, property: String, value: String): DataSet = DataArray(ds.elems.filter(f => f(property).stringOption.getOrElse("") == value).toList)
 

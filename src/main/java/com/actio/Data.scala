@@ -1,5 +1,7 @@
 package com.actio
 
+import java.io.InputStream
+
 import org.json4s._
 import org.json4s.jackson.JsonMethods._
 
@@ -114,5 +116,7 @@ object Data2Json {
     }
 
   def fromJson2Data(string: String): DataSet = fromJson4s2Data("", parse(string))
+
+  def fromFileStream2Json2Data(inputStream:InputStream): DataSet = fromJson4s2Data("", parse(inputStream))
 }
 

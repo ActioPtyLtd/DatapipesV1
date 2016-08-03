@@ -63,6 +63,7 @@ public class DPSystemConfigurable {
     public static final String DIFF_PROCESS_REVISED_LABEL="diffProcessRev";
     public static final String VALIDATE_PHONE_COLUMNS_LABEL = "validatePhoneColumns";
     public static final String DATEDAYOFFSET_LABEL = "dateDayOffset";
+    public static final String READ_JSON_FROM_FILE = "readJsonFromFile";
     // QueryParser Substitution LABELS
     public static final String DATE_SUBSTITUTION_LABEL = "@yesterdaysDate";
     public static final String DATE_SUBSTITUTION_WITH_OFFSET_LABEL = "@yesterdaysDateWithOffset";

@@ -1,0 +1,98 @@
+{
+  "script": {
+    "schema": {},
+    "tasks": {
+      "load-payruns": {
+        "type": "extract",
+        "behavior": "simple",
+        "dataSource": {
+          "type": "rest",
+          "behavior": "simple",
+          "path": "-",
+          "credential": {
+            "user": "WmFXcGs0dVJsU3VUS0dCcXJsVmIxdz09",
+            "password": ""
+          },
+          "query": {
+            "read": {
+              "uri": "https://gandm.yourpayroll.com.au/api/v2/business/24195/payrun"
+            }
+          }
+        }
+      },
+	  "load-mock-payruns": {
+	    "type": "extract",
+		"behavior": "simple",
+		"dataSource": {
+          "behavior" : "readJsonFromFile",
+          "directory": "c://temp//",
+          "type": "file",
+          "filenameTemplate": "payruns.json",
+          "outputDelimiter": ","
+        }
+	  },
+	  "get-last-payrun": {
+	    "type": "transform",
+        "batch": [
+          "orderBy, payPeriodEnding, desc",
+		  "take, 3"
+        ]
+	  },
+	  "load-payrun-earning-lines-for-payrun": {
+        "type": "extract",
+        "behavior": "simple",
+        "dataSource": {
+          "type": "rest",
+          "behavior": "simple",
+          "path": "-",
+          "credential": {
+            "user": "WmFXcGs0dVJsU3VUS0dCcXJsVmIxdz09",
+            "password": ""
+          },
+          "query": {
+            "read": {
+              "uri": "https://gandm.yourpayroll.com.au/api/v2/business/24195/payrun/{payrunId}/earningslines/"
+            }
+          }
+        }
+      },
+      "iterate-template": {
+        "type": "iterateTemplate",
+        "behavior": "iterateTemplate",
+        "iterate": "0.root.data.*.relationships.products.data.*",
+        "template": "@{d.local.id},@{(firstValue,(filterValue,d.global.response.root.included,'type','productAttributeEyewear'),'id',d.local.id).attributes.brand},@{(firstValue,(filterValue,d.global.response.root.included,'type','productAttributeEyewear'),'id',d.local.id).attributes.frame_model},@{(firstValue,(filterValue,d.global.response.root.included,'type','productAttributeEyewear'),'id',d.local.id).attributes.frame_colour},@{(firstValue,(filterValue,d.global.response.root.included,'type','productAttributeEyewear'),'id',d.local.id).attributes.frame_eye_size},@{(firstValue,(filterValue,d.global.response.root.included,'type','productAttributeEyewear'),'id',d.local.id).attributes.frame_bridge_size},@{(firstValue,(filterValue,d.global.response.root.included,'type','productAttributeEyewear'),'id',d.local.id).attributes.frame_temple_length},@{(firstValue,(filterValue,d.global.response.root.included,'type','productAttributeEyewear'),'id',d.local.id).attributes.frame_depth},f,FALSE,@{(firstValue,(filterValue,d.global.response.root.included,'type','productAttributeEyewear'),'id',d.local.id).attributes.frame_type},@{(firstValue,(filterValue,d.global.response.root.included,'type','product'),'id',d.local.id).attributes.retailPrice},0,@{(firstValue,(filterValue,d.global.response.root.included,'type','product'),'id',d.local.id).attributes.wholesalePriceTax},@{(firstValue,(filterValue,d.global.response.root.included,'type','product'),'id',d.local.id).attributes.wholesalePrice},@{(firstValue,(filterValue,d.global.response.root.included,'type','product'),'id',d.local.id).attributes.apn}"
+      },
+      "add-header-csv": {
+        "type": "transform",
+        "batch": [
+          "split2Cols,template",
+          "rename,template1,gnmcode,template2,frame_brand,template3,frame_model,template4,frame_colour,template5,frame_eye_size,template6,frame_bridge_size,template7,frame_temple_length,template8,frame_depth,template9,frame_group,template10,frame_rx,template11,frame_type,template12,retail_price_incl_tax,template13,wholesale_price_excl_tax,template14,wholesale_price_tax,template15,wholesale_price_incl_tax,template16,supplier_barcode",
+          "keep,gnmcode,frame_brand,frame_model,frame_colour,frame_eye_size,frame_bridge_size,frame_temple_length,frame_depth,frame_group,frame_rx,frame_type,retail_price_incl_tax,wholesale_price_excl_tax,wholesale_price_tax,wholesale_price_incl_tax,supplier_barcode"
+       ]
+      },
+      "load-product-csv": {
+        "type": "load",
+        "behavior": "simple",
+        "dataSource": {
+          "behavior" : "append",
+          "directory": "c://temp//",
+          "type": "file",
+          "filenameTemplate": "test.csv",
+          "outputDelimiter": ","
+        }
+      }
+    },
+    "pipelines": {
+      "load-payrun-earning-lines" : {
+        "pipe": "load-mock-payruns | get-last-payrun"
+      },
+	  "load-mock-payruns" : {
+        "pipe": "load-mock-payruns"
+      }
+    },
+    "services": { },
+    "startup": {
+      "exec": "load-payrun-earning-lines"
+    }
+  }
+}

@@ -3,6 +3,7 @@ package com.actio
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
+import scala.annotation.tailrec
 import scala.collection.mutable
 import scala.util.Try
 
@@ -16,13 +17,83 @@ object DataSetTransforms {
   //TODO: likely will remove Batch, it's confusing
   type Batch = (SchemaDefinition, DataSet)
 
-  def orderBy(ds: DataSet, property: String, direction: String): DataSet = {
-    for(elem <- ds.elems)
-      println(elem.value(property))
-    ds
+  /**
+    * Sorts the DataSet by a specified property - Currently only supports dates
+    *
+    * @param ds         the DataSet containing the items to sort
+    * @param property   the property to sort by
+    * @param dataType   the data type of the property to sort by
+    * @param dataFormat the format of the property value
+    * @param direction  the direction to sort by
+    * @return           a new DataSet containing the sorted items
+    */
+  def orderBy(ds: DataSet, property: String, dataType: String, dataFormat: String,  direction: String): DataSet = {
+//    @tailrec
+    var dataFormatOption = Option(dataFormat)
+    if(dataFormat == "")
+      dataFormatOption = None
+    val elementCount = ds.elems.count(x => true)
+    if(elementCount > 1 && ds.elems.forall(x => x.value(property).toOption.isDefined)) {
+      ds match {
+        case DataArray(label, arrayElems) => dataType.toLowerCase() match {
+          case "date" =>
+            if (dataFormatOption.isDefined)
+              DataArray(label, sortByDate(arrayElems, property, dataFormatOption.get, direction))
+            else
+              ds
+          case _ => ds
+        }
+        case DataRecord(label, elements) => dataType.toLowerCase() match {
+          case "date" =>
+            if (dataFormatOption.isDefined)
+              DataRecord(label, sortByDate(elements, property, dataFormatOption.get, direction))
+            else
+              ds
+          case _ => var sortedElements = elements.sortBy(x => x.value(property).stringOption)
+            if(direction.equalsIgnoreCase("desc"))
+              sortedElements = sortedElements.reverse
+            DataArray(label, sortedElements)
+        }
+        case _ => ds
+      }
+    }
+    else if (elementCount == 1) {
+      if(ds.elems.next().elems.count(x => true) > 1) {
+        ds match {
+          case DataArray(label, _) => DataArray(label, List[DataSet] {
+            orderBy(ds.elems.next(), property, dataType, dataFormat, direction)
+          })
+          case DataRecord(label, _) => orderBy(ds.elems.next(), property, dataType, dataFormat, direction)
+          case DataSetHttpResponse(label, _, _, _, body) =>  orderBy(body, property, dataType, dataFormat, direction)
+          case x: DataSetFixedData => orderBy(ds.elems.next(), property, dataType, dataFormat, direction)
+          case _ => ds
+        }
+      }
+      else {
+        ds match {
+          case x: DataSetFixedData => orderBy(ds.elems.next(), property, dataType, dataFormat, direction)
+          case _ => ds
+        }
+      }
+    }
+    else
+      ds
   }
 
-  def take(ds: DataSet, numberOfItems: Int): DataSet = DataArray(ds.elems.take(numberOfItems).toList)
+  def sortByDate(items: List[DataSet], property: String, dateFormat: String, direction: String): List[DataSet] = {
+    implicit val localDateOrdering: Ordering[LocalDate] = Ordering.by(_.toEpochDay)
+    val sortedItems = items.sortBy(x => LocalDate.parse(x.value(property).stringOption.getOrElse(""), DateTimeFormatter.ofPattern(dateFormat)).toEpochDay)(Ordering[Long])
+    if(direction.equalsIgnoreCase("desc"))
+      sortedItems.reverse
+    else
+      sortedItems
+  }
+
+
+  def take(ds: DataSet, numberOfItems: Int): DataSet = {
+    val x = DataArray(ds.elems.take(numberOfItems).toList)
+    x
+  }
 
   def filterValue(ds: DataSet, property: String, value: String): DataSet = DataArray(ds.elems.filter(f => f(property).stringOption.getOrElse("") == value).toList)
 

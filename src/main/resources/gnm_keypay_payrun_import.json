@@ -34,13 +34,14 @@
 	  "get-last-payrun": {
 	    "type": "transform",
         "batch": [
-          "orderBy, payPeriodEnding, desc",
-		  "take, 3"
+          "orderBy, dateFinalised, date, yyyy-MM-dd'T'HH:mm:ss, asc",
+		  "take, 1"
         ]
 	  },
-	  "load-payrun-earning-lines-for-payrun": {
-        "type": "extract",
+	  "load-payrunearninglines-merge": {
+        "type": "merge",
         "behavior": "simple",
+        "attribute": "earninglines",
         "dataSource": {
           "type": "rest",
           "behavior": "simple",
@@ -51,11 +52,24 @@
           },
           "query": {
             "read": {
-              "uri": "https://gandm.yourpayroll.com.au/api/v2/business/24195/payrun/{payrunId}/earningslines/"
+              "uri": "https://gandm.yourpayroll.com.au/api/v2/business/24195/payrun/~{d.id}/earningslines/"
             }
           }
         }
       },
+	  "load-mock-payrunearninglines": {
+	    "type": "extract",
+		"behavior": "simple",
+		"dataSource": {
+          "behavior" : "readJsonFromFile",
+          "directory": "c://temp//",
+          "type": "file",
+          "filenameTemplate": "payrunearninglines.json",
+          "outputDelimiter": ","
+        }
+	  },
+	  
+	  
       "iterate-template": {
         "type": "iterateTemplate",
         "behavior": "iterateTemplate",
@@ -84,11 +98,14 @@
     },
     "pipelines": {
       "load-payrun-earning-lines" : {
-        "pipe": "load-mock-payruns | get-last-payrun"
+        "pipe": "load-mock-payruns | get-last-payrun | load-payrunearninglines-merge"
       },
 	  "load-mock-payruns" : {
         "pipe": "load-mock-payruns"
-      }
+      },
+	  "process-earning-lines" : {
+	    "pipe": "load-mock-payrunearninglines"
+	  }
     },
     "services": { },
     "startup": {

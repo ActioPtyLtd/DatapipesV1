@@ -20,9 +20,64 @@
           }
         }
       },
+	  "load-locations": {
+        "type": "extract",
+        "behavior": "simple",
+        "dataSource": {
+          "type": "rest",
+          "behavior": "simple",
+          "path": "-",
+          "credential": {
+            "user": "WmFXcGs0dVJsU3VUS0dCcXJsVmIxdz09",
+            "password": ""
+          },
+          "query": {
+            "read": {
+              "uri": "https://gandm.yourpayroll.com.au/api/v2/business/24195/location"
+            }
+          }
+        }
+      },
+	  "load-paycategories": {
+        "type": "extract",
+        "behavior": "simple",
+        "dataSource": {
+          "type": "rest",
+          "behavior": "simple",
+          "path": "-",
+          "credential": {
+            "user": "WmFXcGs0dVJsU3VUS0dCcXJsVmIxdz09",
+            "password": ""
+          },
+          "query": {
+            "read": {
+              "uri": "https://gandm.yourpayroll.com.au/api/v2/business/24195/paycategory"
+            }
+          }
+        }
+      },
+	  "load-employees": {
+        "type": "extract",
+        "behavior": "simple",
+        "dataSource": {
+          "type": "rest",
+          "behavior": "simple",
+          "path": "-",
+          "credential": {
+            "user": "WmFXcGs0dVJsU3VUS0dCcXJsVmIxdz09",
+            "password": ""
+          },
+          "query": {
+            "read": {
+              "uri": "https://gandm.yourpayroll.com.au/api/v2/business/24195/employee/unstructured"
+            }
+          }
+        }
+      },
 	  "load-mock-payruns": {
 	    "type": "extract",
 		"behavior": "simple",
+		"attribute": "payruns",
 		"dataSource": {
           "behavior" : "readJsonFromFile",
           "directory": "c://temp//",
@@ -57,9 +112,162 @@
           }
         }
       },
+	  "flatten-payrun-earninglines-payrun": {
+	    "type": "transform",
+        "batch": [
+          "flattenStructure, earninglines._.root.earningsLines._.*, +earninglines._.root.payRunId"
+        ]
+	  },
+	  "load-employees-merge": {
+        "type": "merge",
+        "behavior": "simple",
+        "attribute": "employees",
+        "dataSource": {
+          "type": "rest",
+          "behavior": "simple",
+          "path": "-",
+          "credential": {
+            "user": "WmFXcGs0dVJsU3VUS0dCcXJsVmIxdz09",
+            "password": ""
+          },
+          "query": {
+            "read": {
+              "uri": "https://gandm.yourpayroll.com.au/api/v2/business/24195/employee/unstructured/~{d.employeeId}"
+            }
+          }
+        }
+      },
+	  "load-paycategory-merge": {
+        "type": "merge",
+        "behavior": "simple",
+        "attribute": "paycategory",
+        "dataSource": {
+          "type": "rest",
+          "behavior": "simple",
+          "path": "-",
+          "credential": {
+            "user": "WmFXcGs0dVJsU3VUS0dCcXJsVmIxdz09",
+            "password": ""
+          },
+          "query": {
+            "read": {
+              "uri": "https://gandm.yourpayroll.com.au/api/v2/business/24195/paycategory/~{d.payCategoryId}"
+            }
+          }
+        }
+      },
+	  "load-location-merge": {
+        "type": "merge",
+        "behavior": "simple",
+        "attribute": "location",
+        "dataSource": {
+          "type": "rest",
+          "behavior": "simple",
+          "path": "-",
+          "credential": {
+            "user": "WmFXcGs0dVJsU3VUS0dCcXJsVmIxdz09",
+            "password": ""
+          },
+          "query": {
+            "read": {
+              "uri": "https://gandm.yourpayroll.com.au/api/v2/business/24195/location/~{d.locationId}"
+            }
+          }
+        }
+      },
+	  "update-payrun-db": {
+        "type": "datasourceupdate",
+        "behavior": "",
+        "keys": [
+          "externalref"
+        ],
+        "dataSource": {
+          "type": "sql",
+          "behavior": "",
+          "jdbcDriver": "org.postgresql.Driver",
+          "connect": "jdbc:postgresql://localhost/payrolldev?user=payroll&password=payroll",
+          "query": {
+            "queryTemplate": "",
+            "create": "insert into dim_payrun (externalref, datefinalised, payscheduleid, payperiodstarting, payperiodending, datepaid, isfinalised) values (@externalref::int,@dateFinalised::date,@payScheduleId::int,@payPeriodStarting::date,@payPeriodEnding::date,@datePaid::date,@isFinalised::bool)",
+            "read": "select * from dim_payrun",
+            "update": "update dim_payrun set datefinalised=@dateFinalised::date, payscheduleid=@payScheduleId::int, payperiodstarting=@payPeriodStarting::date,            payperiodending=@payPeriodEnding::date, datepaid=@datePaid::date, isfinalised=@isFinalised::bool where externalref = @externalref::int"
+          }
+        }
+      },
+	  "update-location-db": {
+        "type": "datasourceupdate",
+        "behavior": "",
+        "keys": [
+          "externalref"
+        ],
+        "dataSource": {
+          "type": "sql",
+          "behavior": "",
+          "jdbcDriver": "org.postgresql.Driver",
+          "connect": "jdbc:postgresql://localhost/payrolldev?user=payroll&password=payroll",
+          "query": {
+            "queryTemplate": "",
+            "create": "insert into dim_location (externalref, externalparentref, label, fullyqualifiedlabel) values (@externalref::int, NullIF(@externalparentref,'')::int, @label, @fullyqualifiedlabel)",
+            "read": "select * from dim_location",
+            "update": "update dim_location set parent=@parent::bigint, externalparentref=@externalparentref::int, label=@label, fullyqualifiedlabel=@fullyqualifiedlabel where externalref = @externalref::int"
+          }
+        }
+      },
+	  "update-paycategory-db": {
+        "type": "datasourceupdate",
+        "behavior": "",
+        "keys": [
+          "externalref"
+        ],
+        "dataSource": {
+          "type": "sql",
+          "behavior": "",
+          "jdbcDriver": "org.postgresql.Driver",
+          "connect": "jdbc:postgresql://localhost/payrolldev?user=payroll&password=payroll",
+          "query": {
+            "queryTemplate": "",
+            "create": "insert into dim_paycategory (externalref, label, rateunit, accruesleave, defaultsuperrate, rateloadingpercent, penaltyloadingpercent, istaxexempt, ispayrolltaxexempt, externalid, source, externalparentref, generalledgermappingcode, paymentsummaryclassification) values (@externalref::int, @label, @rateUnit, @accruesLeave::bool, @defaultSuperRate::numeric, @rateLoadingPercent::numeric, @penaltyLoadingPercent::numeric, @isTaxExempt::bool, @isPayRollTaxExempt::bool, NullIf(@externalId,'')::int, @source, NullIF(@externalparentref,'')::int, NullIf(@generalLedgerMappingCode,'')::int, @paymentSummaryClassification)",
+            "read": "select * from dim_paycategory",
+            "update": "update dim_paycategory set label=@label, rateunit=@rateUnit, accruesleave=@accruesLeave::bool, defaultsuperrate=@defaultSuperRate::numeric, rateloadingpercent=@rateLoadinPercent::numeric, penaltyloadingpercent=@penaltyLoadingPercent::numeric, istaxexempt=@isTaxExempt::bool, ispayrolltaxexempt=@isPayRollTaxExempt::bool, externalid=@externalId::int, source=@source, externalparentref=@externalparentref::int, generalledgermappingcode=@generalLedgerMappingCode::int, paymentsummaryclassification=@paymentSummaryClassification where externalref = @externalref::int"
+          }
+        }
+      },
+	  "update-employee-db": {
+        "type": "datasourceupdate",
+        "behavior": "",
+        "keys": [
+          "externalref"
+        ],
+        "dataSource": {
+          "type": "sql",
+          "behavior": "",
+          "jdbcDriver": "org.postgresql.Driver",
+          "connect": "jdbc:postgresql://localhost/payrolldev?user=payroll&password=payroll",
+          "query": {
+            "queryTemplate": "",
+            "create": "insert into dim_employee (externalref, firstname, middlename, surname, dob, employmenttype_sk, startdate, enddate, previoussurname, jobtitle, primarylocation_sk) values (@externalref::int, @firstName, @middleName, @surname, @dateOfBirth::date, @employmentTypeSk, @NullIF(@startDate,'')::date, @NullIF(@endDate,'')::date, @previousSurname, @jobTitle, @primaryLocationSk)",
+            "read": "select * from dim_employee",
+            "update": "update dim_employee set firstname=@firstName, middlename=@middleName, surname=@surname, dob=@dateOfBirth::date, employmenttype_sk=@employmentTypeSk, startdate=@startDate, enddate=@endDate, previoussurname=@previousSurname, jobtitle=@jobTitle, primarylocation_sk=@primaryLocationSk where externalref = @externalref::int"
+          }
+        }
+      },
+	  "transform-to-table": {
+	    "type": "transform",
+        "batch": [
+          "mapToDataSetTableScala",
+		  "rename,id,externalref,parentId,externalparentref,name,label,fullyQualifiedName,fullyqualifiedlabel"
+        ]
+	  },
+	  "flatten-mock-payrun-earninglines-payrun": {
+	    "type": "transform",
+        "batch": [
+          "flattenStructure, earningsLines._.*, +payRunId"
+        ]
+	  },
 	  "load-mock-payrunearninglines": {
 	    "type": "extract",
 		"behavior": "simple",
+		"attribute": "earninglines",
 		"dataSource": {
           "behavior" : "readJsonFromFile",
           "directory": "c://temp//",
@@ -83,17 +291,6 @@
           "rename,template1,gnmcode,template2,frame_brand,template3,frame_model,template4,frame_colour,template5,frame_eye_size,template6,frame_bridge_size,template7,frame_temple_length,template8,frame_depth,template9,frame_group,template10,frame_rx,template11,frame_type,template12,retail_price_incl_tax,template13,wholesale_price_excl_tax,template14,wholesale_price_tax,template15,wholesale_price_incl_tax,template16,supplier_barcode",
           "keep,gnmcode,frame_brand,frame_model,frame_colour,frame_eye_size,frame_bridge_size,frame_temple_length,frame_depth,frame_group,frame_rx,frame_type,retail_price_incl_tax,wholesale_price_excl_tax,wholesale_price_tax,wholesale_price_incl_tax,supplier_barcode"
        ]
-      },
-      "load-product-csv": {
-        "type": "load",
-        "behavior": "simple",
-        "dataSource": {
-          "behavior" : "append",
-          "directory": "c://temp//",
-          "type": "file",
-          "filenameTemplate": "test.csv",
-          "outputDelimiter": ","
-        }
       }
     },
     "pipelines": {
@@ -104,12 +301,28 @@
         "pipe": "load-mock-payruns"
       },
 	  "process-earning-lines" : {
-	    "pipe": "load-mock-payrunearninglines"
+	    "pipe": "load-mock-payruns | get-last-payrun | load-payrunearninglines-merge | flatten-payrun-earninglines-payrun"
+	  },
+	  "mock-process-earning-lines" : {
+	    "pipe": "load-mock-payrunearninglines | flatten-mock-payrun-earninglines-payrun | load-location-merge | update-location-db"
+	  },
+	  "load-payrun-dim" : {
+	    "pipe": "load-mock-payruns | transform-to-table | update-payrun-db"
+	  },
+	  "load-location-dim" : {
+	    "pipe": "load-locations | transform-to-table | update-location-db"
+	  },
+	  "load-paycategory-dim" : {
+		"pipe": "load-paycategories | transform-to-table | update-paycategory-db"
+	  },
+	  "load-employee-dim" : {
+		"pipe": "load-employees | transform-to-table | update-employee-db"
 	  }
+	  
     },
     "services": { },
     "startup": {
-      "exec": "load-payrun-earning-lines"
+      "exec": "load-employee-dim"
     }
   }
 }

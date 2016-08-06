@@ -52,6 +52,7 @@ public class DPSystemConfigurable {
     public static final String TASK_LOAD_LABEL = "load";
     public static final String TASK_TRANSFORM_LABEL = "transform";
     public static final String TASK_PIPELINE_LABEL = "pipeline";
+    public static final String ATTRIBUTE_LABEL = "attribute";
     // types of behavior
     public static final String CHECKPOINT_DIFF_LABEL="checkpointDiff";
     public static final String FULL_CHECKPOINT_DIFF_LABEL="fullCheckpointDiff";

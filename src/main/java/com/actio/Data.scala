@@ -117,6 +117,6 @@ object Data2Json {
 
   def fromJson2Data(string: String): DataSet = fromJson4s2Data("", parse(string))
 
-  def fromFileStream2Json2Data(inputStream:InputStream): DataSet = DataRecord("",List(fromJson4s2Data("", parse(inputStream))))
+  def fromFileStream2Json2Data(label:String, inputStream:InputStream): DataSet = DataRecord(label,List(fromJson4s2Data("", parse(inputStream))))
 }
 

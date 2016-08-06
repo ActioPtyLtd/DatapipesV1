@@ -28,11 +28,11 @@ object DataSetTransforms {
     * @return           a new DataSet containing the sorted items
     */
   def orderBy(ds: DataSet, property: String, dataType: String, dataFormat: String,  direction: String): DataSet = {
-//    @tailrec
+    @tailrec
     var dataFormatOption = Option(dataFormat)
     if(dataFormat == "")
       dataFormatOption = None
-    val elementCount = ds.elems.count(x => true)
+    val elementCount = ds.elems.length
     if(elementCount > 1 && ds.elems.forall(x => x.value(property).toOption.isDefined)) {
       ds match {
         case DataArray(label, arrayElems) => dataType.toLowerCase() match {
@@ -58,7 +58,7 @@ object DataSetTransforms {
       }
     }
     else if (elementCount == 1) {
-      if(ds.elems.next().elems.count(x => true) > 1) {
+      if(ds.elems.next().elems.length > 1) {
         ds match {
           case DataArray(label, _) => DataArray(label, List[DataSet] {
             orderBy(ds.elems.next(), property, dataType, dataFormat, direction)
@@ -89,10 +89,77 @@ object DataSetTransforms {
       sortedItems
   }
 
-
   def take(ds: DataSet, numberOfItems: Int): DataSet = {
     val x = DataArray(ds.elems.take(numberOfItems).toList)
     x
+  }
+
+  def getDataSetWithHierarchy(ds: DataSet, hierarchyPath:Array[String]): List[DataSet] = {
+    @tailrec
+    var itemsToReturn = List[DataSet]()
+    val nextItemInHierarchy = hierarchyPath.head
+    val endOfHierarchyReached = if (hierarchyPath.tail.length == 0) true else false
+    if (endOfHierarchyReached) {
+      if(nextItemInHierarchy.equals("*")) {
+        val l =  ds.elems.toList
+        itemsToReturn = itemsToReturn:::l
+      }
+      else
+        itemsToReturn = itemsToReturn:+ds.value(nextItemInHierarchy)
+    }
+    else {
+      if(nextItemInHierarchy.equals("_"))
+        itemsToReturn = itemsToReturn:::ds.elems.foldLeft(List[DataSet]()) { (z:List[DataSet], f:DataSet) => z:::getDataSetWithHierarchy(f, hierarchyPath.tail) }
+      else
+        itemsToReturn = itemsToReturn:::getDataSetWithHierarchy(ds.value(nextItemInHierarchy), hierarchyPath.tail)
+    }
+    itemsToReturn
+  }
+
+  /**
+    * Flattens a hierarcy structure by copying items at the specified hierarchy level into the root
+    * supports merging items at different hierarchy levels as "includes"
+    *
+    * @param ds   the dataset containing the hierarchy structure
+    * @param args comma separated list of . notation hierarchy i.e. fieldA._.* will copy all the grandchildren of fieldA without knowing the child field names
+    *             any hierarchy definitions prefixed with + will get appended to the copied items
+    * @return     DataArray
+    */
+  def flattenStructure(ds: DataSet, args: List[String]): DataSet =
+  {
+    val fieldsToFlatten = args.filterNot(x => x.startsWith("+"))
+    val fieldsToInclude = args.filter(x => x.startsWith("+")).map(x => x.substring(1))
+    var flattenedList = List[DataSet]()
+    for (field <- fieldsToFlatten) {
+      val hierarchy = field.split('.')
+      flattenedList = flattenedList:::getDataSetWithHierarchy(ds, hierarchy)
+    }
+    for ( field <- fieldsToInclude) {
+      val hierarchy = field.split('.')
+      val dataSetToInclude = getDataSetWithHierarchy(ds, hierarchy)
+      flattenedList = flattenedList.map(x => DataRecord(x.label,x.elems.toList:::dataSetToInclude))
+    }
+    DataArray("",flattenedList)
+  }
+
+  def mapToDataSetTableScala(ds: DataSet): DataSetTableScala = {
+    ds match {
+      case x: DataSetFixedData => x.headOption.get match {
+        case DataSetHttpResponse(_,_,_,_,body) => body.schema match {
+          case SchemaRecord(_,fields) =>
+            if(fields.head.label.isEmpty()) {
+              DataSetTableScala(SchemaArray("", fields.head),body)
+            }
+            else
+              DataSetTableScala(SchemaArray("", body.schema), body)
+          case _ => DataSetTableScala( body.schema, x.headOption.get)
+        }
+        case subDS => DataSetTableScala(subDS.schema, x.headOption.get)
+      }
+      case DataArray(_,arrayElems) => DataSetTableScala(arrayElems.head.schema, arrayElems.head)
+      case _ => DataSetTableScala(ds)
+    }
+
   }
 
   def filterValue(ds: DataSet, property: String, value: String): DataSet = DataArray(ds.elems.filter(f => f(property).stringOption.getOrElse("") == value).toList)
@@ -263,7 +330,7 @@ object DataSetTransforms {
   def changes(ds1: DataSetTableScala, ds2: DataSetTableScala, keyCols: List[String]) = DataSetTableScala(ds1.header, ds1.rows.filter(r => {
     val option = ds2.rows.find(ri => keyCols.forall(c => ds1.getValue(r, c) == ds2.getValue(ri, c)))
     if (option.isDefined)
-      !ds1.header.forall(c => {
+      !ds1.header.intersect(ds2.header).forall(c => {
         val equal = ds1.getValue(r, c) == ds2.getValue(option.get, c) //TODO string equality doesn't work nicely for numerics & dates
         if (!equal)
           printf(c + ":" + ds1.getValue(r, c)) //TODO remove side-effect. I needed this to test diffs

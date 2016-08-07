@@ -2,35 +2,52 @@
   "script": {
     "schema": {},
     "tasks": {
-      "read-frame-csv": {
+      "read-frame-dbf": {
         "type": "extract",
-        "behavior": "simple",
+        "behavior": "",
         "dataSource": {
-          "behavior": "regex",
-          "directory": "C:\\Users\\mauri\\bitbucket\\gandm-data\\Sunix\\Hewitt-PHHEW\\2016-06-15",
-          "type": "file",
-          "filenameTemplate": "VFRAME.CSV"
+          "type": "sql",
+          "behavior": "",
+          "jdbcDriver": "com.caigen.sql.dbf.DBFDriver",
+          "connect": "jdbc:dbf:/C:/Users/mauri/bitbucket/gandm-data/Sunix/Hewett Sunix Vision DBF",
+          "query": {
+            "read": "select * from VFRAME",
+            "queryTemplate": "select * from VFRAME"
+          }
         }
       },
-      "transform": {
-        "type": "transformTerm",
-        "term": "ds => row1header(split2cols(ds, \"col1\"))"
+      "template": {
+        "type": "mergeTemplate",
+        "templates": {
+          "create": "insert into product (productid,\"type\",datecreated,name,description,retailprice,wholesaleprice,modified) values ('PHEW-$FRAMENUM', 'Frame', '2016-05-01 00:00:00.0'::timestamp,'${sq(MANUFACT)} ${sq(MODEL)}','$FRAMENUM',$RRP::numeric,$LISTPRICE::numeric, '${convertDateFormat(MODIFIED,\"yyyy-MM-dd HH:mm:ss.S\",\"yyyy-MM-dd HH:mm:ss.S\")}'::timestamp)",
+          "update": "update product set name='${sq(MANUFACT)} ${sq(MODEL)}',description='$FRAMENUM',retailprice=$RRP::numeric,wholesaleprice=$LISTPRICE::numeric, modified='${convertDateFormat(MODIFIED,\"yyyy-MM-dd HH:mm:ss.S\",\"yyyy-MM-dd HH:mm:ss.S\")}'::timestamp WHERE productid='PHEW-$FRAMENUM'"
+        }
       },
-      "load-product-csv": {
-        "type": "load",
-        "behavior": "simple",
+      "update-customer-db": {
+        "type": "datasourceupdate",
+        "behavior": "",
+        "iterateR": "ds => ds",
+        "keyL": "PHEW-${row.FRAMENUM}",
+        "keyR": "$productid",
+        "changeL": "${convertDateFormat(row.MODIFIED,\"yyyy-MM-dd HH:mm:ss.S\",\"yyyy-MM-dd HH:mm:ss.S\")}",
+        "changeR": "$modified",
         "dataSource": {
-          "behavior" : "append",
-          "directory": "c://tmp//",
-          "type": "file",
-          "filenameTemplate": "test1.csv",
-          "outputDelimiter": ","
+          "type": "sql",
+          "behavior": "",
+          "jdbcDriver": "org.postgresql.Driver",
+          "connect": "jdbc:postgresql://localhost/gmdwh?user=postgres&password=postgres",
+          "query": {
+            "queryTemplate": "",
+            "create": "create",
+            "read": "select productid, modified FROM product",
+            "update": "update"
+          }
         }
       }
     },
     "pipelines": {
       "load-frame" : {
-        "pipe": "read-frame-csv | transform | load-product-csv"
+        "pipe": "read-frame-dbf | template | update-customer-db"
       }
     },
     "services": { },

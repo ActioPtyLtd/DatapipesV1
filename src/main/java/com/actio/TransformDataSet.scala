@@ -9,7 +9,7 @@ import scala.meta._
 object TestMeta extends App {
 
   val ds = DataRecord("", List(DataString("key", "value"), DataString("key2", "value2")))
-  val text = "ds => s\"some text ${ds.key} and some more\""
+  val text = "ds => s\"\"\"some \"text\" ${ds.key} and some more\"\"\""
 
   val term = text.parse[Term]
 
@@ -21,8 +21,13 @@ object TestMeta extends App {
 
   def eval(ds: DataSet, text: String): DataSet = eval(ds, text.parse[Term].get)
 
+  def evalTemplate(ds: DataSet, text: String): DataSet = eval(ds, interpolate(text))
+
+  def interpolate(str: String): String = "s\"\"\"" + str + "\"\"\""
+
   def eval(ds: DataSet, t: Term): DataSet = t match {
     case Term.Function(Seq(Term.Param(_, Term.Name(name), _, _)), body) => eval(body, Map(name -> ds))
+    case _ => eval(t, ds.elems.map(e => (e.label -> e)).toList.toMap )
   }
 
   def eval(t: AnyRef, scope: Map[String, AnyRef]): DataSet = t match {

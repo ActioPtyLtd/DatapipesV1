@@ -1,6 +1,6 @@
 package com.actio
 
-import java.time.LocalDate
+import java.time.{LocalDateTime, LocalDate}
 import java.time.format.DateTimeFormatter
 
 import scala.collection.mutable
@@ -32,6 +32,10 @@ object DataSetTransforms {
   def isBlank(ds: DataSet) = DataBoolean(ds.stringOption.exists(_.isEmpty))
 
   def quoteOption(ds: DataSet) = ds.stringOption.map(s => if (s.isEmpty) DataString("null") else DataString("\"" + s + "\"")).getOrElse(DataString("null"))
+
+  // single quote escape
+  def sq(str: String): DataSet = DataString(str.replace("'","''"))
+
 
   /* below will need to be replaced when I have time */
 
@@ -227,10 +231,10 @@ object DataSetTransforms {
 
   def convDateValue(value: String, in: String, out: String) =
     try {
-      LocalDate.parse(value, DateTimeFormatter.ofPattern(in)).format(DateTimeFormatter.ofPattern(out))
+      LocalDateTime.parse(value, DateTimeFormatter.ofPattern(in)).format(DateTimeFormatter.ofPattern(out))
     }
     catch {
-      case _: Exception => "1900-01-01"
+      case _: Exception => "1900-01-01 00:00:00.0"
     }
 
   def defaultIfBlank(ds: DataSetTableScala, cols: List[String], default: String) = cols.foldLeft(ds)((d, c) => valueFunc(d, c, defaultIfBlankValue(_, default)))

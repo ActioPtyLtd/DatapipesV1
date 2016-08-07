@@ -28,17 +28,20 @@ class DataSetDBStream(private val rs: ResultSet, val batchSize: Int) extends Dat
   }).toList))
 
   override lazy val elems = new Iterator[DataSet] {
-    override def hasNext: Boolean = rs.next()
+    private var hNext = rs.next()
+
+    override def hasNext: Boolean = hNext
 
     override def next() = {
       var i = 0
       var recs: List[DataRecord] = Nil
 
       do {
-        recs = DataRecord(header.map(c => (c, Option(rs.getObject(c)))).map(v =>
+        recs = DataRecord("row", header.map(c => (c, Option(rs.getObject(c)))).map(v =>
           if (v._2.isDefined) DataString(v._1, v._2.get.toString) else Nothin(v._1))) :: recs
         i += 1
-      } while (rs.next() && i < batchSize)
+        hNext = rs.next()
+      } while ( hNext && i < batchSize)
 
       DataArray(recs)
     }

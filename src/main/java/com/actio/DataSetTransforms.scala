@@ -142,22 +142,41 @@ object DataSetTransforms {
     DataArray("",flattenedList)
   }
 
+  /**
+    * Attempts to map the DataSet to DataSetTableScala with custom sub DataSets
+    * @param ds DataSet to map
+    * @return   DataSetTableScala
+    */
   def mapToDataSetTableScala(ds: DataSet): DataSetTableScala = {
     ds match {
       case x: DataSetFixedData => x.headOption.get match {
         case DataSetHttpResponse(_,_,_,_,body) => body.schema match {
           case SchemaRecord(_,fields) =>
-            if(fields.head.label.isEmpty()) {
+            if(fields.head.label.isEmpty())
               DataSetTableScala(SchemaArray("", fields.head),body)
-            }
             else
               DataSetTableScala(SchemaArray("", body.schema), body)
           case _ => DataSetTableScala( body.schema, x.headOption.get)
         }
-        case subDS => DataSetTableScala(subDS.schema, x.headOption.get)
+        case subDS => subDS.schema match {
+          case SchemaRecord(_, fields) =>
+            if (fields.head.label.isEmpty())
+              DataSetTableScala(SchemaArray("", fields.head), x)
+            else
+              DataSetTableScala(SchemaArray("", subDS.schema), x)
+          case _ => DataSetTableScala(subDS.schema, x.headOption.get)
+        }
       }
-      case DataArray(_,arrayElems) => DataSetTableScala(arrayElems.head.schema, arrayElems.head)
-      case _ => DataSetTableScala(ds)
+      case DataArray(_,arrayElems) => ds.schema match {
+           case SchemaRecord(_, fields) =>
+            if (fields.head.label.isEmpty())
+              DataSetTableScala(SchemaArray("", fields.head), ds)
+            else
+              DataSetTableScala(SchemaArray("", arrayElems.head.schema), ds)
+           case _ => DataSetTableScala(ds.schema, ds)
+      }
+      case DataRecord(_, fields) => DataSetTableScala(SchemaArray("",ds.schema), ds)
+      case _ => DataSetTableScala(SchemaArray("",ds.schema), ds)//DataSetTableScala(ds)
     }
 
   }

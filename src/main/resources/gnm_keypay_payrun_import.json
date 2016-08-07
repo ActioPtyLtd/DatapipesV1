@@ -74,6 +74,24 @@
           }
         }
       },
+	  "load-employmenttypes": {
+        "type": "extract",
+        "behavior": "simple",
+        "dataSource": {
+          "type": "rest",
+          "behavior": "simple",
+          "path": "-",
+          "credential": {
+            "user": "WmFXcGs0dVJsU3VUS0dCcXJsVmIxdz09",
+            "password": ""
+          },
+          "query": {
+            "read": {
+              "uri": "https://gandm.yourpayroll.com.au/api/v2/business/24195/employee/unstructured?$select=EmploymentType"
+            }
+          }
+        }
+      },
 	  "load-mock-payruns": {
 	    "type": "extract",
 		"behavior": "simple",
@@ -89,8 +107,7 @@
 	  "get-last-payrun": {
 	    "type": "transform",
         "batch": [
-          "orderBy, dateFinalised, date, yyyy-MM-dd'T'HH:mm:ss, asc",
-		  "take, 1"
+          "orderBy, dateFinalised, date, yyyy-MM-dd'T'HH:mm:ss, asc"
         ]
 	  },
 	  "load-payrunearninglines-merge": {
@@ -115,7 +132,8 @@
 	  "flatten-payrun-earninglines-payrun": {
 	    "type": "transform",
         "batch": [
-          "flattenStructure, earninglines._.root.earningsLines._.*, +earninglines._.root.payRunId"
+          "flattenStructure, earninglines._.root.earningsLines._.*, +earninglines._.root.payRunId",
+		  "mapToDataSetTableScala"
         ]
 	  },
 	  "load-employees-merge": {
@@ -209,7 +227,7 @@
             "queryTemplate": "",
             "create": "insert into dim_location (externalref, externalparentref, label, fullyqualifiedlabel) values (@externalref::int, NullIF(@externalparentref,'')::int, @label, @fullyqualifiedlabel)",
             "read": "select * from dim_location",
-            "update": "update dim_location set parent=@parent::bigint, externalparentref=@externalparentref::int, label=@label, fullyqualifiedlabel=@fullyqualifiedlabel where externalref = @externalref::int"
+            "update": "update dim_location set parent_sk=@parent_sk::bigint, externalparentref=@externalparentref::int, label=@label, fullyqualifiedlabel=@fullyqualifiedlabel where externalref = @externalref::int"
           }
         }
       },
@@ -232,6 +250,25 @@
           }
         }
       },
+	  "update-employmenttype-db": {
+        "type": "datasourceupdate",
+        "behavior": "",
+        "keys": [
+          "label"
+        ],
+        "dataSource": {
+          "type": "sql",
+          "behavior": "",
+          "jdbcDriver": "org.postgresql.Driver",
+          "connect": "jdbc:postgresql://localhost/payrolldev?user=payroll&password=payroll",
+          "query": {
+            "queryTemplate": "",
+            "create": "insert into dim_employmenttype (label) values(@label)",
+            "read": "select * from dim_employmenttype",
+            "update": ""
+          }
+        }
+      },
 	  "update-employee-db": {
         "type": "datasourceupdate",
         "behavior": "",
@@ -245,9 +282,28 @@
           "connect": "jdbc:postgresql://localhost/payrolldev?user=payroll&password=payroll",
           "query": {
             "queryTemplate": "",
-            "create": "insert into dim_employee (externalref, firstname, middlename, surname, dob, employmenttype_sk, startdate, enddate, previoussurname, jobtitle, primarylocation_sk) values (@externalref::int, @firstName, @middleName, @surname, @dateOfBirth::date, @employmentTypeSk, @NullIF(@startDate,'')::date, @NullIF(@endDate,'')::date, @previousSurname, @jobTitle, @primaryLocationSk)",
+            "create": "insert into dim_employee (externalref, firstname, middlename, surname, dob, employmenttype_sk, startdate, enddate, previoussurname, jobtitle, primarylocation_sk) values (@externalref::int, @firstName, @middleName, @surname, @dateOfBirth::date, @employmenttype_sk::bigint, NullIF(@startDate,'')::date, NullIF(@endDate,'')::date, @previousSurname, @jobTitle, NullIf(@primarylocation_sk,'')::bigint)",
             "read": "select * from dim_employee",
-            "update": "update dim_employee set firstname=@firstName, middlename=@middleName, surname=@surname, dob=@dateOfBirth::date, employmenttype_sk=@employmentTypeSk, startdate=@startDate, enddate=@endDate, previoussurname=@previousSurname, jobtitle=@jobTitle, primarylocation_sk=@primaryLocationSk where externalref = @externalref::int"
+            "update": "update dim_employee set firstname=@firstName, middlename=@middleName, surname=@surname, dob=@dateOfBirth::date, employmenttype_sk=@employmenttype_sk::bigint, startdate=@startDate, enddate=@endDate, previoussurname=@previousSurname, jobtitle=@jobTitle, primarylocation_sk=@primarylocation_sk::bigint where externalref = @externalref::int"
+          }
+        }
+      },
+	  "update-payrunearninglines-db": {
+        "type": "datasourceupdate",
+        "behavior": "",
+        "keys": [
+          "payrun_sk","employee_sk","paycategory_sk","location_sk"
+        ],
+        "dataSource": {
+          "type": "sql",
+          "behavior": "",
+          "jdbcDriver": "org.postgresql.Driver",
+          "connect": "jdbc:postgresql://localhost/payrolldev?user=payroll&password=payroll",
+          "query": {
+            "queryTemplate": "",
+            "create": "insert into fact_payrunearninglines(employee_sk, paycategory_sk, location_sk, payrun_sk, units, notes, rate, earnings, super, sfss, help, payg, lumpsumnumberofpayperiods, externalid) values (@employee_sk::bigint, @paycategory_sk::bigint, COALESCE(NullIF(@location_sk,''),'0')::bigint, @payrun_sk::bigint, @units::numeric, @notes, @rate::numeric, @earnings::numeric, @super::numeric, @sfss::numeric, @help::numeric, @payg::numeric, @lumpsumnumberofpayperiods::numeric, NullIf(@externalid,'')::int)",
+            "read": "select * from fact_payrunearninglines",
+            "update": "update fact_payrunearninglines set employee_sk=@employee_sk::bigint, paycategory_sk=@paycategory_sk::bigint, location_sk=@location_sk::bigint, payrun_sk=@payrun_sk::bigint, units=@units::numeric, notes=@notes, rate=@rate::numeric, earnings=@earnings::numeric, super=@super::numeric, sfss=@sfss::numeric, help=@help::numeric, payg=@payg::numeric, lumpsumnumberofpayperiods=@lumpsumnumberofpayperiods::numeric, externalid=@externalid::int where payrun_sk = @payrun_sk::bigint and employee_sk = @employee_sk::bigint and paycategory_sk = @paycategory_sk::bigint and location_sk = @location_sk::bigint"
           }
         }
       },
@@ -258,10 +314,148 @@
 		  "rename,id,externalref,parentId,externalparentref,name,label,fullyQualifiedName,fullyqualifiedlabel"
         ]
 	  },
+	  "transform-to-table-and-make-distinct": {
+	    "type": "transform",
+        "batch": [
+          "mapToDataSetTableScala",
+		  "rename,employmentType,label",
+		  "deDup,label"
+        ]
+	  },
+	  "read-parent-dim": {
+        "type": "extract",
+        "behavior": "simple",
+        "dataSource": {
+          "type": "sql",
+          "jdbcDriver": "org.postgresql.Driver",
+          "connect": "jdbc:postgresql://localhost/payrolldev?user=payroll&password=payroll",
+          "query": {
+            "queryTemplate": "select sk,externalref,externalparentref,label,fullyqualifiedlabel from dim_location where externalparentref is not null"
+          }
+        }
+      },
+	  "lookup-parent-location": {
+        "type": "lookup",
+        "behavior": "lookup-merge",
+        "lookup1": "externalparentref",
+        "lookup2": "externalref",
+        "dataSource": {
+          "type": "sql",
+          "jdbcDriver": "org.postgresql.Driver",
+          "connect": "jdbc:postgresql://localhost/payrolldev?user=payroll&password=payroll",
+          "query": {
+            "queryTemplate": "select sk as parent_sk, externalref from dim_location where externalref in ($1)"
+          }
+        }
+      },
+	  "lookup-primary-location": {
+        "type": "lookup",
+        "behavior": "lookup-merge",
+        "lookup1": "primaryLocation",
+        "lookup2": "fullyqualifiedlabel",
+        "dataSource": {
+          "type": "sql",
+          "jdbcDriver": "org.postgresql.Driver",
+          "connect": "jdbc:postgresql://localhost/payrolldev?user=payroll&password=payroll",
+          "query": {
+            "queryTemplate": "select sk as primarylocation_sk, fullyqualifiedlabel from dim_location where fullyqualifiedlabel in ($1)"
+          }
+        }
+      },
+	  "lookup-employeetype": {
+        "type": "lookup",
+        "behavior": "lookup-merge",
+        "lookup1": "employmentType",
+        "lookup2": "label",
+        "dataSource": {
+          "type": "sql",
+          "jdbcDriver": "org.postgresql.Driver",
+          "connect": "jdbc:postgresql://localhost/payrolldev?user=payroll&password=payroll",
+          "query": {
+            "queryTemplate": "select sk as employmenttype_sk, label from dim_employmenttype where label in ($1)"
+          }
+        }
+      },
+	  "lookup-employee-dim": {
+        "type": "lookup",
+        "behavior": "lookup-merge",
+        "lookup1": "employeeId",
+        "lookup2": "externalref",
+        "dataSource": {
+          "type": "sql",
+          "jdbcDriver": "org.postgresql.Driver",
+          "connect": "jdbc:postgresql://localhost/payrolldev?user=payroll&password=payroll",
+          "query": {
+            "queryTemplate": "select sk as employee_sk, externalref from dim_employee where externalref in ($1)"
+          }
+        }
+      },
+	  "lookup-payrun-dim": {
+        "type": "lookup",
+        "behavior": "lookup-merge",
+        "lookup1": "payRunId",
+        "lookup2": "externalref",
+        "dataSource": {
+          "type": "sql",
+          "jdbcDriver": "org.postgresql.Driver",
+          "connect": "jdbc:postgresql://localhost/payrolldev?user=payroll&password=payroll",
+          "query": {
+            "queryTemplate": "select sk as payrun_sk, externalref from dim_payrun where externalref in ($1)"
+          }
+        }
+      },
+	  "lookup-paycategory-dim": {
+        "type": "lookup",
+        "behavior": "lookup-merge",
+        "lookup1": "payCategoryId",
+        "lookup2": "externalref",
+        "dataSource": {
+          "type": "sql",
+          "jdbcDriver": "org.postgresql.Driver",
+          "connect": "jdbc:postgresql://localhost/payrolldev?user=payroll&password=payroll",
+          "query": {
+            "queryTemplate": "select sk as paycategory_sk, externalref from dim_paycategory where externalref in ($1)"
+          }
+        }
+      },
+	  "lookup-location-dim": {
+        "type": "lookup",
+        "behavior": "lookup-merge",
+        "lookup1": "locationId",
+        "lookup2": "externalref",
+        "dataSource": {
+          "type": "sql",
+          "jdbcDriver": "org.postgresql.Driver",
+          "connect": "jdbc:postgresql://localhost/payrolldev?user=payroll&password=payroll",
+          "query": {
+            "queryTemplate": "select sk as location_sk, externalref from dim_location where externalref in ($1)"
+          }
+        }
+      },
+	  "prep-parent-location": {
+	     "type": "transform",
+        "batch": [
+          "rename,parent_sk1,parent_sk"
+        ]
+	  },
+	  "prep-employee-dim": {
+	    "type": "transform",
+        "batch": [
+          "rename, employmenttype_sk1, employmenttype_sk, primarylocation_sk1, primarylocation_sk"
+        ]
+	  },
+	  "prep-payrunearninglines-fact": {
+	    "type": "transform",
+        "batch": [
+		  "defaultIfBlank,location_sk1,0",
+          "rename, payrun_sk1, payrun_sk, paycategory_sk1, paycategory_sk, employee_sk1, employee_sk, location_sk2, location_sk"
+        ]
+	  },
 	  "flatten-mock-payrun-earninglines-payrun": {
 	    "type": "transform",
         "batch": [
-          "flattenStructure, earningsLines._.*, +payRunId"
+          "flattenStructure, earningsLines._.*, +payRunId",
+		  "mapToDataSetTableScala"
         ]
 	  },
 	  "load-mock-payrunearninglines": {
@@ -275,39 +469,11 @@
           "filenameTemplate": "payrunearninglines.json",
           "outputDelimiter": ","
         }
-	  },
-	  
-	  
-      "iterate-template": {
-        "type": "iterateTemplate",
-        "behavior": "iterateTemplate",
-        "iterate": "0.root.data.*.relationships.products.data.*",
-        "template": "@{d.local.id},@{(firstValue,(filterValue,d.global.response.root.included,'type','productAttributeEyewear'),'id',d.local.id).attributes.brand},@{(firstValue,(filterValue,d.global.response.root.included,'type','productAttributeEyewear'),'id',d.local.id).attributes.frame_model},@{(firstValue,(filterValue,d.global.response.root.included,'type','productAttributeEyewear'),'id',d.local.id).attributes.frame_colour},@{(firstValue,(filterValue,d.global.response.root.included,'type','productAttributeEyewear'),'id',d.local.id).attributes.frame_eye_size},@{(firstValue,(filterValue,d.global.response.root.included,'type','productAttributeEyewear'),'id',d.local.id).attributes.frame_bridge_size},@{(firstValue,(filterValue,d.global.response.root.included,'type','productAttributeEyewear'),'id',d.local.id).attributes.frame_temple_length},@{(firstValue,(filterValue,d.global.response.root.included,'type','productAttributeEyewear'),'id',d.local.id).attributes.frame_depth},f,FALSE,@{(firstValue,(filterValue,d.global.response.root.included,'type','productAttributeEyewear'),'id',d.local.id).attributes.frame_type},@{(firstValue,(filterValue,d.global.response.root.included,'type','product'),'id',d.local.id).attributes.retailPrice},0,@{(firstValue,(filterValue,d.global.response.root.included,'type','product'),'id',d.local.id).attributes.wholesalePriceTax},@{(firstValue,(filterValue,d.global.response.root.included,'type','product'),'id',d.local.id).attributes.wholesalePrice},@{(firstValue,(filterValue,d.global.response.root.included,'type','product'),'id',d.local.id).attributes.apn}"
-      },
-      "add-header-csv": {
-        "type": "transform",
-        "batch": [
-          "split2Cols,template",
-          "rename,template1,gnmcode,template2,frame_brand,template3,frame_model,template4,frame_colour,template5,frame_eye_size,template6,frame_bridge_size,template7,frame_temple_length,template8,frame_depth,template9,frame_group,template10,frame_rx,template11,frame_type,template12,retail_price_incl_tax,template13,wholesale_price_excl_tax,template14,wholesale_price_tax,template15,wholesale_price_incl_tax,template16,supplier_barcode",
-          "keep,gnmcode,frame_brand,frame_model,frame_colour,frame_eye_size,frame_bridge_size,frame_temple_length,frame_depth,frame_group,frame_rx,frame_type,retail_price_incl_tax,wholesale_price_excl_tax,wholesale_price_tax,wholesale_price_incl_tax,supplier_barcode"
-       ]
-      }
+	  }
     },
     "pipelines": {
-      "load-payrun-earning-lines" : {
-        "pipe": "load-mock-payruns | get-last-payrun | load-payrunearninglines-merge"
-      },
-	  "load-mock-payruns" : {
-        "pipe": "load-mock-payruns"
-      },
-	  "process-earning-lines" : {
-	    "pipe": "load-mock-payruns | get-last-payrun | load-payrunearninglines-merge | flatten-payrun-earninglines-payrun"
-	  },
-	  "mock-process-earning-lines" : {
-	    "pipe": "load-mock-payrunearninglines | flatten-mock-payrun-earninglines-payrun | load-location-merge | update-location-db"
-	  },
 	  "load-payrun-dim" : {
-	    "pipe": "load-mock-payruns | transform-to-table | update-payrun-db"
+	    "pipe": "load-payruns | transform-to-table | update-payrun-db"
 	  },
 	  "load-location-dim" : {
 	    "pipe": "load-locations | transform-to-table | update-location-db"
@@ -315,14 +481,31 @@
 	  "load-paycategory-dim" : {
 		"pipe": "load-paycategories | transform-to-table | update-paycategory-db"
 	  },
+	  "link-parent-locations" : {
+		"pipe": "read-parent-dim | lookup-parent-location | prep-parent-location | update-location-db"
+	  },
+	  "load-employmenttype-dim" : {
+		"pipe": "load-employmenttypes | transform-to-table-and-make-distinct | update-employmenttype-db"
+	  },
 	  "load-employee-dim" : {
-		"pipe": "load-employees | transform-to-table | update-employee-db"
+		"pipe": "load-employees | transform-to-table | lookup-employeetype | lookup-primary-location | prep-employee-dim | update-employee-db"
+	  },
+	  "load-payrun-earning-lines" : {
+        "pipe": "load-payruns | get-last-payrun | load-payrunearninglines-merge"
+      },
+	  "process-earning-lines" : {
+	    "pipe": "load-payruns | get-last-payrun | load-payrunearninglines-merge | flatten-payrun-earninglines-payrun | transform-to-table | lookup-payrun-dim | lookup-employee-dim | lookup-paycategory-dim | lookup-location-dim | prep-payrunearninglines-fact | update-payrunearninglines-db"
+	  },
+	  "mock-process-earning-lines" : {
+	    "pipe": "load-mock-payrunearninglines | flatten-mock-payrun-earninglines-payrun | transform-to-table "
+	  },
+	  "load-dimensions" : {
+	    "pipe": "load-payrun-dim | load-location-dim | link-parent-locations | load-paycategory-dim | load-employmenttype-dim | load-employee-dim"
 	  }
-	  
     },
     "services": { },
     "startup": {
-      "exec": "load-employee-dim"
+      "exec": "process-earning-lines"
     }
   }
 }

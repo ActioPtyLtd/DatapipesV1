@@ -44,7 +44,7 @@ class DataSourceSQL extends DataSource with Logging {
 
       logger.info("Executing Query: " + sqlQuery)
 
-      dataSet = new DataSetDBStream(st.executeQuery(sqlQuery), 10)
+      dataSet = new DataSetDBStream(st.executeQuery(sqlQuery), 100)
 
       logger.info("Successfully executed statement.")
     } catch {

@@ -19,15 +19,15 @@
       "template": {
         "type": "mergeTemplate",
         "templates": {
-          "create": "insert into product (productid,\"type\",datecreated,name,description,retailprice,wholesaleprice,modified) values ('PHEW-$FRAMENUM', 'Frame', '2016-05-01 00:00:00.0'::timestamp,'${sq(MANUFACT)} ${sq(MODEL)}','$FRAMENUM',$RRP::numeric,$LISTPRICE::numeric, '${convertDateFormat(MODIFIED,\"yyyy-MM-dd HH:mm:ss.S\",\"yyyy-MM-dd HH:mm:ss.S\")}'::timestamp)",
-          "update": "update product set name='${sq(MANUFACT)} ${sq(MODEL)}',description='$FRAMENUM',retailprice=$RRP::numeric,wholesaleprice=$LISTPRICE::numeric, modified='${convertDateFormat(MODIFIED,\"yyyy-MM-dd HH:mm:ss.S\",\"yyyy-MM-dd HH:mm:ss.S\")}'::timestamp WHERE productid='PHEW-$FRAMENUM'"
+          "create": "insert into storeproduct (storeid,productid,\"type\",datecreated,name,description,retailprice,wholesaleprice,modified,last_purchase,last_sale,quantity,frame_manufacturer,frame_model,frame_colour) values ('2088-PH-012', '2088-PH-012-$FRAMENUM', 'Frame', current_date,'${sq(MANUFACT)} ${sq(MODEL)}','$FRAMENUM',$RRP::numeric,$LISTPRICE::numeric, '${convertDateFormat(MODIFIED,\"yyyy-MM-dd HH:mm:ss.S\",\"yyyy-MM-dd HH:mm:ss.S\")}'::timestamp, '${convertDateFormat(LASTPUR,\"yyyy-MM-dd\",\"yyyy-MM-dd\")}'::timestamp, '${convertDateFormat(LASTSALE,\"yyyy-MM-dd\",\"yyyy-MM-dd\")}'::timestamp, $QUANTITY::numeric, '${sq(MANUFACT)}', '${sq(MODEL)}', '${sq(FCOLOUR)}')",
+          "update": "update storeproduct set name='${sq(MANUFACT)} ${sq(MODEL)}',description='$FRAMENUM',retailprice=$RRP::numeric,wholesaleprice=$LISTPRICE::numeric, modified='${convertDateFormat(MODIFIED,\"yyyy-MM-dd HH:mm:ss.S\",\"yyyy-MM-dd HH:mm:ss.S\")}'::timestamp, last_purchase='${convertDateFormat(LASTPUR,\"yyyy-MM-dd\",\"yyyy-MM-dd\")}'::timestamp, last_sale='${convertDateFormat(LASTSALE,\"yyyy-MM-dd\",\"yyyy-MM-dd\")}'::timestamp,quantity=$QUANTITY::numeric WHERE productid='2088-PH-012-$FRAMENUM'"
         }
       },
       "update-customer-db": {
         "type": "datasourceupdate",
         "behavior": "",
         "iterateR": "ds => ds",
-        "keyL": "PHEW-${row.FRAMENUM}",
+        "keyL": "2088-PH-012-${row.FRAMENUM}",
         "keyR": "$productid",
         "changeL": "${convertDateFormat(row.MODIFIED,\"yyyy-MM-dd HH:mm:ss.S\",\"yyyy-MM-dd HH:mm:ss.S\")}",
         "changeR": "$modified",
@@ -39,7 +39,7 @@
           "query": {
             "queryTemplate": "",
             "create": "create",
-            "read": "select productid, modified FROM product",
+            "read": "select productid, modified FROM storeproduct",
             "update": "update"
           }
         }

@@ -34,7 +34,7 @@ object DataSetTransforms {
   def quoteOption(ds: DataSet) = ds.stringOption.map(s => if (s.isEmpty) DataString("null") else DataString("\"" + s + "\"")).getOrElse(DataString("null"))
 
   // single quote escape
-  def sq(str: String): DataSet = DataString(str.replace("'","''"))
+  def sq(str: String): DataSet = if(str == null) DataString("") else DataString(str.replace("'","''"))
 
 
   /* below will need to be replaced when I have time */
@@ -231,7 +231,10 @@ object DataSetTransforms {
 
   def convDateValue(value: String, in: String, out: String) =
     try {
-      LocalDateTime.parse(value, DateTimeFormatter.ofPattern(in)).format(DateTimeFormatter.ofPattern(out))
+      if(value.contains(":"))
+        LocalDateTime.parse(value, DateTimeFormatter.ofPattern(in)).format(DateTimeFormatter.ofPattern(out))
+      else
+        LocalDate.parse(value, DateTimeFormatter.ofPattern(in)).format(DateTimeFormatter.ofPattern(out))
     }
     catch {
       case _: Exception => "1900-01-01 00:00:00.0"

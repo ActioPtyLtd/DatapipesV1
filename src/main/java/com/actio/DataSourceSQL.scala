@@ -22,6 +22,7 @@ class DataSourceSQL extends DataSource with Logging {
     val stmt: PreparedStatement = cn.prepareStatement(statement)
 
     logger.info("Executing SQL batch statement...")
+    logger.info(statement)
 
     stmt.execute()
 

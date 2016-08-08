@@ -36,6 +36,8 @@ object DataSetTransforms {
   // single quote escape
   def sq(str: String): DataSet = if(str == null) DataString("") else DataString(str.replace("'","''"))
 
+  def numeric(value: String): DataSet = DataNumeric(Try(BigDecimal(value)).getOrElse(BigDecimal(0)))
+
 
   /* below will need to be replaced when I have time */
 

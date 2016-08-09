@@ -6,21 +6,17 @@
         "type": "extract",
         "behavior": "",
         "dataSource": {
-          "type": "sql",
-          "behavior": "",
-          "jdbcDriver": "com.caigen.sql.dbf.DBFDriver",
-          "connect": "jdbc:dbf:/C:/Users/mauri/bitbucket/gandm-data/Sunix/Hewett Sunix Vision DBF",
-          "query": {
-            "read": "select * from VFRAME",
-            "queryTemplate": "select * from VFRAME"
-          }
+          "type": "file",
+          "behavior": "DBF",
+          "directory": "C:\\Users\\mauri\\bitbucket\\gandm-data\\Sunix\\Hewett Sunix Vision DBF",
+          "filenameTemplate": "VFRAME.DBF"
         }
       },
       "template": {
         "type": "mergeTemplate",
         "templates": {
-          "create": "insert into storeproduct (storeid,productid,\"type\",datecreated,name,description,retailprice,wholesaleprice,modified,last_purchase,last_sale,quantity,frame_manufacturer,frame_model,frame_colour) values ('2088-PH-012', '2088-PH-012-$FRAMENUM', 'Frame', current_date,'${sq(MANUFACT)} ${sq(MODEL)}','$FRAMENUM',$RRP::numeric,$LISTPRICE::numeric, '${convertDateFormat(MODIFIED,\"yyyy-MM-dd HH:mm:ss.S\",\"yyyy-MM-dd HH:mm:ss.S\")}'::timestamp, '${convertDateFormat(LASTPUR,\"yyyy-MM-dd\",\"yyyy-MM-dd\")}'::timestamp, '${convertDateFormat(LASTSALE,\"yyyy-MM-dd\",\"yyyy-MM-dd\")}'::timestamp, $QUANTITY::numeric, '${sq(MANUFACT)}', '${sq(MODEL)}', '${sq(FCOLOUR)}')",
-          "update": "update storeproduct set name='${sq(MANUFACT)} ${sq(MODEL)}',description='$FRAMENUM',retailprice=$RRP::numeric,wholesaleprice=$LISTPRICE::numeric, modified='${convertDateFormat(MODIFIED,\"yyyy-MM-dd HH:mm:ss.S\",\"yyyy-MM-dd HH:mm:ss.S\")}'::timestamp, last_purchase='${convertDateFormat(LASTPUR,\"yyyy-MM-dd\",\"yyyy-MM-dd\")}'::timestamp, last_sale='${convertDateFormat(LASTSALE,\"yyyy-MM-dd\",\"yyyy-MM-dd\")}'::timestamp,quantity=$QUANTITY::numeric WHERE productid='2088-PH-012-$FRAMENUM'"
+          "create": "insert into storeproduct (storeid,productid,\"type\",datecreated,name,description,retailprice,wholesaleprice,modified,last_purchase,last_sale,quantity,frame_manufacturer,frame_model,frame_colour) values ('2088-PH-012', '2088-PH-012-$FRAMENUM', 'Frame', current_date,'${sq(MANUFACT)} ${sq(MODEL)}','$FRAMENUM',${numeric(RRP)},${numeric(LISTPRICE)}, '${convertDateFormat(MODIFIED,\"yyyy-MM-dd HH:mm:ss.S\",\"yyyy-MM-dd HH:mm:ss.S\")}'::timestamp, '${convertDateFormat(LASTPUR,\"yyyy-MM-dd\",\"yyyy-MM-dd\")}'::timestamp, '${convertDateFormat(LASTSALE,\"yyyy-MM-dd\",\"yyyy-MM-dd\")}'::timestamp, ${numeric(QUANTITY)}::numeric, '${sq(MANUFACT)}', '${sq(MODEL)}', '${sq(FCOLOUR)}')",
+          "update": "update storeproduct set name='${sq(MANUFACT)} ${sq(MODEL)}',description='$FRAMENUM',retailprice=${numeric(RRP)},wholesaleprice=${numeric(LISTPRICE)}, modified='${convertDateFormat(MODIFIED,\"yyyy-MM-dd HH:mm:ss.S\",\"yyyy-MM-dd HH:mm:ss.S\")}'::timestamp, last_purchase='${convertDateFormat(LASTPUR,\"yyyy-MM-dd\",\"yyyy-MM-dd\")}'::timestamp, last_sale='${convertDateFormat(LASTSALE,\"yyyy-MM-dd\",\"yyyy-MM-dd\")}'::timestamp,quantity=${numeric(QUANTITY)}::numeric WHERE productid='2088-PH-012-$FRAMENUM'"
         }
       },
       "update-customer-db": {

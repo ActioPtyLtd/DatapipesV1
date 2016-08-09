@@ -78,7 +78,7 @@ class Main {
                 dprun.execute(pipelineName);
 
             ///==========
-            dprun.sendEvents();
+            //dprun.sendEvents();
 
         }
         else {

@@ -3,6 +3,7 @@ package com.actio
 import com.actio.dpsystem.{ DPSystemFactory, DPSystemConfigurable }
 import com.typesafe.config.ConfigValueFactory
 import scala.collection.mutable.Map
+import scala.collection.JavaConverters._
 
 /**
  * Created by mauri on 2/05/2016.
@@ -66,13 +67,10 @@ class TaskDataSourceUpdate extends Task {
 
   override def extract(): Unit = ???
 
-  import scala.collection.JavaConverters._
-
-  def keyColumns() = getConfig.getStringList("keys").asScala.toList
-  def iterateR = getConfig.getString("iterateR")
-  def keyL = getConfig.getString("keyL")
-  def keyR = getConfig.getString("keyR")
-  def changeL = getConfig.getString("changeL")
-  def changeR = getConfig.getString("changeR")
+  lazy val iterateR = getConfig.getString("iterateR")
+  lazy val keyL = getConfig.getString("keyL")
+  lazy val keyR = getConfig.getString("keyR")
+  lazy val changeL = getConfig.getString("changeL")
+  lazy val changeR = getConfig.getString("changeR")
 
 }

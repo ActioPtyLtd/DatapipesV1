@@ -14,7 +14,7 @@ object DataSetDBF {
   val ROW = "row"
 
   def field2ds(row: Array[Object], fields: List[DBFField]): DataRecord = DataRecord(ROW, fields.zipWithIndex.map(f => {
-    val t = f._1.getType()
+    val t = f._1.getType
 
     if (Option(row(f._2)).isDefined) {
       if (t == DBFDataType.NUMERIC || t == DBFDataType.FLOATING_POINT || t == DBFDataType.LONG || t == DBFDataType.CURRENCY) {

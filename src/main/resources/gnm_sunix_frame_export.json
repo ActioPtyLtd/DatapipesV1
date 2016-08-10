@@ -19,7 +19,7 @@
           "update": "update storeproduct set name='${sq(MANUFACT)} ${sq(MODEL)}',description='$FRAMENUM',retailprice=${numeric(RRP)},wholesaleprice=${numeric(LISTPRICE)}, modified='${convertDateFormat(MODIFIED,\"yyyy-MM-dd HH:mm:ss.S\",\"yyyy-MM-dd HH:mm:ss.S\")}'::timestamp, last_purchase='${convertDateFormat(LASTPUR,\"yyyy-MM-dd\",\"yyyy-MM-dd\")}'::timestamp, last_sale='${convertDateFormat(LASTSALE,\"yyyy-MM-dd\",\"yyyy-MM-dd\")}'::timestamp,quantity=${numeric(QUANTITY)}::numeric WHERE productid='2088-PH-012-$FRAMENUM'"
         }
       },
-      "update-customer-db": {
+      "update-product-db": {
         "type": "datasourceupdate",
         "behavior": "",
         "iterateR": "ds => ds",
@@ -43,7 +43,7 @@
     },
     "pipelines": {
       "load-frame" : {
-        "pipe": "read-frame-dbf | template | update-customer-db"
+        "pipe": "read-frame-dbf | template | update-product-db"
       }
     },
     "services": { },

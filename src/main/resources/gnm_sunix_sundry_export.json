@@ -2,18 +2,14 @@
   "script": {
     "schema": {},
     "tasks": {
-      "read-frame-dbf": {
+      "read-sundry-dbf": {
         "type": "extract",
         "behavior": "",
         "dataSource": {
-          "type": "sql",
-          "behavior": "",
-          "jdbcDriver": "com.caigen.sql.dbf.DBFDriver",
-          "connect": "jdbc:dbf:/C:/Users/mauri/bitbucket/gandm-data/Sunix/Hewett Sunix Vision DBF",
-          "query": {
-            "read": "select * from VPRODUCT",
-            "queryTemplate": "select * from VPRODUCT"
-          }
+          "type": "file",
+          "behavior": "DBF",
+          "directory": "C:\\Users\\mauri\\bitbucket\\gandm-data\\Sunix\\Hewett Sunix Vision DBF",
+          "filenameTemplate": "VPRODUCT.DBF"
         }
       },
       "template": {
@@ -23,7 +19,7 @@
           "update": "update storeproduct set name='${sq(DESC)}',description='$PRODCODE',retailprice=${numeric(RRP)},wholesaleprice=${numeric(COSTPRICE)}, modified='${convertDateFormat(MODIFIED,\"yyyy-MM-dd HH:mm:ss.S\",\"yyyy-MM-dd HH:mm:ss.S\")}'::timestamp, last_purchase='${convertDateFormat(LASTPUR,\"yyyy-MM-dd\",\"yyyy-MM-dd\")}'::timestamp, last_sale='${convertDateFormat(LASTSALE,\"yyyy-MM-dd\",\"yyyy-MM-dd\")}'::timestamp,quantity=${numeric(QUANTITY)} WHERE productid='2088-PH-012-$PRODCODE'"
         }
       },
-      "update-customer-db": {
+      "update-product-db": {
         "type": "datasourceupdate",
         "behavior": "",
         "iterateR": "ds => ds",
@@ -47,7 +43,7 @@
     },
     "pipelines": {
       "load-frame" : {
-        "pipe": "read-frame-dbf | template | update-customer-db"
+        "pipe": "read-sundry-dbf | template | update-product-db"
       }
     },
     "services": { },

@@ -38,6 +38,8 @@ object DataSetTransforms {
 
   def numeric(value: String): DataSet = DataNumeric(Try(BigDecimal(value)).getOrElse(BigDecimal(0)))
 
+  def batch(ds: DataSet): DataSet = DataRecord("", List(ds))
+
 
   /* below will need to be replaced when I have time */
 

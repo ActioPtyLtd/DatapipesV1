@@ -106,7 +106,8 @@ class DataSourceREST extends DataSource with Logging {
   }
 
   @throws(classOf[Exception])
-  def execute(ds: DataSet, query: String) {
+  def execute(ds: DataSet, query: String): Unit = {
+
   }
 
   def credentialsProvider: CredentialsProvider = {
@@ -168,16 +169,9 @@ class DataSourceREST extends DataSource with Logging {
   @throws(classOf[Exception])
   override def executeQueryLabel(ds: DataSet, label: String): DataSet = {
     val requestQuery =
-      getRequest(ds,
+      createRequest(configOption(config,s"query.$label.body").map(d => ds(d)).getOrElse(ds),
         DataSourceREST.createHttpRequest(label),
-        config.getString(s"query.$label.uri"),
-        configOption(config, s"query.$label.body"),
-        if(config.hasPath(s"query.$label.templates")) {
-          config.getObject(s"query.$label.templates").asScala.map(kv => (kv._1, kv._2.unwrapped().toString)).toList
-        }
-        else {
-          Nil
-        }
+        ds(config.getString(s"query.$label.uri")).stringOption.getOrElse(config.getString(s"query.$label.uri"))
       )
 
     logger.info(s"Calling ${requestQuery.getMethod} ${requestQuery.getURI}")
@@ -231,21 +225,6 @@ class DataSourceREST extends DataSource with Logging {
 
   private def configOption(config: Config, path: String) = if (config.hasPath(path)) Some(config.getString(path)) else None
 
-  private def getRequest[T <: HttpRequestBase](ds: DataSet, verb: => HttpRequestBase, templateHeader: String, templateBody: Option[String], templates: List[(String, String)]) = {
-    val headerParser = TemplateParser(templateHeader)
-    val scope = (("d" -> (() => ExprDataSet(ds))) :: templates.map(t => (t._1, () => TemplateParser(t._2))).toList).toMap
-    val headerExpression = TemplateEngine.eval(headerParser, scope)
-
-    if (templateBody.isDefined) {
-      val bodyParser = TemplateParser(templateBody.get)
-      val bodyExpression = TemplateEngine.eval(bodyParser, scope)
-
-      createRequest(bodyExpression, verb, headerExpression.stringOption.getOrElse(""))
-    } else {
-      createRequest(ds, verb, headerExpression.stringOption.getOrElse(""))
-    }
-  }
-
   private def createRequest(body: DataSet, verb: => HttpRequestBase, uri: String): HttpRequestBase =
     verb match {
       case postput: HttpEntityEnclosingRequestBase => createRequest(body match {
@@ -287,7 +266,9 @@ class DataSourceREST extends DataSource with Logging {
     if (suffix.contentEquals("_all")) write(data)
   }
 
-  override def update(ds: DataSet): Unit = {}
+  override def update(ds: DataSet): Unit = {
+    executeQueryLabel(ds, "update")
+  }
 
   @throws(classOf[Exception])
   def read(queryParser: QueryParser): DataSet = ???

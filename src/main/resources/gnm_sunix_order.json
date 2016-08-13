@@ -13,11 +13,25 @@
         }
       },
       "parse-order-csv": {
-        "type": "transform",
-        "batch": [
-          "split2cols,col1",
-          "row1header"
-          ]
+        "type": "transformTerm",
+        "term": "ds => row1header(split2cols(ds, \"col1\"))"
+      },
+      "template": {
+        "type": "mergeTemplate",
+        "templates": {
+          "createbodyleft": "{\"order_id\": \"$jobreference\",\"customer\": {\"customer_id\": \"$patientreference\",\"first_name\": \"$patientgivenname\",\"last_name\": \"$patientsurname\",\"telephone\": \"1234\"},\"delivery_address\": {\"attention\": \"Peter Hewett\",\"number\": \"799\",\"postcode\": \"2088\",\"state\": \"NSW\",\"street1\": \"Military Road\",\"street2\": \"-\",\"street3\": \"Australia\",\"suburb\": \"Mosman\"},\"invoice_id\": \"0001\"",
+          "createbodyright": "\"store_id\": \"2088-PH-012\",\"submitted_date_time\": \"${convertDateFormat(orderdate,\"d/MM/yyyy\",\"yyyy-MM-dd\")}T00:00:00.000Z\"}",
+          "frame": "{\"product_id\": \"$spectaclemeasurement_framesuppliercode\",\"quantity\": 1}",
+          "leftlens": "{\"attributes\": [{\"name\": \"left_lens_size\",\"type\": \"decimal\",\"value\": \"$leftlens_lenssize\"},{\"name\": \"left_lens_sphere\",\"type\": \"string\",\"value\": \"$leftlens_sphere\"},{\"name\": \"left_lens_cylindar\",\"type\": \"string\",\"value\": \"$leftlens_cylinder\"},{\"name\": \"left_lens_axis\",\"type\": \"string\",\"value\": \"$leftlens_axis\"},{\"name\": \"left_lens_seg_size\",\"type\": \"decimal\",\"value\": \"$leftlens_segsize\"},{\"name\": \"left_lens_box_height\",\"type\": \"decimal\",\"value\": \"$leftlens_boxheight\"},{\"name\": \"left_lens_box_width\",\"type\": \"decimal\",\"value\": \"$leftlens_boxwidth\"}], \"product_id\": \"$leftlens_supplierlenscode\",\"quantity\": 1}",
+          "rightlens": "{\"attributes\": [{\"name\": \"right_lens_size\",\"type\": \"decimal\",\"value\": \"$rightlens_lenssize\"},{\"name\": \"right_lens_sphere\",\"type\": \"string\",\"value\": \"$rightlens_sphere\"},{\"name\": \"right_lens_cylindar\",\"type\": \"string\",\"value\": \"$rightlens_cylinder\"},{\"name\": \"right_lens_axis\",\"type\": \"string\",\"value\": \"$rightlens_axis\"},{\"name\": \"right_lens_seg_size\",\"type\": \"decimal\",\"value\": \"$rightlens_segsize\"},{\"name\": \"right_lens_box_height\",\"type\": \"decimal\",\"value\": \"$rightlens_boxheight\"},{\"name\": \"right_lens_box_width\",\"type\": \"decimal\",\"value\": \"$rightlens_boxwidth\"}], \"product_id\": \"$rightlens_supplierlenscode\",\"quantity\": 1}"
+        }
+      },
+      "template-concat": {
+        "type": "mergeTemplate",
+        "templates": {
+          "createuri": "https://dev-api-gnm.actio.com.au:8443/service/order",
+          "createbody": "$createbodyleft, \"order_items\": [${concatString(DataArray(if(isBlank(record.spectaclemeasurement_framesuppliercode)) nothin() else frame, if(isBlank(record.leftlens_supplierlenscode)) nothin() else leftlens, if(isBlank(record.rightlens_supplierlenscode)) nothin() else rightlens))}], $createbodyright"
+        }
       },
       "update-order-api": {
         "type": "load",
@@ -32,14 +46,8 @@
           },
           "query": {
             "create": {
-              "uri": "https://dev-api-gnm.actio.com.au:8443/service/order",
-              "body": "{\"customer\": {\"customer_id\": \"@{d.0.patientreference}\",\"first_name\": \"@{d.0.patientgivenname}\",\"last_name\": \"@{d.0.patientsurname}\",\"telephone\": \"1234\"},\"delivery_address\": {\"attention\": \"Peter Hewett\",\"number\": \"799\",\"postcode\": \"2088\",\"state\": \"NSW\",\"street1\": \"Military Road\",\"street2\": \"-\",\"street3\": \"Australia\",\"suburb\": \"Mosman\"},\"invoice_id\": \"0001\", @{products},\"store_id\": \"PHHEW\",\"submitted_date_time\": \"@{(convertDateFormat,d.0.orderdate,'d/MM/yyyy','yyyy-MM-dd')}T00:00:00.000Z\"}",
-              "templates": {
-                "products": "\"order_items\": [@{(concatString,[(if,(isBlank,d.0.spectaclemeasurement_framesuppliercode),(nothing),frame),(if,(isBlank,d.0.leftlens_supplierlenscode),(nothing),leftlens),(if,(isBlank,d.0.rightlens_supplierlenscode),(nothing),rightlens)])}]",
-                "frame": "{\"product_id\": \"@{d.0.spectaclemeasurement_framesuppliercode}\",\"quantity\": 1}",
-                "leftlens": "{\"attributes\": [{\"name\": \"left_lens_size\",\"type\": \"decimal\",\"value\": \"@{d.0.leftlens_lenssize}\"},{\"name\": \"left_lens_sphere\",\"type\": \"string\",\"value\": \"@{d.0.leftlens_sphere}\"},{\"name\": \"left_lens_cylindar\",\"type\": \"string\",\"value\": \"@{d.0.leftlens_cylinder}\"},{\"name\": \"left_lens_axis\",\"type\": \"string\",\"value\": \"@{d.0.leftlens_axis}\"},{\"name\": \"left_lens_seg_size\",\"type\": \"decimal\",\"value\": \"@{d.0.leftlens_segsize}\"},{\"name\": \"left_lens_box_height\",\"type\": \"decimal\",\"value\": \"@{d.0.leftlens_boxheight}\"},{\"name\": \"left_lens_box_width\",\"type\": \"decimal\",\"value\": \"@{d.0.leftlens_boxwidth}\"}], \"product_id\": \"@{d.0.leftlens_supplierlenscode}\",\"quantity\": 1}",
-                "rightlens": "{\"attributes\": [{\"name\": \"right_lens_size\",\"type\": \"decimal\",\"value\": \"@{d.0.rightlens_lenssize}\"},{\"name\": \"right_lens_sphere\",\"type\": \"string\",\"value\": \"@{d.0.rightlens_sphere}\"},{\"name\": \"right_lens_cylindar\",\"type\": \"string\",\"value\": \"@{d.0.rightlens_cylinder}\"},{\"name\": \"right_lens_axis\",\"type\": \"string\",\"value\": \"@{d.0.rightlens_axis}\"},{\"name\": \"right_lens_seg_size\",\"type\": \"decimal\",\"value\": \"@{d.0.rightlens_segsize}\"},{\"name\": \"right_lens_box_height\",\"type\": \"decimal\",\"value\": \"@{d.0.rightlens_boxheight}\"},{\"name\": \"right_lens_box_width\",\"type\": \"decimal\",\"value\": \"@{d.0.rightlens_boxwidth}\"}], \"product_id\": \"@{d.0.rightlens_supplierlenscode}\",\"quantity\": 1}"
-              }
+              "uri": "createuri",
+              "body": "createbody"
             }
           }
         }
@@ -47,7 +55,7 @@
     },
     "pipelines": {
       "load-order" : {
-        "pipe": "read-order-csv | parse-order-csv | update-order-api"
+        "pipe": "read-order-csv | parse-order-csv | template | template-concat | update-order-api"
       }
     },
     "services": { },

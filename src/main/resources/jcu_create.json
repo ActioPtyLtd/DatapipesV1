@@ -18,6 +18,18 @@
           "inputDelimiter": ","
         }
       },
+      "read-sql-data": {
+        "type": "extract",
+        "dataSource": {
+          "type": "sql",
+          "jdbcDriver": "com.microsoft.sqlserver.jdbc.SQLServerDriver",
+          "connect": "jdbc:sqlserver://corptestmdb01.jcu.edu.au:1433;user=mediasite_ro;password=afcfh8742Nch7y1SA",
+          "query": {
+            "read1" : "",
+            "read": "select distinct top 5 PresenterUsername,PresenterFullname,case when charindex(',',[PresenterFullname],0) = 0 then PresenterFullname else right(presenterfullname,len(presenterfullname)-charindex(',',[PresenterFullname],0)) end firstname,case when charindex(',',[PresenterFullname],0) = 0 then 'n/a' else left (presenterfullname, charindex(',',[PresenterFullname],0)-1) end lastname,coalesce([PresenterEmail],PresenterUsername+'@jcu.edu.au') email from current_activities where PresenterUsername is not null order by PresenterUsername desc"
+          }
+        }
+      },
       "process-user-header": {
         "type": "transform",
         "batch": [
@@ -30,7 +42,7 @@
         "type": "include",
         "behavior": "simple",
         "foreach": "*",
-        "attribute": "users",
+        "attribute": "user",
         "dataSource": {
           "type": "rest",
           "behavior": "simple",
@@ -46,7 +58,7 @@
           "query": {
             "create": {
               "uri": "http://devmediasite.webcastcloud.com.au/mediasite/api/v1/UserProfiles",
-              "body": "{ \"UserName\": \"ZZ~{d.local.USERNAME}\",\"DisplayName\": \"~{d.local.FULLNAME}\",\"Email\":\"ZZ~{d.local.USERNAME}@actio.com.au\",\"Activated\": true,\"ModeratorEmail\": \"jmckinney_webcastcloud.com.au\",\"ModeratorEmailOptOut\": false,\"DisablePresentationContentCompleteEmails\": false,\"DisablePresentationContentFailedEmails\": true,\"DisablePresentationChangeOwnerEmails\": true,\"TimeZone\": 19,\"PresenterFirstName\": \"First\",\"PresenterMiddleName\": \"Middle\",\"PresenterLastName\": \"Last\",\"PresenterEmail\": \"jmckinneywebcastcloud.com.au\",\"PresenterPrefix\": \"null\",\"PresenterSuffix\": \"null\",\"PresenterAdditionalInfo\": \"null\",\"PresenterBio\": \"null\" }"
+              "body": "{ \"UserName\": \"~{d.global.PresenterUsername}\",\"DisplayName\": \"~{d.global.PresenterFullname}\",\"Email\":\"~{d.global.email}\",\"Activated\": true,\"ModeratorEmail\": \"jmckinney_webcastcloud.com.au\",\"ModeratorEmailOptOut\": false,\"DisablePresentationContentCompleteEmails\": false,\"DisablePresentationContentFailedEmails\": true,\"DisablePresentationChangeOwnerEmails\": true,\"TimeZone\": 19,\"PresenterFirstName\": \"~{d.global.firstname}\",\"PresenterLastName\": \"~{d.global.lastname}\",\"PresenterEmail\": \"~{d.global.email}\"}"
             }
           }
         }
@@ -58,6 +70,11 @@
           "row1header",
           "deDup,ModuleId"
         ]
+      },
+      "iterate-users": {
+        "type": "iterate",
+        "behavior": "iterate",
+        "iterate": "*"
       },
       "iterate-module": {
         "type": "iterate",
@@ -186,8 +203,11 @@
       }
     },
     "pipelines": {
+      "test-sql" : {
+        "pipe" : "read-sql-data"
+      },
       "read-users": {
-        "pipe": "read-data-file | process-user-header | create-users | iterate-users"
+        "pipe": "read-sql-data | create-users"
       },
       "read-modules-demo": {
         "pipe": "read-data-file | process-module-header | iterate-module | create-module-merge | create-folder-merge | owner-folder-merge | create-schedule-merge | assign-schedule-module-merge"
@@ -195,7 +215,7 @@
     },
     "services": {},
     "startup": {
-      "exec": "read-modules-demo"
+      "exec": "test-sql"
     }
   }
 }

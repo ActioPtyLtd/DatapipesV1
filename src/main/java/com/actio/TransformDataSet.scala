@@ -36,6 +36,7 @@ object TestMeta extends App {
     case Term.Select(Term.Select(q, Term.Name("*")) ,Term.Name(n)) => DataArray("", eval(q, scope).elems.map(i => i(n)).toList)
     case Term.Select(q, Term.Name(n)) => eval(q, scope)(n)
     case Term.Apply(q, Seq(Lit(num: Int))) => eval(q, scope)(num)
+    case Term.Apply(Term.Name("DataArray"), args) => DataArray(args.map(eval(_, scope)).toList)
     case Term.Apply(Term.Name(fName), args) => UtilityFunctions.execute(fName, args.map(eval(_, scope)).toList)
     case Term.If(cond, thenp, elsep) =>
       if(eval(cond, scope) match {

@@ -114,11 +114,72 @@
             }
           }
         }
+      },
+      "schedule-template": {
+        "type": "mergeTemplate",
+        "templates": {
+          "schedulebody": "{\"ScheduleTemplateId\":\"0eddda4fd7304a0ca530acf593b76d3f0b\",  \"RecorderId\":\"eefd2ec11f5749fd9ab777f2c1f358d816\",  \"Name\": \"Schedule_APIcreated\",  \"TitleType\": \"ScheduleNameAndAirDateTime\",  \"FolderId\": \"${folder.root.Id}\",  \"AdvanceCreationTime\": \"172800\",  \"AdvanceLoadTimeInSeconds\": \"120\",  \"CreatePresentation\": \"true\",  \"LoadPresentation\": \"true\",  \"AutoStart\": \"true\",  \"AutoStop\": \"true\",  \"ReceipientsEmailAddresses\": \"jmckinney@webcastcloud.com.au\",  \"NextNumberInSchedule\": \"2\",  \"Description\": \"Presentation Created via API w/ Presenter email sent Hopefully\",  \"ReviewEditApproveEnabled\": \"true\"}"
+        }
+      },
+      "create-schedule": {
+        "type": "merge",
+        "behavior": "simple",
+        "attribute": "schedule",
+        "dataSource": {
+          "type": "rest",
+          "behavior": "simple",
+          "path": "-",
+          "headers": {
+            "Content-Type": "application/json",
+            "sfapikey": "6ee2ac1c-6045-496f-892e-a0ad3dd5976c"
+          },
+          "credential": {
+            "user": "ACTIO",
+            "password": "ACTIO1234!"
+          },
+          "query": {
+            "create": {
+              "uri": "http://devmediasite.webcastcloud.com.au/mediasite/api/v1/Schedules",
+              "body": "schedulebody"
+            }
+          }
+        }
+      },
+      "assign-schedule-template": {
+        "type": "mergeTemplate",
+        "templates": {
+          "assignscheduleuri": "http://devmediasite.webcastcloud.com.au/mediasite/api/v1/Modules('${module.root.Id}')/AddAssociation",
+          "assignschedulebody": "{\"MediasiteId\":\"${schedule.root.Id}\"}"
+        }
+      },
+      "assign-schedule": {
+        "type": "merge",
+        "behavior": "simple",
+        "attribute": "schedulemodule",
+        "dataSource": {
+          "type": "rest",
+          "behavior": "simple",
+          "path": "-",
+          "headers": {
+            "Content-Type": "application/json",
+            "sfapikey": "6ee2ac1c-6045-496f-892e-a0ad3dd5976c"
+          },
+          "credential": {
+            "user": "ACTIO",
+            "password": "ACTIO1234!"
+          },
+          "query": {
+            "create": {
+              "uri": "assignscheduleuri",
+              "body": "assignschedulebody"
+            }
+          }
+        }
       }
     },
     "pipelines": {
       "load-frame" : {
-        "pipe": "read-modules | template-module | tr1 | create-module-merge | batch1 | template-createfolder | tr1 | create-folder-merge | batch1 | owner-folder | tr1 | owner-folder-merge"
+        "pipe": "read-modules | template-module | tr1 | create-module-merge | batch1 | template-createfolder | tr1 | create-folder-merge | batch1 | owner-folder | tr1 | owner-folder-merge | batch1 | schedule-template | tr1 | create-schedule | batch1 | assign-schedule-template | tr1 | assign-schedule"
       }
     },
     "services": { },

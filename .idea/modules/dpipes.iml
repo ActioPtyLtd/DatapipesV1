@@ -26,16 +26,6 @@
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
-    <orderEntry type="library" name="SBT: org.scala-lang:scala-library:2.11.7:jar" level="project" />
-    <orderEntry type="module-library">
-      <library name="SBT: unmanaged-jars">
-        <CLASSES>
-          <root url="jar://$MODULE_DIR$/../../lib/dbfdriver.jar!/" />
-        </CLASSES>
-        <JAVADOC />
-        <SOURCES />
-      </library>
-    </orderEntry>
     <orderEntry type="library" name="SBT: org.scala-lang.modules:scala-xml_2.11:1.0.5:jar" level="project" />
     <orderEntry type="library" name="SBT: org.json4s:json4s-scalap_2.11:3.3.0:jar" level="project" />
     <orderEntry type="library" name="SBT: org.json4s:json4s-jackson_2.11:3.3.0:jar" level="project" />
@@ -75,6 +65,33 @@
     <orderEntry type="library" name="SBT: org.eclipse.jetty.websocket:websocket-common:9.3.6.v20151106:jar" level="project" />
     <orderEntry type="library" name="SBT: org.eclipse.jetty.websocket:websocket-server:9.3.6.v20151106:jar" level="project" />
     <orderEntry type="library" name="SBT: org.eclipse.jetty.websocket:websocket-servlet:9.3.6.v20151106:jar" level="project" />
-    <orderEntry type="library" name="scala-sdk-2.11.8" level="application" />
+    <orderEntry type="library" name="SBT: com.lihaoyi:fastparse-utils_2.11:0.3.7:jar" level="project" />
+    <orderEntry type="library" name="SBT: com.lihaoyi:fastparse_2.11:0.3.7:jar" level="project" />
+    <orderEntry type="library" name="SBT: com.lihaoyi:scalaparse_2.11:0.3.7:jar" level="project" />
+    <orderEntry type="library" name="SBT: com.lihaoyi:sourcecode_2.11:0.1.1:jar" level="project" />
+    <orderEntry type="library" name="SBT: org.postgresql:postgresql:9.4.1209.jre7:jar" level="project" />
+    <orderEntry type="library" name="SBT: org.scala-lang:scala-library:2.11.8:jar" level="project" />
+    <orderEntry type="library" name="SBT: org.scalameta:common_2.11:1.0.0:jar" level="project" />
+    <orderEntry type="library" name="SBT: org.scalameta:dialects_2.11:1.0.0:jar" level="project" />
+    <orderEntry type="library" name="SBT: org.scalameta:inline_2.11:1.0.0:jar" level="project" />
+    <orderEntry type="library" name="SBT: org.scalameta:inputs_2.11:1.0.0:jar" level="project" />
+    <orderEntry type="library" name="SBT: org.scalameta:parsers_2.11:1.0.0:jar" level="project" />
+    <orderEntry type="library" name="SBT: org.scalameta:quasiquotes_2.11:1.0.0:jar" level="project" />
+    <orderEntry type="library" name="SBT: org.scalameta:scalameta_2.11:1.0.0:jar" level="project" />
+    <orderEntry type="library" name="SBT: org.scalameta:tokenizers_2.11:1.0.0:jar" level="project" />
+    <orderEntry type="library" name="SBT: org.scalameta:tokens_2.11:1.0.0:jar" level="project" />
+    <orderEntry type="library" name="SBT: org.scalameta:transversers_2.11:1.0.0:jar" level="project" />
+    <orderEntry type="library" name="SBT: org.scalameta:trees_2.11:1.0.0:jar" level="project" />
+    <orderEntry type="module-library">
+      <library name="SBT: unmanaged-jars">
+        <CLASSES>
+          <root url="jar://$MODULE_DIR$/../../lib/dbfreader.jar!/" />
+          <root url="jar://$MODULE_DIR$/../../lib/sqljdbc42.jar!/" />
+          <root url="jar://$MODULE_DIR$/../../lib/dbfdriver.jar!/" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES />
+      </library>
+    </orderEntry>
   </component>
 </module>

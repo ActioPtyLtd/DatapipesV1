@@ -56,7 +56,7 @@
     },
     "pipelines": {
       "load-frame" : {
-        "pipe": "read-users | template | update-mediasite-users"
+        "pipe": "read-users | template-module | update-mediasite-users"
       }
     },
     "services": { },

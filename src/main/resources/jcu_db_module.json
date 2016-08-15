@@ -1,0 +1,129 @@
+{
+  "script": {
+    "schema": {},
+    "tasks": {
+      "read-modules": {
+        "type": "extract",
+        "behavior": "",
+        "dataSource": {
+          "type": "sql",
+          "behavior": "",
+          "jdbcDriver": "org.postgresql.Driver",
+          "connect": "jdbc:postgresql://localhost/jcu?user=postgres&password=postgres",
+          "query": {
+            "queryTemplate": "",
+            "read": "select distinct moduleid,presenterusername from current_activities where PresenterUsername is not null order by PresenterUsername desc"
+          }
+        }
+      },
+      "template-module": {
+        "type": "mergeTemplate",
+        "templates": {
+          "modulecreatebody": "{ \"ModuleId\": \"$moduleid\", \"Name\": \"$moduleid\", \"Description\": \"$moduleid\", \"Owner\": \"MediasiteAdmin\"}"
+        }
+      },
+      "tr1": {
+        "type": "transformTerm",
+        "term": "ds => ds"
+      },
+      "create-module-merge": {
+        "type": "merge",
+        "behavior": "simple",
+        "attribute": "module",
+        "dataSource": {
+          "type": "rest",
+          "behavior": "simple",
+          "path": "-",
+          "headers": {
+            "Content-Type": "application/json",
+            "sfapikey": "6ee2ac1c-6045-496f-892e-a0ad3dd5976c"
+          },
+          "credential": {
+            "user": "ACTIO",
+            "password": "ACTIO1234!"
+          },
+          "query": {
+            "create": {
+              "uri": "http://devmediasite.webcastcloud.com.au/mediasite/api/v1/Modules",
+              "body": "modulecreatebody"
+            }
+          }
+        }
+      },
+      "batch1": {
+        "type": "transformTerm",
+        "term": "ds => batch(batch(ds))"
+      },
+      "template-createfolder": {
+        "type": "mergeTemplate",
+        "templates": {
+          "foldercreatebody": "{ \"Name\": \"${module.root.ModuleId}\", \"Owner\": \"LECTURER\", \"ParentFolderId\": \"a1d05da916264510bb98cb94d9ba4e7614\", \"Recycled\": false, \"Type\": \"Folder\", \"IsShared\": false, \"IsCopyDestination\": true, \"IsReviewEditApproveEnabled\": true}"
+        }
+      },
+      "create-folder-merge": {
+        "type": "merge",
+        "behavior": "simple",
+        "attribute": "folder",
+        "dataSource": {
+          "type": "rest",
+          "behavior": "simple",
+          "path": "-",
+          "headers": {
+            "Content-Type": "application/json",
+            "sfapikey": "6ee2ac1c-6045-496f-892e-a0ad3dd5976c"
+          },
+          "credential": {
+            "user": "ACTIO",
+            "password": "ACTIO1234!"
+          },
+          "query": {
+            "create": {
+              "uri": "http://devmediasite.webcastcloud.com.au/mediasite/api/v1/Folders",
+              "body": "foldercreatebody"
+            }
+          }
+        }
+      },
+      "owner-folder": {
+        "type": "mergeTemplate",
+        "templates": {
+          "owneruri": "http://devmediasite.webcastcloud.com.au/mediasite/api/v1/Folders('${folder.root.Id}')/UpdateOwner",
+          "ownercreatebody": "{ \"Owner\": \"$presenterusername\" }"
+        }
+      },
+      "owner-folder-merge": {
+        "type": "merge",
+        "behavior": "simple",
+        "attribute": "ownerfolder",
+        "dataSource": {
+          "type": "rest",
+          "behavior": "simple",
+          "path": "-",
+          "headers": {
+            "Content-Type": "application/json",
+            "sfapikey": "6ee2ac1c-6045-496f-892e-a0ad3dd5976c"
+          },
+          "credential": {
+            "user": "ACTIO",
+            "password": "ACTIO1234!"
+          },
+          "query": {
+            "create": {
+              "uri": "owneruri",
+              "body": "ownercreatebody"
+            }
+          }
+        }
+      }
+    },
+    "pipelines": {
+      "load-frame" : {
+        "pipe": "read-modules | template-module | tr1 | create-module-merge | batch1 | template-createfolder | tr1 | create-folder-merge | batch1 | owner-folder | tr1 | owner-folder-merge"
+      }
+    },
+    "services": { },
+    "startup": {
+      "exec": "load-frame"
+    }
+  }
+}

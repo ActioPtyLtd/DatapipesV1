@@ -107,7 +107,7 @@ class DataSourceREST extends DataSource with Logging {
 
   @throws(classOf[Exception])
   def execute(ds: DataSet, query: String): Unit = {
-    executeQueryLabel(ds.elems.toList.head, query)
+    ds.elems.foreach(e => executeQueryLabel(e,query))
   }
 
   def credentialsProvider: CredentialsProvider = {

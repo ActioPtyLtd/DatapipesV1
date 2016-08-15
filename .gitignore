@@ -12,6 +12,7 @@ target/
 .idea/workspace.xml
 .idea/tasks.xml
 .idea/dictionaries
+.idea/sbt.xml
 
 # Sensitive or high-churn files:
 .idea/dataSources.ids
@@ -19,6 +20,7 @@ target/
 .idea/sqlDataSources.xml
 .idea/dynamic.xml
 .idea/uiDesigner.xml
+
 
 # Logback
 .idea/modules/log*.txt

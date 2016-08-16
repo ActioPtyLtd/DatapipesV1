@@ -45,14 +45,14 @@ class TaskDataSourceUpdate extends Task {
 
     //TODO: can refactor to load (insert and/or update) these in the next task
 
-    if (inserts.nonEmpty) {
+    if (inserts.nonEmpty && config.getConfig(DPSystemConfigurable.DATASOURCE_LABEL).hasPath("query.create")) {
       dataSource.execute(DataArray("", inserts.map(_._1)), "create")
 
       // update the dimension cache, so this isn't repeated again
       Cache.dim.get ++= inserts.map(m => (m._2, m._3))
     }
-
-    if (updates.nonEmpty) {
+7
+    if (updates.nonEmpty && config.getConfig(DPSystemConfigurable.DATASOURCE_LABEL).hasPath("query.update")) {
       dataSource.execute(DataArray("", updates.map(_._1)), "update")
 
       // update the dimension cache, so this isn't repeated again

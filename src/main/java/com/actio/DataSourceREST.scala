@@ -33,9 +33,9 @@ object DataSourceREST {
   private val CONTENT_TYPE: String = "application/json"
 
   def createHttpRequest(label: String): HttpRequestBase = {
-    if (label == "create") {
+    if (label == "create" || label == "post") {
       new HttpPost()
-    } else if (label == "update") {
+    } else if (label == "update" || label == "put") {
       new HttpPut()
     } else if (label == "patch") {
       new HttpPatch()
@@ -170,7 +170,7 @@ class DataSourceREST extends DataSource with Logging {
   override def executeQueryLabel(ds: DataSet, label: String): DataSet = {
     val requestQuery =
       createRequest(configOption(config,s"query.$label.body").map(d => ds(d)).getOrElse(ds),
-        DataSourceREST.createHttpRequest(label),
+        DataSourceREST.createHttpRequest(configOption(config,s"query.$label.verb").getOrElse(label)),
         ds(config.getString(s"query.$label.uri")).stringOption.getOrElse(config.getString(s"query.$label.uri"))
       )
 

@@ -40,6 +40,8 @@ object DataSetTransforms {
 
   def batch(ds: DataSet): DataSet = DataRecord("", List(ds))
 
+  def sumValues(ls: List[DataSet]) = DataNumeric(ls.foldLeft(BigDecimal(0))((d,l) => d + Try(BigDecimal(l.stringOption.getOrElse("0"))).getOrElse(BigDecimal(0))))
+
 
   /* below will need to be replaced when I have time */
 

@@ -31,21 +31,22 @@ class DataSourceSQL extends DataSource with Logging {
     cn.close()
   }
 
+  lazy val connection = DriverManager.getConnection(getConnectStr())
+
+  lazy val statement = connection.createStatement(ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_READ_ONLY)
+
+  //TODO: close connection on dispose
+
   override def executeQuery(ds: DataSet, query: String): DataSet = {
     logger.info("Connecting to database...")
 
     try {
 
-      val cn = DriverManager.getConnection(getConnectStr()) //TODO: close connection on query execute exception
-
-      logger.info("Connected")
-
-      val st = cn.createStatement(ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_READ_ONLY)
       val sqlQuery = ds(query).stringOption.getOrElse(query)
 
       logger.info("Executing Query: " + sqlQuery)
 
-      dataSet = new DataSetDBStream(st.executeQuery(sqlQuery), 100)
+      dataSet = new DataSetDBStream(statement.executeQuery(sqlQuery), 100)
 
       logger.info("Successfully executed statement.")
     } catch {

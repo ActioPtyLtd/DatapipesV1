@@ -51,7 +51,7 @@ class TaskDataSourceUpdate extends Task {
       // update the dimension cache, so this isn't repeated again
       Cache.dim.get ++= inserts.map(m => (m._2, m._3))
     }
-7
+
     if (updates.nonEmpty && config.getConfig(DPSystemConfigurable.DATASOURCE_LABEL).hasPath("query.update")) {
       dataSource.execute(DataArray("", updates.map(_._1)), "update")
 

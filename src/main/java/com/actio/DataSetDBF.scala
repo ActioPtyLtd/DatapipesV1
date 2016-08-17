@@ -5,6 +5,8 @@ import java.text.SimpleDateFormat
 import com.linuxense.javadbf._
 import java.util
 
+import scala.collection.mutable
+
 /**
  * Created by mauri on 14/04/2016.
  */
@@ -21,10 +23,8 @@ object DataSetDBF {
         DataNumeric(f._1.getName, BigDecimal(BigDecimal(row(f._2).toString).underlying()
           .stripTrailingZeros()
           .toPlainString))
-      } else if (t == DBFDataType.DATE) {
-        DataString(f._1.getName, new SimpleDateFormat("yyyy-MM-dd").format(row(f._2).asInstanceOf[java.util.Date]))
-      } else if (t == DBFDataType.TIMESTAMP) {
-        DataString(f._1.getName, new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.S").format(row(f._2).asInstanceOf[java.util.Date]))
+      } else if (t == DBFDataType.DATE || t == DBFDataType.TIMESTAMP) {
+        DataDate(f._1.getName, row(f._2).asInstanceOf[java.util.Date])
       } else {
         DataString(f._1.getName, row(f._2).toString.trim())
       }
@@ -47,16 +47,16 @@ class DataSetDBF(private val reader: InputStream) extends DataSet {
 
     override def next(): DataSet = {
       var i = 0
-      var recs: List[DataRecord] = Nil
+      var recs = mutable.MutableList[DataRecord]()
 
       do {
-        recs = DataSetDBF.field2ds(row, fields) :: recs
+        recs += DataSetDBF.field2ds(row, fields)
 
         i += 1
         row = stream.nextRecord()
       } while (row != null && i < batchSize)
 
-      DataArray(recs)
+      DataArray(recs.toList)
     }
   }
 

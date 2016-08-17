@@ -1,5 +1,7 @@
 package com.actio
 
+import java.text.SimpleDateFormat
+
 import org.json4s._
 import org.json4s.jackson.JsonMethods._
 
@@ -29,6 +31,18 @@ case class DataNumeric(label: String, num: BigDecimal) extends DataSet {
 object DataNumeric {
 
   def apply(num: BigDecimal): DataNumeric = DataNumeric("numeric", num)
+}
+
+case class DataDate(label: String, date: java.util.Date) extends DataSet {
+
+  override def stringOption: Option[String] = Some(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.S").format(date))
+
+  override def schema: SchemaDefinition = SchemaDate(label, "yyyy-MM-dd")
+}
+
+object DataDate {
+
+  def apply(date: java.util.Date): DataDate = DataDate("date", date)
 }
 
 case class DataBoolean(label: String, bool: Boolean) extends DataSet {

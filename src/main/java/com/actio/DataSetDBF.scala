@@ -18,7 +18,9 @@ object DataSetDBF {
 
     if (Option(row(f._2)).isDefined) {
       if (t == DBFDataType.NUMERIC || t == DBFDataType.FLOATING_POINT || t == DBFDataType.LONG || t == DBFDataType.CURRENCY) {
-        DataNumeric(f._1.getName, BigDecimal(row(f._2).toString))
+        DataNumeric(f._1.getName, BigDecimal(BigDecimal(row(f._2).toString).underlying()
+          .stripTrailingZeros()
+          .toPlainString))
       } else if (t == DBFDataType.DATE) {
         DataString(f._1.getName, new SimpleDateFormat("yyyy-MM-dd").format(row(f._2).asInstanceOf[java.util.Date]))
       } else if (t == DBFDataType.TIMESTAMP) {

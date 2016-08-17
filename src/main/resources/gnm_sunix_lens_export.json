@@ -2,7 +2,7 @@
   "script": {
     "schema": {},
     "tasks": {
-      "read-sundry-dbf": {
+      "read-lens-dbf": {
         "type": "extract",
         "behavior": "",
         "dataSource": {
@@ -42,13 +42,13 @@
       }
     },
     "pipelines": {
-      "load-frame" : {
-        "pipe": "read-sundry-dbf | template | update-product-db"
+      "load-lens" : {
+        "pipe": "read-lens-dbf | template | update-product-db"
       }
     },
     "services": { },
     "startup": {
-      "exec": "load-frame"
+      "exec": "load-lens"
     }
   }
 }

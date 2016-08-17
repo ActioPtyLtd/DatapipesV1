@@ -2,7 +2,7 @@
   "script": {
     "schema": {},
     "tasks": {
-      "read-sundry-dbf": {
+      "read-contacts-dbf": {
         "type": "extract",
         "behavior": "",
         "dataSource": {
@@ -42,13 +42,13 @@
       }
     },
     "pipelines": {
-      "load-frame" : {
-        "pipe": "read-sundry-dbf | template | update-product-db"
+      "load-contacts" : {
+        "pipe": "read-contacts-dbf | template | update-product-db"
       }
     },
     "services": { },
     "startup": {
-      "exec": "load-frame"
+      "exec": "load-contacts"
     }
   }
 }

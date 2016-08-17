@@ -11,9 +11,9 @@ class DataSetDBStream(private val rs: ResultSet, val batchSize: Int) extends Dat
 
   private val metaData = rs.getMetaData
   private val ordinals = 1 to metaData.getColumnCount
-  private val header = (ordinals map metaData.getColumnName).toList
+  private val header = ordinals.map(o => metaData.getColumnName(o)).toList
 
-  private val mySchema = SchemaArray(SchemaRecord(ordinals.map(o => {
+  private val mySchema = ordinals.map(o => {
     val t = metaData.getColumnType(o)
 
     if (t == Types.BIGINT || t == Types.DECIMAL || t == Types.DOUBLE || t == Types.FLOAT || t == Types.INTEGER || t == Types.NUMERIC) {
@@ -25,7 +25,7 @@ class DataSetDBStream(private val rs: ResultSet, val batchSize: Int) extends Dat
     else {
       SchemaString(metaData.getColumnName(o).toLowerCase, metaData.getColumnDisplaySize(o))
     }
-  }).toList))
+  }).toList
 
   override lazy val elems = new Iterator[DataSet] {
     private var hNext = rs.next()
@@ -37,8 +37,20 @@ class DataSetDBStream(private val rs: ResultSet, val batchSize: Int) extends Dat
       var recs: List[DataRecord] = Nil
 
       do {
-        recs = DataRecord("row", header.map(c => (c, Option(rs.getObject(c)))).map(v =>
-          if (v._2.isDefined) DataString(v._1, v._2.get.toString) else Nothin(v._1))) :: recs
+        recs = DataRecord("row", (header zip mySchema).map(c => (c._1, Option(rs.getObject(c._1)), c._2)).map(v =>
+          if (v._2.isDefined) {
+            v._3 match {
+              case _: SchemaNumber => DataNumeric(v._1,
+                BigDecimal(BigDecimal(v._2.get.toString)
+                  .underlying()
+                  .stripTrailingZeros()
+                  .toPlainString))
+              case _ => DataString(v._1, v._2.get.toString)
+            }
+          }
+          else {
+            Nothin(v._1)
+          })) :: recs
         i += 1
         hNext = rs.next()
       } while ( hNext && i < batchSize)
@@ -47,7 +59,7 @@ class DataSetDBStream(private val rs: ResultSet, val batchSize: Int) extends Dat
     }
   }
 
-  override def schema: SchemaDefinition = mySchema
+  override def schema: SchemaDefinition = SchemaArray(SchemaRecord(mySchema))
 
   override def label: String = ""
 }

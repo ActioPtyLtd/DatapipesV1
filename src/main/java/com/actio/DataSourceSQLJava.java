@@ -11,10 +11,10 @@ import java.sql.*;
 /**
  * Created by jim on 7/8/2015.
  */
-public class DataSourceSQL extends DataSource {
+public class DataSourceSQLJava extends DataSource {
 
 
-    public DataSourceSQL()
+    public DataSourceSQLJava()
     {
         /* no op */
     }

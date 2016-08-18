@@ -72,7 +72,10 @@ public class DataSourceFile extends DataSource {
         // execute the sqlquery
         logger.info("ReadFile: " + fname);
 
-        dataSet = new DataSetFileStream(new FileInputStream(new File(fname)));
+        if(behaviour.equals("DBF"))
+            dataSet = new DataSetDBF(new FileInputStream(new File(fname)));
+        else
+            dataSet = new DataSetFileStream(new FileInputStream(new File(fname)));
 
         // save the results
 

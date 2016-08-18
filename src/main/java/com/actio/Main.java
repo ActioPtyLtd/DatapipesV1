@@ -1,7 +1,6 @@
 package com.actio;
 
-import com.actio.dpsystem.DPEventPublisher;
-import com.actio.dpsystem.DPSystemConfig;
+
 import com.actio.dpsystem.DPSystemFactory;
 import com.actio.dpsystem.DPSystemRuntime;
 
@@ -17,7 +16,7 @@ import org.slf4j.LoggerFactory;
 
 import static java.lang.System.exit;
 
-class Main {
+public class Main {
 
 
     private static final Logger logger = LoggerFactory.getLogger(Main.class);
@@ -78,7 +77,7 @@ class Main {
                 dprun.execute(pipelineName);
 
             ///==========
-            dprun.sendEvents();
+            //dprun.sendEvents();
 
         }
         else {

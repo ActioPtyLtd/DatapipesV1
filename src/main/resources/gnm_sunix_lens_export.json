@@ -1,0 +1,54 @@
+{
+  "script": {
+    "schema": {},
+    "tasks": {
+      "read-lens-dbf": {
+        "type": "extract",
+        "behavior": "",
+        "dataSource": {
+          "type": "file",
+          "behavior": "DBF",
+          "directory": "C:\\Users\\mauri\\bitbucket\\gandm-data\\Sunix\\Hewett Sunix Vision DBF",
+          "filenameTemplate": "VLENCODE.DBF"
+        }
+      },
+      "template": {
+        "type": "mergeTemplate",
+        "templates": {
+          "create": "insert into storeproduct (storeid,productid,\"type\",datecreated,name,description,retailprice,wholesaleprice,modified,last_purchase,last_sale,quantity) values ('2088-PH-012', '2088-PH-012-$LENCODE', 'Lens', current_date,'${sq(SUPDESC)}','$LENCODE',${numeric(RRP)},${numeric(COSTPRICE)}, '1900-01-01'::timestamp, '1900-01-01'::timestamp, '1900-01-01'::timestamp, 0)",
+          "update": "update storeproduct set name='${sq(SUPDESC)}',description='$LENCODE',retailprice=${numeric(RRP)},wholesaleprice=${numeric(COSTPRICE)}, modified='1900-01-01'::timestamp, last_purchase='1900-01-01'::timestamp, last_sale='1900-01-01'::timestamp,quantity=0 WHERE productid='2088-PH-012-$LENCODE'"
+        }
+      },
+      "update-product-db": {
+        "type": "datasourceupdate",
+        "behavior": "",
+        "iterateR": "ds => ds",
+        "keyL": "2088-PH-012-${row.LENCODE}",
+        "keyR": "$productid",
+        "changeL": "-",
+        "changeR": "-",
+        "dataSource": {
+          "type": "sql",
+          "behavior": "",
+          "jdbcDriver": "org.postgresql.Driver",
+          "connect": "jdbc:postgresql://localhost/gmdwh?user=postgres&password=postgres",
+          "query": {
+            "queryTemplate": "",
+            "create": "create",
+            "read": "select productid, modified FROM storeproduct",
+            "update": "update"
+          }
+        }
+      }
+    },
+    "pipelines": {
+      "load-lens" : {
+        "pipe": "read-lens-dbf | template | update-product-db"
+      }
+    },
+    "services": { },
+    "startup": {
+      "exec": "load-lens"
+    }
+  }
+}

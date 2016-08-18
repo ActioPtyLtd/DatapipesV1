@@ -1,0 +1,54 @@
+{
+  "script": {
+    "schema": {},
+    "tasks": {
+      "read-sundry-dbf": {
+        "type": "extract",
+        "behavior": "",
+        "dataSource": {
+          "type": "file",
+          "behavior": "DBF",
+          "directory": "C:\\Users\\mauri\\bitbucket\\gandm-data\\Sunix\\Hewett Sunix Vision DBF",
+          "filenameTemplate": "VPRODUCT.DBF"
+        }
+      },
+      "template": {
+        "type": "mergeTemplate",
+        "templates": {
+          "create": "insert into storeproduct (storeid,productid,\"type\",datecreated,name,description,retailprice,wholesaleprice,modified,last_purchase,last_sale,quantity) values ('2088-PH-012', '2088-PH-012-$PRODCODE', 'Sundry', current_date,'${sq(DESC)}','$PRODCODE',${numeric(RRP)},${numeric(COSTPRICE)}, '${convertDateFormat(MODIFIED,\"yyyy-MM-dd HH:mm:ss.S\",\"yyyy-MM-dd HH:mm:ss.S\")}'::timestamp, '${convertDateFormat(LASTPUR,\"yyyy-MM-dd\",\"yyyy-MM-dd\")}'::timestamp, '${convertDateFormat(LASTSALE,\"yyyy-MM-dd\",\"yyyy-MM-dd\")}'::timestamp, ${numeric(QUANTITY)})",
+          "update": "update storeproduct set name='${sq(DESC)}',description='$PRODCODE',retailprice=${numeric(RRP)},wholesaleprice=${numeric(COSTPRICE)}, modified='${convertDateFormat(MODIFIED,\"yyyy-MM-dd HH:mm:ss.S\",\"yyyy-MM-dd HH:mm:ss.S\")}'::timestamp, last_purchase='${convertDateFormat(LASTPUR,\"yyyy-MM-dd\",\"yyyy-MM-dd\")}'::timestamp, last_sale='${convertDateFormat(LASTSALE,\"yyyy-MM-dd\",\"yyyy-MM-dd\")}'::timestamp,quantity=${numeric(QUANTITY)} WHERE productid='2088-PH-012-$PRODCODE'"
+        }
+      },
+      "update-product-db": {
+        "type": "datasourceupdate",
+        "behavior": "",
+        "iterateR": "ds => ds",
+        "keyL": "2088-PH-012-${row.PRODCODE}",
+        "keyR": "$productid",
+        "changeL": "${convertDateFormat(row.MODIFIED,\"yyyy-MM-dd HH:mm:ss.S\",\"yyyy-MM-dd HH:mm:ss.S\")}",
+        "changeR": "$modified",
+        "dataSource": {
+          "type": "sql",
+          "behavior": "",
+          "jdbcDriver": "org.postgresql.Driver",
+          "connect": "jdbc:postgresql://localhost/gmdwh?user=postgres&password=postgres",
+          "query": {
+            "queryTemplate": "",
+            "create": "create",
+            "read": "select productid, modified FROM storeproduct",
+            "update": "update"
+          }
+        }
+      }
+    },
+    "pipelines": {
+      "load-frame" : {
+        "pipe": "read-sundry-dbf | template | update-product-db"
+      }
+    },
+    "services": { },
+    "startup": {
+      "exec": "load-frame"
+    }
+  }
+}

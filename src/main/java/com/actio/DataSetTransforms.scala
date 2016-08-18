@@ -1,6 +1,6 @@
 package com.actio
 
-import java.time.LocalDate
+import java.time.{LocalDateTime, LocalDate}
 import java.time.format.DateTimeFormatter
 
 import scala.collection.mutable
@@ -32,6 +32,16 @@ object DataSetTransforms {
   def isBlank(ds: DataSet) = DataBoolean(ds.stringOption.exists(_.isEmpty))
 
   def quoteOption(ds: DataSet) = ds.stringOption.map(s => if (s.isEmpty) DataString("null") else DataString("\"" + s + "\"")).getOrElse(DataString("null"))
+
+  // single quote escape
+  def sq(str: String): DataSet = if(str == null) DataString("") else DataString(str.replace("'","''"))
+
+  def numeric(value: String): DataSet = DataNumeric(Try(BigDecimal(value)).getOrElse(BigDecimal(0)))
+
+  def batch(ds: DataSet): DataSet = DataRecord("", List(ds))
+
+  def sumValues(ls: List[DataSet]) = DataNumeric(ls.foldLeft(BigDecimal(0))((d,l) => d + Try(BigDecimal(l.stringOption.getOrElse("0"))).getOrElse(BigDecimal(0))))
+
 
   /* below will need to be replaced when I have time */
 
@@ -108,6 +118,8 @@ object DataSetTransforms {
     res
   }
 
+  /*
+
   def numeric(batch: Batch, field: String, precision: Int, scale: Int): DataSet = batch match {
     case (s, DataRecord(key, fs)) =>
       new DataSetFixedData(s, if (fs.map(_.label).contains(field))
@@ -136,7 +148,7 @@ object DataSetTransforms {
     case (s, DataArray(key, a)) =>
       new DataSetFixedData(s, DataArray(key, a.map(m => bool((s, m), field).headOption.get)))
     case (s, d) => new DataSetFixedData(s, d)
-  }
+  } */
 
   def delim(str: String, d: DataSet) = DataString(d.elems.map(_.stringOption.getOrElse("")).mkString(str))
 
@@ -225,10 +237,13 @@ object DataSetTransforms {
 
   def convDateValue(value: String, in: String, out: String) =
     try {
-      LocalDate.parse(value, DateTimeFormatter.ofPattern(in)).format(DateTimeFormatter.ofPattern(out))
+      if(value.contains(":"))
+        LocalDateTime.parse(value, DateTimeFormatter.ofPattern(in)).format(DateTimeFormatter.ofPattern(out))
+      else
+        LocalDate.parse(value, DateTimeFormatter.ofPattern(in)).format(DateTimeFormatter.ofPattern(out))
     }
     catch {
-      case _: Exception => "1900-01-01"
+      case _: Exception => "1900-01-01 00:00:00.0"
     }
 
   def defaultIfBlank(ds: DataSetTableScala, cols: List[String], default: String) = cols.foldLeft(ds)((d, c) => valueFunc(d, c, defaultIfBlankValue(_, default)))

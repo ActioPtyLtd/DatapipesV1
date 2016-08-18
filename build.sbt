@@ -22,9 +22,8 @@ libraryDependencies ++= Seq(
   "com.googlecode.java-diff-utils" % "diffutils" % "1.3.0",
   "commons-cli" % "commons-cli" % "1.3.1",
   "com.sparkjava" % "spark-core" % "2.5",
-  "org.postgresql" % "postgresql" % "9.4.1209.jre7"
-
-  //,"org.scalameta" %% "scalameta" % "1.0.0"
+  "org.postgresql" % "postgresql" % "9.4.1209.jre7",
+  "org.scalameta" %% "scalameta" % "1.0.0"
 )
 
 enablePlugins(JavaAppPackaging)

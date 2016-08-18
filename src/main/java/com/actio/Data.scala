@@ -1,5 +1,7 @@
 package com.actio
 
+import java.text.SimpleDateFormat
+
 import org.json4s._
 import org.json4s.jackson.JsonMethods._
 
@@ -16,7 +18,7 @@ case class DataString(label: String, str: String) extends DataSet {
 
 object DataString {
 
-  def apply(str: String): DataString = DataString("", str)
+  def apply(str: String): DataString = DataString("string", str)
 }
 
 case class DataNumeric(label: String, num: BigDecimal) extends DataSet {
@@ -28,7 +30,19 @@ case class DataNumeric(label: String, num: BigDecimal) extends DataSet {
 
 object DataNumeric {
 
-  def apply(num: BigDecimal): DataNumeric = DataNumeric("", num)
+  def apply(num: BigDecimal): DataNumeric = DataNumeric("numeric", num)
+}
+
+case class DataDate(label: String, date: java.util.Date) extends DataSet {
+
+  override def stringOption: Option[String] = Some(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.S").format(date))
+
+  override def schema: SchemaDefinition = SchemaDate(label, "yyyy-MM-dd")
+}
+
+object DataDate {
+
+  def apply(date: java.util.Date): DataDate = DataDate("date", date)
 }
 
 case class DataBoolean(label: String, bool: Boolean) extends DataSet {
@@ -40,7 +54,7 @@ case class DataBoolean(label: String, bool: Boolean) extends DataSet {
 
 object DataBoolean {
 
-  def apply(bool: Boolean): DataBoolean = DataBoolean("", bool)
+  def apply(bool: Boolean): DataBoolean = DataBoolean("bool", bool)
 }
 
 case class DataRecord(label: String, fields: List[DataSet]) extends DataSet {
@@ -56,7 +70,7 @@ case class DataRecord(label: String, fields: List[DataSet]) extends DataSet {
 
 object DataRecord {
 
-  def apply(fields: List[DataSet]): DataRecord = new DataRecord("", fields)
+  def apply(fields: List[DataSet]): DataRecord = new DataRecord("record", fields)
 }
 
 case class DataArray(label: String, arrayElems: List[DataSet]) extends DataSet {
@@ -71,8 +85,8 @@ case class DataArray(label: String, arrayElems: List[DataSet]) extends DataSet {
 
 object DataArray {
 
-  def apply(arrayElems: DataSet*): DataArray = new DataArray("", arrayElems.toList)
-  def apply(arrayElems: List[DataSet]): DataArray = new DataArray("", arrayElems)
+  def apply(arrayElems: DataSet*): DataArray = new DataArray("array", arrayElems.toList)
+  def apply(arrayElems: List[DataSet]): DataArray = new DataArray("array", arrayElems)
 }
 
 sealed abstract class Key

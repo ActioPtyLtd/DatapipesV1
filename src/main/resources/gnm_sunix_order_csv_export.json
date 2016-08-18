@@ -1,0 +1,66 @@
+{
+  "script": {
+    "schema": {},
+    "tasks": {
+      "read-order-csv": {
+        "type": "extract",
+        "behavior": "simple",
+        "dataSource": {
+          "behavior": "regex",
+          "directory": "C:\\Users\\mauri\\bitbucket\\gandm-data",
+          "type": "file",
+          "filenameTemplate": "gmSpecOrder_sample.csv"
+        }
+      },
+      "parse-order-csv": {
+        "type": "transformTerm",
+        "term": "ds => row1header(split2cols(ds, \"col1\"))"
+      },
+      "template": {
+        "type": "mergeTemplate",
+        "templates": {
+          "createbodyleft": "{\"order_id\": \"$jobreference\",\"customer\": {\"customer_id\": \"$patientreference\",\"first_name\": \"$patientgivenname\",\"last_name\": \"$patientsurname\",\"telephone\": \"1234\"},\"delivery_address\": {\"attention\": \"Peter Hewett\",\"number\": \"799\",\"postcode\": \"2088\",\"state\": \"NSW\",\"street1\": \"Military Road\",\"street2\": \"-\",\"street3\": \"Australia\",\"suburb\": \"Mosman\"},\"invoice_id\": \"0001\"",
+          "createbodyright": "\"store_id\": \"2088-PH-012\",\"submitted_date_time\": \"${convertDateFormat(orderdate,\"d/MM/yyyy\",\"yyyy-MM-dd\")}T00:00:00.000Z\"}",
+          "frame": "{\"product_id\": \"$spectaclemeasurement_framesuppliercode\",\"quantity\": 1}",
+          "leftlens": "{\"attributes\": [{\"name\": \"left_lens_size\",\"type\": \"decimal\",\"value\": \"$leftlens_lenssize\"},{\"name\": \"left_lens_sphere\",\"type\": \"string\",\"value\": \"$leftlens_sphere\"},{\"name\": \"left_lens_cylindar\",\"type\": \"string\",\"value\": \"$leftlens_cylinder\"},{\"name\": \"left_lens_axis\",\"type\": \"string\",\"value\": \"$leftlens_axis\"},{\"name\": \"left_lens_seg_size\",\"type\": \"decimal\",\"value\": \"$leftlens_segsize\"},{\"name\": \"left_lens_box_height\",\"type\": \"decimal\",\"value\": \"$leftlens_boxheight\"},{\"name\": \"left_lens_box_width\",\"type\": \"decimal\",\"value\": \"$leftlens_boxwidth\"}], \"product_id\": \"$leftlens_supplierlenscode\",\"quantity\": 1}",
+          "rightlens": "{\"attributes\": [{\"name\": \"right_lens_size\",\"type\": \"decimal\",\"value\": \"$rightlens_lenssize\"},{\"name\": \"right_lens_sphere\",\"type\": \"string\",\"value\": \"$rightlens_sphere\"},{\"name\": \"right_lens_cylindar\",\"type\": \"string\",\"value\": \"$rightlens_cylinder\"},{\"name\": \"right_lens_axis\",\"type\": \"string\",\"value\": \"$rightlens_axis\"},{\"name\": \"right_lens_seg_size\",\"type\": \"decimal\",\"value\": \"$rightlens_segsize\"},{\"name\": \"right_lens_box_height\",\"type\": \"decimal\",\"value\": \"$rightlens_boxheight\"},{\"name\": \"right_lens_box_width\",\"type\": \"decimal\",\"value\": \"$rightlens_boxwidth\"}], \"product_id\": \"$rightlens_supplierlenscode\",\"quantity\": 1}"
+        }
+      },
+      "template-concat": {
+        "type": "mergeTemplate",
+        "templates": {
+          "createuri": "https://dev-api-gnm.actio.com.au:8443/service/order",
+          "createbody": "$createbodyleft, \"order_items\": [${concatString(DataArray(if(isBlank(record.spectaclemeasurement_framesuppliercode)) nothin() else frame, if(isBlank(record.leftlens_supplierlenscode)) nothin() else leftlens, if(isBlank(record.rightlens_supplierlenscode)) nothin() else rightlens))}], $createbodyright"
+        }
+      },
+      "update-order-api": {
+        "type": "load",
+        "behavior": "simple",
+        "dataSource": {
+          "type": "rest",
+          "behavior": "simple",
+          "path": "https://dev-api-gnm.actio.com.au:8443/service/order",
+          "credential": {
+            "user": "admin",
+            "password": "password"
+          },
+          "query": {
+            "create": {
+              "uri": "createuri",
+              "body": "createbody"
+            }
+          }
+        }
+      }
+    },
+    "pipelines": {
+      "load-order" : {
+        "pipe": "read-order-csv | parse-order-csv | template | template-concat | update-order-api"
+      }
+    },
+    "services": { },
+    "startup": {
+      "exec": "load-order"
+    }
+  }
+}

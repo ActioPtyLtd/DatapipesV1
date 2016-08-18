@@ -22,6 +22,7 @@ out/
 .idea/codeStyleSettings.xml
 .idea/scala_settings.xml
 .idea/vcs.xml
+.idea/.name
 
 # Sensitive or high-churn files:
 .idea/dataSources.ids

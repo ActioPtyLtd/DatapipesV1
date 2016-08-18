@@ -1,4 +1,5 @@
 target/
+out/
 
 ### Intellij ###
 # Covers JetBrains IDEs: IntelliJ, RubyMine, PhpStorm, AppCode, PyCharm
@@ -13,6 +14,14 @@ target/
 .idea/tasks.xml
 .idea/dictionaries
 .idea/sbt.xml
+.idea/compiler.xml
+.idea/encodings.xml
+.idea/misc.xml
+.idea/modules.xml
+.idea/scala_compiler.xml
+.idea/codeStyleSettings.xml
+.idea/scala_settings.xml
+.idea/vcs.xml
 
 # Sensitive or high-churn files:
 .idea/dataSources.ids

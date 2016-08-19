@@ -14,7 +14,7 @@ class TaskLookup extends Task {
     super.setConfig(sysconf.getTaskConfig(this.node.getName).toConfig, sysconf.getMasterConfig)
 
     dataSet = DataRecord(List(DataArray(dataSet.elems.map(d =>
-      DataRecord(List(d,DataArray(dataSource.read(d).elems.toList)))).toList)))
+      DataRecord( DataArray(this.node.getName,dataSource.read(d).elems.toList) :: d.elems.toList)).toList)))
 
   }
 

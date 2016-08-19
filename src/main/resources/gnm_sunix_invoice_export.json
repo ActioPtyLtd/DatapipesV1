@@ -12,20 +12,69 @@
           "filenameTemplate": "VACCOUNT.DBF"
         }
       },
+      "templatelookup": {
+        "type": "mergeTemplate",
+        "templates": {
+          "lookupemployee": "select sk from employee where employeeid='2088-PH-012-$OPTOM'",
+          "lookupcustomer": "select sk from customer where customerid='2088-PH-012-$REFNUM'",
+          "lookupstore": "select sk from store where storeid='2088-PH-012'"
+        }
+      },
+      "lookupstorekey": {
+        "type": "lookup",
+        "behavior": "lookup-merge",
+        "dataSource": {
+          "type": "sql",
+          "jdbcDriver": "org.postgresql.Driver",
+          "connect": "jdbc:postgresql://localhost/gmdwh?user=postgres&password=postgres",
+          "query": {
+            "queryTemplate": "",
+            "read": "lookupstore"
+          }
+        }
+      },
+      "lookupemployeekey": {
+        "type": "lookup",
+        "behavior": "lookup-merge",
+        "dataSource": {
+          "type": "sql",
+          "jdbcDriver": "org.postgresql.Driver",
+          "connect": "jdbc:postgresql://localhost/gmdwh?user=postgres&password=postgres",
+          "query": {
+            "queryTemplate": "",
+            "read": "lookupemployee"
+          }
+        }
+      },
+      "lookupcustomerkey": {
+        "type": "lookup",
+        "behavior": "lookup-merge",
+        "dataSource": {
+          "type": "sql",
+          "jdbcDriver": "org.postgresql.Driver",
+          "connect": "jdbc:postgresql://localhost/gmdwh?user=postgres&password=postgres",
+          "query": {
+            "queryTemplate": "",
+            "read": "lookupcustomer"
+          }
+        }
+      },
       "template": {
         "type": "mergeTemplate",
         "templates": {
-          "create": "insert into invoice (invoiceid, createddate, storeid, employeeid, customerid, totalcost, modified) values ('2088-PH-012-$ACCNUM', '$ACCDATE'::timestamp, '2088-PH-012', '2088-PH-012-$OPTOM', '2088-PH-012-$REFNUM', ${sumValues(SUNGAMT,CONFEE,CLENSAMT,SPECAMT,FRAMEAMT,MISCAMT,MAMOUNT)}, '${convertDateFormat(MODIFIED,\"yyyy-MM-dd HH:mm:ss.S\",\"yyyy-MM-dd HH:mm:ss.S\")}'::timestamp)",
-          "update": "update invoice set createddate='$ACCDATE'::timestamp, employeeid='2088-PH-012-$OPTOM', customerid='2088-PH-012-$REFNUM', totalcost=${sumValues(SUNGAMT,CONFEE,CLENSAMT,SPECAMT,FRAMEAMT,MISCAMT,MAMOUNT)} where invoiceid='2088-PH-012-$ACCNUM'"
+          "key": "2088-PH-012-${row.ACCNUM}",
+          "change": "${convertDateFormat(row.MODIFIED,\"yyyy-MM-dd HH:mm:ss.S\",\"yyyy-MM-dd HH:mm:ss.S\")}",
+          "create": "insert into invoice (invoiceid, createddate, storesk, employeesk, customersk, totalcost, modified) values ('2088-PH-012-${row.ACCNUM}', '${row.ACCDATE}'::timestamp, ${numeric(lookupstorekey(0)(0).sk)}, ${numeric(lookupemployeekey(0)(0).sk)}, ${numeric(lookupcustomerkey(0)(0).sk)}, ${sumValues(row.SUNGAMT,row.CONFEE,row.CLENSAMT,row.SPECAMT,row.FRAMEAMT,row.MISCAMT,row.MAMOUNT)}, '${convertDateFormat(row.MODIFIED,\"yyyy-MM-dd HH:mm:ss.S\",\"yyyy-MM-dd HH:mm:ss.S\")}'::timestamp)",
+          "update": "update invoice set createddate='${row.ACCDATE}'::timestamp, storesk=${numeric(lookupstorekey(0)(0).sk)}, employeesk=${numeric(lookupemployeekey(0)(0).sk)}, customersk=${numeric(lookupcustomerkey(0)(0).sk)}, totalcost=${sumValues(row.SUNGAMT,row.CONFEE,row.CLENSAMT,row.SPECAMT,row.FRAMEAMT,row.MISCAMT,row.MAMOUNT)} where invoiceid='2088-PH-012-${row.ACCNUM}'"
         }
       },
       "update-invoice-db": {
         "type": "datasourceupdate",
         "behavior": "",
         "iterateR": "ds => ds",
-        "keyL": "2088-PH-012-${row.ACCNUM}",
+        "keyL": "$key",
         "keyR": "$invoiceid",
-        "changeL": "${convertDateFormat(row.MODIFIED,\"yyyy-MM-dd HH:mm:ss.S\",\"yyyy-MM-dd HH:mm:ss.S\")}",
+        "changeL": "$change",
         "changeR": "$modified",
         "dataSource": {
           "type": "sql",
@@ -43,7 +92,7 @@
     },
     "pipelines": {
       "load-invoice" : {
-        "pipe": "read-invoice-dbf | template | update-invoice-db"
+        "pipe": "read-invoice-dbf | templatelookup | lookupstorekey | lookupemployeekey | lookupcustomerkey | template | update-invoice-db"
       }
     },
     "services": { },

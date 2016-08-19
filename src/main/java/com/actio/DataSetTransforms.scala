@@ -1,7 +1,9 @@
 package com.actio
 
+import java.security.MessageDigest
 import java.time.{LocalDateTime, LocalDate}
 import java.time.format.DateTimeFormatter
+import org.apache.commons.codec.binary.Hex;
 
 import scala.collection.mutable
 import scala.util.Try
@@ -41,6 +43,16 @@ object DataSetTransforms {
   def batch(ds: DataSet): DataSet = DataRecord("", List(ds))
 
   def sumValues(ls: List[DataSet]) = DataNumeric(ls.foldLeft(BigDecimal(0))((d,l) => d + Try(BigDecimal(l.stringOption.getOrElse("0"))).getOrElse(BigDecimal(0))))
+
+  def orElse(ds: DataSet, or: DataSet): DataSet = ds.toOption.getOrElse(or)
+
+  def md5(ls: List[DataSet]) = {
+    val str = ls map (_.stringOption.getOrElse("")) mkString ""
+    val m = MessageDigest.getInstance("MD5")
+
+    m.update(str.getBytes(),0,str.length)
+    DataString(Hex.encodeHexString(m.digest))
+  }
 
 
   /* below will need to be replaced when I have time */

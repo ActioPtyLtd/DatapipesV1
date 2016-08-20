@@ -42,13 +42,13 @@
       }
     },
     "pipelines": {
-      "load-frame" : {
+      "load-sundry" : {
         "pipe": "read-sundry-dbf | template | update-product-db"
       }
     },
     "services": { },
     "startup": {
-      "exec": "load-frame"
+      "exec": "load-sundry"
     }
   }
 }

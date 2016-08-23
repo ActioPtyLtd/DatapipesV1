@@ -10,29 +10,53 @@
           "behavior": "simple",
           "path": "-",
           "credential": {
-            "user": "admin",
-            "password": "password"
+            "user": "dpipes",
+            "password": "L3tM37n!"
           },
           "query": {
             "read": {
-              "uri": "https://dev-api-gnm.actio.com.au:8443/api/productAssortment?filter[productAssortment.stores.id]=9&include=products,products.eyewear"
+              "uri": "https://stage-api-gnm.actio.com.au:8443/api/product?filter[product.assortments.stores.id]=26&fields[product]=id&page[limit]=10000"
             }
           }
         }
       },
-      "iterate-template": {
-        "type": "iterateTemplate",
-        "behavior": "iterateTemplate",
-        "iterate": "0.root.data.*.relationships.products.data.*",
-        "template": "@{d.local.id},@{(firstValue,(filterValue,d.global.response.root.included,'type','productAttributeEyewear'),'id',d.local.id).attributes.brand},@{(firstValue,(filterValue,d.global.response.root.included,'type','productAttributeEyewear'),'id',d.local.id).attributes.frame_model},@{(firstValue,(filterValue,d.global.response.root.included,'type','productAttributeEyewear'),'id',d.local.id).attributes.frame_colour},@{(firstValue,(filterValue,d.global.response.root.included,'type','productAttributeEyewear'),'id',d.local.id).attributes.frame_eye_size},@{(firstValue,(filterValue,d.global.response.root.included,'type','productAttributeEyewear'),'id',d.local.id).attributes.frame_bridge_size},@{(firstValue,(filterValue,d.global.response.root.included,'type','productAttributeEyewear'),'id',d.local.id).attributes.frame_temple_length},@{(firstValue,(filterValue,d.global.response.root.included,'type','productAttributeEyewear'),'id',d.local.id).attributes.frame_depth},f,FALSE,@{(firstValue,(filterValue,d.global.response.root.included,'type','productAttributeEyewear'),'id',d.local.id).attributes.frame_type},@{(firstValue,(filterValue,d.global.response.root.included,'type','product'),'id',d.local.id).attributes.retailPrice},0,@{(firstValue,(filterValue,d.global.response.root.included,'type','product'),'id',d.local.id).attributes.wholesalePriceTax},@{(firstValue,(filterValue,d.global.response.root.included,'type','product'),'id',d.local.id).attributes.wholesalePrice},@{(firstValue,(filterValue,d.global.response.root.included,'type','product'),'id',d.local.id).attributes.apn}"
+      "getdata": {
+        "type": "transformTerm",
+        "term": "ds => batch(ds.data)"
       },
-      "add-header-csv": {
-        "type": "transform",
-        "batch": [
-          "split2Cols,template",
-          "rename,template1,gnmcode,template2,frame_brand,template3,frame_model,template4,frame_colour,template5,frame_eye_size,template6,frame_bridge_size,template7,frame_temple_length,template8,frame_depth,template9,frame_group,template10,frame_rx,template11,frame_type,template12,retail_price_incl_tax,template13,wholesale_price_excl_tax,template14,wholesale_price_tax,template15,wholesale_price_incl_tax,template16,supplier_barcode",
-          "keep,gnmcode,frame_brand,frame_model,frame_colour,frame_eye_size,frame_bridge_size,frame_temple_length,frame_depth,frame_group,frame_rx,frame_type,retail_price_incl_tax,wholesale_price_excl_tax,wholesale_price_tax,wholesale_price_incl_tax,supplier_barcode"
-       ]
+      "template-getframe": {
+        "type": "mergeTemplate",
+        "templates": {
+          "getframe": "https://stage-api-gnm.actio.com.au:8443/api/product/$id?include=frame,stocks"
+        }
+      },
+      "lookupframe": {
+        "type": "lookup",
+        "behavior": "simple",
+        "dataSource": {
+          "type": "rest",
+          "behavior": "simple",
+          "path": "-",
+          "credential": {
+            "user": "dpipes",
+            "password": "L3tM37n!"
+          },
+          "query": {
+            "read": {
+              "uri": "getframe"
+            }
+          }
+        }
+      },
+      "template-csv": {
+        "type": "mergeTemplate",
+        "templates": {
+          "col": "${lookupframe(0).data.id},${lookupframe(0).data.attributes.brand},${lookupframe(0).included(0).attributes.model},${lookupframe(0).included(0).attributes.colour},${lookupframe(0).included(0).attributes.eye_size},${lookupframe(0).included(0).attributes.bridge_size},${lookupframe(0).included(0).attributes.temple_length},${lookupframe(0).included(0).attributes.depth},f,FALSE,${lookupframe(0).included(0).attributes(\"type\")},${lookupframe(0).data.attributes.retailPrice},0,${lookupframe(0).data.attributes.wholesalePriceTax},${lookupframe(0).data.attributes.wholesalePrice},${lookupframe(0).data.attributes.apn},${lookupframe(0).included(1).attributes.quantity}"
+        }
+      },
+      "getlines": {
+        "type": "transformTerm",
+        "term": "ds => batch(maprecord(ds.*.col))"
       },
       "load-product-csv": {
         "type": "load",
@@ -42,13 +66,14 @@
           "directory": "c://tmp//",
           "type": "file",
           "filenameTemplate": "test.csv",
-          "outputDelimiter": ","
+          "outputDelimiter": ",",
+          "header": "gnmcode,frame_brand,frame_model,frame_colour,frame_eye_size,frame_bridge_size,frame_temple_length,frame_depth,frame_group,frame_rx,frame_type,retail_price_incl_tax ,wholesale_price_excl_tax,wholesale_price_tax,wholesale_price_incl_tax,supplier_barcode,supplier_stock_status"
         }
       }
     },
     "pipelines": {
       "load-product" : {
-        "pipe": "read-product-api | iterate-template | add-header-csv | load-product-csv"
+        "pipe": "read-product-api | getdata | template-getframe | lookupframe | template-csv | getlines| load-product-csv"
       }
     },
     "services": { },

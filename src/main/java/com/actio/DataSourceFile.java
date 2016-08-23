@@ -129,6 +129,11 @@ public class DataSourceFile extends DataSource {
         else
             filenameTemplate = DEFAULT_FILENAME_LABEL;
 
+        if(config.hasPath("header"))
+            header = config.getString("header");
+        else
+            header = "";
+
         // General Init
         generatedFilename = null;
                 /* no op */
@@ -169,7 +174,10 @@ public class DataSourceFile extends DataSource {
     public void write(DataSet data) throws Exception {
         String outFileName = getFilename();
 
-        WriteWorker(outFileName, data, DataSetTableScala$.MODULE$.apply(data).getColumnHeaderStr(), preamble);
+        if(!header.isEmpty())
+            WriteWorker(outFileName, data, header, preamble);
+        else
+            WriteWorker(outFileName, data, DataSetTableScala$.MODULE$.apply(data).getColumnHeaderStr(), preamble);
     }
 
     @Override
@@ -184,7 +192,11 @@ public class DataSourceFile extends DataSource {
 
         String outFileName = generateFilenameByLabel(qualifier);
         logger.info("   DiffOutputFile=" + outFileName);
-        WriteWorker(outFileName, data, DataSetTableScala$.MODULE$.apply(data).getColumnHeaderStr(), preamble);
+
+        if(!header.isEmpty())
+            WriteWorker(outFileName, data, header, preamble);
+        else
+            WriteWorker(outFileName, data, DataSetTableScala$.MODULE$.apply(data).getColumnHeaderStr(), preamble);
 
     }
 

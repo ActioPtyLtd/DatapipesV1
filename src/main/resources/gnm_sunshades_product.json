@@ -27,7 +27,7 @@
       "product-template": {
         "type": "mergeTemplate",
         "templates": {
-          "update-uri": "https://dev-api-gnm.actio.com.au:8443/service/product/SUNSHADES/$stockid",
+          "update-uri": "https://stage-api-gnm.actio.com.au:8443/service/product/SUNSHADES/$stockid",
           "update-body": "{\"alias_id\": \"$stockid\",\"alias_prefix\": \"SUNSHADES\",\"apn\": \"$apn\",\"attributes\": [{\"name\": \"frame_brand\",\"type\": \"string\",\"value\": \"$frame_brand\"},{\"name\": \"frame_bridge_size\",\"type\": \"string\",\"value\": \"$frame_bridge_size\"},{\"name\": \"frame_colour\",\"type\": \"string\",\"value\": \"$frame_colour\"},{\"name\": \"frame_depth\",\"type\": \"string\",\"value\": \"$frame_depth\"},{\"name\": \"frame_eye_size\",\"type\": \"string\",\"value\": \"$frame_eye_size\"},{\"name\": \"frame_gender\",\"type\": \"string\",\"value\": \"$frame_gender\"},{\"name\": \"frame_material\",\"type\": \"string\",\"value\": \"$frame_material\"},{\"name\": \"frame_model\",\"type\": \"string\",\"value\": \"$frame_model\"},{\"name\": \"frame_temple_length\",\"type\": \"string\",\"value\": \"$frame_temple_length\"},{\"name\": \"frame_type\",\"type\": \"string\",\"value\": \"$frame_type\"}],\"description\": \"$description\",\"discontinued\": $discontinued,\"name\": \"$stockid\",\"retail_price\": $retail_price,\"retail_price_tax\": $retail_price_tax,\"type\": \"frame\",\"wholesale_price\": $wholesale_price,\"wholesale_price_tax\": $wholesale_price_tax}"
         }
       },
@@ -43,8 +43,8 @@
           "behavior": "simple",
           "path": "-",
           "credential": {
-            "user": "admin",
-            "password": "password"
+            "user": "dpipes",
+            "password": "L3tM37n!"
           },
           "query": {
             "update": {

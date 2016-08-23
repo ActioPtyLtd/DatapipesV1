@@ -25,7 +25,7 @@ class TaskInclude extends Task {
     val allQueryResults = iterate.map(d => (d, dataSource.executeQueryLabel(d, operation).elems.toList.head)).toList
 
     if (config.hasPath(DPSystemConfigurable.ATTRIBUTE_LABEL)) {
-      dataSet = new DataSetFixedData(dataSet.schema, DataRecord("", List(DataArray(attribute, allQueryResults.map(_._2)), dataSet.elems.toList.head)))
+      dataSet = DataRecord("", List(DataArray(attribute, allQueryResults.map(_._2)), dataSet.elems.toList.head))
     } else {
       dataSet = DataArray("", allQueryResults.map(r => DataRecord("", List(DataRecord("item", r._1.elems.toList), DataRecord("response", List(r._2))))))
     }

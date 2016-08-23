@@ -1,0 +1,54 @@
+{
+  "script": {
+    "schema": {},
+    "tasks": {
+      "read-invoice-dbf": {
+        "type": "extract",
+        "behavior": "",
+        "dataSource": {
+          "type": "file",
+          "behavior": "DBF",
+          "directory": "C:\\Users\\mauri\\bitbucket\\gandm-data\\Sunix\\Hewett Sunix Vision DBF",
+          "filenameTemplate": "VACCOUNT.DBF"
+        }
+      },
+      "template": {
+        "type": "mergeTemplate",
+        "templates": {
+          "create": "insert into invoice (invoiceid, createddate, storeid, employeeid, customerid, totalcost, modified) values ('2088-PH-012-$ACCNUM', '$ACCDATE'::timestamp, '2088-PH-012', '2088-PH-012-$OPTOM', '2088-PH-012-$REFNUM', ${sumValues(SUNGAMT,CONFEE,CLENSAMT,SPECAMT,FRAMEAMT,MISCAMT,MAMOUNT)}, '${convertDateFormat(MODIFIED,\"yyyy-MM-dd HH:mm:ss.S\",\"yyyy-MM-dd HH:mm:ss.S\")}'::timestamp)",
+          "update": "update invoice set createddate='$ACCDATE'::timestamp, employeeid='2088-PH-012-$OPTOM', customerid='2088-PH-012-$REFNUM', totalcost=${sumValues(SUNGAMT,CONFEE,CLENSAMT,SPECAMT,FRAMEAMT,MISCAMT,MAMOUNT)} where invoiceid='2088-PH-012-$ACCNUM'"
+        }
+      },
+      "update-invoice-db": {
+        "type": "datasourceupdate",
+        "behavior": "",
+        "iterateR": "ds => ds",
+        "keyL": "2088-PH-012-${row.ACCNUM}",
+        "keyR": "$invoiceid",
+        "changeL": "${convertDateFormat(row.MODIFIED,\"yyyy-MM-dd HH:mm:ss.S\",\"yyyy-MM-dd HH:mm:ss.S\")}",
+        "changeR": "$modified",
+        "dataSource": {
+          "type": "sql",
+          "behavior": "",
+          "jdbcDriver": "org.postgresql.Driver",
+          "connect": "jdbc:postgresql://localhost/gmdwh?user=postgres&password=postgres",
+          "query": {
+            "queryTemplate": "",
+            "create": "create",
+            "read": "select invoiceid, modified FROM invoice",
+            "update": "update"
+          }
+        }
+      }
+    },
+    "pipelines": {
+      "load-invoice" : {
+        "pipe": "read-invoice-dbf | template | update-invoice-db"
+      }
+    },
+    "services": { },
+    "startup": {
+      "exec": "load-invoice"
+    }
+  }
+}

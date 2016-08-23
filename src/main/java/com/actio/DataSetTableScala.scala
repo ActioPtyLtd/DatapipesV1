@@ -70,7 +70,7 @@ object DataSetTableScala {
     SchemaArray(SchemaRecord(header.map(SchemaString(_,0)).toList)),
     DataArray(rows.map(r => DataRecord((header zip r).map(p => if (p._2 == null) Nothin(p._1) else DataString(p._1, p._2)).toList)).toList))
 
-  def apply(ds: DataSet): DataSetTableScala = new DataSetTableScala(ds.schema, ds.headOption.get)
+  def apply(ds: DataSet): DataSetTableScala = new DataSetTableScala(ds.schema, ds)
 
   def inPredicate[T](list: List[T]) = (i: T) => list.contains(i)
 }

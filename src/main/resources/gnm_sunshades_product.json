@@ -20,30 +20,24 @@
           }
         }
       },
-      "update-product-api": {
-        "type": "include",
-        "behavior": "simple",
-        "foreach": "root.items.*",
-        "dataSource": {
-          "type": "rest",
-          "behavior": "simple",
-          "path": "-",
-          "credential": {
-            "user": "admin",
-            "password": "password"
-          },
-          "query": {
-            "update": {
-              "uri": "https://dev-api-gnm.actio.com.au:8443/service/product/SUNSHADES/@{d.local.stockid}",
-              "body": "{\"alias_id\": \"@{d.local.stockid}\",\"alias_prefix\": \"SUNSHADES\",\"apn\": \"@{d.local.apn}\",\"attributes\": [{\"name\": \"frame_brand\",\"type\": \"string\",\"value\": \"@{(ifNotBlankOrElse,d.local.frame_brand,'-')}\"},{\"name\": \"frame_bridge_size\",\"type\": \"string\",\"value\": \"@{(ifNotBlankOrElse,d.local.frame_bridge_size,'-')}\"},{\"name\": \"frame_colour\",\"type\": \"string\",\"value\": \"@{(ifNotBlankOrElse,d.local.frame_colour,'-')}\"},{\"name\": \"frame_depth\",\"type\": \"string\",\"value\": \"@{(ifNotBlankOrElse,d.local.frame_depth,'-')}\"},{\"name\": \"frame_eye_size\",\"type\": \"string\",\"value\": \"@{(ifNotBlankOrElse,d.local.frame_eye_size,'-')}\"},{\"name\": \"frame_gender\",\"type\": \"string\",\"value\": \"@{(ifNotBlankOrElse,d.local.frame_gender,'-')}\"},{\"name\": \"frame_material\",\"type\": \"string\",\"value\": \"@{(ifNotBlankOrElse,d.local.frame_material,'-')}\"},{\"name\": \"frame_model\",\"type\": \"string\",\"value\": \"@{(ifNotBlankOrElse,d.local.frame_model,'-')}\"},{\"name\": \"frame_temple_length\",\"type\": \"string\",\"value\": \"@{(ifNotBlankOrElse,d.local.frame_temple_length,'-')}\"},{\"name\": \"frame_type\",\"type\": \"string\",\"value\": \"@{(ifNotBlankOrElse,d.local.frame_type,'-')}\"}],\"description\": \"@{d.local.description}\",\"discontinued\": @{d.local.discontinued},\"name\": \"@{d.local.stockid}\",\"retail_price\": @{d.local.retail_price},\"retail_price_tax\": @{d.local.retail_price_tax},\"type\": \"frame\",\"wholesale_price\": @{d.local.wholesale_price},\"wholesale_price_tax\": @{d.local.wholesale_price_tax}}"
-            }
-          }
+      "pick-items": {
+        "type": "transformTerm",
+        "term": "batch(items)"
+      },
+      "product-template": {
+        "type": "mergeTemplate",
+        "templates": {
+          "update-uri": "https://dev-api-gnm.actio.com.au:8443/service/product/SUNSHADES/$stockid",
+          "update-body": "{\"alias_id\": \"$stockid\",\"alias_prefix\": \"SUNSHADES\",\"apn\": \"$apn\",\"attributes\": [{\"name\": \"frame_brand\",\"type\": \"string\",\"value\": \"$frame_brand\"},{\"name\": \"frame_bridge_size\",\"type\": \"string\",\"value\": \"$frame_bridge_size\"},{\"name\": \"frame_colour\",\"type\": \"string\",\"value\": \"$frame_colour\"},{\"name\": \"frame_depth\",\"type\": \"string\",\"value\": \"$frame_depth\"},{\"name\": \"frame_eye_size\",\"type\": \"string\",\"value\": \"$frame_eye_size\"},{\"name\": \"frame_gender\",\"type\": \"string\",\"value\": \"$frame_gender\"},{\"name\": \"frame_material\",\"type\": \"string\",\"value\": \"$frame_material\"},{\"name\": \"frame_model\",\"type\": \"string\",\"value\": \"$frame_model\"},{\"name\": \"frame_temple_length\",\"type\": \"string\",\"value\": \"$frame_temple_length\"},{\"name\": \"frame_type\",\"type\": \"string\",\"value\": \"$frame_type\"}],\"description\": \"$description\",\"discontinued\": $discontinued,\"name\": \"$stockid\",\"retail_price\": $retail_price,\"retail_price_tax\": $retail_price_tax,\"type\": \"frame\",\"wholesale_price\": $wholesale_price,\"wholesale_price_tax\": $wholesale_price_tax}"
         }
       },
-      "update-stock-api": {
-        "type": "include",
-        "behavior": "simple",
-        "foreach": "root.items.*",
+      "iterate": {
+        "type": "transformTerm",
+        "term": "ds => ds"
+      },
+      "update-product-api": {
+        "type": "load",
+        "behavior": "update",
         "dataSource": {
           "type": "rest",
           "behavior": "simple",
@@ -54,8 +48,8 @@
           },
           "query": {
             "update": {
-              "uri": "https://dev-api-gnm.actio.com.au:8443/service/product/SUNSHADES/@{d.local.stockid}/stock",
-              "body": "{\"supplier_id\": \"SUNSHADES\",\"retail_price\": @{d.local.retail_price},\"retail_price_tax\": @{d.local.retail_price_tax},\"alias_prefix\":\"SUNSHADES\",\"alias_id\": \"@{d.local.stockid}\",\"quantity\": @{d.local.supplier_total},\"wholesale_price\": @{d.local.wholesale_price},\"wholesale_price_tax\": @{d.local.wholesale_price_tax}}"
+              "uri": "update-uri",
+              "body": "update-body"
             }
           }
         }
@@ -63,20 +57,12 @@
     },
     "pipelines": {
       "load-frame" : {
-        "pipe": "read-product-api | update-product-api"
-      },
-      "load-stock" : {
-        "pipe": "read-product-api | update-stock-api"
+        "pipe": "read-product-api | pick-items | product-template | iterate | update-product-api"
       }
     },
-    "services": {
-      "name001": {
-        "path": "/a/b/c",
-        "pipe": "p00411"
-      }
-    },
+    "services": { },
     "startup": {
-      "exec": "load-stock"
+      "exec": "load-frame"
     }
   }
 }

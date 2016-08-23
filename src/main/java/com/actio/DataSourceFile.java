@@ -70,13 +70,14 @@ public class DataSourceFile extends DataSource {
         // read the file into memory -- yeah yeah
         ArrayList<String> list = new ArrayList<String>();
 
-
         // execute the sqlquery
         logger.info("ReadFile: " + fname);
-        if(!behaviour.equalsIgnoreCase(READ_JSON_FROM_FILE))
-            dataSet = new DataSetFileStream(new FileInputStream(new File(fname)));
-        else
+	if(behaviour.equals("DBF"))
+            dataSet = new DataSetDBF(new FileInputStream(new File(fname)));        
+	else if(behaviour.equalsIgnoreCase(READ_JSON_FROM_FILE))
             dataSet = Data2Json.fromFileStream2Json2Data(attribute, new FileInputStream(new File(fname)));
+        else
+            dataSet = new DataSetFileStream(new FileInputStream(new File(fname)));
 
         // save the results
 

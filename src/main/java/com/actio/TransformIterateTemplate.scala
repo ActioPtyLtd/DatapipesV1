@@ -12,9 +12,7 @@ class TransformIterateTemplate extends TaskTransform {
       res
     }
     else {
-      new DataSetFixedData(
-        SchemaArray("items", SchemaRecord("row", List(SchemaString("template", 0)))),
-        res)
+      DataRecord("items", List(res))
     }
   }
 

@@ -1,0 +1,75 @@
+{
+  "script": {
+    "schema": {},
+    "tasks": {
+      "read-invoiceitem-dbf": {
+        "type": "extract",
+        "behavior": "",
+        "dataSource": {
+          "type": "file",
+          "behavior": "DBF",
+          "directory": "C:\\Users\\mauri\\bitbucket\\gandm-data\\Sunix\\Hewett Sunix Vision DBF",
+          "filenameTemplate": "VACCITEM.DBF"
+        }
+      },
+      "template-lookup": {
+        "type": "mergeTemplate",
+        "templates": {
+          "lookupinvoice": "select sk from invoice where invoiceid='2088-PH-012-$ACCNUM'",
+          "lookupproduct": "select sk from storeproduct where productid='$CODE'"
+        }
+      },
+      "lookup-product": {
+        "type": "lookup",
+        "behavior": "lookup-merge",
+        "dataSource": {
+          "type": "sql",
+          "jdbcDriver": "org.postgresql.Driver",
+          "connect": "jdbc:postgresql://localhost/gmdwh?user=postgres&password=postgres",
+          "query": {
+            "queryTemplate": "",
+            "read": "lookupinvoice"
+          }
+        }
+      },
+      "template-update": {
+        "type": "mergeTemplate",
+        "templates": {
+          "key": "${array(0)(0).sk},${record.row.IPOS}",
+          "create": "insert into invoiceitem (invoicesk,pos,productsk,storesk,employeesk,serviceemployeesk,customersk,createddate,quantity,cost) values (${array(0)(0).sk},${record.row.IPOS},0,0,0,0,0,'1900-01-01'::timestamp,1,0)",
+          "update": "update invoiceitem set a=a where a=a"
+        }
+      },
+      "update-invoiceitem-db": {
+        "type": "datasourceupdate",
+        "behavior": "",
+        "iterateR": "ds => ds",
+        "keyL": "$key",
+        "keyR": "$invoicesk,$pos",
+        "changeL": "",
+        "changeR": "$productsk,$quantity,$cost",
+        "dataSource": {
+          "type": "sql",
+          "behavior": "",
+          "jdbcDriver": "org.postgresql.Driver",
+          "connect": "jdbc:postgresql://localhost/gmdwh?user=postgres&password=postgres",
+          "query": {
+            "queryTemplate": "",
+            "create": "create",
+            "read": "select invoicesk, pos, productsk, quantity, cost  FROM invoiceitem",
+            "update": "update"
+          }
+        }
+      }
+    },
+    "pipelines": {
+      "load-invoice" : {
+        "pipe": "read-invoiceitem-dbf | template-lookup | lookup-product | template-update | update-invoiceitem-db"
+      }
+    },
+    "services": { },
+    "startup": {
+      "exec": "load-invoice"
+    }
+  }
+}

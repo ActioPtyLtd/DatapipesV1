@@ -1,6 +1,6 @@
 package com.actio
 
-import java.time.LocalDate
+import java.time.{LocalDateTime, LocalDate}
 import java.time.format.DateTimeFormatter
 
 import scala.annotation.tailrec
@@ -28,56 +28,67 @@ object DataSetTransforms {
     * @return           a new DataSet containing the sorted items
     */
   def orderBy(ds: DataSet, property: String, dataType: String, dataFormat: String,  direction: String): DataSet = {
+    orderByRE(ds, property, dataType, dataFormat, direction, 0)
+  }
+
+  def orderByRE(ds: DataSet, property: String, dataType: String, dataFormat: String,  direction: String, level: Int): DataSet = {
     @tailrec
     var dataFormatOption = Option(dataFormat)
+    var orderedSet = ds
     if(dataFormat == "")
       dataFormatOption = None
     val elementCount = ds.elems.length
-    if(elementCount > 1 && ds.elems.forall(x => x.value(property).toOption.isDefined)) {
-      ds match {
-        case DataArray(label, arrayElems) => dataType.toLowerCase() match {
-          case "date" =>
-            if (dataFormatOption.isDefined)
-              DataArray(label, sortByDate(arrayElems, property, dataFormatOption.get, direction))
-            else
-              ds
-          case _ => ds
+    if(elementCount > 1)
+      {
+        if(ds.elems.forall(x => x.value(property).toOption.isDefined)) {
+          orderedSet = ds match {
+            case DataArray(label, arrayElems) => dataType.toLowerCase() match {
+              case "date" =>
+                if (dataFormatOption.isDefined)
+                  DataArray(label, sortByDate(arrayElems, property, dataFormatOption.get, direction))
+                else
+                  ds
+              case _ => ds
+            }
+            case DataRecord(label, elements) => dataType.toLowerCase() match {
+              case "date" =>
+                if (dataFormatOption.isDefined)
+                  DataRecord(label, sortByDate(elements, property, dataFormatOption.get, direction))
+                else
+                  ds
+              case _ => var sortedElements = elements.sortBy(x => x.value(property).stringOption)
+                if (direction.equalsIgnoreCase("desc"))
+                  sortedElements = sortedElements.reverse
+                DataArray(label, sortedElements)
+            }
+            case _ => ds
+          }
         }
-        case DataRecord(label, elements) => dataType.toLowerCase() match {
-          case "date" =>
-            if (dataFormatOption.isDefined)
-              DataRecord(label, sortByDate(elements, property, dataFormatOption.get, direction))
-            else
-              ds
-          case _ => var sortedElements = elements.sortBy(x => x.value(property).stringOption)
-            if(direction.equalsIgnoreCase("desc"))
-              sortedElements = sortedElements.reverse
-            DataArray(label, sortedElements)
-        }
-        case _ => ds
-      }
+        else
+          orderedSet = DataRecord("item", ds.elems.toList)
     }
     else if (elementCount == 1) {
-      if(ds.elems.next().elems.length > 1) {
-        ds match {
-          case DataArray(label, _) => DataArray(label, List[DataSet] {
-            orderBy(ds.elems.next(), property, dataType, dataFormat, direction)
-          })
-          case DataRecord(label, _) => orderBy(ds.elems.next(), property, dataType, dataFormat, direction)
-          case DataSetHttpResponse(label, _, _, _, body) =>  orderBy(body, property, dataType, dataFormat, direction)
-          case x: DataSetFixedData => orderBy(ds.elems.next(), property, dataType, dataFormat, direction)
-          case _ => ds
-        }
-      }
-      else {
-        ds match {
-          case x: DataSetFixedData => orderBy(ds.elems.next(), property, dataType, dataFormat, direction)
-          case _ => ds
+      if(ds.headOption.isDefined) {
+        if (level == 0) {
+          orderedSet = ds match {
+            case DataArray(label, _) => DataArray(label, List[DataSet] {
+              orderByRE(ds.elems.next(), property, dataType, dataFormat, direction, (level + 1))
+            })
+            case DataRecord(label, _) => DataRecord(label, List[DataSet] {
+              orderByRE(ds.elems.next(), property, dataType, dataFormat, direction, (level + 1))
+            })
+            case DataSetHttpResponse(label, _, _, _, body) => DataRecord(label, List[DataSet] {
+              orderByRE(body, property, dataType, dataFormat, direction, (level + 1))
+            })
+            case _ => ds
+          }
         }
       }
     }
+    if (level == 0)
+      DataRecord("orderBy", List[DataSet]{orderedSet})
     else
-      ds
+      orderedSet
   }
 
   def sortByDate(items: List[DataSet], property: String, dateFormat: String, direction: String): List[DataSet] = {
@@ -90,8 +101,22 @@ object DataSetTransforms {
   }
 
   def take(ds: DataSet, numberOfItems: Int): DataSet = {
-    val x = DataArray(ds.elems.take(numberOfItems).toList)
-    x
+    val elementCount = ds.elems.length
+    var takenSet = ds
+    if(elementCount > 1)
+      takenSet = DataArray(ds.label, ds.elems.take(numberOfItems).toList)
+    else if(elementCount == 1 && ds.headOption.isDefined) {
+      takenSet = ds.headOption.get match {
+        case DataArray(label, arrayElems) => DataArray(label, arrayElems.take(numberOfItems))
+        case DataRecord(label, elems) =>
+          if (elems.forall(x => x.label == elems.head.label))
+            DataArray(label, elems.take(numberOfItems))
+          else
+            DataArray("root", List(DataRecord(label, elems.take(numberOfItems))))
+        case _ => DataArray(ds.label, ds.elems.take(numberOfItems).toList)
+      }
+    }
+    DataRecord("take", List[DataSet]{takenSet})
   }
 
   def getDataSetWithHierarchy(ds: DataSet, hierarchyPath:Array[String]): List[DataSet] = {
@@ -139,43 +164,34 @@ object DataSetTransforms {
       val dataSetToInclude = getDataSetWithHierarchy(ds, hierarchy)
       flattenedList = flattenedList.map(x => DataRecord(x.label,x.elems.toList:::dataSetToInclude))
     }
-    DataArray("",flattenedList)
+    DataRecord("flatternedList", List[DataSet](DataArray("item",flattenedList)))
   }
 
   /**
     * Attempts to map the DataSet to DataSetTableScala with custom sub DataSets
+    *
     * @param ds DataSet to map
     * @return   DataSetTableScala
     */
   def mapToDataSetTableScala(ds: DataSet): DataSetTableScala = {
     ds match {
-      case x: DataSetFixedData => x.headOption.get match {
-        case DataSetHttpResponse(_,_,_,_,body) => body.schema match {
-          case SchemaRecord(_,fields) =>
-            if(fields.head.label.isEmpty())
-              DataSetTableScala(SchemaArray("", fields.head),body)
-            else
-              DataSetTableScala(SchemaArray("", body.schema), body)
-          case _ => DataSetTableScala( body.schema, x.headOption.get)
-        }
-        case subDS => subDS.schema match {
-          case SchemaRecord(_, fields) =>
-            if (fields.head.label.isEmpty())
-              DataSetTableScala(SchemaArray("", fields.head), x)
-            else
-              DataSetTableScala(SchemaArray("", subDS.schema), x)
-          case _ => DataSetTableScala(subDS.schema, x.headOption.get)
-        }
+      case DataSetHttpResponse(_,_,_,_,body) => body.schema match {
+        case SchemaRecord(_, fields) =>
+          if (fields.head.label.isEmpty())
+            DataSetTableScala(SchemaArray("", fields.head), body)
+          else
+            DataSetTableScala(SchemaArray("", body.schema), body)
+        case _ => DataSetTableScala(body.schema, ds.headOption.get)
       }
       case DataArray(_,arrayElems) => ds.schema match {
-           case SchemaRecord(_, fields) =>
-            if (fields.head.label.isEmpty())
-              DataSetTableScala(SchemaArray("", fields.head), ds)
-            else
-              DataSetTableScala(SchemaArray("", arrayElems.head.schema), ds)
-           case _ => DataSetTableScala(ds.schema, ds)
+        case SchemaRecord(_, fields) =>
+          if (fields.head.label.isEmpty())
+            DataSetTableScala(SchemaArray("", fields.head), ds)
+          else
+            DataSetTableScala(SchemaArray("", arrayElems.head.schema), ds)
+        case _ => DataSetTableScala(ds.schema, ds)
       }
-      case DataRecord(_, fields) => DataSetTableScala(SchemaArray("",ds.schema), ds)
+      case DataRecord(_, fields) => DataSetTableScala(SchemaArray("",ds.headOption.get.schema), ds)
       case _ => DataSetTableScala(SchemaArray("",ds.schema), ds)//DataSetTableScala(ds)
     }
 
@@ -198,6 +214,20 @@ object DataSetTransforms {
   def isBlank(ds: DataSet) = DataBoolean(ds.stringOption.exists(_.isEmpty))
 
   def quoteOption(ds: DataSet) = ds.stringOption.map(s => if (s.isEmpty) DataString("null") else DataString("\"" + s + "\"")).getOrElse(DataString("null"))
+
+  // single quote escape
+  def sq(str: String): DataSet = if(str == null) DataString("") else DataString(str.replace("'","''"))
+
+  def numeric(value: String): DataSet = DataNumeric(Try(BigDecimal(value)).getOrElse(BigDecimal(0)))
+
+  def round(value: String, scale: Int): DataSet = DataNumeric(Try(BigDecimal(value).setScale(scale, BigDecimal.RoundingMode.HALF_UP)).getOrElse(BigDecimal(0)))
+
+  def removeTrailingZeros(value: String): DataSet = DataNumeric(Try(BigDecimal(value).setScale(2, BigDecimal.RoundingMode.HALF_UP)).getOrElse(BigDecimal(0)).underlying().stripTrailingZeros())
+
+  def batch(ds: DataSet): DataSet = DataRecord("", List(ds))
+
+  def sumValues(ls: List[DataSet]) = DataNumeric(ls.foldLeft(BigDecimal(0))((d,l) => d + Try(BigDecimal(l.stringOption.getOrElse("0"))).getOrElse(BigDecimal(0))))
+
 
   /* below will need to be replaced when I have time */
 
@@ -274,6 +304,8 @@ object DataSetTransforms {
     res
   }
 
+  /*
+
   def numeric(batch: Batch, field: String, precision: Int, scale: Int): DataSet = batch match {
     case (s, DataRecord(key, fs)) =>
       new DataSetFixedData(s, if (fs.map(_.label).contains(field))
@@ -302,7 +334,7 @@ object DataSetTransforms {
     case (s, DataArray(key, a)) =>
       new DataSetFixedData(s, DataArray(key, a.map(m => bool((s, m), field).headOption.get)))
     case (s, d) => new DataSetFixedData(s, d)
-  }
+  } */
 
   def delim(str: String, d: DataSet) = DataString(d.elems.map(_.stringOption.getOrElse("")).mkString(str))
 
@@ -391,10 +423,13 @@ object DataSetTransforms {
 
   def convDateValue(value: String, in: String, out: String) =
     try {
-      LocalDate.parse(value, DateTimeFormatter.ofPattern(in)).format(DateTimeFormatter.ofPattern(out))
+      if(value.contains(":"))
+        LocalDateTime.parse(value, DateTimeFormatter.ofPattern(in)).format(DateTimeFormatter.ofPattern(out))
+      else
+        LocalDate.parse(value, DateTimeFormatter.ofPattern(in)).format(DateTimeFormatter.ofPattern(out))
     }
     catch {
-      case _: Exception => "1900-01-01"
+      case _: Exception => "1900-01-01 00:00:00.0"
     }
 
   def defaultIfBlank(ds: DataSetTableScala, cols: List[String], default: String) = cols.foldLeft(ds)((d, c) => valueFunc(d, c, defaultIfBlankValue(_, default)))

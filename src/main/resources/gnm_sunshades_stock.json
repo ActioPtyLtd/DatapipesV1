@@ -27,7 +27,7 @@
       "stock-template": {
         "type": "mergeTemplate",
         "templates": {
-          "update-uri": "https://dev-api-gnm.actio.com.au:8443/service/product/SUNSHADES/$stockid/stock",
+          "update-uri": "https://stage-api-gnm.actio.com.au:8443/service/product/SUNSHADES/$stockid/stock",
           "update-body": "{\"supplier_id\": \"SUNSHADES\",\"retail_price\": $retail_price,\"retail_price_tax\": $retail_price_tax,\"alias_prefix\":\"SUNSHADES\",\"alias_id\": \"$stockid\",\"quantity\": $supplier_total,\"wholesale_price\": $wholesale_price,\"wholesale_price_tax\": $wholesale_price_tax}"
         }
       },
@@ -43,8 +43,8 @@
           "behavior": "simple",
           "path": "-",
           "credential": {
-            "user": "admin",
-            "password": "password"
+            "user": "dpipes",
+            "password": "L3tM37n!"
           },
           "query": {
             "update": {

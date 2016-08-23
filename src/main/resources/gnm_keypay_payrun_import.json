@@ -944,7 +944,7 @@
 			},
 			"lookup-parent-location": {
 				"type": "lookup",
-				"behavior": "lookup-merge",
+				"behavior": "legacy-lookup-merge",
 				"dataSource": {
 					"type": "sql",
 					"jdbcDriver": "org.postgresql.Driver",
@@ -957,7 +957,7 @@
 			},
 			"lookup-employmenttype": {
 				"type": "lookup",
-				"behavior": "lookup-merge",
+				"behavior": "legacy-lookup-merge",
 				"dataSource": {
 					"type": "sql",
 					"jdbcDriver": "org.postgresql.Driver",
@@ -970,7 +970,7 @@
 			},
 			"lookup-primary-location": {
 				"type": "lookup",
-				"behavior": "lookup-merge",
+				"behavior": "legacy-lookup-merge",
 				"dataSource": {
 					"type": "sql",
 					"jdbcDriver": "org.postgresql.Driver",
@@ -983,7 +983,7 @@
 			},
 			"lookup-payrun-dim": {
 				"type": "lookup",
-				"behavior": "lookup-merge",
+				"behavior": "legacy-lookup-merge",
 				"dataSource": {
 					"type": "sql",
 					"jdbcDriver": "org.postgresql.Driver",
@@ -996,7 +996,7 @@
 			},
 			"lookup-employee-dim": {
 				"type": "lookup",
-				"behavior": "lookup-merge",
+				"behavior": "legacy-lookup-merge",
 				"dataSource": {
 					"type": "sql",
 					"jdbcDriver": "org.postgresql.Driver",
@@ -1009,7 +1009,7 @@
 			},
 			"lookup-paycategory-dim": {
 				"type": "lookup",
-				"behavior": "lookup-merge",
+				"behavior": "legacy-lookup-merge",
 				"dataSource": {
 					"type": "sql",
 					"jdbcDriver": "org.postgresql.Driver",
@@ -1022,7 +1022,7 @@
 			},
 			"lookup-location-dim": {
 				"type": "lookup",
-				"behavior": "lookup-merge",
+				"behavior": "legacy-lookup-merge",
 				"dataSource": {
 					"type": "sql",
 					"jdbcDriver": "org.postgresql.Driver",
@@ -1035,7 +1035,7 @@
 			},
 			"lookup-deductioncategory-dim": {
 				"type": "lookup",
-				"behavior": "lookup-merge",
+				"behavior": "legacy-lookup-merge",
 				"dataSource": {
 					"type": "sql",
 					"jdbcDriver": "org.postgresql.Driver",
@@ -1048,7 +1048,7 @@
 			},
 			"lookup-employeeexpensecategory-dim": {
 				"type": "lookup",
-				"behavior": "lookup-merge",
+				"behavior": "legacy-lookup-merge",
 				"dataSource": {
 					"type": "sql",
 					"jdbcDriver": "org.postgresql.Driver",
@@ -1061,7 +1061,7 @@
 			},
 			"lookup-employerliabilitycategory-dim": {
 				"type": "lookup",
-				"behavior": "lookup-merge",
+				"behavior": "legacy-lookup-merge",
 				"dataSource": {
 					"type": "sql",
 					"jdbcDriver": "org.postgresql.Driver",

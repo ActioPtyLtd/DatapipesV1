@@ -15,11 +15,11 @@
       "template-lookup": {
         "type": "mergeTemplate",
         "templates": {
-          "lookupinvoice": "select sk from invoice where invoiceid='2088-PH-012-$ACCNUM'",
-          "lookupproduct": "select sk from storeproduct where productid='$CODE'"
+          "lookupinvoice": "select sk,createddate,storesk,employeesk,customersk from invoice where invoiceid='2088-PH-012-$ACCNUM'",
+          "lookupproduct": "select sk from storeproduct where productid='2088-PH-012-$CODE'"
         }
       },
-      "lookup-product": {
+      "lookupinvoicekey": {
         "type": "lookup",
         "behavior": "lookup-merge",
         "dataSource": {
@@ -32,12 +32,26 @@
           }
         }
       },
+      "lookupproductkey": {
+        "type": "lookup",
+        "behavior": "lookup-merge",
+        "dataSource": {
+          "type": "sql",
+          "jdbcDriver": "org.postgresql.Driver",
+          "connect": "jdbc:postgresql://localhost/gmdwh?user=postgres&password=postgres",
+          "query": {
+            "queryTemplate": "",
+            "read": "lookupproduct"
+          }
+        }
+      },
       "template-update": {
         "type": "mergeTemplate",
         "templates": {
-          "key": "${array(0)(0).sk},${record.row.IPOS}",
-          "create": "insert into invoiceitem (invoicesk,pos,productsk,storesk,employeesk,serviceemployeesk,customersk,createddate,quantity,cost) values (${array(0)(0).sk},${record.row.IPOS},0,0,0,0,0,'1900-01-01'::timestamp,1,0)",
-          "update": "update invoiceitem set a=a where a=a"
+          "key": "${numeric(lookupinvoicekey(0)(0).sk)},${row.IPOS}",
+          "changeL": "${numeric(lookupproductkey(0)(0).sk)},${row.QTY},${row.ITEMAMT}",
+          "create": "insert into invoiceitem (invoicesk,pos,productsk,storesk,employeesk,serviceemployeesk,customersk,createddate,quantity,cost) values (${numeric(lookupinvoicekey(0)(0).sk)},${row.IPOS},${numeric(lookupproductkey(0)(0).sk)},${numeric(lookupinvoicekey(0)(0).storesk)},${numeric(lookupinvoicekey(0)(0).employeesk)},${numeric(lookupinvoicekey(0)(0).employeesk)},${numeric(lookupinvoicekey(0)(0).customersk)},'${orElse(lookupinvoicekey(0)(0).createddate,\"1900-01-01\")}'::timestamp,${row.QTY},${row.ITEMAMT})",
+          "update": "update invoiceitem set productsk=${numeric(lookupproductkey(0)(0).sk)},quantity=${row.QTY},cost=${row.ITEMAMT} where invoicesk=numeric(lookupproductkey(0)(0).sk)} and pos=${row.IPOS}"
         }
       },
       "update-invoiceitem-db": {
@@ -46,7 +60,7 @@
         "iterateR": "ds => ds",
         "keyL": "$key",
         "keyR": "$invoicesk,$pos",
-        "changeL": "",
+        "changeL": "$changeL",
         "changeR": "$productsk,$quantity,$cost",
         "dataSource": {
           "type": "sql",
@@ -64,7 +78,7 @@
     },
     "pipelines": {
       "load-invoice" : {
-        "pipe": "read-invoiceitem-dbf | template-lookup | lookup-product | template-update | update-invoiceitem-db"
+        "pipe": "read-invoiceitem-dbf | template-lookup | lookupinvoicekey | lookupproductkey | template-update | update-invoiceitem-db"
       }
     },
     "services": { },

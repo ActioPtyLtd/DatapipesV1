@@ -25,6 +25,7 @@ public class DataSourceFile extends DataSource {
     private String generatedFilename;
     private String prefixDiffFile;
     private String filenameTemplate;
+    private String readStrategy;
 
     private String getCompiledFilename() throws Exception {
 
@@ -46,6 +47,7 @@ public class DataSourceFile extends DataSource {
     protected String preamble;
     protected String header;
     private String behaviour;
+    private String attribute;
 
     public void resetFilename() {
         generatedFilename = null;
@@ -68,12 +70,12 @@ public class DataSourceFile extends DataSource {
         // read the file into memory -- yeah yeah
         ArrayList<String> list = new ArrayList<String>();
 
-
         // execute the sqlquery
         logger.info("ReadFile: " + fname);
-
-        if(behaviour.equals("DBF"))
-            dataSet = new DataSetDBF(new FileInputStream(new File(fname)));
+	if(behaviour.equals("DBF"))
+            dataSet = new DataSetDBF(new FileInputStream(new File(fname)));        
+	else if(behaviour.equalsIgnoreCase(READ_JSON_FROM_FILE))
+            dataSet = Data2Json.fromFileStream2Json2Data(attribute, new FileInputStream(new File(fname)));
         else
             dataSet = new DataSetFileStream(new FileInputStream(new File(fname)));
 
@@ -128,6 +130,11 @@ public class DataSourceFile extends DataSource {
             filenameTemplate = config.getString(FILENAME_TEMPLATE_LABEL);
         else
             filenameTemplate = DEFAULT_FILENAME_LABEL;
+
+        if(config.hasPath(ATTRIBUTE_LABEL))
+            attribute = config.getString(ATTRIBUTE_LABEL);
+        else
+            attribute = "";
 
         // General Init
         generatedFilename = null;

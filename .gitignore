@@ -54,3 +54,6 @@ log*.txt
 project/project/
 src/main/scala-2.11/
 src/test/
+/dist/
+.idea/modules/
+

@@ -108,7 +108,11 @@ public class TaskLoad extends Task {
             ProcessAllDiffs(); }
         else if(behaviour.equals("update")) {
                 destination.update(getDataSet());
-        } else
+        }
+        else if(behaviour.equals("delete")) {
+            destination.delete(getDataSet());
+        }
+        else
             BasicQueryWrite();
     }
 

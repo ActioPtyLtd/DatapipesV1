@@ -5,7 +5,7 @@ package com.actio
   */
 sealed abstract class SchemaDefinition extends LinkedTree[SchemaDefinition]
 {
-  def apply(field: String): SchemaDefinition = SchemaUnknown
+  def apply(field: String): SchemaDefinition = SchemaUnknown(field)
 
   def value(keys: List[String]): SchemaDefinition =  keys match {
     case Nil => this
@@ -48,6 +48,7 @@ case class SchemaNumber(label: String, precision: Int, scale: Int) extends Schem
 case class SchemaString(label: String, maxLength: Int) extends SchemaDefinition
 case class SchemaDate(label: String, format: String) extends SchemaDefinition
 case class SchemaBoolean(label: String) extends SchemaDefinition
+case class SchemaUnknown(label: String) extends SchemaDefinition
 
 case object SchemaUnknown extends SchemaDefinition {
   def label = ""

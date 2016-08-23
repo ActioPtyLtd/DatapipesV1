@@ -14,7 +14,7 @@ object Cache {
 }
 
 class TaskDataSourceUpdate extends Task {
-
+  Cache.dim = None
   override def execute(): Unit = {
     super.setConfig(sysconf.getTaskConfig(this.node.getName).toConfig, sysconf.getMasterConfig)
 
@@ -46,14 +46,14 @@ class TaskDataSourceUpdate extends Task {
     //TODO: can refactor to load (insert and/or update) these in the next task
 
     if (inserts.nonEmpty && config.getConfig(DPSystemConfigurable.DATASOURCE_LABEL).hasPath("query.create")) {
-      dataSource.execute(DataArray("", inserts.map(_._1)), "create")
+      dataSource.execute(DataArray("", inserts.map(_._1)), config.getConfig(DPSystemConfigurable.DATASOURCE_LABEL).getString("query.create"))
 
       // update the dimension cache, so this isn't repeated again
       Cache.dim.get ++= inserts.map(m => (m._2, m._3))
     }
 
     if (updates.nonEmpty && config.getConfig(DPSystemConfigurable.DATASOURCE_LABEL).hasPath("query.update")) {
-      dataSource.execute(DataArray("", updates.map(_._1)), "update")
+      dataSource.execute(DataArray("", updates.map(_._1)), config.getConfig(DPSystemConfigurable.DATASOURCE_LABEL).getString("query.update"))
 
       // update the dimension cache, so this isn't repeated again
       Cache.dim.get ++= updates.map(m => (m._2, m._3))

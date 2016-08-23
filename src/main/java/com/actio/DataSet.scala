@@ -26,8 +26,11 @@ abstract class DataSet extends LinkedTree[DataSet]{
 
 }
 
-case class Nothin(val label: String) extends DataSet
+case class Nothin(val label: String) extends DataSet {
+  override def schema: SchemaDefinition = SchemaUnknown(label)
+}
 
 object Nothin {
   def apply(): DataSet = Nothin("")
+
 }

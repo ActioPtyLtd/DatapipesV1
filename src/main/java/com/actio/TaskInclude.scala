@@ -11,7 +11,7 @@ import scala.collection.Iterator
 class TaskInclude extends Task {
 
   lazy val forEach = config.getString("foreach")
-  lazy val attribute = config.getString("attribute")
+  lazy val attribute = config.getString(DPSystemConfigurable.ATTRIBUTE_LABEL)
 
   override def execute(): Unit = {
 
@@ -24,7 +24,7 @@ class TaskInclude extends Task {
 
     val allQueryResults = iterate.map(d => (d, dataSource.executeQueryLabel(d, operation).elems.toList.head)).toList
 
-    if (config.hasPath("attribute")) {
+    if (config.hasPath(DPSystemConfigurable.ATTRIBUTE_LABEL)) {
       dataSet = DataRecord("", List(DataArray(attribute, allQueryResults.map(_._2)), dataSet.elems.toList.head))
     } else {
       dataSet = DataArray("", allQueryResults.map(r => DataRecord("", List(DataRecord("item", r._1.elems.toList), DataRecord("response", List(r._2))))))

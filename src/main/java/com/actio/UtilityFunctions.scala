@@ -44,7 +44,12 @@ object UtilityFunctions extends Logging {
         case Nil => result.reverse
         case h :: t =>
           if (h.getType == classOf[Int]) {
-            getParamValues(t, pv.tail, pv.head.toString.toInt :: result)
+            if(pv.head.isInstanceOf[DataNumeric]) {
+              getParamValues(t, pv.tail, pv.head.asInstanceOf[DataNumeric].num.toInt :: result)
+            }
+            else {
+              getParamValues(t, pv.tail, pv.head.toString.toInt :: result)
+            }
           } else if (h.getType == classOf[DataSetTableScala] && pv.head.isInstanceOf[DataSetTableScala]) {
             getParamValues(t, pv.tail, pv.head :: result)
           } else if (h.getType == classOf[DataSetTableScala]) {

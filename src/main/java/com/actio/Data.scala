@@ -1,5 +1,6 @@
 package com.actio
 
+import java.io.InputStream
 import java.text.SimpleDateFormat
 
 import org.json4s._
@@ -122,11 +123,13 @@ object Data2Json {
       case (jDecimal: JDecimal) => DataNumeric(label, jDecimal.num)
       case (jDouble: JDouble) => DataNumeric(label, jDouble.num)
       case (jb: JBool) => DataBoolean(label, jb.value)
-      case (ja: JArray) => DataArray(label, ja.arr.map(a => fromJson4s2Data("", a)).toList)
+      case (ja: JArray) => DataArray(label, ja.arr.map(a => fromJson4s2Data("item", a)).toList)
       case (jo: JObject) => DataRecord(label, jo.obj.map(o => fromJson4s2Data(o._1, o._2)).toList)
       case _ => Nothin(label)
     }
 
   def fromJson2Data(string: String): DataSet = fromJson4s2Data("", parse(string))
+
+  def fromFileStream2Json2Data(label:String, inputStream:InputStream): DataSet = DataRecord("fileContent", List(DataRecord(label,fromJson4s2Data("record", parse(inputStream)).elems.toList)))
 }
 

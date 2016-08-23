@@ -1,0 +1,1180 @@
+{
+	"script": {
+		"schema": {
+			
+		},
+		"tasks": {
+			"load-payruns": {
+				"type": "extract",
+				"behavior": "simple",
+				"dataSource": {
+					"type": "rest",
+					"behavior": "simple",
+					"path": "-",
+					"credential": {
+						"user": "WmFXcGs0dVJsU3VUS0dCcXJsVmIxdz09",
+						"password": ""
+					},
+					"query": {
+						"read": {
+							"uri": "https://gandm.yourpayroll.com.au/api/v2/business/24195/payrun"
+						}
+					}
+				}
+			},
+			"load-locations": {
+				"type": "extract",
+				"behavior": "simple",
+				"dataSource": {
+					"type": "rest",
+					"behavior": "simple",
+					"path": "-",
+					"credential": {
+						"user": "WmFXcGs0dVJsU3VUS0dCcXJsVmIxdz09",
+						"password": ""
+					},
+					"query": {
+						"read": {
+							"uri": "https://gandm.yourpayroll.com.au/api/v2/business/24195/location"
+						}
+					}
+				}
+			},
+			"load-deductioncategories": {
+				"type": "extract",
+				"behavior": "simple",
+				"dataSource": {
+					"type": "rest",
+					"behavior": "simple",
+					"path": "-",
+					"credential": {
+						"user": "WmFXcGs0dVJsU3VUS0dCcXJsVmIxdz09",
+						"password": ""
+					},
+					"query": {
+						"read": {
+							"uri": "https://gandm.yourpayroll.com.au/api/v2/business/24195/deductioncategory"
+						}
+					}
+				}
+			},
+			"load-employeeexpensecategories": {
+				"type": "extract",
+				"behavior": "simple",
+				"dataSource": {
+					"type": "rest",
+					"behavior": "simple",
+					"path": "-",
+					"credential": {
+						"user": "WmFXcGs0dVJsU3VUS0dCcXJsVmIxdz09",
+						"password": ""
+					},
+					"query": {
+						"read": {
+							"uri": "https://gandm.yourpayroll.com.au/api/v2/business/24195/employeeexpensecategory"
+						}
+					}
+				}
+			},
+			"load-employerliabilitycategories": {
+				"type": "extract",
+				"behavior": "simple",
+				"dataSource": {
+					"type": "rest",
+					"behavior": "simple",
+					"path": "-",
+					"credential": {
+						"user": "WmFXcGs0dVJsU3VUS0dCcXJsVmIxdz09",
+						"password": ""
+					},
+					"query": {
+						"read": {
+							"uri": "https://gandm.yourpayroll.com.au/api/v2/business/24195/employerliabilitycategory"
+						}
+					}
+				}
+			},
+			"load-paycategories": {
+				"type": "extract",
+				"behavior": "simple",
+				"dataSource": {
+					"type": "rest",
+					"behavior": "simple",
+					"path": "-",
+					"credential": {
+						"user": "WmFXcGs0dVJsU3VUS0dCcXJsVmIxdz09",
+						"password": ""
+					},
+					"query": {
+						"read": {
+							"uri": "https://gandm.yourpayroll.com.au/api/v2/business/24195/paycategory"
+						}
+					}
+				}
+			},
+			"load-employees": {
+				"type": "extract",
+				"behavior": "simple",
+				"dataSource": {
+					"type": "rest",
+					"behavior": "simple",
+					"path": "-",
+					"credential": {
+						"user": "WmFXcGs0dVJsU3VUS0dCcXJsVmIxdz09",
+						"password": ""
+					},
+					"query": {
+						"read": {
+							"uri": "https://gandm.yourpayroll.com.au/api/v2/business/24195/employee/unstructured"
+						}
+					}
+				}
+			},
+			"load-employmenttypes": {
+				"type": "extract",
+				"behavior": "simple",
+				"dataSource": {
+					"type": "rest",
+					"behavior": "simple",
+					"path": "-",
+					"credential": {
+						"user": "WmFXcGs0dVJsU3VUS0dCcXJsVmIxdz09",
+						"password": ""
+					},
+					"query": {
+						"read": {
+							"uri": "https://gandm.yourpayroll.com.au/api/v2/business/24195/employee/unstructured?$select=EmploymentType"
+						}
+					}
+				}
+			},
+			"get-last-payrun": {
+				"type": "transform",
+				"batch": ["orderBy, dateFinalised, date, yyyy-MM-dd'T'HH:mm:ss, desc",
+				"take, 2"]
+			},
+			"flatten-payrun-earninglines-payrun": {
+				"type": "transform",
+				"batch": ["flattenStructure, earninglines.root.earningsLines._.*, +earninglines.root.payRunId"]
+			},
+			"flatten-payrun-employerliabilities-payrun": {
+				"type": "transform",
+				"batch": ["flattenStructure, employerliabilities.root.employerLiabilities._.*, +employerliabilities.root.payRunId"]
+			},
+			"flatten-payrun-deductions-payrun": {
+				"type": "transform",
+				"batch": ["flattenStructure, deductions.root.deductions._.*, +deductions.root.payRunId"]
+			},
+			"flatten-payrun-employeeexpenses-payrun": {
+				"type": "transform",
+				"batch": ["flattenStructure, employeeexpenses.root.employeeExpenses._.*, +employeeexpenses.root.payRunId"]
+			},
+			"flatten-payrun-superadjustments-payrun": {
+				"type": "transform",
+				"batch": ["flattenStructure, superadjustments.root.superAdjustments._.*, +superadjustments.root.payRunId"]
+			},
+			"flatten-payrun-paygadjustments-payrun": {
+				"type": "transform",
+				"batch": ["flattenStructure, paygadjustments.root.paygAdjustments._.*, +paygadjustments.root.payRunId"]
+			},
+			"delete-payrunemployeeexpenses-for-payrun-template": {
+				"type": "mergeTemplate",
+				"templates": {
+					"delete": "delete from fact_payrunemployeeexpenses where payrun_sk=${array(0)(0).payrun_sk}::bigint"
+				}
+			},
+			"delete-payrunemployeeexpenses-for-payrun": {
+				"type": "load",
+				"behavior": "delete",
+				"dataSource": {
+					"type": "sql",
+					"behavior": "",
+					"jdbcDriver": "org.postgresql.Driver",
+					"connect": "jdbc:postgresql://localhost/payrolldev?user=payroll&password=payroll",
+					"query": {
+						"delete": "delete"
+					}
+				}
+			},
+			"delete-payrunearninglines-for-payrun-template": {
+				"type": "mergeTemplate",
+				"templates": {
+					"delete": "delete from fact_payrunearninglines where payrun_sk=${array(0)(0).payrun_sk}::bigint"
+				}
+			},
+			"delete-payrunearninglines-for-payrun": {
+				"type": "load",
+				"behavior": "delete",
+				"dataSource": {
+					"type": "sql",
+					"behavior": "",
+					"jdbcDriver": "org.postgresql.Driver",
+					"connect": "jdbc:postgresql://localhost/payrolldev?user=payroll&password=payroll",
+					"query": {
+						"delete": "delete"
+					}
+				}
+			},
+			"delete-payrundeductions-for-payrun-template": {
+				"type": "mergeTemplate",
+				"templates": {
+					"delete": "delete from fact_payrundeductions where payrun_sk=${array(0)(0).payrun_sk}::bigint"
+				}
+			},
+			"delete-payrundeductions-for-payrun": {
+				"type": "load",
+				"behavior": "delete",
+				"dataSource": {
+					"type": "sql",
+					"behavior": "",
+					"jdbcDriver": "org.postgresql.Driver",
+					"connect": "jdbc:postgresql://localhost/payrolldev?user=payroll&password=payroll",
+					"query": {
+						"delete": "delete"
+					}
+				}
+			},
+			"delete-payrunpaygadjustments-for-payrun-template": {
+				"type": "mergeTemplate",
+				"templates": {
+					"delete": "delete from fact_payrunpaygadjustments where payrun_sk=${array(0)(0).payrun_sk}::bigint"
+				}
+			},
+			"delete-payrunpaygadjustments-for-payrun": {
+				"type": "load",
+				"behavior": "delete",
+				"dataSource": {
+					"type": "sql",
+					"behavior": "",
+					"jdbcDriver": "org.postgresql.Driver",
+					"connect": "jdbc:postgresql://localhost/payrolldev?user=payroll&password=payroll",
+					"query": {
+						"delete": "delete"
+					}
+				}
+			},
+			"delete-payrunsuperadjustments-for-payrun-template": {
+				"type": "mergeTemplate",
+				"templates": {
+					"delete": "delete from fact_payrunsuperadjustments where payrun_sk=${array(0)(0).payrun_sk}::bigint"
+				}
+			},
+			"delete-payrunsuperadjustments-for-payrun": {
+				"type": "load",
+				"behavior": "delete",
+				"dataSource": {
+					"type": "sql",
+					"behavior": "",
+					"jdbcDriver": "org.postgresql.Driver",
+					"connect": "jdbc:postgresql://localhost/payrolldev?user=payroll&password=payroll",
+					"query": {
+						"delete": "delete"
+					}
+				}
+			},
+			"delete-payrunemployerliabilities-for-payrun-template": {
+				"type": "mergeTemplate",
+				"templates": {
+					"delete": "delete from fact_payrunemployerliabilities where payrun_sk=${array(0)(0).payrun_sk}::bigint"
+				}
+			},
+			"delete-payrunemployerliabilities-for-payrun": {
+				"type": "load",
+				"behavior": "delete",
+				"dataSource": {
+					"type": "sql",
+					"behavior": "",
+					"jdbcDriver": "org.postgresql.Driver",
+					"connect": "jdbc:postgresql://localhost/payrolldev?user=payroll&password=payroll",
+					"query": {
+						"delete": "delete"
+					}
+				}
+			},
+			"payrun-template": {
+				"type": "mergeTemplate",
+				"templates": {
+					"create": "insert into dim_payrun (externalref, datefinalised, payscheduleid, payperiodstarting, payperiodending, datepaid, isfinalised) values ($id::int,'$dateFinalised'::date,$payScheduleId::int,'$payPeriodStarting'::date,'$payPeriodEnding'::date,'$datePaid'::date,$isFinalised::bool)",
+					"update": "update dim_payrun set datefinalised='$dateFinalised'::date, payscheduleid=$payScheduleId::int, payperiodstarting='$payPeriodStarting'::date, payperiodending='$payPeriodEnding'::date, datepaid='$datePaid'::date, isfinalised=$isFinalised::bool where externalref = $id::int"
+				}
+			},
+			"update-payrun-db-with-template": {
+				"type": "datasourceupdate",
+				"behavior": "",
+				"iterateR": "ds => ds",
+				"keyL": "${item.id}",
+				"keyR": "$externalref",
+				"changeL": "${item.isFinalised}",
+				"changeR": "$isfinalised",
+				"dataSource": {
+					"type": "sql",
+					"behavior": "",
+					"jdbcDriver": "org.postgresql.Driver",
+					"connect": "jdbc:postgresql://localhost/payrolldev?user=payroll&password=payroll",
+					"query": {
+						"queryTemplate": "",
+						"create": "create",
+						"read": "select * from dim_payrun",
+						"update": "update"
+					}
+				}
+			},
+			"location-template": {
+				"type": "mergeTemplate",
+				"templates": {
+					"create": "insert into dim_location (externalref, externalparentref, label, fullyqualifiedlabel) values ($id::int, NullIF('$parentId','')::int, '$name', '$fullyQualifiedName')",
+					"update": "update dim_location set externalparentref=NullIF('$parentId','')::int, label='$name', fullyqualifiedlabel='$fullyQualifiedName' where externalref = $id::int"
+				}
+			},
+			"update-location-db-with-template": {
+				"type": "datasourceupdate",
+				"behavior": "",
+				"iterateR": "ds => ds",
+				"keyL": "${item.id}",
+				"keyR": "$externalref",
+				"changeL": "${item.name},${item.fullyQualifiedName}",
+				"changeR": "$label,$fullyqualifiedlabel",
+				"dataSource": {
+					"type": "sql",
+					"behavior": "",
+					"jdbcDriver": "org.postgresql.Driver",
+					"connect": "jdbc:postgresql://localhost/payrolldev?user=payroll&password=payroll",
+					"query": {
+						"queryTemplate": "",
+						"create": "create",
+						"read": "select * from dim_location",
+						"update": "update"
+					}
+				}
+			},
+			"location-parent-template": {
+				"type": "mergeTemplate",
+				"templates": {
+					"create": "",
+					"update": "update dim_location set parent_sk=NullIF('${array(0)(0).parent_sk}','')::int where sk = ${record.row.sk}"
+				}
+			},
+			"update-parent-location-db-with-template": {
+				"type": "datasourceupdate",
+				"behavior": "",
+				"iterateR": "ds => ds",
+				"keyL": "${record.record.row.sk}",
+				"keyR": "$sk",
+				"changeL": "${record.array(0)(0).parent_sk}",
+				"changeR": "$parent_sk",
+				"dataSource": {
+					"type": "sql",
+					"behavior": "",
+					"jdbcDriver": "org.postgresql.Driver",
+					"connect": "jdbc:postgresql://localhost/payrolldev?user=payroll&password=payroll",
+					"query": {
+						"queryTemplate": "",
+						"create": "update",
+						"read": "select * from dim_location",
+						"update": "update"
+					}
+				}
+			},
+			"paycategory-template": {
+				"type": "mergeTemplate",
+				"templates": {
+					"create": "insert into dim_paycategory (externalref, label, rateunit, accruesleave, defaultsuperrate, rateloadingpercent, penaltyloadingpercent, istaxexempt, ispayrolltaxexempt, externalid, source, externalparentref, generalledgermappingcode, paymentsummaryclassification) values ($id::int, '${sq(name)}', '$rateUnit', '$accruesLeave'::bool, $defaultSuperRate::numeric, $rateLoadingPercent::numeric, $penaltyLoadingPercent::numeric, $isTaxExempt::bool, $isPayrollTaxExempt::bool, NullIf('$externalId','')::int, '$source', NullIF('$parentId','')::int, NullIf('$generalLedgerMappingCode',''), '$paymentSummaryClassification')",
+					"update": "update dim_paycategory set label='${sq(name)}', rateunit='$rateUnit', accruesleave='$accruesLeave'::bool, defaultsuperrate=$defaultSuperRate::numeric, rateloadingpercent=$rateLoadingPercent::numeric, penaltyloadingpercent=$penaltyLoadingPercent::numeric, istaxexempt=$isTaxExempt::bool, ispayrolltaxexempt=$isPayrollTaxExempt::bool, externalid=NullIf('$externalId','')::int, source='$source', externalparentref=NullIF('$parentId','')::int, generalledgermappingcode=NullIf('$generalLedgerMappingCode',''), paymentsummaryclassification='$paymentSummaryClassification' where externalref = $id::int"
+				}
+			},
+			"update-paycategory-db-with-template": {
+				"type": "datasourceupdate",
+				"behavior": "",
+				"iterateR": "ds => ds",
+				"keyL": "${item.id}",
+				"keyR": "$externalref",
+				"changeL": "${item.name},${item.rateUnit},${item.accruesLeave},${removeTrailingZeros(item.defaultSuperRate)},${removeTrailingZeros(item.rateLoadingPercent)},${removeTrailingZeros(item.penaltyLoadingPercent)},${item.isTaxExempt},${item.isPayrollTaxExempt},${item.externalId},${item.source},${item.parentId},${item.generalLedgerMappingCode},${item.paymentSummaryClassification}",
+				"changeR": "$label,$rateunit,$accruesleave,${removeTrailingZeros(defaultsuperrate)},${removeTrailingZeros(rateloadingpercent)},${removeTrailingZeros(penaltyloadingpercent)},$istaxexempt,$ispayrolltaxexempt,$externalid,$source,$externalparentref,$generalledgermappingcode,$paymentsummaryclassification",
+				"dataSource": {
+					"type": "sql",
+					"behavior": "",
+					"jdbcDriver": "org.postgresql.Driver",
+					"connect": "jdbc:postgresql://localhost/payrolldev?user=payroll&password=payroll",
+					"query": {
+						"queryTemplate": "",
+						"create": "create",
+						"read": "select * from dim_paycategory",
+						"update": "update"
+					}
+				}
+			},
+			"deductioncategory-template": {
+				"type": "mergeTemplate",
+				"templates": {
+					"create": "insert into dim_deductioncategory (externalref, label, taxexempt, source, externalid, sgccalculationimpact, paymentsummaryclassification, expensesgeneralledgermappingcode, liabilitygeneralledgermappingcode) values ($id::int, '$name', '$taxExempt'::bool, '$source', NullIF('$externalId','')::int, '$sgcCalculationImpact', '$paymentSummaryClassification', NullIF('$expenseGeneralLedgerMappingCode',''), NullIF('$liabilityGeneralLedgerMappingCode',''))",
+					"update": "update dim_deductioncategory set label='$name', taxexempt='$taxExempt'::bool, source='$source', externalid=NullIF('$externalId','')::int, sgccalculationimpact='$sgcCalculationImpact', paymentsummaryclassification='$paymentSummaryClassification', expensesgeneralledgermappingcode=NullIF('$expenseGeneralLedgerMappingCode',''), liabilitygeneralledgermappingcode=NullIF('$liabilityGeneralLedgerMappingCode','') where externalref = $id::int"
+				}
+			},
+			"update-deductioncategory-db-with-template": {
+				"type": "datasourceupdate",
+				"behavior": "",
+				"iterateR": "ds => ds",
+				"keyL": "${item.id}",
+				"keyR": "$externalref",
+				"changeL": "${item.name},${item.taxExempt},${item.source},${item.externalId},${item.sgcCalculationImpact},${item.expenseGeneralLedgerMappingCode},${item.liabilityGeneralLedgerMappingCode}",
+				"changeR": "$label,$taxexempt,$source,$externalid,$sgccalculationimpact,$expensesgeneralledgermappingcode,$liabilitygeneralledgermappingcode",
+				"dataSource": {
+					"type": "sql",
+					"behavior": "",
+					"jdbcDriver": "org.postgresql.Driver",
+					"connect": "jdbc:postgresql://localhost/payrolldev?user=payroll&password=payroll",
+					"query": {
+						"queryTemplate": "",
+						"create": "create",
+						"read": "select * from dim_deductioncategory",
+						"update": "update"
+					}
+				}
+			},
+			"employeeexpensecategory-template": {
+				"type": "mergeTemplate",
+				"templates": {
+					"create": "insert into dim_employeeexpensecategory (externalref, label, externalreferenceid, canbedeleted, generalledgermappingcode) values ($id::int, '$description',  NullIF('$externalReferenceId','')::int, $canBeDeleted::bool, NullIF('$generalLedgerMappingCode',''))",
+					"update": "update dim_employeeexpensecategory set label='$description', externalreferenceid=NullIF('$externalReferenceId','')::int, canbedeleted=$canBeDeleted::bool, generalledgermappingcode=NullIF('$generalLedgerMappingCode','') where externalref = $id::int"
+				}
+			},
+			"update-employeeexpensecategory-db-with-template": {
+				"type": "datasourceupdate",
+				"behavior": "",
+				"iterateR": "ds => ds",
+				"keyL": "${item.id}",
+				"keyR": "$externalref",
+				"changeL": "${item.description},${item.externalReferenceId},${item.canBeDeleted},${item.generalLedgerMappingCode}",
+				"changeR": "$label,$externalreferenceid,$canbedeleted,$generalledgermappingcode",
+				"dataSource": {
+					"type": "sql",
+					"behavior": "",
+					"jdbcDriver": "org.postgresql.Driver",
+					"connect": "jdbc:postgresql://localhost/payrolldev?user=payroll&password=payroll",
+					"query": {
+						"queryTemplate": "",
+						"create": "create",
+						"read": "select * from dim_employeeexpensecategory",
+						"update": "update"
+					}
+				}
+			},
+			"employerliabilitycategory-template": {
+				"type": "mergeTemplate",
+				"templates": {
+					"create": "insert into dim_employerliabilitycategory (externalref, label, externalreferenceid, canbedeleted, hidefrompayslips, showtotalpayments, includeinshiftcosts) values ($id::int, '$name', NullIF('$externalReferenceId','')::int, $canBeDeleted::bool, $hideFromPaySlips::bool, $showTotalPayments::bool, $includeInShiftCosts::bool)",
+					"update": "update dim_employerliabilitycategory set label='$name', externalreferenceid=NullIF('$externalReferenceId','')::int, canbedeleted=$canBeDeleted::bool, hidefrompayslips=$hideFromPaySlips::bool, showtotalpayments=$showTotalPayments::bool, includeinshiftcosts=$includeInShiftCosts where externalref = $id::int"
+				}
+			},
+			"update-employerliabilitycategory-db-with-template": {
+				"type": "datasourceupdate",
+				"behavior": "",
+				"iterateR": "ds => ds",
+				"keyL": "${item.id}",
+				"keyR": "$externalref",
+				"changeL": "${item.name},${item.externalReferenceId},${item.canBeDeleted},${item.hideFromPaySlips},${item.showTotalPayments},${item.includeInShiftCosts}",
+				"changeR": "$label,$externalreferenceid,$canbedeleted,$hidefrompayslips,$showtotalpayments,$includeinshiftcosts",
+				"dataSource": {
+					"type": "sql",
+					"behavior": "",
+					"jdbcDriver": "org.postgresql.Driver",
+					"connect": "jdbc:postgresql://localhost/payrolldev?user=payroll&password=payroll",
+					"query": {
+						"queryTemplate": "",
+						"create": "create",
+						"read": "select * from dim_employerliabilitycategory",
+						"update": "update"
+					}
+				}
+			},
+			"employmenttype-template": {
+				"type": "mergeTemplate",
+				"templates": {
+					"create": "insert into dim_employmenttype (label) values('$employmentType')"
+				}
+			},
+			"update-employmenttype-db-with-template": {
+				"type": "datasourceupdate",
+				"behavior": "",
+				"iterateR": "ds => ds",
+				"keyL": "${record.employmentType}",
+				"keyR": "$label",
+				"changeL": "-",
+				"changeR": "-",
+				"dataSource": {
+					"type": "sql",
+					"behavior": "",
+					"jdbcDriver": "org.postgresql.Driver",
+					"connect": "jdbc:postgresql://localhost/payrolldev?user=payroll&password=payroll",
+					"query": {
+						"queryTemplate": "",
+						"create": "create",
+						"read": "select * from dim_employmenttype",
+						"update": ""
+					}
+				}
+			},
+			"employee-template": {
+				"type": "mergeTemplate",
+				"templates": {
+					"create": "insert into dim_employee (externalref, firstname, middlename, surname, dob, employmenttype_sk, startdate, enddate, previoussurname, jobtitle, primarylocation_sk) values (${record.record.record.item.id}::int, '${sq(record.record.record.item.firstName)}', NullIf('${sq(record.record.record.item.middleName)}',''), '${sq(record.record.record.item.surname)}', '${record.record.record.item.dateOfBirth}'::date, ${record.record.array(0)(0).employmenttype_sk}::bigint, NullIF('${record.record.record.item.startDate}','')::date, NullIF('${record.record.record.item.endDate}','')::date, '${sq(record.record.record.item.previousSurname)}', '${record.record.record.item.jobTitle}', ${ifNotBlankOrElse(array(0)(0).primarylocation_sk,0)}::bigint)",
+					"update": "update dim_employee set firstname='${sq(record.record.record.item.firstName)}', middlename=NullIf('${sq(record.record.record.item.middleName)}',''), surname='${sq(record.record.record.item.surname)}', dob='${record.record.record.item.dateOfBirth}'::date, employmenttype_sk=${record.record.array(0)(0).employmenttype_sk}::bigint, startdate=NullIF('${record.record.record.item.startDate}','')::date, enddate=NullIF('${record.record.record.item.endDate}','')::date, previoussurname='${sq(record.record.record.item.previousSurname)}', jobtitle='${record.record.record.item.jobTitle}', primarylocation_sk=${ifNotBlankOrElse(array(0)(0).primarylocation_sk,0)}::bigint where externalref = ${record.record.record.item.id}::int"
+				}
+			},
+			"update-employee-db-with-template": {
+				"type": "datasourceupdate",
+				"behavior": "",
+				"iterateR": "ds => ds",
+				"keyL": "${record.record.record.record.item.id}",
+				"keyR": "$externalref",
+				"changeL": "${record.record.record.record.item.firstName},${record.record.record.record.item.middleName},${record.record.record.record.item.surname},${convertDateFormat(record.record.record.record.item.dateOfBirth,\"yyyy-MM-dd'T'HH:mm:ss\",\"yyyy-MM-dd HH:mm:ss.S\")},${record.record.record.array(0)(0).employmenttype_sk},${convertDateFormat(record.record.record.record.item.startDate,\"yyyy-MM-dd'T'HH:mm:ss\",\"yyyy-MM-dd HH:mm:ss.S\")},${convertDateFormat(record.record.record.record.item.endDate,\"yyyy-MM-dd'T'HH:mm:ss\",\"yyyy-MM-dd HH:mm:ss.S\")},${record.record.record.record.item.previousSurname},${record.record.record.record.item.jobTitle},${ifNotBlankOrElse(record.array(0)(0).primarylocation_sk,0)}",
+				"changeR": "$firstname,$middlename,$surname,$dob,$employmenttype_sk,$startdate,${convertDateFormat(enddate,\"yyyy-MM-dd HH:mm:ss.S\",\"yyyy-MM-dd HH:mm:ss.S\")},$previoussurname,$jobtitle,$primarylocation_sk",
+				"dataSource": {
+					"type": "sql",
+					"behavior": "",
+					"jdbcDriver": "org.postgresql.Driver",
+					"connect": "jdbc:postgresql://localhost/payrolldev?user=payroll&password=payroll",
+					"query": {
+						"queryTemplate": "",
+						"create": "create",
+						"read": "select * from dim_employee",
+						"update": "update"
+					}
+				}
+			},
+			"payrunearninglines-template": {
+				"type": "mergeTemplate",
+				"templates": {
+					"create": "insert into fact_payrunearninglines(employee_sk, paycategory_sk, location_sk, payrun_sk, units, notes, rate, earnings, super, sfss, help, payg, lumpsumnumberofpayperiods, externalid) values (${record.record.record.record.array(0)(0).employee_sk}::bigint, ${array(0)(0).paycategory_sk}::bigint, ${ifNotBlankOrElse(record.record.array(0)(0).location_sk,0)}::bigint, ${record.record.record.record.record.record.array(0)(0)payrun_sk}::bigint, ${record.record.record.record.record.record.record.item.units}::numeric, '${sq(record.record.record.record.record.record.record.item.notes)}', ${record.record.record.record.record.record.record.item.rate}::numeric, ${record.record.record.record.record.record.record.item.earnings}::numeric, ${record.record.record.record.record.record.record.item.`super`}::numeric, ${record.record.record.record.record.record.record.item.sfss}::numeric, ${record.record.record.record.record.record.record.item.help}::numeric, ${record.record.record.record.record.record.record.item.payg}::numeric, ${record.record.record.record.record.record.record.item.lumpSumNumberOfPayPeriods}::numeric, NullIf('${record.record.record.record.record.record.record.item.externalId}','')::int)",
+					"update": "update fact_payrunearninglines set units=${record.record.record.record.record.record.record.item.units}::numeric,  rate=${record.record.record.record.record.record.record.item.rate}::numeric, earnings=${record.record.record.record.record.record.record.item.earnings}::numeric, super=${record.record.record.record.record.record.record.item.`super`}::numeric, sfss=${record.record.record.record.record.record.record.item.sfss}::numeric, help=${record.record.record.record.record.record.record.item.help}::numeric, payg=${record.record.record.record.record.record.record.item.payg}::numeric, lumpsumnumberofpayperiods=${record.record.record.record.record.record.record.item.lumpSumNumberOfPayPeriods}::numeric, externalid=NullIf('${record.record.record.record.record.record.record.item.externalId}','')::int where payrun_sk = ${record.record.record.record.record.record.array(0)(0)payrun_sk}::bigint and employee_sk = ${record.record.record.record.array(0)(0).employee_sk}::bigint and paycategory_sk = ${array(0)(0).paycategory_sk}::bigint and location_sk = ${ifNotBlankOrElse(record.record.array(0)(0).location_sk,0)}::bigint and notes='${sq(record.record.record.record.record.record.record.item.notes)}'"
+				}
+			},
+			"update-payrunearninglines-db-with-template": {
+				"type": "datasourceupdate",
+				"behavior": "",
+				"iterateR": "ds => ds",
+				"keyL": "${record.record.record.record.record.record.record.array(0)(0).payrun_sk},${record.record.record.record.record.array(0)(0).employee_sk},${record.array(0)(0).paycategory_sk},${ifNotBlankOrElse(record.record.record.array(0)(0).location_sk,0)},${record.record.record.record.record.record.record.record.item.notes}",
+				"keyR": "$payrun_sk,$employee_sk,$paycategory_sk,$location_sk,$notes",
+				"changeL": "${removeTrailingZeros(record.record.record.record.record.record.record.record.item.units)},${record.record.record.record.record.record.record.record.item.notes},${removeTrailingZeros(record.record.record.record.record.record.record.record.item.rate)},${removeTrailingZeros(record.record.record.record.record.record.record.record.item.earnings)},${removeTrailingZeros(record.record.record.record.record.record.record.record.item.`super`)},${removeTrailingZeros(record.record.record.record.record.record.record.record.item.sfss)},${removeTrailingZeros(record.record.record.record.record.record.record.record.item.help)},${removeTrailingZeros(record.record.record.record.record.record.record.record.item.payg)},${removeTrailingZeros(record.record.record.record.record.record.record.record.item.lumpSumNumberOfPayPeriods)},${record.record.record.record.record.record.record.record.item.externalId}",
+				"changeR": "${removeTrailingZeros(units)},$notes,${removeTrailingZeros(rate)},${removeTrailingZeros(earnings)},${removeTrailingZeros(`super`)},${removeTrailingZeros(sfss)},${removeTrailingZeros(help)},${removeTrailingZeros(payg)},${removeTrailingZeros(lumpsumnumberofpayperiods)},$externalid",
+				"dataSource": {
+					"type": "sql",
+					"behavior": "",
+					"jdbcDriver": "org.postgresql.Driver",
+					"connect": "jdbc:postgresql://localhost/payrolldev?user=payroll&password=payroll",
+					"query": {
+						"queryTemplate": "",
+						"create": "create",
+						"read": "select * from fact_payrunearninglines",
+						"update": "update"
+					}
+				}
+			},
+			"payrundeductions-template": {
+				"type": "mergeTemplate",
+				"templates": {
+					"create": "insert into fact_payrundeductions(employee_sk,  location_sk, payrun_sk, deductioncategory_sk, notes, amount, paytosuperfundname, payto, externalid) values (${record.record.record.record.array(0)(0).employee_sk}::bigint, ${array(0)(0).deductioncategory_sk}::bigint, ${ifNotBlankOrElse(record.record.array(0)(0).location_sk,0)}::bigint, ${record.record.record.record.record.record.array(0)(0)payrun_sk}::bigint, NullIf('${sq(record.record.record.record.record.record.record.item.notes)}',''), ${record.record.record.record.record.record.record.item.amount}::numeric, '${sq(record.record.record.record.record.record.record.item.payToSuperFundName)}', '${sq(record.record.record.record.record.record.record.item.payTo)}', NullIf('${record.record.record.record.record.record.record.item.externalId}','')::int)",
+					"update": "update fact_payrundeductions set notes='${sq(record.record.record.record.record.record.record.item.notes)}', amount=${record.record.record.record.record.record.record.item.amount}::numeric, paytosuperfundname='${sq(record.record.record.record.record.record.record.item.payToSuperFundName)}', payto='${sq(record.record.record.record.record.record.record.item.payTo)}', externalid=NullIf('${record.record.record.record.record.record.record.item.externalId}','')::int where payrun_sk = ${record.record.record.record.record.record.array(0)(0)payrun_sk}::bigint and employee_sk = ${record.record.record.record.array(0)(0).employee_sk}::bigint and deductioncategory_sk = ${array(0)(0).deductioncategory_sk}::bigint and location_sk = ${ifNotBlankOrElse(record.record.array(0)(0).location_sk,0)}::bigint and notes=NullIf('${sq(record.record.record.record.record.record.record.item.notes)}','')"
+				}
+			},
+			"update-payrundeductions-db-with-template": {
+				"type": "datasourceupdate",
+				"behavior": "",
+				"iterateR": "ds => ds",
+				"keyL": "${record.record.record.record.record.record.record.array(0)(0).payrun_sk},${record.record.record.record.record.array(0)(0).employee_sk},${record.array(0)(0).deductioncategory_sk},${ifNotBlankOrElse(record.record.record.array(0)(0).location_sk,0)},${record.record.record.record.record.record.record.record.item.notes}",
+				"keyR": "$payrun_sk,$employee_sk,$deductioncategory_sk,$location_sk,$notes",
+				"changeL": "${removeTrailingZeros(record.record.record.record.record.record.record.record.item.amount)},${record.record.record.record.record.record.record.record.item.payToSuperFundName},${record.record.record.record.record.record.record.record.item.payTo},${record.record.record.record.record.record.record.record.item.externalId}",
+				"changeR": "${removeTrailingZeros(amount)},$paytosuperfundname,$payto,$externalid",
+				"dataSource": {
+					"type": "sql",
+					"behavior": "",
+					"jdbcDriver": "org.postgresql.Driver",
+					"connect": "jdbc:postgresql://localhost/payrolldev?user=payroll&password=payroll",
+					"query": {
+						"queryTemplate": "",
+						"create": "create",
+						"read": "select * from fact_payrundeductions",
+						"update": "update"
+					}
+				}
+			},
+			"payrunemployeeexpenses-template": {
+				"type": "mergeTemplate",
+				"templates": {
+					"create": "insert into fact_payrunemployeeexpenses (employee_sk, employeeexpensecategory_sk, location_sk, payrun_sk, notes, amount, externalid) values (${record.record.record.record.array(0)(0).employee_sk}::bigint, ${array(0)(0).employeeexpensecategory_sk}::bigint, ${ifNotBlankOrElse(record.record.array(0)(0).location_sk,0)}::bigint, ${record.record.record.record.record.record.array(0)(0)payrun_sk}::bigint, NullIf('${sq(record.record.record.record.record.record.record.item.notes)}',''), ${record.record.record.record.record.record.record.item.amount}::numeric,  NullIf('${record.record.record.record.record.record.record.item.externalId}','')::int)"
+				}
+			},
+			"update-payrunemployeeexpenses-db-with-template": {
+				"type": "datasourceupdate",
+				"behavior": "",
+				"iterateR": "ds => ds",
+				"keyL": "1",
+				"keyR": "2",
+				"changeL": "-",
+				"changeR": "-",
+				"dataSource": {
+					"type": "sql",
+					"behavior": "",
+					"jdbcDriver": "org.postgresql.Driver",
+					"connect": "jdbc:postgresql://localhost/payrolldev?user=payroll&password=payroll",
+					"query": {
+						"queryTemplate": "",
+						"create": "create",
+						"read": "select * from fact_payrunemployeeexpenses",
+						"update": ""
+					}
+				}
+			},
+			"payrunemployerliabilities-template": {
+				"type": "mergeTemplate",
+				"templates": {
+					"create": "insert into fact_payrunemployerliabilities (employee_sk, employerliabilitycategory_sk, location_sk, payrun_sk, notes, amount, externalid) values (${record.record.record.record.array(0)(0).employee_sk}::bigint, ${array(0)(0).employerliabilitycategory_sk}::bigint, ${ifNotBlankOrElse(record.record.array(0)(0).location_sk,0)}::bigint, ${record.record.record.record.record.record.array(0)(0)payrun_sk}::bigint, NullIf('${sq(record.record.record.record.record.record.record.item.notes)}',''), ${record.record.record.record.record.record.record.item.amount}::numeric,  NullIf('${record.record.record.record.record.record.record.item.externalId}','')::int)"
+				}
+			},
+			"update-payrunemployerliabilities-db-with-template": {
+				"type": "datasourceupdate",
+				"behavior": "",
+				"iterateR": "ds => ds",
+				"keyL": "1",
+				"keyR": "2",
+				"changeL": "-",
+				"changeR": "-",
+				"dataSource": {
+					"type": "sql",
+					"behavior": "",
+					"jdbcDriver": "org.postgresql.Driver",
+					"connect": "jdbc:postgresql://localhost/payrolldev?user=payroll&password=payroll",
+					"query": {
+						"queryTemplate": "",
+						"create": "create",
+						"read": "select * from fact_payrunemployerliabilities",
+						"update": ""
+					}
+				}
+			},
+			"payrunsuperadjustments-template": {
+				"type": "mergeTemplate",
+				"templates": {
+					"create": "insert into fact_payrunsuperadjustments(employee_sk,  payrun_sk, location_sk, contributiontype, notes, amount, externalid) values(${record.record.array(0)(0).employee_sk}::bigint, ${record.record.record.record.array(0)(0)payrun_sk}::bigint, ${ifNotBlankOrElse(array(0)(0).location_sk,0)}::bigint,  '${sq(record.record.record.record.record.item.contributionType)}', NullIf('${sq(record.record.record.record.record.item.notes)}',''), ${record.record.record.record.record.item.amount}::numeric,  NullIf('${record.record.record.record.record.item.externalId}','')::int)",
+					"update": "update fact_payrunsuperadjustments set amount=${record.record.record.record.record.item.amount}::numeric, externalid=NullIf('${record.record.record.record.record.item.externalId}','')::int where payrun_sk = ${record.record.record.record.array(0)(0)payrun_sk}::bigint and employee_sk = ${record.record.array(0)(0).employee_sk}::bigint and location_sk = ${ifNotBlankOrElse(array(0)(0).location_sk,0)}::bigint and contributiontype='${sq(record.record.record.record.record.item.contributionType)}' and notes=NullIf('${sq(record.record.record.record.record.item.notes)}','')"
+				}
+			},
+			"update-payrunsuperadjustments-db-with-template": {
+				"type": "datasourceupdate",
+				"behavior": "",
+				"iterateR": "ds => ds",
+				"keyL": "${record.record.record.record.record.array(0)(0).payrun_sk},${record.record.record.array(0)(0).employee_sk},${ifNotBlankOrElse(record.array(0)(0).location_sk,0)},${record.record.record.record.record.record.item.contributionType},${record.record.record.record.record.record.item.notes}",
+				"keyR": "$payrun_sk,$employee_sk,$location_sk,$contributiontype,$notes",
+				"changeL": "${removeTrailingZeros(record.record.record.record.record.record.item.amount)},${record.record.record.record.record.record.item.externalId}",
+				"changeR": "${removeTrailingZeros(amount)},$externalid",
+				"dataSource": {
+					"type": "sql",
+					"behavior": "",
+					"jdbcDriver": "org.postgresql.Driver",
+					"connect": "jdbc:postgresql://localhost/payrolldev?user=payroll&password=payroll",
+					"query": {
+						"queryTemplate": "",
+						"create": "create",
+						"read": "select * from fact_payrunsuperadjustments",
+						"update": "update"
+					}
+				}
+			},
+			"payrunpaygadjustments-template": {
+				"type": "mergeTemplate",
+				"templates": {
+					"create": "insert into fact_payrunpaygadjustments(employee_sk,  payrun_sk, location_sk, notes, amount, externalid) values(${record.record.array(0)(0).employee_sk}::bigint, ${record.record.record.record.array(0)(0)payrun_sk}::bigint, ${ifNotBlankOrElse(array(0)(0).location_sk,0)}::bigint, NullIf('${sq(record.record.record.record.record.item.notes)}',''), ${record.record.record.record.record.item.amount}::numeric,  NullIf('${record.record.record.record.record.item.externalId}','')::int)",
+					"update": "update fact_payrunpaygadjustments set amount=${record.record.record.record.record.item.amount}::numeric, externalid=NullIf('${record.record.record.record.record.item.externalId}','')::int where payrun_sk = ${record.record.record.record.array(0)(0)payrun_sk}::bigint and employee_sk = ${record.record.array(0)(0).employee_sk}::bigint and location_sk = ${ifNotBlankOrElse(array(0)(0).location_sk,0)}::bigint and notes=NullIf('${sq(record.record.record.record.record.item.notes)}','')"
+				}
+			},
+			"update-payrunpaygadjustments-db-with-template": {
+				"type": "datasourceupdate",
+				"behavior": "",
+				"iterateR": "ds => ds",
+				"keyL": "${record.record.record.record.record.array(0)(0).payrun_sk},${record.record.record.array(0)(0).employee_sk},${ifNotBlankOrElse(record.array(0)(0).location_sk,0)},${record.record.record.record.record.record.item.notes}",
+				"keyR": "$payrun_sk,$employee_sk,$location_sk,$notes",
+				"changeL": "${removeTrailingZeros(record.record.record.record.record.record.item.amount)},${record.record.record.record.record.record.item.externalId}",
+				"changeR": "${removeTrailingZeros(amount)},$externalid",
+				"dataSource": {
+					"type": "sql",
+					"behavior": "",
+					"jdbcDriver": "org.postgresql.Driver",
+					"connect": "jdbc:postgresql://localhost/payrolldev?user=payroll&password=payroll",
+					"query": {
+						"queryTemplate": "",
+						"create": "create",
+						"read": "select * from fact_payrunpaygadjustments",
+						"update": "update"
+					}
+				}
+			},
+			"load-payrunearninglines-template": {
+				"type": "mergeTemplate",
+				"templates": {
+					"read-uri": "https://gandm.yourpayroll.com.au/api/v2/business/24195/payrun/$id/earningslines/"
+				}
+			},
+			"load-payrunearninglines": {
+				"type": "merge",
+				"behavior": "simple",
+				"attribute": "earninglines",
+				"dataSource": {
+					"type": "rest",
+					"behavior": "simple",
+					"path": "-",
+					"credential": {
+						"user": "WmFXcGs0dVJsU3VUS0dCcXJsVmIxdz09",
+						"password": ""
+					},
+					"query": {
+						"read": {
+							"uri": "read-uri"
+						}
+					}
+				}
+			},
+			"load-payrundeductions-template": {
+				"type": "mergeTemplate",
+				"templates": {
+					"read-uri": "https://gandm.yourpayroll.com.au/api/v2/business/24195/payrun/$id/deductions/"
+				}
+			},
+			"load-payrundeductions": {
+				"type": "merge",
+				"behavior": "simple",
+				"attribute": "deductions",
+				"dataSource": {
+					"type": "rest",
+					"behavior": "simple",
+					"path": "-",
+					"credential": {
+						"user": "WmFXcGs0dVJsU3VUS0dCcXJsVmIxdz09",
+						"password": ""
+					},
+					"query": {
+						"read": {
+							"uri": "read-uri"
+						}
+					}
+				}
+			},
+			"load-payrunemployerliabilities-template": {
+				"type": "mergeTemplate",
+				"templates": {
+					"read-uri": "https://gandm.yourpayroll.com.au/api/v2/business/24195/payrun/$id/employerliabilities/"
+				}
+			},
+			"load-payrunemployerliabilities": {
+				"type": "merge",
+				"behavior": "simple",
+				"attribute": "employerliabilities",
+				"dataSource": {
+					"type": "rest",
+					"behavior": "simple",
+					"path": "-",
+					"credential": {
+						"user": "WmFXcGs0dVJsU3VUS0dCcXJsVmIxdz09",
+						"password": ""
+					},
+					"query": {
+						"read": {
+							"uri": "read-uri"
+						}
+					}
+				}
+			},
+			"load-payrunemployeeexpenses-template": {
+				"type": "mergeTemplate",
+				"templates": {
+					"read-uri": "https://gandm.yourpayroll.com.au/api/v2/business/24195/payrun/$id/employeeexpenses"
+				}
+			},
+			"load-payrunemployeeexpenses": {
+				"type": "merge",
+				"behavior": "simple",
+				"attribute": "employeeexpenses",
+				"dataSource": {
+					"type": "rest",
+					"behavior": "simple",
+					"path": "-",
+					"credential": {
+						"user": "WmFXcGs0dVJsU3VUS0dCcXJsVmIxdz09",
+						"password": ""
+					},
+					"query": {
+						"read": {
+							"uri": "read-uri"
+						}
+					}
+				}
+			},
+			"load-payrunsuperadjustments-template": {
+				"type": "mergeTemplate",
+				"templates": {
+					"read-uri": "https://gandm.yourpayroll.com.au/api/v2/business/24195/payrun/$id/superadjustments/"
+				}
+			},
+			"load-payrunsuperadjustments": {
+				"type": "merge",
+				"behavior": "simple",
+				"attribute": "superadjustments",
+				"dataSource": {
+					"type": "rest",
+					"behavior": "simple",
+					"path": "-",
+					"credential": {
+						"user": "WmFXcGs0dVJsU3VUS0dCcXJsVmIxdz09",
+						"password": ""
+					},
+					"query": {
+						"read": {
+							"uri": "read-uri"
+						}
+					}
+				}
+			},
+			"load-payrunpaygadjustments-template": {
+				"type": "mergeTemplate",
+				"templates": {
+					"read-uri": "https://gandm.yourpayroll.com.au/api/v2/business/24195/payrun/$id/paygadjustments/"
+				}
+			},
+			"load-payrunpaygadjustments": {
+				"type": "merge",
+				"behavior": "simple",
+				"attribute": "paygadjustments",
+				"dataSource": {
+					"type": "rest",
+					"behavior": "simple",
+					"path": "-",
+					"credential": {
+						"user": "WmFXcGs0dVJsU3VUS0dCcXJsVmIxdz09",
+						"password": ""
+					},
+					"query": {
+						"read": {
+							"uri": "read-uri"
+						}
+					}
+				}
+			},
+			"make-distinct": {
+				"type": "transform",
+				"batch": ["mapToDataSetTableScala",
+				"deDup,employmentType"]
+			},
+			"read-parent-location-dim": {
+				"type": "extract",
+				"behavior": "simple",
+				"dataSource": {
+					"type": "sql",
+					"jdbcDriver": "org.postgresql.Driver",
+					"connect": "jdbc:postgresql://localhost/payrolldev?user=payroll&password=payroll",
+					"query": {
+						"queryTemplate": "",
+						"read": "select sk,externalref,externalparentref,label,fullyqualifiedlabel from dim_location where externalparentref is not null"
+					}
+				}
+			},
+			"lookup-parent-location-template": {
+				"type": "mergeTemplate",
+				"templates": {
+					"lookup-parent-location": "select sk as parent_sk, externalref from dim_location where externalref=$externalparentref"
+				}
+			},
+			"lookup-primary-location-template": {
+				"type": "mergeTemplate",
+				"templates": {
+					"lookup-primary-location": "select sk as primarylocation_sk from dim_location where fullyqualifiedlabel='${record.item.primaryLocation}'"
+				}
+			},
+			"lookup-employmenttype-template": {
+				"type": "mergeTemplate",
+				"templates": {
+					"lookup-employmenttype": "select sk as employmenttype_sk, label from dim_employmenttype where label='$employmentType'"
+				}
+			},
+			"lookup-payrun-with-id-template": {
+				"type": "mergeTemplate",
+				"templates": {
+					"lookup-payrun": "select sk as payrun_sk, externalref from dim_payrun where externalref=$id"
+				}
+			},
+			"lookup-payrun-template": {
+				"type": "mergeTemplate",
+				"templates": {
+					"lookup-payrun": "select sk as payrun_sk, externalref from dim_payrun where externalref=$payRunId"
+				}
+			},
+			"lookup-employee-template": {
+				"type": "mergeTemplate",
+				"templates": {
+					"lookup-employee": "select sk as employee_sk, externalref from dim_employee where externalref=${record.item.employeeId}"
+				}
+			},
+			"lookup-location-template": {
+				"type": "mergeTemplate",
+				"templates": {
+					"lookup-location": "select sk as location_sk from dim_location where externalref=${record.record.record.item.locationId}"
+				}
+			},
+			"lookup-paycategory-template": {
+				"type": "mergeTemplate",
+				"templates": {
+					"lookup-paycategory": "select sk as paycategory_sk, externalref from dim_paycategory where externalref=${record.record.record.record.record.item.payCategoryId}"
+				}
+			},
+			"lookup-deductioncategory-template": {
+				"type": "mergeTemplate",
+				"templates": {
+					"lookup-deductioncategory": "select sk as deductioncategory_sk, externalref from dim_deductioncategory where externalref=${record.record.record.record.record.item.deductionCategoryId}"
+				}
+			},
+			"lookup-employeeexpensecategory-template": {
+				"type": "mergeTemplate",
+				"templates": {
+					"lookup-employeeexpensecategory": "select sk as employeeexpensecategory_sk, externalref from dim_employeeexpensecategory where externalref=${record.record.record.record.record.item.employeeExpenseCategoryId}"
+				}
+			},
+			"lookup-employerliabilitycategory-template": {
+				"type": "mergeTemplate",
+				"templates": {
+					"lookup-employerliabilitycategory": "select sk as employerliabilitycategory_sk, externalref from dim_employerliabilitycategory where externalref=${record.record.record.record.record.item.employeeExpenseCategoryId}"
+				}
+			},
+			"lookup-parent-location": {
+				"type": "lookup",
+				"behavior": "legacy-lookup-merge",
+				"dataSource": {
+					"type": "sql",
+					"jdbcDriver": "org.postgresql.Driver",
+					"connect": "jdbc:postgresql://localhost/payrolldev?user=payroll&password=payroll",
+					"query": {
+						"queryTemplate": "",
+						"read": "lookup-parent-location"
+					}
+				}
+			},
+			"lookup-employmenttype": {
+				"type": "lookup",
+				"behavior": "legacy-lookup-merge",
+				"dataSource": {
+					"type": "sql",
+					"jdbcDriver": "org.postgresql.Driver",
+					"connect": "jdbc:postgresql://localhost/payrolldev?user=payroll&password=payroll",
+					"query": {
+						"queryTemplate": "",
+						"read": "lookup-employmenttype"
+					}
+				}
+			},
+			"lookup-primary-location": {
+				"type": "lookup",
+				"behavior": "legacy-lookup-merge",
+				"dataSource": {
+					"type": "sql",
+					"jdbcDriver": "org.postgresql.Driver",
+					"connect": "jdbc:postgresql://localhost/payrolldev?user=payroll&password=payroll",
+					"query": {
+						"queryTemplate": "",
+						"read": "lookup-primary-location"
+					}
+				}
+			},
+			"lookup-payrun-dim": {
+				"type": "lookup",
+				"behavior": "legacy-lookup-merge",
+				"dataSource": {
+					"type": "sql",
+					"jdbcDriver": "org.postgresql.Driver",
+					"connect": "jdbc:postgresql://localhost/payrolldev?user=payroll&password=payroll",
+					"query": {
+						"queryTemplate": "",
+						"read": "lookup-payrun"
+					}
+				}
+			},
+			"lookup-employee-dim": {
+				"type": "lookup",
+				"behavior": "legacy-lookup-merge",
+				"dataSource": {
+					"type": "sql",
+					"jdbcDriver": "org.postgresql.Driver",
+					"connect": "jdbc:postgresql://localhost/payrolldev?user=payroll&password=payroll",
+					"query": {
+						"queryTemplate": "",
+						"read": "lookup-employee"
+					}
+				}
+			},
+			"lookup-paycategory-dim": {
+				"type": "lookup",
+				"behavior": "legacy-lookup-merge",
+				"dataSource": {
+					"type": "sql",
+					"jdbcDriver": "org.postgresql.Driver",
+					"connect": "jdbc:postgresql://localhost/payrolldev?user=payroll&password=payroll",
+					"query": {
+						"queryTemplate": "",
+						"read": "lookup-paycategory"
+					}
+				}
+			},
+			"lookup-location-dim": {
+				"type": "lookup",
+				"behavior": "legacy-lookup-merge",
+				"dataSource": {
+					"type": "sql",
+					"jdbcDriver": "org.postgresql.Driver",
+					"connect": "jdbc:postgresql://localhost/payrolldev?user=payroll&password=payroll",
+					"query": {
+						"queryTemplate": "",
+						"read": "lookup-location"
+					}
+				}
+			},
+			"lookup-deductioncategory-dim": {
+				"type": "lookup",
+				"behavior": "legacy-lookup-merge",
+				"dataSource": {
+					"type": "sql",
+					"jdbcDriver": "org.postgresql.Driver",
+					"connect": "jdbc:postgresql://localhost/payrolldev?user=payroll&password=payroll",
+					"query": {
+						"queryTemplate": "",
+						"read": "lookup-deductioncategory"
+					}
+				}
+			},
+			"lookup-employeeexpensecategory-dim": {
+				"type": "lookup",
+				"behavior": "legacy-lookup-merge",
+				"dataSource": {
+					"type": "sql",
+					"jdbcDriver": "org.postgresql.Driver",
+					"connect": "jdbc:postgresql://localhost/payrolldev?user=payroll&password=payroll",
+					"query": {
+						"queryTemplate": "",
+						"read": "lookup-employeeexpensecategory"
+					}
+				}
+			},
+			"lookup-employerliabilitycategory-dim": {
+				"type": "lookup",
+				"behavior": "legacy-lookup-merge",
+				"dataSource": {
+					"type": "sql",
+					"jdbcDriver": "org.postgresql.Driver",
+					"connect": "jdbc:postgresql://localhost/payrolldev?user=payroll&password=payroll",
+					"query": {
+						"queryTemplate": "",
+						"read": "lookup-employerliabilitycategory"
+					}
+				}
+			},
+			"lookup-dim-for-employees-template": {
+				"type": "mergeTemplate",
+				"templates": {
+					"lookup-employmenttype": "select sk as employmenttype_sk, label from dim_employmenttype where label='$employmentType'",
+					"lookup-primary-location": "select sk as primarylocation_sk from dim_location where fullyqualifiedlabel='$primaryLocation'"
+				}
+			},
+			"lookup-dim-for-payrunearninglines-template": {
+				"type": "mergeTemplate",
+				"templates": {
+					"lookup-payrun": "select sk as payrun_sk, externalref from dim_payrun where externalref=$payRunId",
+					"lookup-employee": "select sk as employee_sk, externalref from dim_employee where externalref=$employeeId",
+					"lookup-paycategory": "select sk as paycategory_sk, externalref from dim_paycategory where externalref=$payCategoryIdId",
+					"lookup-location": "select sk as location_sk from dim_location where externalref=$locationId"
+				}
+			},
+			"tr1": {
+				"type": "transformTerm",
+				"term": "ds => ds"
+			}
+		},
+		"pipelines": {
+			"load-payrun-dim": {
+				"pipe": "load-payruns | payrun-template | update-payrun-db-with-template"
+			},
+			"load-location-dim": {
+				"pipe": "load-locations | location-template | update-location-db-with-template"
+			},
+			"link-parent-locations": {
+				"pipe": "read-parent-location-dim | lookup-parent-location-template | lookup-parent-location | location-parent-template | update-parent-location-db-with-template"
+			},
+			"load-paycategory-dim": {
+				"pipe": "load-paycategories | paycategory-template | update-paycategory-db-with-template"
+			},
+			"load-deductioncategory-dim": {
+				"pipe": "load-deductioncategories | deductioncategory-template | update-deductioncategory-db-with-template"
+			},
+			"load-employeeexpensecategory-dim": {
+				"pipe": "load-employeeexpensecategories | employeeexpensecategory-template | update-employeeexpensecategory-db-with-template"
+			},
+			"load-employerliabilitycategory-dim": {
+				"pipe": "load-employerliabilitycategories | employerliabilitycategory-template | update-employerliabilitycategory-db-with-template"
+			},
+			"load-employmenttype-dim": {
+				"pipe": "load-employmenttypes | make-distinct | employmenttype-template |update-employmenttype-db-with-template"
+			},
+			"load-employee-dim": {
+				"pipe": "load-employees | lookup-employmenttype-template | lookup-employmenttype | lookup-primary-location-template | lookup-primary-location | employee-template | update-employee-db-with-template"
+			},
+			"load-dimensions": {
+				"pipe": "load-payrun-dim | load-location-dim | link-parent-locations | load-paycategory-dim | load-deductioncategory-dim | load-employmenttype-dim | load-employee-dim | load-employeeexpensecategory-dim | load-employerliabilitycategory-dim"
+			},
+			"process-payrun-earning-lines": {
+				"pipe": "load-payruns | get-last-payrun | load-payrunearninglines-template | tr1 | load-payrunearninglines | flatten-payrun-earninglines-payrun | lookup-payrun-template | lookup-payrun-dim | lookup-employee-template | lookup-employee-dim | lookup-location-template | lookup-location-dim | lookup-paycategory-template | lookup-paycategory-dim | payrunearninglines-template | update-payrunearninglines-db-with-template"
+			},
+			"process-payrun-deductions": {
+				"pipe": "load-payruns | get-last-payrun | load-payrundeductions-template | tr1 | load-payrundeductions | flatten-payrun-deductions-payrun | lookup-payrun-template | lookup-payrun-dim | lookup-employee-template | lookup-employee-dim | lookup-location-template | lookup-location-dim | lookup-deductioncategory-template | lookup-deductioncategory-dim | payrundeductions-template | update-payrundeductions-db-with-template"
+			},
+			"process-payrun-employer-liabilities": {
+				"pipe": "load-payruns | get-last-payrun | load-payrunemployerliabilities-template | tr1 | load-payrunemployerliabilities | flatten-payrun-employerliabilities-payrun | lookup-payrun-template | lookup-payrun-dim | lookup-employee-template | lookup-employee-dim | lookup-location-template | lookup-location-dim | lookup-employerliabilitycategory-template | lookup-employerliabilitycategory-dim | payrunemployerliabilities-template | update-payrunemployerliabilities-db-with-template"
+			},
+			"process-payrun-employee-expenses": {
+				"pipe": "load-payruns | get-last-payrun | load-payrunemployeeexpenses-template | tr1 | load-payrunemployeeexpenses | flatten-payrun-employeeexpenses-payrun | lookup-payrun-template | lookup-payrun-dim | lookup-employee-template | lookup-employee-dim | lookup-location-template | lookup-location-dim | lookup-employeeexpensecategory-template | lookup-employeeexpensecategory-dim | payrunemployeeexpenses-template | update-payrunemployeeexpenses-db-with-template"
+			},
+			"process-payrun-super-adjustments": {
+				"pipe": "load-payruns | get-last-payrun | load-payrunsuperadjustments-template | tr1 | load-payrunsuperadjustments | flatten-payrun-superadjustments-payrun | lookup-payrun-template | lookup-payrun-dim | lookup-employee-template | lookup-employee-dim | lookup-location-template | lookup-location-dim | payrunsuperadjustments-template | update-payrunsuperadjustments-db-with-template"
+			},
+			"process-payrun-payg-adjustments": {
+				"pipe": "load-payruns | get-last-payrun | load-payrunpaygadjustments-template | tr1 | load-payrunpaygadjustments | flatten-payrun-paygadjustments-payrun | lookup-payrun-template | lookup-payrun-dim | lookup-employee-template | lookup-employee-dim | lookup-location-template | lookup-location-dim | payrunpaygadjustments-template | update-payrunpaygadjustments-db-with-template"
+			},
+			"cleanup-payrun-earning-lines": {
+				"pipe": "load-payruns | get-last-payrun | lookup-payrun-with-id-template | lookup-payrun-dim | delete-payrunearninglines-for-payrun-template | delete-payrunearninglines-for-payrun"
+			},
+			"cleanup-payrun-deductions": {
+				"pipe": "load-payruns | get-last-payrun | lookup-payrun-with-id-template | lookup-payrun-dim | delete-payrundeductions-for-payrun-template | delete-payrundeductions-for-payrun"
+			},
+			"cleanup-payrun-employer-liabilities": {
+				"pipe": "load-payruns | get-last-payrun | lookup-payrun-with-id-template | lookup-payrun-dim | delete-payrunemployerliabilities-for-payrun-template | delete-payrunemployerliabilities-for-payrun"
+			},
+			"cleanup-payrun-employee-expenses": {
+				"pipe": "load-payruns | get-last-payrun | lookup-payrun-with-id-template | lookup-payrun-dim | delete-payrunemployeeexpenses-for-payrun-template | delete-payrunemployeeexpenses-for-payrun"
+			},
+			"cleanup-payrun-super-adjustments": {
+				"pipe": "load-payruns | get-last-payrun | lookup-payrun-with-id-template | lookup-payrun-dim | delete-payrunsuperadjustments-for-payrun-template | delete-payrunsuperadjustments-for-payrun"
+			},
+			"cleanup-payrun-payg-adjustments": {
+				"pipe": "load-payruns | get-last-payrun | lookup-payrun-with-id-template | lookup-payrun-dim | delete-payrunpaygadjustments-for-payrun-template | delete-payrunpaygadjustments-for-payrun"
+			},
+			"cleanup-payrun-facts": {
+				"pipe": "cleanup-payrun-deductions | cleanup-payrun-earning-lines | cleanup-payrun-employee-expenses | cleanup-payrun-employer-liabilities | cleanup-payrun-payg-adjustments | cleanup-payrun-super-adjustments"
+			},
+			"process-payrun-facts": {
+				"pipe": "process-payrun-earning-lines | process-payrun-super-adjustments | process-payrun-payg-adjustments | process-payrun-deductions | cleanup-payrun-employee-expenses | process-payrun-employee-expenses | process-payrun-employer-liabilities"
+			},
+			"run": {
+				"pipe": "load-dimensions | cleanup-payrun-facts | process-payrun-facts"
+			}
+		},
+		"services": {
+			
+		},
+		"startup": {
+			"exec": "run"
+		}
+	}
+}

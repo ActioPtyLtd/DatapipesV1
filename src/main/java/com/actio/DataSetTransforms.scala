@@ -459,9 +459,9 @@ object DataSetTransforms {
   // helpers
   def getEmptyRow(ds: DataSetTableScala) = List.fill(ds.header.length)(null)
 
-  def trim(ds: DataSetTableScala, cols: List[String]) = cols.foldLeft(ds)((d, c) => valueFunc(d, c, trimValue))
+  def trim(ds: DataSetTableScala, cols: List[String]) = cols.foldLeft(ds)((d, c) => valueFunc(d, c, v => v.trim))
 
-  def trimValue(value: String) = value.trim
+  def trimValue(value: String) = DataString(value.trim)
 
   def mapOrElse(ds: DataSetTableScala, col: String, colPairs: List[String], orElse: String) = {
     val pairMap = colPairs.grouped(2).map(g => (g.head, g.tail.headOption.getOrElse(""))).toMap

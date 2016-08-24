@@ -7,9 +7,9 @@
         "behavior": "simple",
         "dataSource": {
           "behavior": "regex",
-          "directory": "C:\\Users\\mauri\\bitbucket\\gandm-data",
+          "directory": "/data/client/gnmepp/processing",
           "type": "file",
-          "filenameTemplate": "gmSpecOrder_sample.csv"
+          "filenameTemplate": "gmSpecOrder.csv"
         }
       },
       "parse-order-csv": {
@@ -29,7 +29,7 @@
       "template-concat": {
         "type": "mergeTemplate",
         "templates": {
-          "createuri": "https://dev-api-gnm.actio.com.au:8443/service/order",
+          "createuri": "https://stage-api-gnm.actio.com.au:8443/service/order",
           "createbody": "$createbodyleft, \"order_items\": [${concatString(DataArray(if(isBlank(record.spectaclemeasurement_framesuppliercode)) nothin() else frame, if(isBlank(record.leftlens_supplierlenscode)) nothin() else leftlens, if(isBlank(record.rightlens_supplierlenscode)) nothin() else rightlens))}], $createbodyright"
         }
       },
@@ -39,10 +39,10 @@
         "dataSource": {
           "type": "rest",
           "behavior": "simple",
-          "path": "https://dev-api-gnm.actio.com.au:8443/service/order",
+          "path": "https://stage-api-gnm.actio.com.au:8443/service/order",
           "credential": {
-            "user": "admin",
-            "password": "password"
+            "user": "dpipes",
+            "password": "L3tM37n!"
           },
           "query": {
             "create": {

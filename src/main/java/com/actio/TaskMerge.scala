@@ -10,7 +10,7 @@ import scala.collection.Iterator
   */
 class TaskMerge extends Task {
 
-  lazy val attribute = config.getString("attribute")
+  lazy val attribute = config.getString(DPSystemConfigurable.ATTRIBUTE_LABEL)
 
   override def execute(): Unit = {
 

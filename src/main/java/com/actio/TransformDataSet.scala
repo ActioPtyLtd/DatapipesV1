@@ -32,6 +32,7 @@ object TestMeta extends App {
 
   def eval(t: AnyRef, scope: Map[String, AnyRef]): DataSet = t match {
     case Lit(str: String) => DataString(str)
+    case Lit(int: Int) => DataNumeric(int)
     case Term.Name(name) => scope(name) match {case ds: DataSet => ds case term => eval(term, scope) }
     case Term.Select(q, Term.Placeholder()) => eval(q, scope)("")
     case Term.Select(Term.Select(q, Term.Name("*")) ,Term.Name(n)) => DataArray("", eval(q, scope).elems.map(i => i(n)).toList)

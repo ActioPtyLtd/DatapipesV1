@@ -112,17 +112,26 @@ public class TaskPipeline extends Task implements Runnable
         //dont think we need this. initalise straight awy resultSet.initBatch();
 
         logger.info("Calling Batch Recursively::"+currentNode.getName()+"("+keyIndex + "/"+tasksInPipeline.size()+")");
-        scala.collection.Iterator<DataSet> iterator = resultSet.elems();
-        while ( iterator.hasNext() && tasksInPipeline.size() > keyIndex ) {
-            DataSet subResultSet = iterator.next();
-            // recursively traverse the rest of the pipeline batching up the ResultSet
-            //subResultSet.dump();
+        if(resultSet.elems().hasNext()) {
+            scala.collection.Iterator<DataSet> iterator = resultSet.elems();
+            while (iterator.hasNext() && tasksInPipeline.size() > keyIndex) {
+                DataSet subResultSet = iterator.next();
+                // recursively traverse the rest of the pipeline batching up the ResultSet
+                //subResultSet.dump();
 
-            for (DataSet iteratedDatSet : getSubDataSets(subResultSet, tasksInPipeline, keyIndex)) {
-                processPipeLineRE(tasksInPipeline, keyIndex, iteratedDatSet);
+                for (DataSet iteratedDatSet : getSubDataSets(subResultSet, tasksInPipeline, keyIndex)) {
+                    processPipeLineRE(tasksInPipeline, keyIndex, iteratedDatSet);
 
+                    logger.info("Called Batch Recursively::" + currentNode.getName() +
+                            "(" + keyIndex + "/" + tasksInPipeline.size() + ")");
+                }
+            }
+        }
+        else{
+            if(tasksInPipeline.size() > keyIndex) {
+                processPipeLineRE(tasksInPipeline, keyIndex, new DataSetTabular());
                 logger.info("Called Batch Recursively::" + currentNode.getName() +
-                        "(" + keyIndex + "/" + tasksInPipeline.size() + ")");
+                            "(" + keyIndex + "/" + tasksInPipeline.size() + ")");
             }
         }
 

@@ -43,7 +43,7 @@ case class DataSetTableScala(myschema: SchemaDefinition, data: DataSet) extends 
 
   def getValue(row: List[String], columnName: String) = row(getOrdinalOfColumn(columnName))
 
-  def getOrdinalOfColumn(columnName: String) = { val i = header.indexWhere(_ == columnName)
+  def getOrdinalOfColumn(columnName: String) = { val i = header.indexWhere(_ .equalsIgnoreCase(columnName))
     if(i < 0) throw new Exception("Column " + columnName + " doesn't exist")
     i }
 

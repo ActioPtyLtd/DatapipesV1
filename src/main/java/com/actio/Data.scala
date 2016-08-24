@@ -1,5 +1,6 @@
 package com.actio
 
+import java.io.InputStream
 import java.text.SimpleDateFormat
 
 import org.json4s._
@@ -128,5 +129,7 @@ object Data2Json {
     }
 
   def fromJson2Data(string: String): DataSet = fromJson4s2Data("", parse(string))
+
+  def fromFileStream2Json2Data(label:String, inputStream:InputStream): DataSet = DataRecord("fileContent", List(DataRecord(label,fromJson4s2Data("record", parse(inputStream)).elems.toList)))
 }
 

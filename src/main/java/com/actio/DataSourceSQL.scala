@@ -56,7 +56,14 @@ class DataSourceSQL extends DataSource with Logging {
     dataSet
   }
 
-  override def write(data: DataSet): Unit = ???
+  override def write(data: DataSet): Unit = {
+    if(config.getString(DPSystemConfigurable.BEHAVIOR_LABEL).isEmpty()) {
+      executeQuery(data, "query.create")
+    }
+    else {
+      executeQuery(data, "query." + config.getString(DPSystemConfigurable.BEHAVIOR_LABEL))
+    }
+  }
 
   override def write(data: DataSet, suffix: String): Unit = ???
 

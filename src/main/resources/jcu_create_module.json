@@ -19,7 +19,7 @@
       "template-module": {
         "type": "mergeTemplate",
         "templates": {
-          "modulecreatebody": "{ \"ModuleId\": \"$moduleid\", \"Name\": \"$moduleid\", \"Description\": \"$moduleid\", \"Owner\": \"MediasiteAdmin\"}"
+          "modulecreatebody": "{ \"ModuleId\": \"xx$moduleid\", \"Name\": \"$moduleid\", \"Description\": \"$moduleid\", \"Owner\": \"MediasiteAdmin\"}"
         }
       },
       "tr1": {
@@ -63,7 +63,6 @@
       "create-folder-merge": {
         "type": "merge",
         "behavior": "simple",
-        "attribute": "folder",
         "dataSource": {
           "type": "rest",
           "behavior": "simple",
@@ -175,16 +174,59 @@
             }
           }
         }
+      },
+      "getdata": {
+        "type": "transformTerm",
+        "term": "ds => batch(ds.data)"
+      },
+      "dumpthis": {
+        "type": "dump"
+      },
+
+      "module-templates": {
+        "type": "mergeTemplate",
+        "templates": {
+          "createmodule": "{ \"ModuleId\": \"$moduleid\", \"Name\": \"$moduleid\", \"Description\": \"$moduleid\", \"Owner\": \"MediasiteAdmin\"}",
+          "createdir": ""
+        }
+      },
+
+      "create-module": {
+        "type": "lookup",
+        "behavior": "simple",
+        "dataSource": {
+          "type": "rest",
+          "behavior": "simple",
+          "path": "-",
+          "headers": {
+            "Content-Type": "application/json",
+            "sfapikey": "25da71cb-4032-49b3-8fe0-11ceb5f4e3a9"
+          },
+          "credential": {
+            "user": "ACTIO",
+            "password": "actio1234"
+          },
+          "query": {
+            "read": {
+              "verb": "post",
+              "uri": "https://mediasiteDEV.jcu.edu.au/mediasite/api/v1/Modules",
+              "body": "createmodule"
+            }
+          }
+        }
       }
     },
     "pipelines": {
+      "create-module" : {
+        "pipe" : "read-modules | module-templates | create-module | dumpthis"
+      },
       "load-frame" : {
         "pipe": "read-modules | template-module | tr1 | create-module-merge | batch1 | template-createfolder | tr1 | create-folder-merge | batch1 | owner-folder | tr1 | owner-folder-merge | batch1 | schedule-template | tr1 | create-schedule | batch1 | assign-schedule-template | tr1 | assign-schedule"
       }
     },
     "services": { },
     "startup": {
-      "exec": "load-frame"
+      "exec": "create-module"
     }
   }
 }

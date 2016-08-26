@@ -178,7 +178,10 @@
       }
     },
     "pipelines": {
-      "load-frame" : {
+      "create-module" : {
+        "pipe" : "read-modules"
+      },
+      "load-frame-old" : {
         "pipe": "read-modules | template-module | tr1 | create-module-merge | batch1 | template-createfolder | tr1 | create-folder-merge | batch1 | owner-folder | tr1 | owner-folder-merge | batch1 | schedule-template | tr1 | create-schedule | batch1 | assign-schedule-template | tr1 | assign-schedule"
       }
     },

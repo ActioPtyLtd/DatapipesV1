@@ -1,6 +1,28 @@
 {
   "script": {
     "schema": {},
+    "include": [
+      {
+        "file": "xyz"
+      },
+      {
+        "file": "abc"
+      },
+      {
+        "file": "abc"
+      },
+      {
+        "environment": [
+          "balh",
+          "balh2",
+          "path"
+        ]
+      }
+    ],
+    "variables" : {
+      "abc" : "xyz",
+      "122" : "blahblah"
+    },
     "tasks": {
       "read-users": {
         "type": "extract",

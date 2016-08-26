@@ -8,6 +8,7 @@ import com.actio.dpsystem.Logging
 class TaskDump extends Task with Logging {
   override def execute(): Unit = {
     logger.info(Data2Json.toJsonString(dataSet))
+    dataSet = DataRecord(List(dataSet))
   }
 
   override def load(): Unit = ???

@@ -75,6 +75,9 @@ public class DPSystemFactory extends DPSystemConfigurable {
             case "mergeTemplate":
                 t = new TransformTemplate();
                 break;
+            case "dump":
+                t = new TaskDump();
+                break;
             default:
                 throw new Exception("DPSystemFactory:Unknown Task Type "+type);
         }

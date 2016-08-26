@@ -63,9 +63,6 @@ public class DPSystemFactory extends DPSystemConfigurable {
             case "include":
                 t = new TaskInclude();
                 break;
-            case "iterateTemplate":
-                t = new TransformIterateTemplate();
-                break;
             case "iterate":
                 t = new TransformIterate();
                 break;
@@ -203,9 +200,6 @@ public class DPSystemFactory extends DPSystemConfigurable {
         switch (type){
             case "mergeTemplate" :
                 t = new TransformTemplate();
-                break;
-            case "iterateTemplate":
-                t = new TransformIterateTemplate();
                 break;
             case "lineValidation":
                 t = new TaskTransform();

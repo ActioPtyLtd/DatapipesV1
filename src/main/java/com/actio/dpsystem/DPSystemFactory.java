@@ -63,9 +63,6 @@ public class DPSystemFactory extends DPSystemConfigurable {
             case "include":
                 t = new TaskInclude();
                 break;
-            case "iterateTemplate":
-                t = new TransformIterateTemplate();
-                break;
             case "iterate":
                 t = new TransformIterate();
                 break;
@@ -77,6 +74,9 @@ public class DPSystemFactory extends DPSystemConfigurable {
                 break;
             case "mergeTemplate":
                 t = new TransformTemplate();
+                break;
+            case "dump":
+                t = new TaskDump();
                 break;
             default:
                 throw new Exception("DPSystemFactory:Unknown Task Type "+type);
@@ -203,9 +203,6 @@ public class DPSystemFactory extends DPSystemConfigurable {
         switch (type){
             case "mergeTemplate" :
                 t = new TransformTemplate();
-                break;
-            case "iterateTemplate":
-                t = new TransformIterateTemplate();
                 break;
             case "lineValidation":
                 t = new TaskTransform();

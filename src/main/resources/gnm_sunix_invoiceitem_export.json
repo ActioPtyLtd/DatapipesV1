@@ -81,13 +81,16 @@
       }
     },
     "pipelines": {
-      "load-invoice" : {
+      "incremental" : {
         "pipe": "read-invoiceitem-dbf | filter | template-lookup | lookupinvoicekey | lookupproductkey | template-update | update-invoiceitem-db"
+      },
+      "full" : {
+        "pipe": "read-invoiceitem-dbf | template-lookup | lookupinvoicekey | lookupproductkey | template-update | update-invoiceitem-db"
       }
     },
     "services": { },
     "startup": {
-      "exec": "load-invoice"
+      "exec": "incremental"
     }
   }
 }

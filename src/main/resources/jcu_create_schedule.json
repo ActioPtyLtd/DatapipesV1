@@ -20,7 +20,7 @@
         }
       },
       "load-folder-uuid": {
-        "type": "datasourceupdate",
+        "type": "join",
         "behavior": "",
         "iterateR": "ds => ds.value",
         "keyL": "$moduleid",

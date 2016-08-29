@@ -12,6 +12,10 @@
           "filenameTemplate": "VACCOUNT.DBF"
         }
       },
+      "filter": {
+        "type": "transformTerm",
+        "term": "ds => batch(ds.filter(d => d.ACCDATE >= today(-7)))"
+      },
       "templatelookup": {
         "type": "mergeTemplate",
         "templates": {
@@ -92,7 +96,7 @@
     },
     "pipelines": {
       "load-invoice" : {
-        "pipe": "read-invoice-dbf | templatelookup | lookupstorekey | lookupemployeekey | lookupcustomerkey | template | update-invoice-db"
+        "pipe": "read-invoice-dbf | filter | templatelookup | lookupstorekey | lookupemployeekey | lookupcustomerkey | template | update-invoice-db"
       }
     },
     "services": { },

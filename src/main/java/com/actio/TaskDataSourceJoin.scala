@@ -34,7 +34,7 @@ class TaskDataJoin extends Task {
 
     dataSet = DataRecord(List(DataArray(dataSet.elems
       .map(e => (e, JoinCache.dim.get(TestMeta.evalTemplate(e, keyL).stringOption.getOrElse(""))))
-      .map(m => if(m._2.isDefined) DataRecord(List(m._1, m._2.get)) else m._1 )
+      .map(m => if(m._2.isDefined) DataRecord(m._1.label, m._2.get :: m._1.elems.toList) else m._1 )
       .toList)))
 
   }

@@ -3,7 +3,9 @@ package com.actio
 import java.security.MessageDigest
 import java.time.{LocalDateTime, LocalDate}
 import java.time.format.DateTimeFormatter
-import org.apache.commons.codec.binary.Hex;
+import org.apache.commons.codec.binary.Hex
+import org.apache.commons.lang.time.DateUtils
+;
 
 import scala.annotation.tailrec
 import scala.collection.mutable
@@ -198,6 +200,8 @@ object DataSetTransforms {
     }
 
   }
+
+  def today(dateOffset: Int): DataSet = DataDate(DateUtils.addDays(new java.util.Date(), dateOffset))
 
   def filterValue(ds: DataSet, property: String, value: String): DataSet = DataArray(ds.elems.filter(f => f(property).stringOption.getOrElse("") == value).toList)
 

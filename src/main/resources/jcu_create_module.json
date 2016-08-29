@@ -12,7 +12,7 @@
           "connect": "jdbc:sqlserver://corptestmdb01.jcu.edu.au:1433;user=mediasite_ro;password=afcfh8742Nch7y1SA",
           "query": {
             "queryTemplate": "",
-            "read": "select distinct  top 50 moduleid,presenterusername from current_activities where PresenterUsername is not null order by PresenterUsername desc"
+            "read": "select distinct moduleid,presenterusername from current_activities where PresenterUsername is not null order by PresenterUsername desc"
           }
         }
       },
@@ -186,8 +186,8 @@
       "module-templates": {
         "type": "mergeTemplate",
         "templates": {
-          "createmodule": "{ \"ModuleId\": \"xx$moduleid\", \"Name\": \"$moduleid\", \"Description\": \"$moduleid\", \"Owner\": \"MediasiteAdmin\"}",
-          "createfolder": "{ \"Name\": \"xx$moduleid\", \"Owner\": \"MediasiteAdmin\", \"ParentFolderId\": \"7c06968cc79c44eea80b89c627d2ac4b14\", \"Recycled\": false, \"Type\": \"Folder\", \"IsShared\": false, \"IsCopyDestination\": true, \"IsReviewEditApproveEnabled\": true}"
+          "createmodule": "{ \"ModuleId\": \"$moduleid\", \"Name\": \"$moduleid\", \"Description\": \"$moduleid\", \"Owner\": \"MediasiteAdmin\"}",
+          "createfolder": "{ \"Name\": \"$moduleid\", \"Owner\": \"MediasiteAdmin\", \"ParentFolderId\": \"7c06968cc79c44eea80b89c627d2ac4b14\", \"Recycled\": false, \"Type\": \"Folder\", \"IsShared\": false, \"IsCopyDestination\": true, \"IsReviewEditApproveEnabled\": true}"
         }
       },
 
@@ -233,7 +233,7 @@
           "query": {
             "read": {
               "verb": "post",
-              "uri": "https://mediasiteDEV.jcu.edu.au/mediasite/api/v1/Modules",
+              "uri": "https://mediasiteDEV.jcu.edu.au/mediasite/api/v1/Folders",
               "body": "createfolder"
             }
           }
@@ -242,10 +242,7 @@
     },
     "pipelines": {
       "create-module" : {
-        "pipe" : "read-modules | dumpthis | module-templates | dumpthis  "
-      },
-      "create-module2" : {
-        "pipe" : "read-modules | dumpthis  | module-templates | dumpthis | create-module | dumpthis | create-folder"
+        "pipe" : "read-modules | dumpthis  | module-templates | dumpthis | create-module | dumpthis | create-folder | create-schedule "
       },
       "load-frame" : {
         "pipe": "read-modules | template-module | tr1 | create-module-merge | batch1 | template-createfolder | tr1 | create-folder-merge | batch1 | owner-folder | tr1 | owner-folder-merge | batch1 | schedule-template | tr1 | create-schedule | batch1 | assign-schedule-template | tr1 | assign-schedule"

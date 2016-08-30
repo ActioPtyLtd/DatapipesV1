@@ -11,6 +11,8 @@ import scala.collection.JavaConverters._
 
 object Cache {
   var dim: Option[Map[String, String]] = None
+
+  def clear: Unit = { dim = None }
 }
 
 class TaskDataSourceUpdate extends Task {

@@ -8,8 +8,8 @@ import scala.meta._
  */
 object TestMeta extends App {
 
-  val ds = DataRecord("", List(DataDate("key", new java.util.Date()), DataDate("key2", new java.util.Date(2000-1900,1,1))))
-  val text = "ds => ds.filterNot(d => d < today(-7))"
+  val ds = DataRecord("", List(DataString("key", "abc"), DataDate("key2", new java.util.Date(2000-1900,1,1))))
+  val text = "ds => ds.key + \"def\""
 
   val term = text.parse[Term]
 
@@ -61,5 +61,6 @@ object TestMeta extends App {
     case Term.ApplyInfix(l, Term.Name("<"), Nil, Seq(r)) => eval(l, scope) match {
       case d: DataDate => DataBoolean(d.date.compareTo(eval(r, scope).asInstanceOf[DataDate].date) < 0)
       case _ => DataBoolean(false)}
+    case Term.ApplyInfix(l, Term.Name("+"), Nil, Seq(r)) => DataString(eval(l, scope).stringOption.getOrElse("") + eval(r, scope).stringOption.getOrElse(""))
   }
 }

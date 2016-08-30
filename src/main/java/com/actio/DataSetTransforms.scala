@@ -246,7 +246,6 @@ object DataSetTransforms {
 
   def maprecord(ds: DataSet): DataSet = DataArray(ds.elems.map(e => DataRecord(List(e))).toList)
 
-
   /* below will need to be replaced when I have time */
 
   def equal(ds1: DataSet, ds2: DataSet) = DataBoolean(ds1 == ds2)
@@ -480,9 +479,9 @@ object DataSetTransforms {
 
   def copy(ds: DataSetTableScala, from: String, to: List[String]) = DataSetTableScala(to ::: ds.header, ds.rows map (r => List.fill(to.size)(ds.getValue(r, from)) ::: r))
 
-  def coalesce(ds: DataSetTableScala, cols: List[String]) = rowFunc(ds, ds.getNextAvailableColumnName("coalesce"), r => coalesceValue(cols.map(ds.getValue(r, _)).toList))
+  def coalesce(vals: List[DataSet]) = DataString(vals.find(v => v.stringOption.isDefined).map(_.stringOption.get).getOrElse(""))
 
-  def coalesceValue(vals: List[String]) = vals.find(v => v.trim().nonEmpty).getOrElse("")
+  def blankAsNull(str: String) = if(str.isEmpty) Nothin() else DataString(str)
 
   def isEmptyDataSet(ds: DataSetTableScala) = ds.rows.isEmpty
 

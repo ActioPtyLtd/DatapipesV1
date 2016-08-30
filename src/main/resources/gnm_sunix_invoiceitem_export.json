@@ -20,7 +20,7 @@
         "type": "mergeTemplate",
         "templates": {
           "lookupinvoice": "select sk,createddate,storesk,employeesk,customersk from invoice where invoiceid='2088-PH-012-$ACCNUM'",
-          "lookupproduct": "select sk from storeproduct where productid='2088-PH-012-$CODE'"
+          "lookupproduct": "select sk from storeproduct where productid='2088-PH-012-${coalesce(blankAsNull(CODE),PAIDBY + \"-\" + ITEMCODE)}'"
         }
       },
       "lookupinvoicekey": {
@@ -55,7 +55,7 @@
           "key": "${numeric(lookupinvoicekey(0)(0).sk)},${row.IPOS}",
           "changeL": "${numeric(lookupproductkey(0)(0).sk)},${row.QTY},${row.ITEMAMT}",
           "create": "insert into invoiceitem (invoicesk,pos,productsk,storesk,employeesk,serviceemployeesk,customersk,createddate,quantity,cost) values (${numeric(lookupinvoicekey(0)(0).sk)},${row.IPOS},${numeric(lookupproductkey(0)(0).sk)},${numeric(lookupinvoicekey(0)(0).storesk)},${numeric(lookupinvoicekey(0)(0).employeesk)},${numeric(lookupinvoicekey(0)(0).employeesk)},${numeric(lookupinvoicekey(0)(0).customersk)},'${orElse(lookupinvoicekey(0)(0).createddate,\"1900-01-01\")}'::timestamp,${row.QTY},${row.ITEMAMT})",
-          "update": "update invoiceitem set productsk=${numeric(lookupproductkey(0)(0).sk)},quantity=${row.QTY},cost=${row.ITEMAMT} where invoicesk=${numeric(lookupproductkey(0)(0).sk)} and pos=${row.IPOS}"
+          "update": "update invoiceitem set productsk=${numeric(lookupproductkey(0)(0).sk)},quantity=${row.QTY},cost=${row.ITEMAMT} where invoicesk=${numeric(lookupinvoicekey(0)(0).sk)} and pos=${row.IPOS}"
         }
       },
       "update-invoiceitem-db": {

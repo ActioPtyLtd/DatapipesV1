@@ -3,7 +3,9 @@ package com.actio
 import java.security.MessageDigest
 import java.time.{LocalDateTime, LocalDate}
 import java.time.format.DateTimeFormatter
-import org.apache.commons.codec.binary.Hex;
+import org.apache.commons.codec.binary.Hex
+import org.apache.commons.lang.time.DateUtils
+;
 
 import scala.annotation.tailrec
 import scala.collection.mutable
@@ -199,6 +201,8 @@ object DataSetTransforms {
 
   }
 
+  def today(dateOffset: Int): DataSet = DataDate(DateUtils.addDays(new java.util.Date(), dateOffset))
+
   def filterValue(ds: DataSet, property: String, value: String): DataSet = DataArray(ds.elems.filter(f => f(property).stringOption.getOrElse("") == value).toList)
 
   def firstValue(ds: DataSet, property: String, value: String): DataSet = ds.elems.find(f => f.value(property).stringOption.getOrElse("") == value).getOrElse(Nothin())
@@ -241,7 +245,6 @@ object DataSetTransforms {
   }
 
   def maprecord(ds: DataSet): DataSet = DataArray(ds.elems.map(e => DataRecord(List(e))).toList)
-
 
   /* below will need to be replaced when I have time */
 
@@ -476,9 +479,9 @@ object DataSetTransforms {
 
   def copy(ds: DataSetTableScala, from: String, to: List[String]) = DataSetTableScala(to ::: ds.header, ds.rows map (r => List.fill(to.size)(ds.getValue(r, from)) ::: r))
 
-  def coalesce(ds: DataSetTableScala, cols: List[String]) = rowFunc(ds, ds.getNextAvailableColumnName("coalesce"), r => coalesceValue(cols.map(ds.getValue(r, _)).toList))
+  def coalesce(vals: List[DataSet]) = DataString(vals.find(v => v.stringOption.isDefined).map(_.stringOption.get).getOrElse(""))
 
-  def coalesceValue(vals: List[String]) = vals.find(v => v.trim().nonEmpty).getOrElse("")
+  def blankAsNull(str: String) = if(str.isEmpty) Nothin() else DataString(str)
 
   def isEmptyDataSet(ds: DataSetTableScala) = ds.rows.isEmpty
 

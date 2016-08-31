@@ -72,6 +72,8 @@ case class DataRecord(label: String, fields: List[DataSet]) extends DataSet {
 object DataRecord {
 
   def apply(fields: List[DataSet]): DataRecord = new DataRecord("record", fields)
+  def apply(fields: DataSet*): DataRecord = new DataRecord("record", fields.toList)
+  def apply(label: String, fields: DataSet*): DataRecord = new DataRecord(label, fields.toList)
 }
 
 case class DataArray(label: String, arrayElems: List[DataSet]) extends DataSet {

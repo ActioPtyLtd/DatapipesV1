@@ -63,9 +63,6 @@ public class DPSystemFactory extends DPSystemConfigurable {
             case "include":
                 t = new TaskInclude();
                 break;
-            case "iterate":
-                t = new TransformIterate();
-                break;
             case "merge":
                 t = new TaskMerge();
                 break;

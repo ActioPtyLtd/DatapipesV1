@@ -12,7 +12,7 @@
             "connect": "jdbc:sqlserver://corptestmdb01.jcu.edu.au:1433;user=mediasite_ro;password=afcfh8742Nch7y1SA",
             "query": {
               "queryTemplate": "",
-              "read": "select distinct moduleid from mediasite_activities where PresenterUsername is not null"
+              "read": "select distinct moduleid from current_activities where PresenterUsername is not null"
             }
           }
         },
@@ -26,14 +26,14 @@
             "connect": "jdbc:sqlserver://corptestmdb01.jcu.edu.au:1433;user=mediasite_ro;password=afcfh8742Nch7y1SA",
             "query": {
               "queryTemplate": "",
-              "read": "select distinct moduleid,presenterusername from mediasite_activities where PresenterUsername is not null order by moduleid"
+              "read": "select distinct moduleid,presenterusername from current_activities where PresenterUsername is not null order by moduleid"
             }
           }
         },
         "template-module": {
           "type": "mergeTemplate",
           "templates": {
-            "modulecreatebody": "{ \"ModuleId\": \"xx$moduleid\", \"Name\": \"$moduleid\", \"Description\": \"$moduleid\", \"Owner\": \"MediasiteAdmin\"}"
+            "modulecreatebody": "{ \"ModuleId\": \"$moduleid\", \"Name\": \"$moduleid\", \"Description\": \"$moduleid\", \"Owner\": \"MediasiteAdmin\"}"
           }
         },
         "tr1": {
@@ -201,7 +201,7 @@
           "type": "mergeTemplate",
           "templates": {
             "createmodule": "{ \"ModuleId\": \"$moduleid\", \"Name\": \"$moduleid\", \"Description\": \"$moduleid\", \"Owner\": \"MediasiteAdmin\"}",
-            "createfolder": "{ \"Name\": \"$moduleid\", \"Owner\": \"MediasiteAdmin\", \"ParentFolderId\": \"7c06968cc79c44eea80b89c627d2ac4b14\", \"Recycled\": false, \"Type\": \"Folder\", \"IsShared\": false, \"IsCopyDestination\": true, \"IsReviewEditApproveEnabled\": true}"
+            "createfolder": "{ \"Name\": \"$moduleid\", \"Owner\": \"MediasiteAdmin\", \"ParentFolderId\": \"e3ccde54d41047d6961425744bf89a4414\", \"Recycled\": false, \"Type\": \"Folder\", \"IsShared\": false, \"IsCopyDestination\": true, \"IsReviewEditApproveEnabled\": true}"
           }
         },
 

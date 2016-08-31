@@ -212,7 +212,7 @@ class DataSourceREST extends DataSource with Logging {
   def getResponseDataSet(request: HttpUriRequest)(implicit httpClient: HttpClient): DataSetHttpResponse = {
     val response = httpClient(request)
 
-    this.logger.info(response._3)
+    this.logger.debug(response._3)
 
     val dsBody = Try(Data2Json.fromJson2Data(response._3)).toOption.getOrElse(DataString(Option(response._3).getOrElse("")))
 

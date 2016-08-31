@@ -15,7 +15,7 @@
           "connect": "jdbc:sqlserver://corptestmdb01.jcu.edu.au:1433;user=mediasite_ro;password=afcfh8742Nch7y1SA",
           "query": {
             "queryTemplate": "",
-            "read": "SELECT top 2000 courseid+':'+room courseid,moduleid,room,year,  CONVERT(varchar, SWITCHOFFSET(CONVERT(datetimeoffset, startdatetime), DATENAME(TzOffset, SYSDATETIMEOFFSET())),126) startdatetime,CONVERT(varchar, SWITCHOFFSET(CONVERT(datetimeoffset, enddatetime), DATENAME(TzOffset, SYSDATETIMEOFFSET())),126) enddatetime,duration*60*1000 duration,presenterusername,presenterfullname FROM [Mediasite].[dbo].[mediasite_activities] where presenterUsername is not null order by moduleid "
+            "read": "SELECT courseid+'_'+room+'_'+presenterfullname+'_'+CONVERT(varchar, SWITCHOFFSET(CONVERT(datetimeoffset, startdatetime), DATENAME(TzOffset, SYSDATETIMEOFFSET())),126) courseid,moduleid,room,year, CONVERT(varchar, SWITCHOFFSET(CONVERT(datetimeoffset, startdatetime), DATENAME(TzOffset, SYSDATETIMEOFFSET())),126) startdatetime,CONVERT(varchar, SWITCHOFFSET(CONVERT(datetimeoffset, enddatetime), DATENAME(TzOffset, SYSDATETIMEOFFSET())),126) enddatetime,duration*60*1000 duration,presenterusername,presenterfullname FROM current_activities where presenterUsername is not null order by moduleid"
           }
         }
       },
@@ -29,7 +29,7 @@
           "connect": "jdbc:sqlserver://corptestmdb01.jcu.edu.au:1433;user=mediasite_ro;password=afcfh8742Nch7y1SA",
           "query": {
             "queryTemplate": "",
-            "read": "select distinct moduleid from mediasite_activities where PresenterUsername is not null order by moduleid"
+            "read": "select distinct moduleid from current_activities where PresenterUsername is not null order by moduleid"
           }
         }
       },
@@ -369,7 +369,6 @@
         "pipe" : " get_schedules | tr1 | dumpthis | merge_del_schedule | delete_schedules "
       }
     },
-    "services": { },
     "startup": {
       "exec": "create_catalogs"
     }

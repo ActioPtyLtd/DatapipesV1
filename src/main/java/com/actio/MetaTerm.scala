@@ -6,18 +6,7 @@ import scala.meta._
 /**
  * Created by mauri on 23/07/2016.
  */
-object MetaTerm extends App {
-
-  val ds = DataRecord("", List(DataString("key", "abc"), DataDate("key2", new java.util.Date(2000 - 1900, 1, 1))))
-  val text = "ds => ds.key + \"def\""
-
-  val term = text.parse[Term]
-
-  println(term.get.structure)
-
-  val res = eval(ds, term.get)
-
-  println(res)
+object MetaTerm {
 
   def eval(ds: DataSet, text: String): DataSet = eval(ds, text.parse[Term].get)
 
@@ -28,10 +17,11 @@ object MetaTerm extends App {
   def eval(ds: DataSet, t: Term): DataSet = t match {
 
     // evaluate lambda expression
-    case Term.Function(Seq(Term.Param(_, Term.Name(name), _, _)), body) => eval(body, Map(name -> ds))
+    case Term.Function(Seq(Term.Param(_, Term.Name(name), _, _)), body) =>
+      eval(body, Map(name -> ds))
 
     // evaluate expression, add to scope top level attributes of the DataSet
-    case _ => eval(t, ds.elems.map(e => (e.label -> e)).toList.toMap)
+    case _ => eval(t, ds.elems.map(e => e.label -> e).toList.toMap)
   }
 
   def eval(t: AnyRef, scope: Map[String, AnyRef]): DataSet = t match {
@@ -43,7 +33,10 @@ object MetaTerm extends App {
     case Lit(int: Int) => DataNumeric(int)
 
     // get variable in scope
-    case Term.Name(name) => scope(name) match { case ds: DataSet => ds case term => eval(term, scope) }
+    case Term.Name(name) => scope(name) match {
+      case ds: DataSet => ds
+      case term => eval(term, scope)
+    }
 
     // evaluate conditional block
     case Term.If(cond, thenp, elsep) =>
@@ -59,9 +52,8 @@ object MetaTerm extends App {
     // evaluate templates
     case Term.Interpolate(_, strings, terms) => DataString(
       (strings zip terms)
-        .map(p =>
-          p._1.toString() + eval(p._2, scope).stringOption.getOrElse("")).mkString +
-        strings.last.toString)
+        .map(p => p._1.toString() + eval(p._2, scope).stringOption.getOrElse(""))
+        .mkString + strings.last.toString)
 
     // support dot notation to access DataSets
     case select: Term.Select => evalSelect(select, scope)
@@ -75,11 +67,13 @@ object MetaTerm extends App {
 
   def evalSelect(t: Term.Select, scope: Map[String, AnyRef]): DataSet = t match {
 
-    // Placeholder '_' will evaluate to accessing a DataSet record by empty label (maybe obsolete)
+    // Placeholder '_' will evaluate to accessing a
+    // DataSet record by empty label (maybe obsolete)
     case Term.Select(q, Term.Placeholder()) => eval(q, scope)("")
 
     // Astrix should be treated as iteration
-    case Term.Select(Term.Select(q, Term.Name("*")), Term.Name(n)) => DataArray("", eval(q, scope).elems.map(i => i(n)).toList)
+    case Term.Select(Term.Select(q, Term.Name("*")), Term.Name(n)) =>
+      DataArray(eval(q, scope).elems.map(i => i(n)).toList)
 
     // Look for the DataSet with label
     case Term.Select(q, Term.Name(n)) => eval(q, scope)(n)
@@ -88,7 +82,9 @@ object MetaTerm extends App {
   def evalApply(t: Term.Apply, scope: Map[String, AnyRef]): DataSet = t match {
 
     // dynamically call function, evaluating parameters before execution
-    case Term.Apply(Term.Name(fName), args) if !scope.contains(fName) => UtilityFunctions.execute(fName, args.map(eval(_, scope)).toList)
+    case Term.Apply(Term.Name(fName), args)
+      if !scope.contains(fName) =>
+        UtilityFunctions.execute(fName, args.map(eval(_, scope)).toList)
 
     // get DataSet by ordinal
     case Term.Apply(q, Seq(Lit(num: Int))) => eval(q, scope)(num)
@@ -97,39 +93,58 @@ object MetaTerm extends App {
     case Term.Apply(q, Seq(Lit(str: String))) => eval(q, scope)(str)
 
     // construct a fixed size DataArray
-    case Term.Apply(Term.Name("DataArray"), args) => DataArray(args.map(eval(_, scope)).toList)
+    case Term.Apply(Term.Name("DataArray"), args) =>
+      DataArray(args.map(eval(_, scope)).toList)
 
     // iterate through DataSet and include elements matching condition
     case Term.Apply(
       Term.Select(s, Term.Name("filter")),
       Seq(Term.Function(Seq(Term.Param(Nil, Term.Name(tn), None, None)), rem))) =>
-      DataArray(eval(s, scope).elems.filter(f => eval(rem, scope + (tn -> f)).asInstanceOf[DataBoolean].bool).toList)
+        DataArray(
+          eval(s, scope)
+            .elems
+            .filter(f => eval(rem, scope + (tn -> f)).asInstanceOf[DataBoolean].bool)
+            .toList)
 
     // iterate through DataSet and exclude elements matching condition
     case Term.Apply(
       Term.Select(s, Term.Name("filterNot")),
       Seq(Term.Function(Seq(Term.Param(Nil, Term.Name(tn), None, None)), rem))) =>
-      DataArray(eval(s, scope).elems.filterNot(f => eval(rem, scope + (tn -> f)).asInstanceOf[DataBoolean].bool).toList)
+        DataArray(
+          eval(s, scope)
+            .elems
+            .filterNot(f => eval(rem, scope + (tn -> f)).asInstanceOf[DataBoolean].bool)
+            .toList)
   }
 
   def evalApplyInfix(t: Term.ApplyInfix, scope: Map[String, AnyRef]): DataSet = t match {
 
     // currently can compare dates only
-    case Term.ApplyInfix(l, Term.Name(">="), Nil, Seq(r)) => eval(l, scope) match {
-      case d: DataDate => DataBoolean(d.date.compareTo(eval(r, scope).asInstanceOf[DataDate].date) >= 0)
-      case n: DataNumeric => DataBoolean(n.num >= eval(r, scope).asInstanceOf[DataNumeric].num)
-      case _ => DataBoolean(false)
+    case Term.ApplyInfix(l, Term.Name(">="), Nil, Seq(r)) =>
+      eval(l, scope) match {
+        case d: DataDate =>
+          DataBoolean(d.date.compareTo(eval(r, scope).asInstanceOf[DataDate].date) >= 0)
+        case n: DataNumeric =>
+          DataBoolean(n.num >= eval(r, scope).asInstanceOf[DataNumeric].num)
+        case _ =>
+          DataBoolean(false)
     }
 
     // currently can compare dates only
     case Term.ApplyInfix(l, Term.Name("<"), Nil, Seq(r)) => eval(l, scope) match {
-      case d: DataDate => DataBoolean(d.date.compareTo(eval(r, scope).asInstanceOf[DataDate].date) < 0)
-      case n: DataNumeric => DataBoolean(n.num < eval(r, scope).asInstanceOf[DataNumeric].num)
-      case _ => DataBoolean(false)
+      case d: DataDate =>
+        DataBoolean(d.date.compareTo(eval(r, scope).asInstanceOf[DataDate].date) < 0)
+      case n: DataNumeric =>
+        DataBoolean(n.num < eval(r, scope).asInstanceOf[DataNumeric].num)
+      case _ =>
+        DataBoolean(false)
     }
 
     // currently, addition appends strings only
-    case Term.ApplyInfix(l, Term.Name("+"), Nil, Seq(r)) => DataString(eval(l, scope).stringOption.getOrElse("") + eval(r, scope).stringOption.getOrElse(""))
+    case Term.ApplyInfix(l, Term.Name("+"), Nil, Seq(r)) =>
+      DataString(
+        eval(l, scope).stringOption.getOrElse("") +
+        eval(r, scope).stringOption.getOrElse(""))
 
     // currently, equality will do a string comparison
     case Term.ApplyInfix(l, Term.Name("=="), Nil, Seq(r)) => {
@@ -139,5 +154,4 @@ object MetaTerm extends App {
       DataBoolean(ls.isDefined && rs.isDefined && ls.get == rs.get)
     }
   }
-
 }

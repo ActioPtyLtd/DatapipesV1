@@ -10,7 +10,7 @@ import scala.collection.JavaConverters._
 class TransformTemplate extends TaskTransform {
 
   override def execute(): Unit = {
-    val records = dataSet.elems.map(ds => DataRecord(ds :: templates.map(t => DataString(t._1, TestMeta.evalTemplate(ds,t._2).stringOption.getOrElse(""))).toList))
+    val records = dataSet.elems.map(ds => DataRecord(ds :: templates.map(t => DataString(t._1, MetaTerm.evalTemplate(ds,t._2).stringOption.getOrElse(""))).toList))
     val batch = DataRecord("batch", List(DataArray(records.toList)))
     dataSet = batch
   }

@@ -23,17 +23,17 @@ class TaskDataJoin extends Task {
       val dataSourceDataSet = dataSource.read(Nothin())
 
       val tes = dataSourceDataSet.elems.toList
-      val es = tes.flatMap(e => TestMeta.eval(e, iterateR).elems).toList
+      val es = tes.flatMap(e => MetaTerm.eval(e, iterateR).elems).toList
 
       dim = scala.collection.mutable.HashMap[String, DataSet](
         es
           .map(m =>
-            (TestMeta.evalTemplate(m, keyR).stringOption.getOrElse(""),
+            (MetaTerm.evalTemplate(m, keyR).stringOption.getOrElse(""),
               m)).toList: _*)
     }
 
     dataSet = DataRecord(List(DataArray(dataSet.elems
-      .map(e => (e, dim.get(TestMeta.evalTemplate(e, keyL).stringOption.getOrElse(""))))
+      .map(e => (e, dim.get(MetaTerm.evalTemplate(e, keyL).stringOption.getOrElse(""))))
       .map(m => if(m._2.isDefined) DataRecord(m._1.label, DataRecord(this.node.getName, List(m._2.get)) :: m._1.elems.toList) else m._1 )
       .toList)))
 

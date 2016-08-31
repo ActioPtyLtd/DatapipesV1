@@ -9,23 +9,23 @@ import scala.collection.JavaConverters._
  * Created by mauri on 2/05/2016.
  */
 
-object JoinCache {
-  var dim: Map[String, DataSet] = scala.collection.mutable.HashMap()
-}
+
 
 class TaskDataJoin extends Task {
 
+
   override def execute(): Unit = {
+    var dim: Map[String, DataSet] = scala.collection.mutable.HashMap()
     super.setConfig(sysconf.getTaskConfig(this.node.getName).toConfig, sysconf.getMasterConfig)
 
     // load all from the data source
-    if (JoinCache.dim.isEmpty) {
+    if (dim.isEmpty) {
       val dataSourceDataSet = dataSource.read(Nothin())
 
       val tes = dataSourceDataSet.elems.toList
       val es = tes.flatMap(e => TestMeta.eval(e, iterateR).elems).toList
 
-      JoinCache.dim = scala.collection.mutable.HashMap[String, DataSet](
+      dim = scala.collection.mutable.HashMap[String, DataSet](
         es
           .map(m =>
             (TestMeta.evalTemplate(m, keyR).stringOption.getOrElse(""),
@@ -33,8 +33,8 @@ class TaskDataJoin extends Task {
     }
 
     dataSet = DataRecord(List(DataArray(dataSet.elems
-      .map(e => (e, JoinCache.dim.get(TestMeta.evalTemplate(e, keyL).stringOption.getOrElse(""))))
-      .map(m => if(m._2.isDefined) DataRecord(m._1.label, m._2.get :: m._1.elems.toList) else m._1 )
+      .map(e => (e, dim.get(TestMeta.evalTemplate(e, keyL).stringOption.getOrElse(""))))
+      .map(m => if(m._2.isDefined) DataRecord(m._1.label, DataRecord(this.node.getName, List(m._2.get)) :: m._1.elems.toList) else m._1 )
       .toList)))
 
   }

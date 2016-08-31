@@ -244,7 +244,7 @@ object DataSetTransforms {
     DataString(Hex.encodeHexString(m.digest))
   }
 
-  def maprecord(ds: DataSet): DataSet = DataArray(ds.elems.map(e => DataRecord(List(e))).toList)
+  def maprecord(ds: DataSet): DataSet = DataArray(ds.elems.map(e => DataRecord(e)).toList)
 
   /* below will need to be replaced when I have time */
 

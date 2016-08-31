@@ -32,10 +32,10 @@ class TaskDataJoin extends Task {
               m)).toList: _*)
     }
 
-    dataSet = DataRecord(List(DataArray(dataSet.elems
+    dataSet = DataRecord(DataArray(dataSet.elems
       .map(e => (e, dim.get(MetaTerm.evalTemplate(e, keyL).stringOption.getOrElse(""))))
       .map(m => if(m._2.isDefined) DataRecord(m._1.label, DataRecord(this.node.getName, List(m._2.get)) :: m._1.elems.toList) else m._1 )
-      .toList)))
+      .toList))
 
   }
 

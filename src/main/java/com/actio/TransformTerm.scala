@@ -7,7 +7,7 @@ import com.actio.dpsystem.{ DPSystemConfig, DPFnNode }
  */
 class TransformTerm extends Task {
 
-  override def execute(): Unit = { dataSet = TestMeta.eval(dataSet, term) }
+  override def execute(): Unit = { dataSet = MetaTerm.eval(dataSet, term) }
 
   override def load(): Unit = ???
 

@@ -24,7 +24,7 @@ object UtilityFunctions extends Logging {
     val method = Class.forName("com.actio.DataSetTransforms").getDeclaredMethods.find(_.getName.equalsIgnoreCase(methodName))
 
     if (method.isDefined) {
-      logger.info("Invoking method " + methodName)
+      logger.debug("Invoking method " + methodName)
       // assume return one data set right now
       method.get.invoke(null, getParamValues(method.get.getParameters, params) map (_.asInstanceOf[Object]): _*).asInstanceOf[DataSet]
     } else {

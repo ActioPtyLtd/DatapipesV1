@@ -1,6 +1,7 @@
 package com.actio
 
 import java.security.MessageDigest
+import java.text.SimpleDateFormat
 import java.time.{LocalDateTime, LocalDate}
 import java.time.format.DateTimeFormatter
 import org.apache.commons.codec.binary.Hex
@@ -201,6 +202,15 @@ object DataSetTransforms {
 
   }
 
+  def dateFormat(ds: DataSet, format: String): DataSet = {
+    try {
+      DataString(new SimpleDateFormat(format).format(ds.asInstanceOf[DataDate].date))
+    }
+    catch {
+      case _: Exception => DataString(new SimpleDateFormat(format).format(new SimpleDateFormat("dd/MM/yyyy").parse("1/1/1900")))
+    }
+  }
+
   def today(dateOffset: Int): DataSet = DataDate(DateUtils.addDays(new java.util.Date(), dateOffset))
 
   def filterValue(ds: DataSet, property: String, value: String): DataSet = DataArray(ds.elems.filter(f => f(property).stringOption.getOrElse("") == value).toList)
@@ -225,6 +235,8 @@ object DataSetTransforms {
   def sq(str: String): DataSet = if(str == null) DataString("") else DataString(str.replace("'","''"))
 
   def numeric(value: String): DataSet = DataNumeric(Try(BigDecimal(value)).getOrElse(BigDecimal(0)))
+
+  def integer(value: String): DataSet = DataNumeric(Try(BigDecimal(value.toInt)).getOrElse(BigDecimal(0)))
 
   def round(value: String, scale: Int): DataSet = DataNumeric(Try(BigDecimal(value).setScale(scale, BigDecimal.RoundingMode.HALF_UP)).getOrElse(BigDecimal(0)))
 

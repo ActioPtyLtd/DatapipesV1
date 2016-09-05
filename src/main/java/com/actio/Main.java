@@ -8,6 +8,7 @@ import java.net.URL;
 import java.net.URLClassLoader;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Properties;
 
 //import com.jcabi.aspects.Loggable;
 import org.apache.commons.cli.*;
@@ -33,6 +34,7 @@ public class Main {
         String configFile = null;
         String pipelineName = null;
         Boolean runService = false;
+        Properties properties = null;
 
         try {
             // parse the command line arguments
@@ -52,6 +54,9 @@ public class Main {
                 runService = true;
                 logger.info("============ RUN AS SERVICE ==========");
             }
+            if (line.hasOption('D')) {
+                properties = line.getOptionProperties("D");
+            }
 
         }
         catch( ParseException exp ) {
@@ -66,7 +71,7 @@ public class Main {
         debug();
 
         DPSystemFactory tf = new DPSystemFactory();
-        tf.loadConfig(configFile);
+        tf.loadConfig(configFile, properties);
 
         DPSystemRuntime dprun = tf.newRuntime();
 
@@ -104,6 +109,10 @@ public class Main {
         options.addOption( "c", "config", true, "config" );
         options.addOption( "p", "pipe", true, "run named pipeline .." );
         options.addOption( "s", "service", false, "run as Service, as configured in Services section");
+        options.addOption( Option.builder("D").argName( "property=value" )
+                .hasArgs()
+                .valueSeparator('=')
+                .build());
 
         return options;
     }

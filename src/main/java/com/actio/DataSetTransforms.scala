@@ -491,7 +491,7 @@ object DataSetTransforms {
 
   def copy(ds: DataSetTableScala, from: String, to: List[String]) = DataSetTableScala(to ::: ds.header, ds.rows map (r => List.fill(to.size)(ds.getValue(r, from)) ::: r))
 
-  def coalesce(vals: List[DataSet]) = DataString(vals.find(v => v.stringOption.isDefined).map(_.stringOption.get).getOrElse(""))
+  def coalesce(vals: List[DataSet]) = vals.find(v => v.toOption.isDefined).getOrElse(Nothin())
 
   def blankAsNull(str: String) = if(str.isEmpty) Nothin() else DataString(str)
 
@@ -506,5 +506,9 @@ object DataSetTransforms {
     var colln = rows.groupBy((f: List[String]) => f(colIdx)).map(_._2.head).toList
 
     return DataSetTableScala(hdr, colln)
+  }
+
+  def distinct(ds: DataSet, col: String) = {
+    DataRecord(DataArray(ds.label, ds.elems.toList.groupBy((row: DataSet) => row(col)).map(_._2.head).toList))
   }
 }

@@ -15,7 +15,7 @@
           "connect": "jdbc:sqlserver://corptestmdb01.jcu.edu.au:1433;user=mediasite_ro;password=afcfh8742Nch7y1SA",
           "query": {
             "queryTemplate": "",
-            "read": "SELECT courseid+'_'+room+'_'+presenterfullname+'_'+CONVERT(varchar, SWITCHOFFSET(CONVERT(datetimeoffset, startdatetime), DATENAME(TzOffset, SYSDATETIMEOFFSET())),126) courseid,moduleid,room,year, CONVERT(varchar, SWITCHOFFSET(CONVERT(datetimeoffset, startdatetime), DATENAME(TzOffset, SYSDATETIMEOFFSET())),126) startdatetime,CONVERT(varchar, SWITCHOFFSET(CONVERT(datetimeoffset, enddatetime), DATENAME(TzOffset, SYSDATETIMEOFFSET())),126) enddatetime,duration*60*1000 duration,presenterusername,presenterfullname FROM current_activities where presenterUsername is not null order by moduleid"
+            "read": "SELECT courseid+'_'+room+'_'+presenterfullname courseid,moduleid,room,case when room = 'A003-002' then '69d9184011af4c0e9f6bea8f740bac554e' when room = 'B001-031' then '5f8e944a7a584463a16c2635553f4be24e' end recorderid,year, CONVERT(varchar, SWITCHOFFSET(CONVERT(datetimeoffset, startdatetime), DATENAME(TzOffset, SYSDATETIMEOFFSET())),126) startdatetime,CONVERT(varchar, SWITCHOFFSET(CONVERT(datetimeoffset, enddatetime), DATENAME(TzOffset, SYSDATETIMEOFFSET())),126) enddatetime,duration*60*1000 duration,presenterusername,REPLACE(REPLACE(presenterfullname, CHAR(10), ''), CHAR(13), '') presenterfullname FROM current_activities where presenterUsername is not null AND room in ('A003-002','B001-031') order by moduleid"
           }
         }
       },
@@ -29,7 +29,7 @@
           "connect": "jdbc:sqlserver://corptestmdb01.jcu.edu.au:1433;user=mediasite_ro;password=afcfh8742Nch7y1SA",
           "query": {
             "queryTemplate": "",
-            "read": "select distinct moduleid from current_activities where PresenterUsername is not null order by moduleid"
+            "read": "select distinct moduleid from current_activities where PresenterUsername is not null AND room in ('A003-002','B001-031') order by moduleid"
           }
         }
       },
@@ -37,8 +37,8 @@
         "type": "join",
         "behavior": "",
         "iterateR": "ds => ds.value",
-        "keyL": "$moduleid",
-        "keyR": "$Name",
+        "keyL": "a32209e4986a4953b30649eb090d481414$moduleid",
+        "keyR": "$ParentFolderId$Name",
         "changeL": "$moduleid",
         "changeR": "$Id",
         "dataSource": {
@@ -87,11 +87,41 @@
           }
         }
       },
-
-      "assign-schedule-template": {
+      "t_owner_schedule" : {
         "type": "mergeTemplate",
         "templates": {
-          "assignschedulebody": "{\"RecorderId\":\"10b3cc97af734dd99a22924df580e8b94e\",\"Name\": \"${courseid}\",\"FolderId\": \"${load_folder_uuid.item.Id}\",\"DeleteInactive\":true,\"LoadPresentation\":true,\"AutoStart\":true,\"AutoStop\":true,\"TitleType\":\"ScheduleNameAndAirDateTime\",\"ScheduleTemplateId\" : \"a76e993574d94730b4b251900f0643580b\"}"
+          "assignownerhdr": "https://mediasiteDEV.jcu.edu.au/mediasite/api/v1/ResourcePermissions('${create_schedule(0).Id}')",
+          "assignownerbody": "{\"Owner\" : ${row.presenterusername}, \"InheritPermissions\" : true}"
+        }
+      },
+      "assign_owner_schedule": {
+        "type": "lookup",
+        "behavior": "simple",
+        "dataSource": {
+          "type": "rest",
+          "behavior": "simple",
+          "path": "-",
+          "headers": {
+            "Content-Type": "application/json",
+            "sfapikey": "25da71cb-4032-49b3-8fe0-11ceb5f4e3a9"
+          },
+          "credential": {
+            "user": "ACTIO",
+            "password": "actio1234"
+          },
+          "query": {
+            "read": {
+              "verb": "put",
+              "uri": "assignownerhdr",
+              "body": "assignownerbody"
+            }
+          }
+        }
+      },
+      "t_assign_schedule": {
+        "type": "mergeTemplate",
+        "templates": {
+          "assignschedulebody": "{\"RecorderId\":\"${recorderid}\",\"Name\": \"${courseid}\",\"FolderId\": \"${load_folder_uuid.item.Id}\",\"DeleteInactive\":true,\"LoadPresentation\":true,\"AutoStart\":true,\"AutoStop\":true,\"TitleType\":\"ScheduleNameAndAirDateTime\",\"ScheduleTemplateId\" : \"8e38410214994bfbb194be5312a85c000b\"}"
         }
       },
       "create_schedule": {
@@ -118,7 +148,7 @@
           }
         }
       },
-      "assign_recurrence": {
+      "t_assign_recurrence": {
         "type": "mergeTemplate",
         "templates": {
           "schedulehdr": "https://mediasiteDEV.jcu.edu.au/mediasite/api/v1/Schedules('${create_schedule(0).Id}')/Recurrences",
@@ -149,14 +179,14 @@
           }
         }
       },
-      "association_template": {
+      "t_module_association": {
         "type": "mergeTemplate",
         "templates": {
           "association_template_hdr": "https://mediasiteDEV.jcu.edu.au/mediasite/api/v1/Modules('${record.row.load_module_uuid.item.Id}')/AddAssociation",
           "association_body": "{\"MediasiteId\":\"${record.create_schedule(0).Id}\"}"
         }
       },
-      "module_association": {
+      "create_module_association": {
         "type": "lookup",
         "behavior": "simple",
         "dataSource": {
@@ -203,6 +233,59 @@
           }
         }
       },
+      "get_catalogs": {
+        "type": "extract",
+        "behavior": "",
+        "dataSource": {
+          "type": "rest",
+          "behavior": "simple",
+          "path": "-",
+          "headers": {
+            "Content-Type": "application/json",
+            "sfapikey": "25da71cb-4032-49b3-8fe0-11ceb5f4e3a9"
+          },
+          "credential": {
+            "user": "ACTIO",
+            "password": "actio1234"
+          },
+          "query": {
+            "read": {
+              "verb" : "get",
+              "uri": "https://mediasiteDEV.jcu.edu.au/mediasite/api/v1/Catalogs?$skip=0&$top=5000"
+            }
+          }
+        }
+      },
+      "t_del_catalog": {
+        "type": "mergeTemplate",
+        "templates": {
+          "merge_del_hdr": "https://mediasiteDEV.jcu.edu.au/mediasite/api/v1/Catalogs('${Id}')"
+        }
+      },
+      "process_delete_catalogs": {
+        "type": "lookup",
+        "behavior": "simple",
+        "dataSource": {
+          "type": "rest",
+          "behavior": "simple",
+          "path": "-",
+          "headers": {
+            "Content-Type": "application/json",
+            "sfapikey": "25da71cb-4032-49b3-8fe0-11ceb5f4e3a9"
+          },
+          "credential": {
+            "user": "ACTIO",
+            "password": "actio1234"
+          },
+          "query": {
+            "read": {
+              "verb":"delete",
+              "uri": "merge_del_hdr",
+              "body": ""
+            }
+          }
+        }
+      },
       "merge_del_schedule": {
         "type": "mergeTemplate",
         "templates": {
@@ -240,7 +323,7 @@
       "t_catalog": {
         "type": "mergeTemplate",
         "templates": {
-          "catabody": "{\"SearchTerm\" : \"$moduleid\",\"Name\" : \"$moduleid\"}"
+          "catabody": "{\"Name\" : \"$moduleid\",\"SearchTerm\":\"ModuleAssociations:$moduleid\",\"IsSearchBased\":true,\"LimitSearchToCatalog\":false}"
         }
       },
       "setup_catalog": {
@@ -270,8 +353,8 @@
       "t_catalog_put": {
         "type": "mergeTemplate",
         "templates": {
-          "catahdr_put" : "https://mediasiteDEV.jcu.edu.au/mediasite/api/v1/Catalogs/('${setup_catalog(0).Id}')",
-          "catabody_put": "{\"SearchTerm\" : \"ModuleAssociations:${row.moduleid}\",\"LimitSearchToCatalog\": false,\"IsMyMediasiteChannel\": false}"
+          "catahdr_put" : "https://mediasiteDEV.jcu.edu.au/mediasite/api/v1/Catalogs/('${setup_catalog(0).Id}')/Settings",
+          "catabody_put": "{\"SearchFields\":\"All\",\"SearchTerm\":\"ModuleAssociations:${row.moduleid}\",\"DefaultSortBy\": 1,\"DefaultSortDirection\": 1}"
         }
       },
     "set_catalog_search": {
@@ -328,7 +411,7 @@
       "t_catalog_module": {
         "type": "mergeTemplate",
         "templates": {
-          "catamodhdr": "https://mediasiteDEV.jcu.edu.au/mediasite/api/v1/Modules('${module_uuid.item.Id}')/AddAssociation'",
+          "catamodhdr": "https://mediasiteDEV.jcu.edu.au/mediasite/api/v1/Modules('${module_uuid.item.Id}')/AddAssociation",
           "catamodbody": "{\"MediasiteId\" : \"${record.setup_catalog(0).Id}\" }"
         }
       },
@@ -355,22 +438,85 @@
             }
           }
         }
+      },
+      "get_folders" : {
+        "type": "extract",
+        "behavior": "simple",
+        "dataSource": {
+          "type": "rest",
+          "behavior": "simple",
+          "path": "-",
+          "headers": {
+            "Content-Type": "application/json",
+            "sfapikey": "25da71cb-4032-49b3-8fe0-11ceb5f4e3a9"
+          },
+          "credential": {
+            "user": "ACTIO",
+            "password": "actio1234"
+          },
+          "query": {
+            "read": {
+              "uri": "https://mediasiteDEV.jcu.edu.au/mediasite/api/v1/Folders?$skip=0&$top=100000"
+            }
+          }
+        }
+      },
+      "t_folder_security" : {
+        "type": "mergeTemplate",
+        "templates": {
+          "assignownerhdr": "https://mediasiteDEV.jcu.edu.au/mediasite/api/v1/Folders('${Id}')/UpdatePermissions",
+          "assignpermissions" : "{\"Owner\": \"${Owner}\",\"InheritFromParent\": false,\"MergePermissions\": true,\"PropagatePermissions\": true,\"PropagateOwner\": true,\"Permissions\": [{\"RoleId\": \"476ca830-9ec4-4587-80b6-f8e32264901c\",\"Read\": true,\"Write\": true,\"Execute\": true,\"Moderate\": true,\"Approve\": true,\"DenyRead\": false,\"DenyWrite\": false,\"DenyExecute\": false,\"DenyModerate\": false,\"DenyApprove\": false}]}"
+        }
+      },
+      "l_folder_security" : {
+        "type": "lookup",
+        "behavior": "simple",
+        "dataSource": {
+          "type": "rest",
+          "behavior": "simple",
+          "path": "-",
+          "headers": {
+            "Content-Type": "application/json",
+            "sfapikey": "25da71cb-4032-49b3-8fe0-11ceb5f4e3a9"
+          },
+          "credential": {
+            "user": "ACTIO",
+            "password": "actio1234"
+          },
+          "query": {
+            "read": {
+              "verb": "post",
+              "uri": "assignownerhdr",
+              "body": "assignpermissions"
+            }
+          }
+        }
       }
     },
     "pipelines": {
       "create-schedules" : {
-          "pipe" : "read-schedules | load_module_uuid | load_folder_uuid | assign-schedule-template | create_schedule | assign_recurrence | create_recurrence | association_template | module_association "
+          "pipe" : "read-schedules | load_module_uuid | load_folder_uuid | t_assign_schedule | create_schedule | dumpthis | t_assign_recurrence | create_recurrence | dumpthis | t_module_association | create_module_association  "
       },
       "create_catalogs" : {
-        "pipe" : "read_modules | t_catalog | setup_catalog | dumpthis | t_catalog_put | set_catalog_search | module_uuid | t_catalog_module | assign_catalog_module"
+        "pipe" : "read_modules | t_catalog | setup_catalog | dumpthis | t_catalog_put | set_catalog_search | module_uuid  | dumpthis | t_catalog_module | assign_catalog_module"
+      },
+      "propagate_security":{
+        "pipe" :  " get_folders | tr1 | dumpthis | t_folder_security | l_folder_security "
+      },
+      "propagate_security1":{
+        "pipe" :  " get_folders | tr1 |  t_folder_security | dumpthis "
       },
       "delete_all_schedules" :
       {
         "pipe" : " get_schedules | tr1 | dumpthis | merge_del_schedule | delete_schedules "
+      },
+      "delete_catalogs" :
+      {
+        "pipe" : " get_catalogs | tr1 | dumpthis | t_del_catalog | process_delete_catalogs "
       }
     },
     "startup": {
-      "exec": "create_catalogs"
+      "exec": "propagate_security"
     }
   }
 }

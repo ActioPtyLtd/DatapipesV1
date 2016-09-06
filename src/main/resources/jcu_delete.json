@@ -29,7 +29,7 @@
           "connect": "jdbc:sqlserver://corptestmdb01.jcu.edu.au:1433;user=mediasite_ro;password=afcfh8742Nch7y1SA",
           "query": {
             "queryTemplate": "",
-            "read": "select distinct moduleid from mediasite_activities where PresenterUsername is not null order by moduleid"
+            "read": "select distinct top 10 moduleid from mediasite_activities where PresenterUsername is not null order by moduleid"
           }
         }
       },
@@ -37,8 +37,8 @@
         "type": "join",
         "behavior": "",
         "iterateR": "ds => ds.value",
-        "keyL": "$moduleid",
-        "keyR": "$Name",
+        "keyL": "7c06968cc79c44eea80b89c627d2ac4b14$moduleid",
+        "keyR": "$ParentFolderId$Name",
         "changeL": "$moduleid",
         "changeR": "$Id",
         "dataSource": {
@@ -55,7 +55,7 @@
           },
           "query": {
             "read": {
-              "uri": "https://mediasiteDEV.jcu.edu.au/mediasite/api/v1/Folders?$skip=0&$top=10"
+              "uri": "https://mediasiteDEV.jcu.edu.au/mediasite/api/v1/Folders?$skip=0&$top=1000000"
             }
           }
         }
@@ -201,7 +201,7 @@
     },
     "services": { },
     "startup": {
-      "exec": "folder_owner"
+      "exec": "dump_all_folders"
     }
   }
 }

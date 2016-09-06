@@ -14,17 +14,14 @@ import java.util.Properties;
 import org.apache.commons.cli.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import java.io.File;
 
 import static java.lang.System.exit;
 
 public class Main {
 
-
-    private static final Logger logger = LoggerFactory.getLogger(Main.class);
-
     public static void main(String[] args) throws Exception {
 
-        logger.info("======First logging.info ***");
         Path currentRelativePath = Paths.get("");
         String s = currentRelativePath.toAbsolutePath().toString();
         System.out.println("Current relative path is: " + s);
@@ -36,16 +33,24 @@ public class Main {
         Boolean runService = false;
         Properties properties = null;
 
+        Logger logger =  null;
+
         try {
             // parse the command line arguments
             CommandLine line = parser.parse( options, args );
+            String appendLogName = "application";
 
             // Check the options set
             if( line.hasOption( "c" ) ) {
                 // print the value of config
                 configFile = line.getOptionValue('c');
-                logger.info( configFile );
+                appendLogName = new File(configFile).getName().replaceFirst("[.][^.]+$", "");
             }
+
+            System.setProperty("log.configname", appendLogName);
+            logger = LoggerFactory.getLogger(Main.class);
+            logger.info("======First logging.info ***");
+
             if (line.hasOption('p')) {
                 pipelineName = line.getOptionValue('p');
                 logger.info( pipelineName );
@@ -58,38 +63,36 @@ public class Main {
                 properties = line.getOptionProperties("D");
             }
 
+            logger.info("loadingConfigFile=" + configFile);
+
+            debug(logger);
+
+            DPSystemFactory tf = new DPSystemFactory();
+            tf.loadConfig(configFile, properties);
+
+            DPSystemRuntime dprun = tf.newRuntime();
+
+            if (!runService) {
+                if (pipelineName == null)
+                    dprun.execute();
+                else
+                    dprun.execute(pipelineName);
+
+                ///==========
+                //dprun.sendEvents();
+
+            }
+            else {
+                dprun.service();
+            }
+            // dump out the runtime state
+            dprun.dump();
         }
         catch( ParseException exp ) {
-            logger.error( "Unexpected exception:" + exp.getMessage() );
+            System.out.print( "Unexpected exception:" + exp.getMessage() );
 
             exit(-1);
         }
-
-
-        logger.info("loadingConfigFile=" + configFile);
-
-        debug();
-
-        DPSystemFactory tf = new DPSystemFactory();
-        tf.loadConfig(configFile, properties);
-
-        DPSystemRuntime dprun = tf.newRuntime();
-
-        if (!runService) {
-            if (pipelineName == null)
-                dprun.execute();
-            else
-                dprun.execute(pipelineName);
-
-            ///==========
-            //dprun.sendEvents();
-
-        }
-        else {
-            dprun.service();
-        }
-        // dump out the runtime state
-        dprun.dump();
     }
 
 
@@ -117,8 +120,7 @@ public class Main {
         return options;
     }
 
-
-    private static void debug()
+    private static void debug(Logger logger)
     {
         ClassLoader cl = ClassLoader.getSystemClassLoader();
 
@@ -129,6 +131,4 @@ public class Main {
         }
 
     }
-
-
 }

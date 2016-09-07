@@ -9,34 +9,60 @@ import scala.collection.JavaConverters._
  * Created by mauri on 2/05/2016.
  */
 
+object DataSetCache {
+  private val lookup = scala.collection.mutable.HashMap[String,Map[String, DataSet]]()
 
+  def isTaskInitialised(taskName: String): Boolean = lookup.contains(taskName)
+
+  def initaliseTask(taskName: String): Unit = {
+    lookup += (taskName -> scala.collection.mutable.HashMap[String, DataSet]())
+  }
+
+  def add(taskName: String, key: String, ds: DataSet): Unit = {
+    lookup(taskName) += (key -> ds)
+  }
+
+  def get(taskName: String, key: String): Option[DataSet] = lookup(taskName).get(key)
+
+  def clear(): Unit = {
+    lookup.clear()
+  }
+}
 
 class TaskDataJoin extends Task {
 
 
   override def execute(): Unit = {
-    var dim: Map[String, DataSet] = scala.collection.mutable.HashMap()
+
     super.setConfig(sysconf.getTaskConfig(this.node.getName).toConfig, sysconf.getMasterConfig)
 
     // load all from the data source
-    if (dim.isEmpty) {
-      val dataSourceDataSet = dataSource.read(Nothin())
+    if (!DataSetCache.isTaskInitialised(taskName)) {
+      DataSetCache.initaliseTask(taskName)
 
+      val dataSourceDataSet = dataSource.read(Nothin())
       val tes = dataSourceDataSet.elems.toList
       val es = tes.flatMap(e => MetaTerm.eval(e, iterateR).elems).toList
 
-      dim = scala.collection.mutable.HashMap[String, DataSet](
-        es
-          .map(m =>
-            (MetaTerm.evalTemplate(m, keyR).stringOption.getOrElse(""),
-              m)).toList: _*)
+      es.foreach(ds => {
+        DataSetCache.add(
+          taskName,
+          MetaTerm.evalTemplate(ds, keyR).stringOption.getOrElse(""),
+          ds
+        )
+      })
     }
 
     dataSet = DataRecord(DataArray(dataSet.elems
-      .map(e => (e, dim.get(MetaTerm.evalTemplate(e, keyL).stringOption.getOrElse(""))))
-      .map(m => if(m._2.isDefined) DataRecord(m._1.label, DataRecord(this.node.getName, List(m._2.get)) :: m._1.elems.toList) else m._1 )
+      .map(e => (e, DataSetCache.get(taskName, MetaTerm.evalTemplate(e, keyL).stringOption.getOrElse(""))))
+      .map(m =>
+        if(m._2.isDefined) {
+          DataRecord(m._1.label, DataRecord(this.node.getName, List(m._2.get)) :: m._1.elems.toList)
+        }
+        else {
+          DataRecord(m._1.label, Nothin(this.node.getName) :: m._1.elems.toList)
+        })
       .toList))
-
   }
 
   def dataSource = DPSystemFactory.newDataSource(config.getConfig(DPSystemConfigurable.DATASOURCE_LABEL), masterConfig)
@@ -49,4 +75,5 @@ class TaskDataJoin extends Task {
   lazy val keyL = getConfig.getString("keyL")
   lazy val keyR = getConfig.getString("keyR")
 
+  lazy val taskName = this.node.getName
 }

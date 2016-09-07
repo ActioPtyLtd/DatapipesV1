@@ -74,7 +74,9 @@ public class TaskPipeline extends Task implements Runnable
             // get the list of tasks for that pipeline
             LinkedList<DPFnNode> tasksInPipeline = node.getNodeList();
 
+            // clear caches when the pipeline starts
             Cache.clear();
+            DataSetCache.clear();
 
             if (dataSet != null)
                 processPipeLineRE(tasksInPipeline, 0, dataSet);

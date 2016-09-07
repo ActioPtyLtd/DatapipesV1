@@ -8,6 +8,7 @@ import java.net.URL;
 import java.net.URLClassLoader;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Enumeration;
 import java.util.Properties;
 
 //import com.jcabi.aspects.Loggable;
@@ -61,6 +62,14 @@ public class Main {
             }
             if (line.hasOption('D')) {
                 properties = line.getOptionProperties("D");
+                Enumeration e = properties.propertyNames();
+
+                logger.info("Command line parameters:");
+
+                while (e.hasMoreElements()) {
+                    String key = (String) e.nextElement();
+                    logger.info(key + " = " + properties.getProperty(key));
+                }
             }
 
             logger.info("loadingConfigFile=" + configFile);

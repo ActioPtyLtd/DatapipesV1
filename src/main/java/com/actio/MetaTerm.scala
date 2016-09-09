@@ -81,6 +81,10 @@ object MetaTerm {
 
   def evalApply(t: Term.Apply, scope: Map[String, AnyRef]): DataSet = t match {
 
+    // construct a fixed size DataArray
+    case Term.Apply(Term.Name("DataArray"), args) =>
+      DataArray(args.map(eval(_, scope)).toList)
+
     // dynamically call function, evaluating parameters before execution
     case Term.Apply(Term.Name(fName), args)
       if !scope.contains(fName) =>
@@ -91,10 +95,6 @@ object MetaTerm {
 
     // get DataSet by name
     case Term.Apply(q, Seq(Lit(str: String))) => eval(q, scope)(str)
-
-    // construct a fixed size DataArray
-    case Term.Apply(Term.Name("DataArray"), args) =>
-      DataArray(args.map(eval(_, scope)).toList)
 
     // iterate through DataSet and include elements matching condition
     case Term.Apply(

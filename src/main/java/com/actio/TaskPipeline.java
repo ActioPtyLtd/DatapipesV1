@@ -9,6 +9,7 @@ import com.actio.dpsystem.DPSystemFactory;
 import com.typesafe.config.ConfigObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import scala.None$;
 
 import java.io.InputStream;
 import java.util.*;
@@ -72,6 +73,11 @@ public class TaskPipeline extends Task implements Runnable
         try {
             // get the list of tasks for that pipeline
             LinkedList<DPFnNode> tasksInPipeline = node.getNodeList();
+
+            // clear caches when the pipeline starts
+            Cache.clear();
+            DataSetCache.clear();
+
             if (dataSet != null)
                 processPipeLineRE(tasksInPipeline, 0, dataSet);
             else

@@ -1,0 +1,207 @@
+{
+  "script": {
+    "schema": {},
+    "tasks": {
+      "dumpthis": {
+        "type": "dump"
+      },
+      "read-schedules": {
+        "type": "extract",
+        "behavior": "",
+        "dataSource": {
+          "type": "sql",
+          "behavior": "",
+          "jdbcDriver": "com.microsoft.sqlserver.jdbc.SQLServerDriver",
+          "connect": "jdbc:sqlserver://corptestmdb01.jcu.edu.au:1433;user=mediasite_ro;password=afcfh8742Nch7y1SA",
+          "query": {
+            "queryTemplate": "",
+            "read": "SELECT top 2000 courseid+':'+room courseid,moduleid,room,year,  CONVERT(varchar, SWITCHOFFSET(CONVERT(datetimeoffset, startdatetime), DATENAME(TzOffset, SYSDATETIMEOFFSET())),126) startdatetime,CONVERT(varchar, SWITCHOFFSET(CONVERT(datetimeoffset, enddatetime), DATENAME(TzOffset, SYSDATETIMEOFFSET())),126) enddatetime,duration*60*1000 duration,presenterusername,presenterfullname FROM [Mediasite].[dbo].[mediasite_activities] where presenterUsername is not null order by moduleid "
+          }
+        }
+      },
+      "get_modules": {
+        "type": "extract",
+        "behavior": "",
+        "dataSource": {
+          "type": "sql",
+          "behavior": "",
+          "jdbcDriver": "com.microsoft.sqlserver.jdbc.SQLServerDriver",
+          "connect": "jdbc:sqlserver://corptestmdb01.jcu.edu.au:1433;user=mediasite_ro;password=afcfh8742Nch7y1SA",
+          "query": {
+            "queryTemplate": "",
+            "read": "select distinct top 10 moduleid from mediasite_activities where PresenterUsername is not null order by moduleid"
+          }
+        }
+      },
+      "load_folder_uuid": {
+        "type": "join",
+        "behavior": "",
+        "iterateR": "ds => ds.value",
+        "keyL": "7c06968cc79c44eea80b89c627d2ac4b14$moduleid",
+        "keyR": "$ParentFolderId$Name",
+        "changeL": "$moduleid",
+        "changeR": "$Id",
+        "dataSource": {
+          "type": "rest",
+          "behavior": "simple",
+          "path": "-",
+          "headers": {
+            "Content-Type": "application/json",
+            "sfapikey": "25da71cb-4032-49b3-8fe0-11ceb5f4e3a9"
+          },
+          "credential": {
+            "user": "ACTIO",
+            "password": "actio1234"
+          },
+          "query": {
+            "read": {
+              "uri": "https://mediasiteDEV.jcu.edu.au/mediasite/api/v1/Folders?$skip=0&$top=1000000"
+            }
+          }
+        }
+      },
+      "load_module_uuid": {
+        "type": "join",
+        "behavior": "",
+        "iterateR": "ds => ds.value",
+        "keyL": "$moduleid",
+        "keyR": "$ModuleId",
+        "changeL": "$moduleid",
+        "changeR": "$Id",
+        "dataSource": {
+          "type": "rest",
+          "behavior": "simple",
+          "path": "-",
+          "headers": {
+            "Content-Type": "application/json",
+            "sfapikey": "25da71cb-4032-49b3-8fe0-11ceb5f4e3a9"
+          },
+          "credential": {
+            "user": "ACTIO",
+            "password": "actio1234"
+          },
+          "query": {
+            "read": {
+              "uri": "https://mediasiteDEV.jcu.edu.au/mediasite/api/v1/Modules"
+            }
+          }
+        }
+      },
+      "module_uuid": {
+        "type": "join",
+        "behavior": "",
+        "iterateR": "ds => ds.value",
+        "keyL": "${record.row.moduleid}",
+        "keyR": "$ModuleId",
+        "changeL": "${record.row.moduleid}",
+        "changeR": "$Id",
+        "dataSource": {
+          "type": "rest",
+          "behavior": "simple",
+          "path": "-",
+          "headers": {
+            "Content-Type": "application/json",
+            "sfapikey": "25da71cb-4032-49b3-8fe0-11ceb5f4e3a9"
+          },
+          "credential": {
+            "user": "ACTIO",
+            "password": "actio1234"
+          },
+          "query": {
+            "read": {
+              "uri": "https://mediasiteDEV.jcu.edu.au/mediasite/api/v1/Modules"
+            }
+          }
+        }
+      },
+      "t_folder_del": {
+        "type": "mergeTemplate",
+        "templates": {
+          "merge_del_hdr": "https://mediasiteDEV.jcu.edu.au/mediasite/api/v1/Folders('${load_folder_uuid.item.Id}')"
+        }
+      },
+      "delete_folders": {
+        "type": "lookup",
+        "behavior": "simple",
+        "dataSource": {
+          "type": "rest",
+          "behavior": "simple",
+          "path": "-",
+          "headers": {
+            "Content-Type": "application/json",
+            "sfapikey": "25da71cb-4032-49b3-8fe0-11ceb5f4e3a9"
+          },
+          "credential": {
+            "user": "ACTIO",
+            "password": "actio1234"
+          },
+          "query": {
+            "read": {
+              "verb":"delete",
+              "uri": "merge_del_hdr",
+              "body": ""
+            }
+          }
+        }
+      },
+      "t_owner_folder": {
+        "type": "mergeTemplate",
+        "templates": {
+          "folderhdr" : "https://mediasiteDEV.jcu.edu.au/mediasite/api/v1/Folders('${load_folder_uuid.item.Id}')/UpdatePermissions",
+          "folderbody": "{ \"Owner\": \"ACTIO\" }"
+        }
+      },
+      "update_folder_owner" : {
+        "type": "lookup",
+        "behavior": "simple",
+        "dataSource": {
+          "type": "rest",
+          "behavior": "simple",
+          "path": "-",
+          "headers": {
+            "Content-Type": "application/json",
+            "sfapikey": "25da71cb-4032-49b3-8fe0-11ceb5f4e3a9"
+          },
+          "credential": {
+            "user": "ACTIO",
+            "password": "actio1234"
+          },
+          "query": {
+            "read": {
+              "verb": "post",
+              "uri": "folderhdr",
+              "body": "folderbody"
+            }
+          }
+        }
+      }
+
+    },
+    "pipelines": {
+      "folder_owner" : {
+        "pipe" : "get_modules | load_folder_uuid | dumpthis |t_owner_folder | update_folder_owner "
+      },
+      "delete_all_folders" :
+      {
+        "pipe" : " get_modules | load_folder_uuid | t_folder_del | delete_folders "
+      },
+      "dump_all_folders" :
+      {
+        "pipe" : " get_modules | load_folder_uuid | dumpthis | t_folder_del | dumpthis "
+      },
+      "delete_all_modules" :
+      {
+        "pipe" : " get_modules | load_folder_uuid | t_folder_del | delete_folders "
+      },
+      "delete_all_users" :
+      {
+        "pipe" : " get_users | load_folder_uuid | t_folder_del | delete_folders "
+      }
+
+    },
+    "services": { },
+    "startup": {
+      "exec": "dump_all_folders"
+    }
+  }
+}

@@ -1,9 +1,12 @@
 package com.actio
 
 import java.security.MessageDigest
+import java.text.SimpleDateFormat
 import java.time.{LocalDateTime, LocalDate}
 import java.time.format.DateTimeFormatter
-import org.apache.commons.codec.binary.Hex;
+import org.apache.commons.codec.binary.Hex
+import org.apache.commons.lang.time.DateUtils
+;
 
 import scala.annotation.tailrec
 import scala.collection.mutable
@@ -199,6 +202,17 @@ object DataSetTransforms {
 
   }
 
+  def dateFormat(ds: DataSet, format: String): DataSet = {
+    try {
+      DataString(new SimpleDateFormat(format).format(ds.asInstanceOf[DataDate].date))
+    }
+    catch {
+      case _: Exception => DataString(new SimpleDateFormat(format).format(new SimpleDateFormat("dd/MM/yyyy").parse("1/1/1900")))
+    }
+  }
+
+  def today(dateOffset: Int): DataSet = DataDate(DateUtils.addDays(new java.util.Date(), dateOffset))
+
   def filterValue(ds: DataSet, property: String, value: String): DataSet = DataArray(ds.elems.filter(f => f(property).stringOption.getOrElse("") == value).toList)
 
   def firstValue(ds: DataSet, property: String, value: String): DataSet = ds.elems.find(f => f.value(property).stringOption.getOrElse("") == value).getOrElse(Nothin())
@@ -222,6 +236,8 @@ object DataSetTransforms {
 
   def numeric(value: String): DataSet = DataNumeric(Try(BigDecimal(value)).getOrElse(BigDecimal(0)))
 
+  def integer(value: String): DataSet = DataNumeric(Try(BigDecimal(value.toInt)).getOrElse(BigDecimal(0)))
+
   def round(value: String, scale: Int): DataSet = DataNumeric(Try(BigDecimal(value).setScale(scale, BigDecimal.RoundingMode.HALF_UP)).getOrElse(BigDecimal(0)))
 
   def removeTrailingZeros(value: String): DataSet = DataNumeric(Try(BigDecimal(value).setScale(2, BigDecimal.RoundingMode.HALF_UP)).getOrElse(BigDecimal(0)).underlying().stripTrailingZeros())
@@ -240,8 +256,7 @@ object DataSetTransforms {
     DataString(Hex.encodeHexString(m.digest))
   }
 
-  def maprecord(ds: DataSet): DataSet = DataArray(ds.elems.map(e => DataRecord(List(e))).toList)
-
+  def maprecord(ds: DataSet): DataSet = DataArray(ds.elems.map(e => DataRecord(e)).toList)
 
   /* below will need to be replaced when I have time */
 
@@ -476,9 +491,9 @@ object DataSetTransforms {
 
   def copy(ds: DataSetTableScala, from: String, to: List[String]) = DataSetTableScala(to ::: ds.header, ds.rows map (r => List.fill(to.size)(ds.getValue(r, from)) ::: r))
 
-  def coalesce(ds: DataSetTableScala, cols: List[String]) = rowFunc(ds, ds.getNextAvailableColumnName("coalesce"), r => coalesceValue(cols.map(ds.getValue(r, _)).toList))
+  def coalesce(vals: List[DataSet]) = vals.find(v => v.toOption.isDefined).getOrElse(Nothin())
 
-  def coalesceValue(vals: List[String]) = vals.find(v => v.trim().nonEmpty).getOrElse("")
+  def blankAsNull(str: String) = if(str.isEmpty) Nothin() else DataString(str)
 
   def isEmptyDataSet(ds: DataSetTableScala) = ds.rows.isEmpty
 
@@ -491,5 +506,9 @@ object DataSetTransforms {
     var colln = rows.groupBy((f: List[String]) => f(colIdx)).map(_._2.head).toList
 
     return DataSetTableScala(hdr, colln)
+  }
+
+  def distinct(ds: DataSet, col: String) = {
+    DataRecord(DataArray(ds.label, ds.elems.toList.groupBy((row: DataSet) => row(col)).map(_._2.head).toList))
   }
 }

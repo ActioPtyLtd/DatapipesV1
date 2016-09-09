@@ -63,9 +63,6 @@ public class DPSystemFactory extends DPSystemConfigurable {
             case "include":
                 t = new TaskInclude();
                 break;
-            case "iterate":
-                t = new TransformIterate();
-                break;
             case "merge":
                 t = new TaskMerge();
                 break;
@@ -77,6 +74,9 @@ public class DPSystemFactory extends DPSystemConfigurable {
                 break;
             case "dump":
                 t = new TaskDump();
+                break;
+            case "join":
+                t = new TaskDataJoin();
                 break;
             default:
                 throw new Exception("DPSystemFactory:Unknown Task Type "+type);
@@ -342,6 +342,10 @@ public class DPSystemFactory extends DPSystemConfigurable {
     // Refactor this into a proper Inversion of Control Bind
 
     public void loadConfig(String configFile) throws IOException {
+        loadConfig(configFile, null);
+    }
+
+    public void loadConfig(String configFile, Properties properties) throws IOException {
 
         if (configFile == null) {
             this.loadConfig();
@@ -353,9 +357,16 @@ public class DPSystemFactory extends DPSystemConfigurable {
         if (!myConfigFile.exists())
             logger.error("File " + configFile + " does not exist.");
 
-        config = ConfigFactory.parseFile(myConfigFile);
-        masterConfig = config;
+        Config fallBack = ConfigFactory.parseFile(myConfigFile);
 
+        if(properties!=null) {
+            config = ConfigFactory.parseProperties(properties).withFallback(fallBack).resolve();
+        }
+        else {
+            config = fallBack.resolve();
+        }
+
+        masterConfig = config;
     }
 
     //

@@ -12,16 +12,24 @@ class TaskLookup extends Task {
 
   def execute(): Unit = {
     super.setConfig(sysconf.getTaskConfig(this.node.getName).toConfig, sysconf.getMasterConfig)
-    if(config.getString(DPSystemConfigurable.BEHAVIOR_LABEL).equalsIgnoreCase("legacy-lookup-merge")) {
-      dataSet = DataRecord(List(DataArray(dataSet.elems.map(d =>
-        DataRecord(List(d,DataArray(dataSource.read(d).elems.toList)))).toList)))
+    if(behavior.equalsIgnoreCase("legacy-lookup-merge")) {
+      dataSet = DataRecord(DataArray(dataSet.elems.map(d =>
+        DataRecord(d,DataArray(dataSource.read(d).elems.toList))).toList))
     }
     else {
-      dataSet = DataRecord(List(DataArray(dataSet.elems.map(d =>
-        DataRecord(DataArray(this.node.getName, dataSource.read(d).elems.toList) :: d.elems.toList)).toList)))
+      dataSet = DataRecord(DataArray(dataSet.elems.map(d =>
+        DataRecord(DataArray(this.node.getName, dataSource.read(d).elems.toList) :: d.elems.toList)).toList))
     }
 
   }
+
+  lazy val behavior: String =
+    if (config.hasPath(DPSystemConfigurable.BEHAVIOR_LABEL)) {
+        config.getString(DPSystemConfigurable.BEHAVIOR_LABEL)
+      }
+      else {
+        ""
+      }
 
   lazy val dataSource: DataSource = DPSystemFactory.newDataSource(config.getConfig(DPSystemConfigurable.DATASOURCE_LABEL), masterConfig)
 

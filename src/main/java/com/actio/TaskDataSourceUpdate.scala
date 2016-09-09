@@ -11,10 +11,12 @@ import scala.collection.JavaConverters._
 
 object Cache {
   var dim: Option[Map[String, String]] = None
+
+  def clear: Unit = { dim = None }
 }
 
 class TaskDataSourceUpdate extends Task {
-  Cache.dim = None
+
   override def execute(): Unit = {
     super.setConfig(sysconf.getTaskConfig(this.node.getName).toConfig, sysconf.getMasterConfig)
 
@@ -23,20 +25,20 @@ class TaskDataSourceUpdate extends Task {
       val dataSourceDataSet = dataSource.read(Nothin())
 
       val tes = dataSourceDataSet.elems.toList
-      val es = tes.flatMap(e => TestMeta.eval(e, iterateR).elems).toList
+      val es = tes.flatMap(e => MetaTerm.eval(e, iterateR).elems).toList
 
       Cache.dim = Some(scala.collection.mutable.HashMap[String, String](
         es
           .map(m =>
-            (TestMeta.evalTemplate(m, keyR).stringOption.getOrElse(""),
-              TestMeta.evalTemplate(m, changeR).stringOption.getOrElse(""))).toList: _*))
+            (MetaTerm.evalTemplate(m, keyR).stringOption.getOrElse(""),
+              MetaTerm.evalTemplate(m, changeR).stringOption.getOrElse(""))).toList: _*))
     }
 
     val dsIncoming = dataSet.elems
       .map(e =>
         (e,
-          TestMeta.evalTemplate(e, keyL).stringOption.getOrElse(""),
-          TestMeta.evalTemplate(e, changeL).stringOption.getOrElse(""))).toList
+          MetaTerm.evalTemplate(e, keyL).stringOption.getOrElse(""),
+          MetaTerm.evalTemplate(e, changeL).stringOption.getOrElse(""))).toList
 
     // work out which elements then need to be inserted or updated
     val inserts = dsIncoming.filter(d => Cache.dim.get.get(d._2).isEmpty)

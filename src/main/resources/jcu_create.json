@@ -26,7 +26,7 @@
           "connect": "jdbc:sqlserver://corptestmdb01.jcu.edu.au:1433;user=mediasite_ro;password=afcfh8742Nch7y1SA",
           "query": {
             "read1" : "",
-            "read": "select distinct top 5 PresenterUsername,PresenterFullname,case when charindex(',',[PresenterFullname],0) = 0 then PresenterFullname else right(presenterfullname,len(presenterfullname)-charindex(',',[PresenterFullname],0)) end firstname,case when charindex(',',[PresenterFullname],0) = 0 then 'n/a' else left (presenterfullname, charindex(',',[PresenterFullname],0)-1) end lastname,coalesce([PresenterEmail],PresenterUsername+'@jcu.edu.au') email from current_activities where PresenterUsername is not null order by PresenterUsername desc"
+            "read": "select distinct top 5 presenterusername,PresenterFullname,case when charindex(',',[PresenterFullname],0) = 0 then PresenterFullname else right(presenterfullname,len(presenterfullname)-charindex(',',[PresenterFullname],0)) end firstname,case when charindex(',',[PresenterFullname],0) = 0 then 'n/a' else left (presenterfullname, charindex(',',[PresenterFullname],0)-1) end lastname,coalesce([PresenterEmail],PresenterUsername+'@jcu.edu.au') email from current_activities where PresenterUsername is not null order by PresenterUsername desc"
           }
         }
       },

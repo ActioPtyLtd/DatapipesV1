@@ -24,8 +24,7 @@ class TaskDataSourceUpdate extends Task {
     if (Cache.dim.isEmpty) {
       val dataSourceDataSet = dataSource.read(Nothin())
 
-      val tes = dataSourceDataSet.elems.toList
-      val es = tes.flatMap(e => MetaTerm.eval(e, iterateR).elems).toList
+      val es = dataSourceDataSet.elems.flatMap(e => MetaTerm.eval(e, iterateR).elems).toList
 
       Cache.dim = Some(scala.collection.mutable.HashMap[String, String](
         es

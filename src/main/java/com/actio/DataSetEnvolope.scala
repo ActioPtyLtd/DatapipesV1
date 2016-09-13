@@ -21,5 +21,5 @@ case class DataSetEnvolope(label: String, data: DataSet, message: DataSet, error
       data(field)
     }
 
-  override def elems: Iterator[DataSet] = List(data).toIterator
+  override def elems: Iterator[DataSet] = data.elems.toIterator
 }

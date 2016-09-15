@@ -81,18 +81,24 @@ public class Main {
 
             DPSystemRuntime dprun = tf.newRuntime();
 
-            if (!runService) {
-                if (pipelineName == null)
-                    dprun.execute();
-                else
-                    dprun.execute(pipelineName);
+            try {
+              if (!runService) {
+                  if (pipelineName == null)
+                      dprun.execute();
+                  else
+                      dprun.execute(pipelineName);
 
-                ///==========
-                //dprun.sendEvents();
-
+                  ///==========
+                  //dprun.sendEvents();
+                  logger.info("Execution completed.");
+              }
+              else {
+                  dprun.service();
+              }
             }
-            else {
-                dprun.service();
+            catch(Exception exp) {
+              logger.error("Unexpected exception:" + exp.getMessage());
+              logger.info("Execution stopped.");
             }
             // dump out the runtime state
             dprun.dump();

@@ -3,7 +3,6 @@ package com.actio
 import com.actio.dpsystem.{ DPSystemFactory, DPSystemConfigurable }
 import com.typesafe.config.ConfigValueFactory
 import scala.collection.mutable.Map
-import scala.collection.JavaConverters._
 
 /**
  * Created by mauri on 2/05/2016.
@@ -24,7 +23,7 @@ class TaskDataSourceUpdate extends Task {
     if (Cache.dim.isEmpty) {
       val dataSourceDataSet = dataSource.read(Nothin())
 
-      val es = dataSourceDataSet.elems.flatMap(e => MetaTerm.eval(e, iterateR).elems).toList
+      val es = dataSourceDataSet.elems.flatMap(e => dataSourceIterate(e).elems).toList
 
       Cache.dim = Some(scala.collection.mutable.HashMap[String, String](
         es
@@ -46,15 +45,15 @@ class TaskDataSourceUpdate extends Task {
 
     //TODO: can refactor to load (insert and/or update) these in the next task
 
-    if (inserts.nonEmpty && config.getConfig(DPSystemConfigurable.DATASOURCE_LABEL).hasPath("query.create")) {
-      dataSource.execute(DataArray("", inserts.map(_._1)), config.getConfig(DPSystemConfigurable.DATASOURCE_LABEL).getString("query.create"))
+    if (inserts.nonEmpty && dataSourceConf.hasPath("query.create")) {
+      dataSource.execute(DataArray("", inserts.map(_._1)), dataSourceConf.getString("query.create"))
 
       // update the dimension cache, so this isn't repeated again
       Cache.dim.get ++= inserts.map(m => (m._2, m._3))
     }
 
-    if (updates.nonEmpty && config.getConfig(DPSystemConfigurable.DATASOURCE_LABEL).hasPath("query.update")) {
-      dataSource.execute(DataArray("", updates.map(_._1)), config.getConfig(DPSystemConfigurable.DATASOURCE_LABEL).getString("query.update"))
+    if (updates.nonEmpty && dataSourceConf.hasPath("query.update")) {
+      dataSource.execute(DataArray("", updates.map(_._1)), dataSourceConf.getString("query.update"))
 
       // update the dimension cache, so this isn't repeated again
       Cache.dim.get ++= updates.map(m => (m._2, m._3))
@@ -62,7 +61,15 @@ class TaskDataSourceUpdate extends Task {
 
   }
 
-  def dataSource = DPSystemFactory.newDataSource(config.getConfig(DPSystemConfigurable.DATASOURCE_LABEL), masterConfig)
+  def dataSource = DPSystemFactory.newDataSource(dataSourceConf, masterConfig)
+  def dataSourceConf = config.getConfig(DPSystemConfigurable.DATASOURCE_LABEL)
+
+  def dataSourceIterate(e: DataSet): DataSet =
+    if(config.hasPath("iterateR")) {
+      MetaTerm.eval(e, iterateR)
+    } else {
+      e
+    }
 
   override def load(): Unit = ???
 

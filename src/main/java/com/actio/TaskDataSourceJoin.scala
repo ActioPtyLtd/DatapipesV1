@@ -42,6 +42,7 @@ class TaskDataJoin extends Task {
 
       val dataSourceDataSet = dataSource.read(Nothin())
       val tes = dataSourceDataSet.elems.toList
+
       val es = tes.flatMap(e => MetaTerm.eval(e, iterateR).elems).toList
 
       es.foreach(ds => {

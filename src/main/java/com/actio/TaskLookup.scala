@@ -8,7 +8,6 @@ import com.typesafe.config.ConfigValueFactory
  * Created by mauri on 18/04/2016.
  */
 class TaskLookup extends Task {
-  import DataSetTableScala._
 
   def execute(): Unit = {
     super.setConfig(sysconf.getTaskConfig(this.node.getName).toConfig, sysconf.getMasterConfig)

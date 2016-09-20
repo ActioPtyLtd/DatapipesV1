@@ -8,6 +8,8 @@ javacOptions ++= Seq("-Xlint:unchecked")
 
 scalacOptions ++= Seq("-unchecked", "-deprecation", "-Ylog-classpath")
 
+publishTo := Some(Resolver.file("file", new File(Path.userHome.absolutePath+"/lib/")))
+
 libraryDependencies ++= Seq(
   "org.scala-lang.modules" %% "scala-xml" % "1.0.4",
   "org.slf4j" % "slf4j-api" % "1.7.19",

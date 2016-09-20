@@ -60,9 +60,6 @@ public class DPSystemFactory extends DPSystemConfigurable {
             case "datasourceupdate":
                 t = new TaskDataSourceUpdate();
                 break;
-            case "include":
-                t = new TaskInclude();
-                break;
             case "merge":
                 t = new TaskMerge();
                 break;

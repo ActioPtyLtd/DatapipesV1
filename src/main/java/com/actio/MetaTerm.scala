@@ -63,6 +63,9 @@ object MetaTerm {
 
     // evaluate infix operations
     case infix: Term.ApplyInfix => evalApplyInfix(infix, scope)
+
+    // evaluate unary operations
+    case unary: Term.ApplyUnary => evalApplyUnary(unary, scope)
   }
 
   def evalSelect(t: Term.Select, scope: Map[String, AnyRef]): DataSet = t match {
@@ -117,6 +120,10 @@ object MetaTerm {
             .toList)
   }
 
+  def evalApplyUnary(t: Term.ApplyUnary, scope: Map[String, AnyRef]): DataSet = t match {
+    case Term.ApplyUnary(Term.Name("-"), r) => DataNumeric(-eval(r, scope).asInstanceOf[DataNumeric].num)
+  }
+
   def evalApplyInfix(t: Term.ApplyInfix, scope: Map[String, AnyRef]): DataSet = t match {
 
     // currently can compare dates only
@@ -145,6 +152,12 @@ object MetaTerm {
       DataString(
         eval(l, scope).stringOption.getOrElse("") +
         eval(r, scope).stringOption.getOrElse(""))
+
+    // subtract numeric
+    case Term.ApplyInfix(l, Term.Name("-"), Nil, Seq(r)) =>
+      DataNumeric(
+        eval(l, scope).asInstanceOf[DataNumeric].num -
+        eval(r, scope).asInstanceOf[DataNumeric].num)
 
     // currently, equality will do a string comparison
     case Term.ApplyInfix(l, Term.Name("=="), Nil, Seq(r)) => {

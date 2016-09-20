@@ -15,8 +15,6 @@ case class DataSetTableScala(myschema: SchemaDefinition, data: DataSet) extends 
 
   def this() = this(SchemaUnknown, Nothin())
 
-  import scala.collection.JavaConverters._
-
   def sizeOfBatch = rows.length
 
   def getNextBatch: DataSet = this
@@ -74,4 +72,3 @@ object DataSetTableScala {
 
   def inPredicate[T](list: List[T]) = (i: T) => list.contains(i)
 }
-

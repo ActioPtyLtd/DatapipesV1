@@ -8,6 +8,8 @@ import scala.collection.Iterator
 /**
   * Created by mauri on 4/07/2016.
   */
+
+@deprecated("Use lookup or join instead", "16/09/2016")
 class TaskMerge extends Task {
 
   lazy val attribute = config.getString(DPSystemConfigurable.ATTRIBUTE_LABEL)

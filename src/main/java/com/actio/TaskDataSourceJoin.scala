@@ -3,7 +3,6 @@ package com.actio
 import com.actio.dpsystem.{ DPSystemFactory, DPSystemConfigurable }
 import com.typesafe.config.ConfigValueFactory
 import scala.collection.mutable.Map
-import scala.collection.JavaConverters._
 
 /**
  * Created by mauri on 2/05/2016.
@@ -41,9 +40,7 @@ class TaskDataJoin extends Task {
       DataSetCache.initaliseTask(taskName)
 
       val dataSourceDataSet = dataSource.read(Nothin())
-      val tes = dataSourceDataSet.elems.toList
-
-      val es = tes.flatMap(e => MetaTerm.eval(e, iterateR).elems).toList
+      val es = dataSourceDataSet.elems.flatMap(e => dataSourceIterate(e).elems).toList
 
       es.foreach(ds => {
         DataSetCache.add(
@@ -67,6 +64,13 @@ class TaskDataJoin extends Task {
   }
 
   def dataSource = DPSystemFactory.newDataSource(config.getConfig(DPSystemConfigurable.DATASOURCE_LABEL), masterConfig)
+
+  def dataSourceIterate(e: DataSet): DataSet =
+    if(config.hasPath("iterateR")) {
+      MetaTerm.eval(e, iterateR)
+    } else {
+      e
+    }
 
   override def load(): Unit = ???
 

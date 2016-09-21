@@ -233,6 +233,8 @@ object DataSetTransforms {
 
   def contains(ds: List[DataSet], d: DataSet) = DataBoolean(ds.exists(i => i.stringOption == d.stringOption))
 
+  def capitalise(str: String): DataSet = DataString(str.toUpperCase)
+
   def quoteOption(ds: DataSet) = ds.stringOption.map(s => if (s.isEmpty) DataString("null") else DataString("\"" + s + "\"")).getOrElse(DataString("null"))
 
   // single quote escape

@@ -36,7 +36,12 @@ class TaskDataSourceUpdate extends Task {
       .map(e =>
         (e,
           MetaTerm.evalTemplate(e, keyL).stringOption.getOrElse(""),
-          MetaTerm.evalTemplate(e, changeL).stringOption.getOrElse(""))).toList
+          MetaTerm.evalTemplate(e, changeL).stringOption.getOrElse("")
+        ))
+      .toList
+      .groupBy(g => g._2)
+      .map(f => f._2.head)
+      .toList
 
     // work out which elements then need to be inserted or updated
     val inserts = dsIncoming.filter(d => Cache.dim.get.get(d._2).isEmpty)

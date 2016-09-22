@@ -124,11 +124,11 @@ public class TaskPipeline extends Task implements Runnable
                 DataSet subResultSet = iterator.next();
                 // recursively traverse the rest of the pipeline batching up the ResultSet
                 //subResultSet.dump();
-
+                logger.info("Processing::" + currentNode.getName() + "::size=" + subResultSet.elems().size() );
                 for (DataSet iteratedDatSet : getSubDataSets(subResultSet, tasksInPipeline, keyIndex)) {
                     processPipeLineRE(tasksInPipeline, keyIndex, iteratedDatSet);
 
-                    logger.info("Called Batch Recursively::" + currentNode.getName() +
+                    logger.info("Called Batch Recursively::" + currentNode.getName() + "::size=" + subResultSet.elems().size() +
                             "(" + keyIndex + "/" + tasksInPipeline.size() + ")");
                 }
             }

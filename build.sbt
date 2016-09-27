@@ -1,6 +1,6 @@
 name := "dpipes"
 
-version := "1.1.8"
+version := "1.1.9"
 
 scalaVersion := "2.11.7"
 
@@ -35,6 +35,3 @@ enablePlugins(DockerPlugin)
 
 // set the main class for 'sbt run'
 mainClass in (Compile, run) := Some("com.actio.Main")
-
-
-

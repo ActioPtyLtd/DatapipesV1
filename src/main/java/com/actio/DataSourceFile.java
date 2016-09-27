@@ -73,7 +73,7 @@ public class DataSourceFile extends DataSource {
         // execute the sqlquery
         logger.info("ReadFile: " + fname);
 	if(behaviour.equals("DBF"))
-            dataSet = new DataSetDBF(new FileInputStream(new File(fname)));        
+            dataSet = new DataSetDBF(new FileInputStream(new File(fname)));
 	else if(behaviour.equalsIgnoreCase(READ_JSON_FROM_FILE))
             dataSet = Data2Json.fromFileStream2Json2Data(attribute, new FileInputStream(new File(fname)));
         else
@@ -156,7 +156,8 @@ public class DataSourceFile extends DataSource {
 
     @Override
     public DataSet executeQuery(DataSet ds, String query) throws Exception {
-        return null;
+        extract();
+        return dataSet;
     }
 
     @Override

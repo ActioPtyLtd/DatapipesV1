@@ -118,6 +118,18 @@ object MetaTerm {
             .elems
             .filterNot(f => eval(rem, scope + (tn -> f)).asInstanceOf[DataBoolean].bool)
             .toList)
+
+    // iterate through DataSet and apply function to each element
+    case Term.Apply(
+      Term.Select(s, Term.Name("map")),
+      Seq(Term.Function(Seq(Term.Param(Nil, Term.Name(tn), None, None)), rem))) =>
+        DataArray(
+          eval(s, scope)
+            .elems
+            .map(f => eval(rem, scope + (tn -> f)))
+            .toList)
+
+
   }
 
   def evalApplyUnary(t: Term.ApplyUnary, scope: Map[String, AnyRef]): DataSet = t match {
@@ -166,5 +178,28 @@ object MetaTerm {
 
       DataBoolean(ls.isDefined && rs.isDefined && ls.get == rs.get)
     }
+
+    // AND logic
+    case Term.ApplyInfix(l, Term.Name("&&"), Nil, Seq(r)) => {
+      val ls = eval(l, scope).asInstanceOf[DataBoolean]
+
+      if(ls.bool) {
+        eval(r, scope)
+      } else {
+        DataBoolean(false)
+      }
+    }
+
+    // AND logic
+    case Term.ApplyInfix(l, Term.Name("||"), Nil, Seq(r)) => {
+      val ls = eval(l, scope).asInstanceOf[DataBoolean]
+
+      if(ls.bool) {
+        DataBoolean(true)
+      } else {
+        eval(r, scope)
+      }
+    }
+
   }
 }

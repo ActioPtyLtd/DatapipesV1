@@ -129,6 +129,15 @@ object MetaTerm {
             .map(f => eval(rem, scope + (tn -> f)))
             .toList)
 
+    // iterate through DataSet and apply function to each element
+    case Term.Apply(
+      Term.Select(s, Term.Name("flatMap")),
+      Seq(Term.Function(Seq(Term.Param(Nil, Term.Name(tn), None, None)), rem))) =>
+        DataArray(
+          eval(s, scope)
+            .elems
+            .flatMap(f => eval(rem, scope + (tn -> f)).elems)
+            .toList)
 
   }
 

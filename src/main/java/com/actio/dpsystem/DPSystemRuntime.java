@@ -85,16 +85,16 @@ public class DPSystemRuntime extends DPSystemConfigurable {
         // going to instantiate a new factory & runtime
         // based upon the systemConfig to send the events out of the existing run
 
-        if (getSysconf().getSystemConfig("eventConfigName") == null)
-            return;
+        //if (getSysconf().getSystemConfig("dp_system.conf") == null)
+         //   return;
 
-        DPSystemFactory eventFactory = new DPSystemFactory();
+        //DPSystemFactory eventFactory = new DPSystemFactory();
 
         // locate filename
-        String sysconfigfilename = getSysconf().getSystemConfig("eventConfigName").toString();
-        logger.info("trying to load systemconfig" + sysconfigfilename);
-        eventFactory.loadConfig(sysconfigfilename);
-        DPSystemRuntime eventRunTime = eventFactory.newRuntime();
+        //String sysconfigfilename = getSysconf().getSystemConfig("dp_system.conf").toString();
+        logger.info("Sending Messages");
+        //eventFactory.loadConfig(sysconfigfilename);
+        //DPSystemRuntime eventRunTime = eventFactory.newRuntime();
 
         // Generate the required DataSets
 
@@ -103,19 +103,19 @@ public class DPSystemRuntime extends DPSystemConfigurable {
         DPEventPublisher dppub = new DPEventPublisher(this);
         DataSet ds = dppub.getRun();
 
-        eventRunTime.execute("create-run", ds);
+        execute("sys-create-run", ds);
 
         DataSet dspipe = dppub.getPipeline();
 
-        eventRunTime.execute("p-create-run-pipelines", dspipe);
+        execute("sys-p-create-run-pipelines", dspipe);
 
         DataSet dstask = dppub.getTasks();
 
-        eventRunTime.execute("p-create-run-tasks", dstask);
+        execute("sys-p-create-run-tasks", dstask);
 
         DataSet dsevents = dppub.GetEvents();
 
-        eventRunTime.execute("p-load-events", dsevents);
+        execute("sys-p-load-events", dsevents);
 
     }
 

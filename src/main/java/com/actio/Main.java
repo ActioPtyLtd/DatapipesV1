@@ -89,12 +89,13 @@ public class Main {
                       dprun.execute(pipelineName);
 
                   ///==========
-                  //dprun.sendEvents();
+                  dprun.sendEvents();
                   logger.info("Execution completed.");
               }
               else {
                   dprun.service();
               }
+
             }
             catch(Exception exp) {
               logger.error("Unexpected exception:" + exp.getMessage());

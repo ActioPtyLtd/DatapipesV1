@@ -35,33 +35,58 @@ class TaskDataJoin extends Task {
 
     super.setConfig(sysconf.getTaskConfig(this.node.getName).toConfig, sysconf.getMasterConfig)
 
-    // load all from the data source
-    if (!DataSetCache.isTaskInitialised(taskName)) {
+    if (config.hasPath("right")) {
+    // load all from the data source each time
       DataSetCache.initaliseTask(taskName)
-
       val dataSourceDataSet = dataSource.read(Nothin())
       val es = dataSourceDataSet.elems.flatMap(e => dataSourceIterate(e).elems).toList
-
-      es.foreach(ds => {
-        DataSetCache.add(
-          taskName,
-          MetaTerm.evalTemplate(ds, keyR).stringOption.getOrElse(""),
-          ds
-        )
-      })
-    }
-
-    dataSet = DataRecord(DataArray(dataSet.elems
-      .map(e => (e, DataSetCache.get(taskName, MetaTerm.evalTemplate(e, keyL).stringOption.getOrElse(""))))
-      .map(m =>
-        if(m._2.isDefined) {
-          DataRecord(m._1.label, DataRecord(this.node.getName, List(m._2.get)) :: m._1.elems.toList)
-        }
-        else {
-          DataRecord(m._1.label, Nothin(this.node.getName) :: m._1.elems.toList)
+        // doing a right join
+        dataSet.elems.foreach(ds => {
+          DataSetCache.add(
+            taskName,
+            MetaTerm.evalTemplate(ds, keyL).stringOption.getOrElse(""),
+            ds
+          )
         })
-      .toList))
+        dataSet = DataRecord(DataArray(es
+          .map(e => (e, DataSetCache.get(taskName, MetaTerm.evalTemplate(e, keyR).stringOption.getOrElse(""))))
+          .map(m =>
+            if (m._2.isDefined) {
+              DataRecord(m._1.label, DataRecord(this.node.getName, List(m._2.get)) :: m._1.elems.toList)
+            }
+            else {
+              DataRecord(m._1.label, Nothin(this.node.getName) :: m._1.elems.toList)
+            })
+          ))
+      } else {
+        if (!DataSetCache.isTaskInitialised(taskName)) {
+          DataSetCache.initaliseTask(taskName)
+
+          val dataSourceDataSet = dataSource.read(Nothin())
+          val es = dataSourceDataSet.elems.flatMap(e => dataSourceIterate(e).elems).toList
+
+          // default is a left join
+          es.foreach(ds => {
+            DataSetCache.add(
+              taskName,
+              MetaTerm.evalTemplate(ds, keyR).stringOption.getOrElse(""),
+              ds
+            )
+          })
+        }
+        dataSet = DataRecord(DataArray(dataSet.elems
+          .map(e => (e, DataSetCache.get(taskName, MetaTerm.evalTemplate(e, keyL).stringOption.getOrElse(""))))
+          .map(m =>
+            if (m._2.isDefined) {
+              DataRecord(m._1.label, DataRecord(this.node.getName, List(m._2.get)) :: m._1.elems.toList)
+            }
+            else {
+              DataRecord(m._1.label, Nothin(this.node.getName) :: m._1.elems.toList)
+            })
+          .toList))
+    }
   }
+
 
   def dataSource = DPSystemFactory.newDataSource(config.getConfig(DPSystemConfigurable.DATASOURCE_LABEL), masterConfig)
 

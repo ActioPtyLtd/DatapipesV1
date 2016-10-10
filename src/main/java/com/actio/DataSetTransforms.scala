@@ -484,9 +484,9 @@ object DataSetTransforms {
 
   def trimValue(value: String) = DataString(value.trim)
 
-  def mapOrElse(ds: DataSetTableScala, col: String, colPairs: List[String], orElse: String) = {
-    val pairMap = colPairs.grouped(2).map(g => (g.head, g.tail.headOption.getOrElse(""))).toMap
-    valueFunc(ds, col, v => mapOrElseValue(v, pairMap, orElse))
+  def mapOrElse(v: String, colPairs: List[DataSet], orElse: String) = {
+    val pairMap = colPairs.map(p => p.stringOption.getOrElse("")).grouped(2).map(g => (g.head, g.tail.headOption.getOrElse(""))).toMap
+    DataString(pairMap.getOrElse(v, orElse))
   }
 
   def valueFunc(ds: DataSetTableScala, col: String, f: String => String) = rowFunc(ds, ds.getNextAvailableColumnName(col), r => f(ds.getValue(r, col)))

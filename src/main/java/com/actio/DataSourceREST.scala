@@ -178,7 +178,11 @@ class DataSourceREST extends DataSource with Logging {
 
     val element = getResponseDataSet(requestQuery)(sendRequest)
 
-    logger.info(s"Status code ${element.statusCode} returned.")
+    if(element.statusCode >= 400 && element.statusCode < 600) {
+      logger.error(s"Status code ${element.statusCode} returned.")
+    } else {
+      logger.info(s"Status code ${element.statusCode} returned.")
+    }
 
     element
   }

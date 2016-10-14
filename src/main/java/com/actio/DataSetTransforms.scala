@@ -240,6 +240,8 @@ object DataSetTransforms {
 
   def urlEncode(str: String): DataSet = DataString(URLEncoder.encode(str, "UTF-8"))
 
+  def replaceAll(str: String, find: String, replaceWith: String): DataSet = DataString(str.replaceAll(find, replaceWith))
+
   // single quote escape
   def sq(str: String): DataSet = if(str == null) DataString("") else DataString(str.replace("'","''"))
 

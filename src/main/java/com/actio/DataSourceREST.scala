@@ -247,7 +247,7 @@ class DataSourceREST extends DataSource with Logging {
 
       logger.info(body.get)
 
-      val input: StringEntity = new StringEntity(body.get)
+      val input: StringEntity = new StringEntity(body.get,"UTF-8")
       input.setContentType(DataSourceREST.CONTENT_TYPE)
       request.asInstanceOf[HttpEntityEnclosingRequestBase].setEntity(input)
     }

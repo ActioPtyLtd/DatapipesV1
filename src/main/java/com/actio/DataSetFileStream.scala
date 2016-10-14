@@ -33,4 +33,5 @@ class DataSetFileStream(private val reader: InputStream) extends DataSet {
   override def label: String = ""
 
   private def lines2data(lines: List[String]) = DataArray(lines.map(l => DataRecord(DataString(col1, l))))
-}
+
+ }

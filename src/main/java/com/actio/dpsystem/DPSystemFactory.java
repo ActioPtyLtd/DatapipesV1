@@ -127,6 +127,9 @@ public class DPSystemFactory extends DPSystemConfigurable {
             case REST_LABEL:
                 t = new DataSourceREST();
                 break;
+            case "ftp_client":
+                t = new DataSourceFTP();
+                break;
             case "dirfiles":
                 t = new DataSourceDirFiles();
                 break;

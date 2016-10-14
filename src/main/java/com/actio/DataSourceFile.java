@@ -70,7 +70,7 @@ public class DataSourceFile extends DataSource {
         // read the file into memory -- yeah yeah
         ArrayList<String> list = new ArrayList<String>();
 
-        // execute the sqlquery
+        // execute the query
         logger.info("ReadFile: " + fname);
 	if(behaviour.equals("DBF"))
             dataSet = new DataSetDBF(new FileInputStream(new File(fname)));

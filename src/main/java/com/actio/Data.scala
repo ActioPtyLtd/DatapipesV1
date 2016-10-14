@@ -115,6 +115,8 @@ object Data2Json {
       case DataNumeric(_, num) => num.setScale(2, BigDecimal.RoundingMode.HALF_UP).underlying().stripTrailingZeros().toPlainString
       case DataBoolean(_, bool) => bool.toString
       case DataDate(_, date) => date.toString
+      case e => toField(e.label) +
+        "{" + e.elems.map(toJsonString).mkString(",") + "}"
     }
 
   def toField(name: String): String = if (name.isEmpty) "" else "\"" + name + "\": "

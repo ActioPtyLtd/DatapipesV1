@@ -15,6 +15,10 @@ class TaskLookup extends Task {
       dataSet = DataRecord(DataArray(dataSet.elems.map(d =>
         DataRecord(d,DataArray(dataSource.read(d).elems.toList))).toList))
     }
+    else if(behavior.equalsIgnoreCase("v3")) {
+      dataSet = DataRecord(DataArray(dataSet.elems.map(d =>
+        DataRecord(d.label, DataRecord(this.node.getName, dataSource.read(d)) :: d.elems.toList)).toList))
+    }
     else {
       dataSet = DataRecord(DataArray(dataSet.elems.map(d =>
         DataRecord(DataArray(this.node.getName, dataSource.read(d).elems.toList) :: d.elems.toList)).toList))

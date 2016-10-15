@@ -2,7 +2,7 @@ package com.actio
 
 import java.lang.reflect.Method
 import java.lang.reflect.Parameter
-import com.actio.DataSetTransforms.Batch
+import com.actio.TransformsDataSet.Batch
 import com.actio.dpsystem.Logging
 import scala.annotation.tailrec
 import scala.collection.JavaConverters._
@@ -21,7 +21,7 @@ object UtilityFunctions extends Logging {
   def execute(methodName: String, params: List[Any]): DataSet = execute(methodName, params.asJava)
 
   def execute(methodName: String, params: java.util.List[Any]): DataSet = {
-    val method = Class.forName("com.actio.DataSetTransforms").getDeclaredMethods.find(_.getName.equalsIgnoreCase(methodName))
+    val method = Class.forName("com.actio.TransformsDataSet").getDeclaredMethods.find(_.getName.equalsIgnoreCase(methodName))
 
     if (method.isDefined) {
       logger.debug("Invoking method " + methodName)

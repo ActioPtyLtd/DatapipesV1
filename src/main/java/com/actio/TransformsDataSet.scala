@@ -18,7 +18,7 @@ import scala.util.Try
   */
 //noinspection ScalaStyle,ScalaStyle
 
-object DataSetTransforms {
+object TransformsDataSet {
 
   //TODO: likely will remove Batch, it's confusing
   type Batch = (SchemaDefinition, DataSet)

@@ -2,10 +2,7 @@ package com.actio;
 
 import com.actio.dpsystem.DPSystemFactory;
 import com.typesafe.config.Config;
-import org.apache.commons.lang.StringUtils;
 
-import java.math.BigDecimal;
-import java.util.stream.Collectors;
 import java.sql.*;
 
 /**
@@ -95,7 +92,7 @@ public class DataSourceSQLJava extends DataSource {
 
     @Override
     public void execute(DataSet data, String statement) throws Exception {
-        DataSetTableScala nds = DataSetTransforms.prepare4statement(DataSetTableScala$.MODULE$.apply(data.schema(),data.headOption().get()), statement);   // assuming one batch again
+        DataSetTableScala nds = TransformsDataSet.prepare4statement(DataSetTableScala$.MODULE$.apply(data.schema(),data.headOption().get()), statement);   // assuming one batch again
         statement = statement.replaceAll("@(?<name>[-_a-zA-Z0-9]+)","?");
 
         logger.info("Connecting to database...");

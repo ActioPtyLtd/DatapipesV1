@@ -4,6 +4,7 @@ import java.security.MessageDigest
 import java.text.SimpleDateFormat
 import java.time.{LocalDateTime, LocalDate}
 import java.time.format.DateTimeFormatter
+import java.net.URLEncoder
 import org.apache.commons.codec.binary.Hex
 import org.apache.commons.lang.time.DateUtils
 ;
@@ -17,7 +18,7 @@ import scala.util.Try
   */
 //noinspection ScalaStyle,ScalaStyle
 
-object DataSetTransforms {
+object TransformsDataSet {
 
   //TODO: likely will remove Batch, it's confusing
   type Batch = (SchemaDefinition, DataSet)
@@ -236,6 +237,10 @@ object DataSetTransforms {
   def capitalise(str: String): DataSet = DataString(str.toUpperCase)
 
   def quoteOption(ds: DataSet) = ds.stringOption.map(s => if (s.isEmpty) DataString("null") else DataString("\"" + s + "\"")).getOrElse(DataString("null"))
+
+  def urlEncode(str: String): DataSet = DataString(URLEncoder.encode(str, "UTF-8"))
+
+  def replaceAll(str: String, find: String, replaceWith: String): DataSet = DataString(str.replaceAll(find, replaceWith))
 
   // single quote escape
   def sq(str: String): DataSet = if(str == null) DataString("") else DataString(str.replace("'","''"))

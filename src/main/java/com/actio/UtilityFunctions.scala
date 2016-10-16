@@ -1,6 +1,5 @@
 package com.actio
 
-import java.lang.reflect.Method
 import java.lang.reflect.Parameter
 import com.actio.DataSetTransforms.Batch
 import com.actio.dpsystem.Logging

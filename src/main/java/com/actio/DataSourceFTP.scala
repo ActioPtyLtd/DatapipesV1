@@ -3,6 +3,8 @@ package com.actio
 import com.actio.dpsystem.Logging
 import com.typesafe.config.Config
 
+// scalastyle:off
+
 /**
   * Created by jimpo on 10/10/2016.
   */

@@ -21,7 +21,7 @@ object MetaTerm {
       eval(body, Map(name -> ds))
 
     // evaluate expression, add to scope top level attributes of the DataSet
-    case _ => eval(t, ds.elems.map(e => e.label -> e).toList.toMap)
+    case _ => eval(t, ds.elems.map(e => e.label -> e).toList.toMap + ("this" -> ds))
   }
 
   def eval(t: AnyRef, scope: Map[String, AnyRef]): DataSet = t match {
@@ -31,6 +31,12 @@ object MetaTerm {
 
     // construct literal numeric
     case Lit(int: Int) => DataNumeric(int)
+
+    // for when you want to reference original top level dataset
+    case Term.This(_) => scope("this")  match {
+      case ds: DataSet => ds
+      case term => eval(term, scope)
+    }
 
     // get variable in scope
     case Term.Name(name) => scope(name) match {

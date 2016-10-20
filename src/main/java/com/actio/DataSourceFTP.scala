@@ -1,19 +1,15 @@
 package com.actio
 
+import org.apache.commons.net.ftp._
 import com.actio.dpsystem.Logging
 import com.typesafe.config.Config
+import scala.util.Try
 
 // scalastyle:off
 
 /**
   * Created by jimpo on 10/10/2016.
   */
-
-object DataSourceFTP {
-
-  // do we need anything for the static class?
-
-}
 
 
 class DataSourceFTP extends DataSource with Logging {
@@ -28,7 +24,7 @@ class DataSourceFTP extends DataSource with Logging {
   @throws(classOf[Exception])
   def execute(ds: DataSet, query: String): Unit = {
 
-    ds.elems.foreach(e => executeQueryLabel(e,query))
+    // ds.elems.foreach(e => executeQueryLabel(e,query))
 
   }
 
@@ -41,21 +37,44 @@ class DataSourceFTP extends DataSource with Logging {
   }
 
   @throws(classOf[Exception])
-  def extract(): Unit = {
-    dataSet = read(Nothin()) // doesn't really need a dataset
+  def extract(): Unit = ???
 
-    // open connection
+  @throws(classOf[Exception])
+  def openConnection() : Try[FTPClient] = {
 
-    // read remote files locally
+    println("openConnection::ftp")
 
-    // create dataset_uri
+    def ftp: FTPClient = new FTPClient()
+    def conf: FTPClientConfig = new FTPClientConfig()
+    conf.setLenientFutureDates(true)
+
+    ftp.configure(conf)
+
+    try {
+      // attempt connection
+      var hostname = getConfig().
 
 
+    }
+    catch
+      {
+        case _:Exception => return Try(null)
+      }
+
+    return Try(ftp)
   }
 
 
   @throws(classOf[Exception])
   def load() {
+    //dataSet = read(Nothin()) // doesn't really need a dataset
+
+    // open connection
+    def ftpconn : Try[FTPClient] = openConnection()
+
+    // read remote files locally
+
+    // create dataset_uri
 
   }
 
@@ -66,6 +85,18 @@ class DataSourceFTP extends DataSource with Logging {
 
   @throws(classOf[Exception])
   def write(dataSet: DataSet): Unit = {
+
+    println("ftp::write::")
+    //dataSet = read(Nothin()) // doesn't really need a dataset
+
+    // open connection
+    def ftpconn : Try[FTPClient] = openConnection()
+
+    var ftp = ftpconn
+    // read remote files locally
+
+
+
 
   }
 

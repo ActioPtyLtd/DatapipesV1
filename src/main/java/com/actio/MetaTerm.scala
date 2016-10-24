@@ -153,7 +153,7 @@ object MetaTerm {
 
   def evalApplyInfix(t: Term.ApplyInfix, scope: Map[String, AnyRef]): DataSet = t match {
 
-    // currently can compare dates only
+    // >=
     case Term.ApplyInfix(l, Term.Name(">="), Nil, Seq(r)) =>
       eval(l, scope) match {
         case d: DataDate =>
@@ -164,12 +164,33 @@ object MetaTerm {
           DataBoolean(false)
     }
 
-    // currently can compare dates only
+    // >
+    case Term.ApplyInfix(l, Term.Name(">"), Nil, Seq(r)) =>
+      eval(l, scope) match {
+        case d: DataDate =>
+          DataBoolean(d.date.compareTo(eval(r, scope).asInstanceOf[DataDate].date) > 0)
+        case n: DataNumeric =>
+          DataBoolean(n.num > eval(r, scope).asInstanceOf[DataNumeric].num)
+        case _ =>
+          DataBoolean(false)
+    }
+
+    // <
     case Term.ApplyInfix(l, Term.Name("<"), Nil, Seq(r)) => eval(l, scope) match {
       case d: DataDate =>
         DataBoolean(d.date.compareTo(eval(r, scope).asInstanceOf[DataDate].date) < 0)
       case n: DataNumeric =>
         DataBoolean(n.num < eval(r, scope).asInstanceOf[DataNumeric].num)
+      case _ =>
+        DataBoolean(false)
+    }
+
+    // <=
+    case Term.ApplyInfix(l, Term.Name("<="), Nil, Seq(r)) => eval(l, scope) match {
+      case d: DataDate =>
+        DataBoolean(d.date.compareTo(eval(r, scope).asInstanceOf[DataDate].date) <= 0)
+      case n: DataNumeric =>
+        DataBoolean(n.num <= eval(r, scope).asInstanceOf[DataNumeric].num)
       case _ =>
         DataBoolean(false)
     }
@@ -205,7 +226,7 @@ object MetaTerm {
       }
     }
 
-    // AND logic
+    // OR logic
     case Term.ApplyInfix(l, Term.Name("||"), Nil, Seq(r)) => {
       val ls = eval(l, scope).asInstanceOf[DataBoolean]
 

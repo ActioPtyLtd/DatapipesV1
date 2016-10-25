@@ -145,6 +145,17 @@ object MetaTerm {
             .flatMap(f => eval(rem, scope + (tn -> f)).elems)
             .toList)
 
+    case Term.Apply(
+      Term.Select(s, Term.Name("groupBy")),
+      Seq(Term.Function(Seq(Term.Param(Nil, Term.Name(tn), None, None)), rem))) =>
+        DataRecord(
+          eval(s, scope)
+            .elems
+            .toList
+            .groupBy(k => eval(rem, scope + (tn -> k)).stringOption.getOrElse(""))
+            .map(p => DataArray(p._1, p._2))
+            .toList)
+
   }
 
   def evalApplyUnary(t: Term.ApplyUnary, scope: Map[String, AnyRef]): DataSet = t match {

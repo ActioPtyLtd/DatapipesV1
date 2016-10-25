@@ -52,7 +52,7 @@ class DataSourceFTP extends DataSource with Logging {
 
     try {
       // attempt connection
-      var hostname = getConfig().
+      //var hostname = getConfig().
 
 
     }

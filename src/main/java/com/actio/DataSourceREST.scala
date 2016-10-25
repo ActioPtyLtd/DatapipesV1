@@ -60,6 +60,10 @@ class DataSourceREST extends DataSource with Logging {
   var patchfn: String = null
   var port: String = null
   var headers: List[(String, String)] = List()
+  var onResponse: String = null
+  var onEmpty: String = null
+  var onError : String = null
+
 
   @throws(classOf[Exception])
   override def setConfig(_conf: Config, _master: Config) {
@@ -92,6 +96,15 @@ class DataSourceREST extends DataSource with Logging {
     }
     if (config.hasPath("port")) {
       port = config.getString("port")
+    }
+    if (config.hasPath("onResponse")) {
+      onResponse = config.getString("onRsponse")
+    }
+    if (config.hasPath("onEmpty")) {
+      onEmpty = config.getString("onEmpty")
+    }
+    if (config.hasPath("onError")) {
+      onError = config.getString("onError")
     }
 
     if (config.hasPath("headers")) {
@@ -180,6 +193,13 @@ class DataSourceREST extends DataSource with Logging {
 
     if(element.statusCode >= 400 && element.statusCode < 600) {
       logger.error(s"Status code ${element.statusCode} returned.")
+      if (onError == "exit"){
+        // exiting pipeline
+
+        logger.error(s"**** Exiting OnError ${element.statusCode} returned.")
+
+        throw new Exception("On Error Exiting")
+      }
     } else {
       logger.info(s"Status code ${element.statusCode} returned.")
     }
@@ -225,6 +245,7 @@ class DataSourceREST extends DataSource with Logging {
       response._1.getStatusCode,
       response._2.map(h => h.getName -> h.getValue).toMap,
       DataRecord("root", dsBody.elems.toList))
+
   }
 
   private def configOption(config: Config, path: String) = if (config.hasPath(path)) Some(config.getString(path)) else None

@@ -229,7 +229,6 @@ object TransformsDataSet {
     "-"+str.substring(20,32))
 
 
-
   def ifEqualOrElse(ds: DataSet, equal: String, dsThen: DataSet, dsElse: DataSet): DataSet = if (ds.stringOption.getOrElse("") == equal) dsThen else dsElse
 
   def nothing(): DataSet = Nothin()
@@ -350,6 +349,15 @@ object TransformsDataSet {
     res
   }
 
+  /*
+  def concatWithinRecord(ds: DataSet, label: String) : DataSet = {
+
+    // iterate over ds
+
+
+    return ds
+  }
+*/
   /*
 
   def numeric(batch: Batch, field: String, precision: Int, scale: Int): DataSet = batch match {

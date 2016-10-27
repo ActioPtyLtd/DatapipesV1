@@ -198,7 +198,13 @@ class DataSourceREST extends DataSource with Logging {
 
         logger.error(s"**** Exiting OnError ${element.statusCode} returned.")
 
-        throw new Exception("On Error Exiting")
+        System.exit(-1)
+      }   else   if (onError == "exception"){
+        // exiting pipeline
+
+        logger.error(s"**** On Error Exception: DataSourceREST ${element.statusCode} returned.")
+
+        throw new Exception("On Error Exception: DataSourceREST ")
       }
     } else {
       logger.info(s"Status code ${element.statusCode} returned.")

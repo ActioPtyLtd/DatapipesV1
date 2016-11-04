@@ -206,17 +206,33 @@ object MetaTerm {
         DataBoolean(false)
     }
 
-    // currently, addition appends strings only
-    case Term.ApplyInfix(l, Term.Name("+"), Nil, Seq(r)) =>
-      DataString(
-        eval(l, scope).stringOption.getOrElse("") +
-        eval(r, scope).stringOption.getOrElse(""))
+    // string concat and numeric addition
+    case Term.ApplyInfix(l, Term.Name("+"), Nil, Seq(r)) => (eval(l, scope),eval(r, scope)) match {
+      case (left: DataNumeric, right: DataNumeric) => DataNumeric(left.num + right.num)
+      case (left,right) => DataString(left.stringOption.getOrElse("") +
+                                  right.stringOption.getOrElse(""))
+    }
 
     // subtract numeric
-    case Term.ApplyInfix(l, Term.Name("-"), Nil, Seq(r)) =>
-      DataNumeric(
-        eval(l, scope).asInstanceOf[DataNumeric].num -
-        eval(r, scope).asInstanceOf[DataNumeric].num)
+    case Term.ApplyInfix(l, Term.Name("-"), Nil, Seq(r)) => (eval(l, scope),eval(r, scope)) match {
+      case (left: DataNumeric, right: DataNumeric) => DataNumeric(
+        left.num -
+        right.num)
+      }
+
+    // multiply numeric
+    case Term.ApplyInfix(l, Term.Name("*"), Nil, Seq(r)) => (eval(l, scope),eval(r, scope)) match {
+      case (left: DataNumeric, right: DataNumeric) => DataNumeric(
+        left.num *
+        right.num)
+      }
+
+    // divide numeric
+    case Term.ApplyInfix(l, Term.Name("/"), Nil, Seq(r)) => (eval(l, scope),eval(r, scope)) match {
+      case (left: DataNumeric, right: DataNumeric) => DataNumeric(
+        left.num /
+        right.num)
+      }
 
     // currently, equality will do a string comparison
     case Term.ApplyInfix(l, Term.Name("=="), Nil, Seq(r)) => {

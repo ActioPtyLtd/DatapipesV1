@@ -32,6 +32,10 @@ object MetaTerm {
     // construct literal numeric
     case Lit(int: Int) => DataNumeric(int)
 
+    // tuple for dataset construction
+    case Term.Tuple(s) => DataRecord(eval(s.head, scope).stringOption.getOrElse(""),
+      s.tail.map(e => eval(e, scope)).toList)
+
     // for when you want to reference original top level dataset
     case Term.This(_) => scope("this")  match {
       case ds: DataSet => ds
@@ -156,6 +160,18 @@ object MetaTerm {
             .map(p => DataArray(p._1, p._2))
             .toList)
 
+    case Term.Apply(
+      Term.Select(s, Term.Name("find")),
+      Seq(Term.Function(Seq(Term.Param(Nil, Term.Name(tn), None, None)), rem))) =>
+        eval(s, scope)
+          .elems
+          .toList
+          .find(f =>
+            eval(rem, scope + (tn -> f)) match {
+              case DataBoolean(_, bool) => bool
+              case _ => false})
+          .getOrElse(Nothin())
+
   }
 
   def evalApplyUnary(t: Term.ApplyUnary, scope: Map[String, AnyRef]): DataSet = t match {
@@ -264,5 +280,29 @@ object MetaTerm {
       }
     }
 
+    case Term.ApplyInfix(l, Term.Name("&"), Nil, Seq(r)) => {
+      merge("merge", eval(l, scope), eval(r,scope))
+    }
+
   }
+
+  def merge(label: String, dsets: DataSet*): DataSet =
+    if(dsets.exists(d => d.isInstanceOf[DataArray]))
+      DataArray(label,
+        dsets
+          .flatMap(ds => ds.elems)
+          .toList)
+    else
+      DataRecord(label,
+        dsets
+          .flatMap(ds => ds.elems)
+          .toList
+          .groupBy(g => g.label)
+          .map(m =>
+            if(m._2.length > 1)
+              merge(m._1, m._2:_*)
+            else
+              m._2.head)
+          .toList)
+
 }

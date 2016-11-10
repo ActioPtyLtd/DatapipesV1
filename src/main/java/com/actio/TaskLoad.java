@@ -81,7 +81,7 @@ public class TaskLoad extends Task {
         // diff = new DiffSet();
 
         setInstanceID(getUUID());
-        logger.info("---RUNID=" + getRunID() + "----INSTANCEID=" + getInstanceID() + ".");
+        logger.info("---RUNID=" + sysconf.events.runId() + "----INSTANCEID=" + getInstanceID() + ".");
 
     }
 

@@ -3,6 +3,7 @@ package com.actio;
 import com.actio.dpsystem.DPFnNode;
 import com.actio.dpsystem.DPSystemConfig;
 import com.actio.dpsystem.DPSystemConfigurable;
+import com.actio.dpsystem.DPEventAggregator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -12,26 +13,9 @@ import org.slf4j.LoggerFactory;
 public abstract class Task extends DPSystemConfigurable {
 
     protected static final Logger logger = LoggerFactory.getLogger(Task.class);
-    DPFnNode node;
-    DPSystemConfig sysconf;
-    private String runID;
-    private String instanceID;
 
-    public String getRunID() {
-        return runID;
-    }
-
-    public void setRunID(String runID) {
-        this.runID = runID;
-    }
-
-    public String getInstanceID() {
-        return instanceID;
-    }
-
-    public void setInstanceID(String instanceID) {
-        this.instanceID = instanceID;
-    }
+    public DPFnNode node;
+    public DPSystemConfig sysconf;
 
     public abstract void execute() throws Exception;
 
@@ -53,7 +37,7 @@ public abstract class Task extends DPSystemConfigurable {
 
         // create the instanceID for this task
         setInstanceID(getUUID());
-        logger.info("---RUNID=" + getRunID() + "----INSTANCEID=" + getInstanceID() + ".");
+        logger.info("---RUNID=" + sysconf.events.runId() + "----INSTANCEID=" + getInstanceID() + ".");
     }
 
 }

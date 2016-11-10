@@ -280,29 +280,10 @@ object MetaTerm {
       }
     }
 
-    case Term.ApplyInfix(l, Term.Name("&"), Nil, Seq(r)) => {
-      merge("merge", eval(l, scope), eval(r,scope))
+    case Term.ApplyInfix(l, Term.Name("mergeLeft"), Nil, Seq(r)) => {
+      DataSetOperations.mergeLeft(eval(l, scope), eval(r,scope))
     }
 
   }
-
-  def merge(label: String, dsets: DataSet*): DataSet =
-    if(dsets.exists(d => d.isInstanceOf[DataArray]))
-      DataArray(label,
-        dsets
-          .flatMap(ds => ds.elems)
-          .toList)
-    else
-      DataRecord(label,
-        dsets
-          .flatMap(ds => ds.elems)
-          .toList
-          .groupBy(g => g.label)
-          .map(m =>
-            if(m._2.length > 1)
-              merge(m._1, m._2:_*)
-            else
-              m._2.head)
-          .toList)
 
 }

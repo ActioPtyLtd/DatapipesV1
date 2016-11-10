@@ -18,6 +18,12 @@ class DataSourceFTP extends DataSource with Logging {
   override def setConfig(_conf: Config, _master: Config) {
     super.setConfig(_conf, _master)
 
+  }
+
+  @throws(classOf[Exception])
+  override def setConfig(_conf: Config, _master: Config) {
+    super.setConfig(_conf, _master)
+
 
   }
 
@@ -52,9 +58,9 @@ class DataSourceFTP extends DataSource with Logging {
 
     try {
       // attempt connection
-      //var hostname = getConfig().
 
 
+      ftp.connect(hostname, port)
     }
     catch
       {

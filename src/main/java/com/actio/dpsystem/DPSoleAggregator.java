@@ -5,6 +5,6 @@ package com.actio.dpsystem;
  */
 public class DPSoleAggregator extends DPSystemConfigurable {
 
-    static public DPEventAggregator events = new DPEventAggregator(getUUID());
+    //static public DPEventAggregator events = new DPEventAggregator(getUUID());
 
 }

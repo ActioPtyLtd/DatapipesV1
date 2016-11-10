@@ -69,7 +69,7 @@ public class TaskPipeline extends Task implements Runnable
     private void processPipe() throws Exception {
 
         logger.info("Entered processPipe, name= '"+node.getName()+"'");
-        events.info(getInstanceID(), "", "START", "ProcessPipeline Started::", node.getName(), "", 0);
+        sysconf.events.info(getInstanceID(), "", "START", "ProcessPipeline Started::", node.getName(), "", 0);
         try {
             // get the list of tasks for that pipeline
             LinkedList<DPFnNode> tasksInPipeline = node.getNodeList();
@@ -85,9 +85,9 @@ public class TaskPipeline extends Task implements Runnable
 
         } catch (Exception e) {
             logger.info("processPipeLine Exception::" + e.getMessage());
-            events.err(getInstanceID(), "", "ERROR", "ProcessPipeline Exception::" + e.getMessage(), node.getName(), "", 0);
+            sysconf.events.err(getInstanceID(), "", "ERROR", "ProcessPipeline Exception::" + e.getMessage(), node.getName(), "", 0);
         }
-        events.info(getInstanceID(), "", "FINISH", "ProcessPipeline Finished::", node.getName(), "", 0);
+        sysconf.events.info(getInstanceID(), "", "FINISH", "ProcessPipeline Finished::", node.getName(), "", 0);
     }
 
 
@@ -124,7 +124,9 @@ public class TaskPipeline extends Task implements Runnable
                 DataSet subResultSet = iterator.next();
                 // recursively traverse the rest of the pipeline batching up the ResultSet
                 //subResultSet.dump();
-                logger.info("Processing::" + currentNode.getName() + "::size=" + subResultSet.elems().size() );
+                int reccount =  subResultSet.elems().size();
+                logger.info("Processing::" + currentNode.getName() + "::size=" +reccount);
+                sysconf.events.count(getInstanceID(), currentNode.getInstanceID(), "RecordCount", currentNode.getName(), "Records", reccount);
                 for (DataSet iteratedDatSet : getSubDataSets(subResultSet, tasksInPipeline, keyIndex)) {
                     processPipeLineRE(tasksInPipeline, keyIndex, iteratedDatSet);
 
@@ -175,18 +177,23 @@ public class TaskPipeline extends Task implements Runnable
                 t.setDataSet(initDataSet);
 
             // ===========================================
-            events.info(getInstanceID(), t.getInstanceID(), "START", "Starting Task", t.node.getName(), "", 0);
+            sysconf.events.info(getInstanceID(), t.getInstanceID(), "START", "Starting Task", t.node.getName(), "", 0);
             //events.info(t.getInstanceID(), "COUNT", "Processing Record Count", t.node.getName(), "Records", t.dataSet.elems().length());
 
-            t.execute();
+            try {
+                t.execute();
+                //events.info(t.getInstanceID(), "COUNT", "Processing Record Count", t.node.getName(), "Records", t.dataSet.elems().length());
+                sysconf.events.info(getInstanceID(), t.getInstanceID(), "FINISH", "Finishing Task", t.node.getName(), "", 0);
 
-            //events.info(t.getInstanceID(), "COUNT", "Processing Record Count", t.node.getName(), "Records", t.dataSet.elems().length());
-            events.info(getInstanceID(), t.getInstanceID(), "FINISH", "Finishing Task", t.node.getName(), "", 0);
-
-            return t.getDataSet();
+                return t.getDataSet();
+            } catch (Exception e) {
+                sysconf.events.err(getInstanceID(), t.getInstanceID(), e.toString(), e.getStackTrace()[0].toString(), t.node.getName(), "", 0);
+            }
 
         } catch (Exception e) {
+            sysconf.events.err(getInstanceID(), null, e.toString(),e.getStackTrace()[0].toString(), node.getName(), "", 0);
             logger.error("evokeTask Exception:" + e.toString());
+            // add system message
         }
 
         // return an empty set on an exception

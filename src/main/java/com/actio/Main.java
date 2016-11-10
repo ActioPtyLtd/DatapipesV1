@@ -76,10 +76,10 @@ public class Main {
 
             debug(logger);
 
-            DPSystemFactory tf = new DPSystemFactory();
-            tf.loadConfig(configFile, properties);
+            //DPSystemFactory tf = new DPSystemFactory();
+            //tf.loadConfig(configFile, properties);
 
-            DPSystemRuntime dprun = tf.newRuntime();
+            DPSystemRuntime dprun = new DPSystemRuntime(configFile,properties);
 
             try {
               if (!runService) {
@@ -98,7 +98,7 @@ public class Main {
 
             }
             catch(Exception exp) {
-              logger.error("Unexpected exception:" + exp.getMessage());
+              logger.error("Unexpected exception:" + exp.toString());
               logger.info("Execution stopped.");
             }
             // dump out the runtime state
@@ -116,13 +116,10 @@ public class Main {
     {
         /*
         Command line options
-
         -s  : run as service according to Service
         -c  : config
         -p  : run pipeline
-
          */
-
         // create the Options
         Options options = new Options();
         options.addOption( "c", "config", true, "config" );

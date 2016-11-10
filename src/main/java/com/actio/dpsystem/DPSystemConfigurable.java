@@ -76,6 +76,14 @@ public class DPSystemConfigurable {
     public static final String ROW_FUNCTIONS_LABEL = "row";
     public static final String BATCH_FUNCTIONS_KEY = "****batch****";
     public static final String ROW_FUNCTIONS_KEY = "****row****";
+
+    public static final String SYSTEM_CONFIG = "systemConfig";
+    public static final String SYSTEM_CONFIG_FILE = "dp_system.conf";
+    public static final String SYS_PIPE_CREATE_RUN = "sys_p_create_run";
+    public static final String SYS_PIPE_CREATE_RUN_PIPE = "sys_p_create_run_pipelines";
+    public static final String SYS_PIPE_CREATE_RUN_TASKS = "sys_p_create_run_tasks";
+    public static final String SYS_PIPE_LOAD_TASKS = "sys_p_load_events";
+
     protected static final Logger logger = LoggerFactory.getLogger(DPSystemConfigurable.class);
     /**
      * The base resource path.
@@ -84,8 +92,8 @@ public class DPSystemConfigurable {
     public DataSet dataSet;
     public Config config;
     public Config masterConfig;
-    public DPEventAggregator events = null;
-    private String runID;
+    //public DPEventAggregator events = null;
+    //private String runID;
     private String instanceID;
 
     static public boolean matchLabel(String value, String label) {
@@ -111,13 +119,17 @@ public class DPSystemConfigurable {
         return UUID.randomUUID().toString();
     }
 
+    /*
     public String getRunID() {
+
         return runID;
     }
 
     public void setRunID(String runID) {
         this.runID = runID;
     }
+
+    */
 
     public String getInstanceID() {
         return instanceID;
@@ -162,11 +174,11 @@ public class DPSystemConfigurable {
         masterConfig = _master;
 
 
-        events = DPSoleAggregator.events;
+        //events = DPSoleAggregator.events;
 
-        setRunID(events.runId());
+        //setRunID(events.runId());
         setInstanceID(getUUID());
-        logger.info("***********---RUNID=" + getRunID() + "----INSTANCEID=" + getInstanceID() + ".");
+        logger.info("*******-----INSTANCEID=" + getInstanceID() + ".");
 
     }
 

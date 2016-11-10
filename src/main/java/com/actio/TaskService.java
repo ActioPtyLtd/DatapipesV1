@@ -64,7 +64,7 @@ public class TaskService extends TaskPipeline {
 
         // locate service Configuration
         setInstanceID(getUUID());
-        logger.info("---RUNID=" + getRunID() + "----INSTANCEID=" + getInstanceID() + ".");
+        logger.info("---RUNID=" + sysconf.events.runId() + "----INSTANCEID=" + getInstanceID() + ".");
     }
 
     public void setNode(DPSystemConfig _sysconf, DPSystemRuntime runtime) throws Exception
@@ -77,7 +77,7 @@ public class TaskService extends TaskPipeline {
 
         // locate service Configuration
         setInstanceID(getUUID());
-        logger.info("---RUNID=" + getRunID() + "----INSTANCEID=" + getInstanceID() + ".");
+        logger.info("---RUNID=" + sysconf.events.runId() + "----INSTANCEID=" + getInstanceID() + ".");
     }
 
     // call back switches

@@ -193,13 +193,13 @@ class DataSourceREST extends DataSource with Logging {
 
     if(element.statusCode >= 400 && element.statusCode < 600) {
       logger.error(s"Status code ${element.statusCode} returned.")
-      if (onError == "exit"){
+      if (onError.toLowerCase  == "exit"){
         // exiting pipeline
 
         logger.error(s"**** Exiting OnError ${element.statusCode} returned.")
 
         System.exit(-1)
-      }   else   if (onError == "exception"){
+      }   else   if (onError.toLowerCase == "exception"){
         // exiting pipeline
 
         logger.error(s"**** On Error Exception: DataSourceREST ${element.statusCode} returned.")

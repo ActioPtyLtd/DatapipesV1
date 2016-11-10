@@ -32,6 +32,10 @@ object MetaTerm {
     // construct literal numeric
     case Lit(int: Int) => DataNumeric(int)
 
+    // tuple for dataset construction
+    case Term.Tuple(s) => DataRecord(eval(s.head, scope).stringOption.getOrElse(""),
+      s.tail.map(e => eval(e, scope)).toList)
+
     // for when you want to reference original top level dataset
     case Term.This(_) => scope("this")  match {
       case ds: DataSet => ds
@@ -156,6 +160,18 @@ object MetaTerm {
             .map(p => DataArray(p._1, p._2))
             .toList)
 
+    case Term.Apply(
+      Term.Select(s, Term.Name("find")),
+      Seq(Term.Function(Seq(Term.Param(Nil, Term.Name(tn), None, None)), rem))) =>
+        eval(s, scope)
+          .elems
+          .toList
+          .find(f =>
+            eval(rem, scope + (tn -> f)) match {
+              case DataBoolean(_, bool) => bool
+              case _ => false})
+          .getOrElse(Nothin())
+
   }
 
   def evalApplyUnary(t: Term.ApplyUnary, scope: Map[String, AnyRef]): DataSet = t match {
@@ -206,17 +222,33 @@ object MetaTerm {
         DataBoolean(false)
     }
 
-    // currently, addition appends strings only
-    case Term.ApplyInfix(l, Term.Name("+"), Nil, Seq(r)) =>
-      DataString(
-        eval(l, scope).stringOption.getOrElse("") +
-        eval(r, scope).stringOption.getOrElse(""))
+    // string concat and numeric addition
+    case Term.ApplyInfix(l, Term.Name("+"), Nil, Seq(r)) => (eval(l, scope),eval(r, scope)) match {
+      case (left: DataNumeric, right: DataNumeric) => DataNumeric(left.num + right.num)
+      case (left,right) => DataString(left.stringOption.getOrElse("") +
+                                  right.stringOption.getOrElse(""))
+    }
 
     // subtract numeric
-    case Term.ApplyInfix(l, Term.Name("-"), Nil, Seq(r)) =>
-      DataNumeric(
-        eval(l, scope).asInstanceOf[DataNumeric].num -
-        eval(r, scope).asInstanceOf[DataNumeric].num)
+    case Term.ApplyInfix(l, Term.Name("-"), Nil, Seq(r)) => (eval(l, scope),eval(r, scope)) match {
+      case (left: DataNumeric, right: DataNumeric) => DataNumeric(
+        left.num -
+        right.num)
+      }
+
+    // multiply numeric
+    case Term.ApplyInfix(l, Term.Name("*"), Nil, Seq(r)) => (eval(l, scope),eval(r, scope)) match {
+      case (left: DataNumeric, right: DataNumeric) => DataNumeric(
+        left.num *
+        right.num)
+      }
+
+    // divide numeric
+    case Term.ApplyInfix(l, Term.Name("/"), Nil, Seq(r)) => (eval(l, scope),eval(r, scope)) match {
+      case (left: DataNumeric, right: DataNumeric) => DataNumeric(
+        left.num /
+        right.num)
+      }
 
     // currently, equality will do a string comparison
     case Term.ApplyInfix(l, Term.Name("=="), Nil, Seq(r)) => {
@@ -248,5 +280,10 @@ object MetaTerm {
       }
     }
 
+    case Term.ApplyInfix(l, Term.Name("mergeLeft"), Nil, Seq(r)) => {
+      DataSetOperations.mergeLeft(eval(l, scope), eval(r,scope))
+    }
+
   }
+
 }

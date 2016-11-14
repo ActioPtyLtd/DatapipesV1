@@ -136,8 +136,6 @@ class DataSourceREST extends DataSource with Logging {
     write(getDataSet)
   }
 
-  import scala.collection.JavaConverters._
-
   @throws(classOf[Exception])
   def execute() {
     if (trans != null) {
@@ -159,11 +157,11 @@ class DataSourceREST extends DataSource with Logging {
   }
 
   override def create(ds: DataSet): Unit = {
-    executeQueryLabel(ds.elems.toList.head, "create")
+    ds.elems.foreach(e => executeQueryLabel(e, "create"))
   }
 
   override def delete(ds: DataSet): Unit = {
-    executeQueryLabel(ds.elems.toList.head, "delete")
+    ds.elems.foreach(e => executeQueryLabel(e, "delete"))
   }
 
   @throws(classOf[Exception])
@@ -195,7 +193,6 @@ class DataSourceREST extends DataSource with Logging {
 
     logger.info(">>>>>>>>" + request.toString + "<<<<<<<" + request.getRequestLine)
 
-    import scala.collection.JavaConversions._
     request.getAllHeaders.foreach(f => logger.info(">>>" + f.getName + ">>" + f.getValue))
 
     val httpreq = HttpClientBuilder.create()
@@ -271,7 +268,7 @@ class DataSourceREST extends DataSource with Logging {
   }
 
   override def update(ds: DataSet): Unit = {
-    executeQueryLabel(ds, "update")
+    ds.elems.foreach(e => executeQueryLabel(e, "update"))
   }
 
   @throws(classOf[Exception])

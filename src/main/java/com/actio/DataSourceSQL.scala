@@ -12,12 +12,12 @@ class DataSourceSQL extends DataSource with Logging {
 
   override def getLastLoggedDataSet: DataSet = ???
 
-  override def execute(ds: DataSet, query: String): Unit = {
+  override def execute(ds: DataSet, label: String): Unit = {
     val cn = DriverManager.getConnection(getConnectStr())
 
     logger.info("Connected")
 
-    val statement = ds.elems.map(d => d(query).stringOption.getOrElse(query)) mkString "; "
+    val statement = ds.elems.map(d => d(label).stringOption.getOrElse(getConfig().getConfig("query").getString(label))) mkString "; "
 
     val stmt: PreparedStatement = cn.prepareStatement(statement)
 
@@ -37,12 +37,12 @@ class DataSourceSQL extends DataSource with Logging {
 
   //TODO: close connection on dispose
 
-  override def executeQuery(ds: DataSet, query: String): DataSet = {
+  override def executeQuery(ds: DataSet, label: String = "read"): DataSet = {
     logger.info("Connecting to database...")
 
     try {
 
-      val sqlQuery = ds(query).stringOption.getOrElse(query)
+      val sqlQuery = ds(label).stringOption.getOrElse(getConfig().getConfig("query").getString(label))
 
       logger.info("Executing Query: " + sqlQuery)
 
@@ -71,7 +71,7 @@ class DataSourceSQL extends DataSource with Logging {
 
   override def read(queryParser: QueryParser): DataSet = ???
 
-  override def extract(): Unit = { dataSet = executeQuery(Nothin(), read) }
+  override def extract(): Unit = { dataSet = executeQuery(Nothin()) }
 
   override def LogNextDataSet(theSet: DataSet): Unit = ???
 
@@ -87,8 +87,6 @@ class DataSourceSQL extends DataSource with Logging {
       }
     }
   }
-
-  lazy val read = this.getConfig().getString("query.read")
 
   override def clazz: Class[_] = classOf[DataSourceSQL]
 }

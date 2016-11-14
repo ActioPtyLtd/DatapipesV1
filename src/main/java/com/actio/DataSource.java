@@ -59,13 +59,11 @@ public abstract class DataSource extends DPSystemConfigurable {
     }
 
     public void executeLabel(DataSet ds, String label) throws Exception {
-        String query = getConfig().getConfig("query").getString(label);
-        execute(ds, query);
+        execute(ds, label);
     }
 
     public DataSet executeQueryLabel(DataSet ds, String label) throws Exception {
-        String query = getConfig().getConfig("query").getString(label);
-        return executeQuery(ds, query);
+        return executeQuery(ds, label);
     }
 
     public abstract void execute(DataSet ds, String query) throws Exception;

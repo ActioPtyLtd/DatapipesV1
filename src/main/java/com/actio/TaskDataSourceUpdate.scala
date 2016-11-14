@@ -51,14 +51,14 @@ class TaskDataSourceUpdate extends Task {
     //TODO: can refactor to load (insert and/or update) these in the next task
 
     if (inserts.nonEmpty && dataSourceConf.hasPath("query.create")) {
-      dataSource.execute(DataArray("", inserts.map(_._1)), dataSourceConf.getString("query.create"))
+      dataSource.create(DataArray("", inserts.map(_._1)))
 
       // update the dimension cache, so this isn't repeated again
       Cache.dim.get ++= inserts.map(m => (m._2, m._3))
     }
 
     if (updates.nonEmpty && dataSourceConf.hasPath("query.update")) {
-      dataSource.execute(DataArray("", updates.map(_._1)), dataSourceConf.getString("query.update"))
+      dataSource.update(DataArray("", updates.map(_._1)))
 
       // update the dimension cache, so this isn't repeated again
       Cache.dim.get ++= updates.map(m => (m._2, m._3))

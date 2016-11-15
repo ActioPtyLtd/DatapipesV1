@@ -224,6 +224,11 @@ object TransformsDataSet {
 
   def concatString(ds: DataSet): DataSet = DataString(ds.elems.filter(_.stringOption.isDefined).map(_.stringOption.get).mkString(","))
 
+  //	  "{1-9}-{9-12}-{13-16}-{17-20}-{21-32}"
+  def toUUIDFormat(str: String): DataSet = DataString(str.substring(0,8)+"-"+str.substring(8,12)+"-"+str.substring(12,16)+"-"+str.substring(16,20)+
+    "-"+str.substring(20,32))
+
+
   def ifEqualOrElse(ds: DataSet, equal: String, dsThen: DataSet, dsElse: DataSet): DataSet = if (ds.stringOption.getOrElse("") == equal) dsThen else dsElse
 
   def nothing(): DataSet = Nothin()
@@ -344,6 +349,15 @@ object TransformsDataSet {
     res
   }
 
+  /*
+  def concatWithinRecord(ds: DataSet, label: String) : DataSet = {
+
+    // iterate over ds
+
+
+    return ds
+  }
+*/
   /*
 
   def numeric(batch: Batch, field: String, precision: Int, scale: Int): DataSet = batch match {

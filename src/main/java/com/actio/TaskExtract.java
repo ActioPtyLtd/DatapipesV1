@@ -53,7 +53,8 @@ public class TaskExtract extends Task {
     // ==========================================================================
 
 
-    public void setNode(DPFnNode _node, DPSystemConfig _sysconf) throws Exception {
+    public void setNode(DPFnNode _node, DPSystemConfig _sysconf) throws Exception
+    {
         sysconf = _sysconf;
         super.setConfig(sysconf.getTaskConfig(_node.getName()).toConfig(),sysconf.getMasterConfig());
         node = _node;
@@ -71,7 +72,7 @@ public class TaskExtract extends Task {
             dataSource = DPSystemFactory.newDataSource(config.getConfig(DATASOURCE_LABEL),masterConfig);
 
 
-        logger.info("---RUNID=" + getRunID() + "----INSTANCEID=" + getInstanceID() + ".");
+        logger.info("---INSTANCEID=" + getInstanceID() + ".");
     }
 
 }

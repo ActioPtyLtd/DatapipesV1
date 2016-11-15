@@ -38,6 +38,7 @@ public class DPSystemConfig extends DPSystemConfigurable {
     private ConfigObject scheduled;
     private ConfigObject system;
 
+    public DPEventAggregator events = null;
 
     //  task name mapping to compiled task - TBD when we compileConfig tasks
 
@@ -60,10 +61,9 @@ public class DPSystemConfig extends DPSystemConfigurable {
 
     public void setConfig(Config conf, Config master) throws Exception
     {
-
         setInstanceID(getUUID());
-        logger.info("---RUNID=" + getRunID() + "----INSTANCEID=" + getInstanceID() + ".");
-
+        logger.info("----INSTANCEID=" + getInstanceID() + ".");
+        events = new DPEventAggregator(getInstanceID());
         super.setConfig(conf,master);
         script  = setconfigsection(master.root(),SCRIPT_LABEL,true);
         schema = setconfigsection(script,SCHEMA_LABEL,false);

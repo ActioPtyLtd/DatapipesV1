@@ -17,7 +17,9 @@ class TransformTerm extends Task {
 
   override def setNode(_node: DPFnNode, _sysconf: DPSystemConfig): Unit = {
     sysconf = _sysconf
+
     super.setConfig(sysconf.getTaskConfig(_node.getName).toConfig, sysconf.getMasterConfig)
     node = _node
+
   }
 }

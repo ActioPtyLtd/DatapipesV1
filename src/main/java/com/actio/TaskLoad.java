@@ -78,10 +78,10 @@ public class TaskLoad extends Task {
         if (config.hasPath(DIFF_PROCESS_REVISED_LABEL))
             diffProcessRev = config.getBoolean(DIFF_PROCESS_REVISED_LABEL);
 
-        diff = new DiffSet();
+        // diff = new DiffSet();
 
         setInstanceID(getUUID());
-        logger.info("---RUNID=" + getRunID() + "----INSTANCEID=" + getInstanceID() + ".");
+        logger.info("---RUNID=" + sysconf.events.runId() + "----INSTANCEID=" + getInstanceID() + ".");
 
     }
 

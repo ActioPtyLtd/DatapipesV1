@@ -125,6 +125,7 @@ public class Main {
         options.addOption( "c", "config", true, "config" );
         options.addOption( "p", "pipe", true, "run named pipeline .." );
         options.addOption( "s", "service", false, "run as Service, as configured in Services section");
+        options.addOption( "L", "load config file into Admin Server");
         options.addOption( Option.builder("D").argName( "property=value" )
                 .hasArgs()
                 .valueSeparator('=')

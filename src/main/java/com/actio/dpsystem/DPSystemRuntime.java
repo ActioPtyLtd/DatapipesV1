@@ -182,6 +182,49 @@ public class DPSystemRuntime extends DPSystemConfigurable {
         return;
     }
 
+    public void uploadConfig() throws Exception {
+
+        // uploadConfig
+
+        // setup runtime if it's not been done before calling execute
+        if (!initialisedCheck){
+            initRuntime();
+        }
+
+        // Initialise Config
+
+        String sysconfigfilename;
+
+        if (getSysconf().getSystemConfig(SYSTEM_CONFIG) == null)
+            sysconfigfilename = SYSTEM_CONFIG_FILE;
+        else
+            sysconfigfilename = getSysconf().getSystemConfig(SYSTEM_CONFIG).toString();
+
+        logger.info("Creating Config");
+
+        DPSystemRuntime eventRunTime = new DPSystemRuntime(sysconfigfilename);
+        eventRunTime.initRuntime();
+        // dont have the event transmission process generate more events
+        eventRunTime.events.disableEvents();
+
+        // Generate the required DataSets to be published
+        DPEventPublisher dppub = new DPEventPublisher(this);
+
+        DataSet ds = dppub.getConfigCreate();
+        //eventRunTime.execute(SYS_PIPE_CREATE_CONFIG, ds);
+
+        DataSet dspipe = dppub.getConfigPipe();
+        dspipe.toString();
+
+        eventRunTime.execute(SYS_PIPE_CREATE_PIPE, dspipe);
+
+
+        DataSet dstask = dppub.getConfigTask();
+        eventRunTime.execute(SYS_PIPE_CREATE_TASK, dstask);
+
+
+    }
+
     public void sendEvents() throws Exception {
         // going to instantiate a new factory & runtime
         // based upon the systemConfig to send the events out of the existing run

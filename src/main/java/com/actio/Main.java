@@ -33,6 +33,7 @@ public class Main {
         String pipelineName = null;
         Boolean runService = false;
         Properties properties = null;
+        Boolean loadConfigIntoAdmin = false;
 
         Logger logger =  null;
 
@@ -71,6 +72,10 @@ public class Main {
                     logger.info(key + " = " + properties.getProperty(key));
                 }
             }
+            if (line.hasOption('L')) {
+                logger.info("Load Config into Admin Server");
+                loadConfigIntoAdmin = true;
+            }
 
             logger.info("loadingConfigFile=" + configFile);
 
@@ -81,18 +86,23 @@ public class Main {
 
             DPSystemRuntime dprun = new DPSystemRuntime(configFile,properties);
 
-            try {
-              if (!runService) {
-                  if (pipelineName == null)
-                      dprun.execute();
-                  else
-                      dprun.execute(pipelineName);
+            try
+            {
+                if (loadConfigIntoAdmin){
 
-                  ///==========
-                  dprun.sendEvents();
-                  logger.info("Execution completed.");
-              }
-              else {
+                    dprun.uploadConfig();
+                }
+                else  if (!runService) {
+                    if (pipelineName == null)
+                        dprun.execute();
+                    else
+                        dprun.execute(pipelineName);
+
+                    ///==========
+                    dprun.sendEvents();
+                    logger.info("Execution completed.");
+                }
+                else {
                   dprun.service();
               }
 

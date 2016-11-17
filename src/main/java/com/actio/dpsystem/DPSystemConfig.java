@@ -72,7 +72,19 @@ public class DPSystemConfig extends DPSystemConfigurable {
         services = setconfigsection(script,SERVICES_LABEL,false);
         execs = setconfigsection(script, STARTUP_EXECS_LABEL,false);
         scheduled = setconfigsection(script,SCHEDULED_LABEL,false);
-        system = setconfigsection(script, "system", false);
+        system = setconfigsection(script, SYSTEM_LABEL, false);
+    }
+
+    public String getConfigName() throws Exception {
+
+        // check system section for a config name
+        String configName = getSystemConfig(CONFIG_NAME);
+
+        if (configName != null) {
+            // otherwise use filename
+            return configName;
+        }
+        return  config.origin().filename();
     }
 
     public ConfigObject getTaskConfig(String name) throws Exception {

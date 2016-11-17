@@ -77,8 +77,17 @@ public class DPSystemConfigurable {
     public static final String BATCH_FUNCTIONS_KEY = "****batch****";
     public static final String ROW_FUNCTIONS_KEY = "****row****";
 
+    public static final String SYSTEM_LABEL = "system";
+    public static final String CONFIG_NAME = "configName";
+    public static final String CONFIG_DESCRIPTION = "configDescription";
+
     public static final String SYSTEM_CONFIG = "systemConfig";
     public static final String SYSTEM_CONFIG_FILE = "dp_system.conf";
+
+    public static final String SYS_PIPE_CREATE_CONFIG = "sys_p_create_config";
+    public static final String SYS_PIPE_CREATE_PIPE = "sys_p_create_pipe";
+    public static final String SYS_PIPE_CREATE_TASK = "sys_p_create_task";
+
     public static final String SYS_PIPE_CREATE_RUN = "sys_p_create_run";
     public static final String SYS_PIPE_CREATE_RUN_PIPE = "sys_p_create_run_pipelines";
     public static final String SYS_PIPE_CREATE_RUN_TASKS = "sys_p_create_run_tasks";

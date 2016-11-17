@@ -303,7 +303,7 @@ public class DPSystemFactory extends DPSystemConfigurable {
     // =====================================================
 
 
-    // REFACTOR NOTE - currently deal with a single sqlquery
+    // REFACTOR NOTE - currently deal with a single sql query
     // in the future will want to be able to deal with a collection of
     // queries, that fulfill an API definition
 

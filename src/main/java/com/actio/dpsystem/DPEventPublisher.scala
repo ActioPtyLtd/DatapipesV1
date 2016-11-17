@@ -1,6 +1,6 @@
 package com.actio.dpsystem
 
-import com.actio._
+import com.actio.{DataArray, _}
 /**
   * Created by jim on 25/07/16.
   */
@@ -55,6 +55,35 @@ class DPEventPublisher(val dprun: DPSystemRuntime) {
       DataString("counter_value", "0"),
       DataString("counter_label", "0")))).toList)
 
+  }
+
+  def getConfigCreate(): DataSet = {
+
+    // get the config file name
+
+    // check sys section if defined
+    // otherwise use name of config file
+    DataRecord("initial", DataArray(DataRecord("record",
+      List(DataString(DPSystemConfigurable.CONFIG_NAME, dprun.getSysconf.getConfigName),
+        DataString(DPSystemConfigurable.CONFIG_DESCRIPTION, dprun.getSysconf.getSystemConfig(DPSystemConfigurable.CONFIG_DESCRIPTION))))))
+  }
+
+  def getConfigPipe(): DataSet = {
+
+    // pipelines [ record_pipeline ( name , task_list ( list of tasks ) ) ]
+
+    val pipes = dprun.getSysconf().pipelinesMap.values().asScala.map(n => ( n.name))
+
+  //    DataRecord("root",
+     DataArray(pipes.map(p => DataRecord(
+            DataString("configName", dprun.getSysconf.getConfigName),
+            DataString("pipelineName", p))).toList)
+    //)
+  }
+
+  def getConfigTask(): DataSet = {
+
+    DataString ("config","name")
   }
 
   //DPFnNode(runid, pipeid) -> taksk (taskid,name)

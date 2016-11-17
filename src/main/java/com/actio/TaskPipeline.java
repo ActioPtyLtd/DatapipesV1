@@ -188,6 +188,7 @@ public class TaskPipeline extends Task implements Runnable
                 return t.getDataSet();
             } catch (Exception e) {
                 sysconf.events.err(getInstanceID(), t.getInstanceID(), e.toString(), e.getStackTrace()[0].toString(), t.node.getName(), "", 0);
+                logger.error("evokeTask Exception:" + e.toString());
             }
 
         } catch (Exception e) {

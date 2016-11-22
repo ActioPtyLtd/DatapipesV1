@@ -53,6 +53,7 @@ public class DPSystemConfigurable {
     public static final String TASK_TRANSFORM_LABEL = "transform";
     public static final String TASK_PIPELINE_LABEL = "pipeline";
     public static final String ATTRIBUTE_LABEL = "attribute";
+
     // types of behavior
     public static final String CHECKPOINT_DIFF_LABEL="checkpointDiff";
     public static final String FULL_CHECKPOINT_DIFF_LABEL="fullCheckpointDiff";
@@ -79,6 +80,7 @@ public class DPSystemConfigurable {
 
     public static final String SYSTEM_LABEL = "system";
     public static final String CONFIG_NAME = "configName";
+    public static final String RUN_ID = "runId";
     public static final String CONFIG_DESCRIPTION = "configDescription";
 
     public static final String SYSTEM_CONFIG = "systemConfig";

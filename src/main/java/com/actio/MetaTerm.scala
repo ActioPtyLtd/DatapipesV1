@@ -33,6 +33,10 @@ object MetaTerm {
     case Lit(int: Int) => DataNumeric(int)
 
     // tuple for dataset construction
+
+    case Term.Tuple(Term.Name(label) +: tail) => DataRecord(label,
+      tail.map(e => eval(e, scope)).toList)
+
     case Term.Tuple(s) => DataRecord(eval(s.head, scope).stringOption.getOrElse(""),
       s.tail.map(e => eval(e, scope)).toList)
 
@@ -283,6 +287,15 @@ object MetaTerm {
     case Term.ApplyInfix(l, Term.Name("mergeLeft"), Nil, Seq(r)) => {
       DataSetOperations.mergeLeft(eval(l, scope), eval(r,scope))
     }
+
+    case Term.ApplyInfix(Term.Name(key), Term.Name("->"), Nil, Seq(r)) => {
+      val value = eval(r, scope)
+      value match {
+        case DataString(_, v) => DataString(key, v)
+        case DataNumeric(_, v) => DataNumeric(key, v)
+      }
+    }
+
 
   }
 

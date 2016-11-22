@@ -8,16 +8,6 @@ import com.actio.{DataArray, _}
 // run system pipelines for publishing
 class DPEventPublisher(val dprun: DPSystemRuntime) {
 
-  def pushConfig(): Unit = {
-
-    // treat config as a datasource - return a dataset
-
-    /*
-
-     */
-
-  }
-
   def getRun(): DataSet = DataArray(DataString(dprun.getRunID))
 
   import collection.JavaConverters._
@@ -70,44 +60,29 @@ class DPEventPublisher(val dprun: DPSystemRuntime) {
 
   def getConfigPipe(): DataSet = {
 
-    // pipelines [ record_pipeline ( name , task_list ( list of tasks ) ) ]
+    val pipes = dprun.getSysconf().pipelinesMap.values().asScala.map(n => (n.name))
 
-    val pipes = dprun.getSysconf().pipelinesMap.values().asScala.map(n => ( n.name))
-
-  //    DataRecord("root",
-     DataArray(pipes.map(p => DataRecord(
-            DataString("configName", dprun.getSysconf.getConfigName),
-            DataString("pipelineName", p))).toList)
-    //)
+    DataArray(pipes.map(p => DataRecord(
+      DataString("configName", dprun.getSysconf.getConfigName),
+      DataString("pipelineName", p))).toList)
   }
 
   def getConfigTask(): DataSet = {
 
-    DataString ("config","name")
+    DataArray(dprun.getSysconf().pipelinesMap.values().asScala.flatMap(p =>
+      p.getNodeList.asScala.zipWithIndex.map { case (t, x) =>
+        DataRecord(
+          DataString("taskName", t.name),
+          DataString("taskType", t.getType match {
+            case "extract" => "EXTRACT"
+            case "load" => "LOAD"
+            case _ => "TRANSFORM"
+          }),
+          DataString("pipelineName", p.name),
+          DataString("configName", dprun.getSysconf.getConfigName),
+          DataString("seq", (x + 1).toString))
+      }).toList)
+
   }
-
-  //DPFnNode(runid, pipeid) -> taksk (taskid,name)
-
-    // treat config as a datasource - return a dataset
-
-    /*
-        Given a pipeline
-
-        1. Create Run
-          - Config Name : System -> configName
-          - RunID
-
-        2. Create Pipeline
-          - Pipeline Name : Nodes -> Pipeline
-          - RUNID + PIPEUUID
-
-        3. Create Taask
-        - Task Name : Nodes ->
-        - RUNID + PIPEUUID + TASKUUID
-
-     */
 }
 
-class ConfigDataSource {
-
-}

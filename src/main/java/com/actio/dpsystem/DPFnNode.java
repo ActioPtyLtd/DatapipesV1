@@ -11,8 +11,7 @@ import org.slf4j.LoggerFactory;
 
 import java.util.HashMap;
 import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
+import com.typesafe.config.Config;
 
 public class DPFnNode {
 
@@ -25,10 +24,20 @@ public class DPFnNode {
     private String instanceID;
     private String type;
 
+    public DPSystemConfig sysconf = null;
+
+
     public DPFnNode(String name, String type)
     {
         this.name = name;
         this.type = type;
+    }
+
+    public DPFnNode(String name, String type, DPSystemConfig _conf)
+    {
+        this.name = name;
+        this.type = type;
+        this.sysconf = _conf;
     }
 
     private DPFnNode() {}

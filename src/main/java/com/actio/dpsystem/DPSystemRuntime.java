@@ -211,17 +211,14 @@ public class DPSystemRuntime extends DPSystemConfigurable {
         DPEventPublisher dppub = new DPEventPublisher(this);
 
         DataSet ds = dppub.getConfigCreate();
-        //eventRunTime.execute(SYS_PIPE_CREATE_CONFIG, ds);
+        eventRunTime.execute(SYS_PIPE_CREATE_CONFIG, ds);
 
         DataSet dspipe = dppub.getConfigPipe();
-        dspipe.toString();
-
         eventRunTime.execute(SYS_PIPE_CREATE_PIPE, dspipe);
 
-
+        // creates the Task & the pipeline Stage Relationships
         DataSet dstask = dppub.getConfigTask();
         eventRunTime.execute(SYS_PIPE_CREATE_TASK, dstask);
-
 
     }
 
@@ -267,7 +264,6 @@ public class DPSystemRuntime extends DPSystemConfigurable {
     // run as a service
     public void service() throws Exception
     {
-
         logger.info("====== Starting SERVICE ===== ");
 
         Task service = DPSystemFactory.newService(sysconf,this);

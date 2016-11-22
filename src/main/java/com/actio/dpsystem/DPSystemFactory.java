@@ -72,6 +72,9 @@ public class DPSystemFactory extends DPSystemConfigurable {
             case "dump":
                 t = new TaskDump();
                 break;
+            case "fileDump":
+                t = new TaskFileDump();
+                break;
             case "join":
                 t = new TaskDataJoin();
                 break;

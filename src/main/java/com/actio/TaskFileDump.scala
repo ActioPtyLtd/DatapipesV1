@@ -2,7 +2,6 @@ package com.actio
 
 import com.actio.dpsystem.Logging
 import java.io._
-//import upickle.default._
 import boopickle.Default._
 
 /**
@@ -17,13 +16,11 @@ class TaskFileDump extends Task with Logging {
 
   override def load(): Unit = {
 
-   val tmpFile = File.createTempFile(this.node.getName, ".ds", new File(config.getString("directory")))
-   val fileOut = new FileOutputStream(tmpFile)
+    val tmpFile = File.createTempFile(this.node.getName, ".ds", new File(config.getString("directory")))
+    val fileOut = new FileOutputStream(tmpFile)
 
-   fileOut.write(Pickle.intoBytes(SerialisableDataSet.convert(dataSet)).array())
-   fileOut.close()
-
-    //val fos = new FileOutputStream(this.node.getName + "-" + java.util.UUID.randomUUID.toString + ".ds")
+    fileOut.write(Pickle.intoBytes(SerialisableDataSet.convert(dataSet)).array())
+    fileOut.close()
 
     dataSet = DataRecord(dataSet)
   }

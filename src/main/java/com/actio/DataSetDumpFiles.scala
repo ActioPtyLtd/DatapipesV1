@@ -1,14 +1,13 @@
 package com.actio
 
-import java.io.{ FileInputStream, ObjectInputStream, File, DataInputStream }
+import java.io.File
 import java.util.regex.Matcher
 import java.util.regex.Pattern
 
 import com.actio.dpsystem.Logging
-//import upickle.default._
 
 import java.nio.file._
-import boopickle.Default._
+import scala.collection.mutable.Queue
 
 /**
  * Created by mauri on 14/04/2016.
@@ -16,32 +15,44 @@ import boopickle.Default._
 
 object DataSetDumpFile {
 
+  // TODO: needs refactoring, only added this here to avoid writing java
   def apply(dir: String, regex: String): DataSet = {
-    apply(new File(dir).listFiles.filter(f => Pattern.compile(regex).matcher(f.getName).matches).map(m => m.getPath()).toSeq)
-  }
-
-  def apply(fileNames: Seq[String]): DataSet = {
-    new DataSet {
-
-      override def elems = fileNames.view.map(f => new DataSetDumpFile(f).ds).toIterator
-      val label = "something"
-    }
+    new DataSetDumpFile(new File(dir).listFiles.filter(f => Pattern.compile(regex).matcher(f.getName).matches).map(m => m.getPath()).toSeq)
   }
 }
 
-class DataSetDumpFile(private val fileName: String) extends DataSet with Logging {
+class DataSetDumpFile(fileNames: Seq[String]) extends DataSet with Logging {
 
-  val ds = {
-    logger.info(s"Reading $fileName...")
+  override def elems =
+    new Iterator[DataSet] {
+      private val files = Queue(fileNames:_*)
 
-    val bytes = Files.readAllBytes(Paths.get(fileName))
-    val ret = SerialisableDataSet.unpickle(bytes)
+      override def hasNext: Boolean = !files.isEmpty
 
-    logger.info(s"Finished reading $fileName...")
-    ret
-  }
+      override def next() = {
+        val fileName = files.dequeue()
 
-  override def elems = List(ds).toIterator
+        try {
+          logger.info(s"Reading file: $fileName...")
+
+          val path = Paths.get(fileName)
+          val bytes = Files.readAllBytes(path)
+          val ds = SerialisableDataSet.unpickle(bytes)
+
+          logger.info(s"Deleting file: $fileName...")
+          Files.delete(path)
+          logger.info(s"Successfully deleted file: $fileName...")
+
+          ds
+        }
+        catch {
+          case e: Throwable => {
+            logger.error(e.getMessage())
+            Nothin()
+          }
+        }
+      }
+    }
 
   override def label: String = "file"
 

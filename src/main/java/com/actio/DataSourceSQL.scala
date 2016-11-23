@@ -17,7 +17,12 @@ class DataSourceSQL extends DataSource with Logging {
 
     logger.info("Connected")
 
-    val statement = ds.elems.map(d => d(label).stringOption.getOrElse(getConfig().getConfig("query").getString(label))) mkString "; "
+    val statement = ds.elems.map(d => d(label).stringOption.getOrElse(
+      if (getConfig().hasPath("query."  + label))
+        getConfig().getConfig("query").getString(label)
+      else
+        label
+    )) mkString "; "
 
     val stmt: PreparedStatement = cn.prepareStatement(statement)
 

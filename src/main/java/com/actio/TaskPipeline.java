@@ -85,7 +85,7 @@ public class TaskPipeline extends Task implements Runnable
 
         } catch (Exception e) {
             logger.info("processPipeLine Exception::" + e.getMessage());
-            sysconf.events.err(getInstanceID(), "", "ERROR", "ProcessPipeline Exception::" + e.getMessage(), node.getName(), "", 0);
+            sysconf.events.err(getInstanceID(), "", "ERROR", "ProcessPipeline Exception::" + e.getMessage() +"::"+node.getName(), "", 0);
         }
         sysconf.events.info(getInstanceID(), "", "FINISH", "ProcessPipeline Finished::", node.getName(), "", 0);
     }
@@ -126,11 +126,24 @@ public class TaskPipeline extends Task implements Runnable
                 //subResultSet.dump();
                 int reccount =  subResultSet.elems().size();
                 logger.info("Processing::" + currentNode.getName() + "::size=" +reccount);
-                sysconf.events.progress(getInstanceID(), currentNode.getInstanceID(), "RecordCount", currentNode.getName(), "Records", reccount);
+                sysconf.events.progress(getInstanceID(), currentNode.getInstanceID(),
+                        "RecordCount", currentNode.getName(), "Records", reccount);
+
+                // check for need to abort on zero dataset
+                if (reccount <= 0 && this.node.getAttrib("onEmpty").contains("exit"))
+                {
+                    // aborting pipeline because the dataset is empty
+                    sysconf.events.progress(getInstanceID(), currentNode.getInstanceID(),
+                            "Exiting Pipeline On Empty DataSet", currentNode.getName(), "", 0);
+                    logger.info("**************** Abort Pipeline due to zero dataset ********************");
+
+                    return;
+                }
+
                 for (DataSet iteratedDatSet : getSubDataSets(subResultSet, tasksInPipeline, keyIndex)) {
                     processPipeLineRE(tasksInPipeline, keyIndex, iteratedDatSet);
-
-                    logger.info("Called Batch Recursively::" + currentNode.getName() + "::size=" + subResultSet.elems().size() +
+                    logger.info("Called Batch Recursively::" + currentNode.getName() +
+                            "::size=" + subResultSet.elems().size() +
                             "(" + keyIndex + "/" + tasksInPipeline.size() + ")");
                 }
             }
@@ -185,12 +198,12 @@ public class TaskPipeline extends Task implements Runnable
 
                 return t.getDataSet();
             } catch (Exception e) {
-                sysconf.events.err(getInstanceID(), t.getInstanceID(), e.toString(), e.getStackTrace()[0].toString(), t.node.getName(), "", 0);
+                sysconf.events.err(getInstanceID(), t.getInstanceID(), e.toString() +"::"+ e.getStackTrace()[0].toString(), t.node.getName(), "", 0);
                 logger.error("evokeTask Exception:" + e.toString());
             }
 
         } catch (Exception e) {
-            sysconf.events.err(getInstanceID(), null, e.toString(),e.getStackTrace()[0].toString(), node.getName(), "", 0);
+            sysconf.events.err(getInstanceID(), null, e.toString() +"::"+e.getStackTrace()[0].toString(), node.getName(), "", 0);
             logger.error("evokeTask Exception:" + e.toString());
             // add system message
         }
@@ -215,7 +228,6 @@ public class TaskPipeline extends Task implements Runnable
 
             logger.info("====== execute Pipeline '"+
                     pipeNode.name+"'");
-            //pipeNode.dump();
 
             // Instantiate the Node Function
             t = DPSystemFactory.newTask(sysconf,pipeNode);

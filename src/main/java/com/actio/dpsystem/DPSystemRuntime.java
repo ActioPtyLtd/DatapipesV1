@@ -10,7 +10,8 @@ import java.io.File;
 import java.io.IOException;
 import java.util.List;
 import java.util.Properties;
-
+import java.lang.System;
+import java.lang.*;
 /**
  * Created by jim on 8/03/2016.
  */
@@ -103,6 +104,20 @@ public class DPSystemRuntime extends DPSystemConfigurable {
 
         events.dump();
 
+    }
+
+    public String getConfigName() throws Exception
+    {
+        String confName = sysconf.getConfigName();
+        if (confName != null)
+            return confName;
+        else {
+            File myConfigFile = new File(configFile);
+            if (myConfigFile.isFile())
+                return myConfigFile.getName();
+        }
+
+        throw new Exception("DPSystemRuntime::getConfigName::Cannot find the name of the Config");
     }
 
     private Config loadConfig() throws IOException {
@@ -208,6 +223,9 @@ public class DPSystemRuntime extends DPSystemConfigurable {
         // Generate the required DataSets to be published
         DPEventPublisher dppub = new DPEventPublisher(this);
 
+        DataSet dsrename = dppub.getConfigCreate(String.valueOf(System.currentTimeMillis()));
+        eventRunTime.execute(SYS_PIPE_RENAME_CONFIG, dsrename);
+
         DataSet ds = dppub.getConfigCreate();
         eventRunTime.execute(SYS_PIPE_CREATE_CONFIG, ds);
 
@@ -221,7 +239,6 @@ public class DPSystemRuntime extends DPSystemConfigurable {
         // creates the Task & the pipeline Stage Relationships
         DataSet dstage = dppub.getConfigStage();
         eventRunTime.execute(SYS_PIPE_CREATE_STAGES, dstage);
-
     }
 
     public void sendEvents() throws Exception {
@@ -235,10 +252,11 @@ public class DPSystemRuntime extends DPSystemConfigurable {
         else
             sysconfigfilename = getSysconf().getSystemConfig(SYSTEM_CONFIG).toString();
 
-        logger.info("Sending Messages");
+        logger.info("----Sending Messages-----");
 
         DPSystemRuntime eventRunTime = new DPSystemRuntime(sysconfigfilename);
         eventRunTime.initRuntime();
+
         // dont have the event transmission process generate more events
         eventRunTime.events.disableEvents();
 
@@ -261,6 +279,8 @@ public class DPSystemRuntime extends DPSystemConfigurable {
         logger.info(Data2Json.toJsonString(dsevents));
         eventRunTime.execute(SYS_PIPE_LOAD_TASKS, dsevents);
 
+        // truncate events at the end
+        dppub.clearEvents();
     }
 
     // run as a service

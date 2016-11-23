@@ -25,7 +25,11 @@ case class DPEventAggregator(runId: String) {
   var addevents: Boolean = true
   var eventList: List[dpEvent] = List()
 
-  def disableEvents() : Unit = { addevents = false }
+  def disableEvents : Unit = { addevents = false }
+
+  def clearEvents : Unit = {
+    eventList = List()
+  }
 
   // ============================================================
 
@@ -40,8 +44,8 @@ case class DPEventAggregator(runId: String) {
       this.eventList = this.eventList ::: List(theEntry)
   }
 
-  def err(pipeInstanceId: String, taskInstanceId: String, theAction: String, themsg: String, keyName: String, counter: String = "", count: Int = 0): Unit = {
-    addEvent(dpEvent(pipeInstanceId, taskInstanceId, "ERROR", theAction, themsg, keyName, counter, count))
+  def err(pipeInstanceId: String, taskInstanceId: String, themsg: String, keyName: String, counter: String = "", count: Int = 0): Unit = {
+    addEvent(dpEvent(pipeInstanceId, taskInstanceId, "ERROR", "PROGRESS", themsg, keyName, counter, count))
   }
 
   def warn(pipeInstanceId: String, taskInstanceId: String, theAction: String, themsg: String, keyName: String, counter: String = "", count: Int = 0): Unit = {

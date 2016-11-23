@@ -80,12 +80,13 @@ public class DPSystemConfigurable {
 
     public static final String SYSTEM_LABEL = "system";
     public static final String CONFIG_NAME = "configName";
+    public static final String CONFIG_NAME_POSTFIX = "configNamePostfix";
     public static final String RUN_ID = "runId";
     public static final String CONFIG_DESCRIPTION = "configDescription";
 
     public static final String SYSTEM_CONFIG = "systemConfig";
     public static final String SYSTEM_CONFIG_FILE = "dp_system.conf";
-
+    public static final String SYS_PIPE_RENAME_CONFIG = "sys_p_rename_config";
     public static final String SYS_PIPE_CREATE_CONFIG = "sys_p_create_config";
     public static final String SYS_PIPE_CREATE_PIPE = "sys_p_create_pipe";
     public static final String SYS_PIPE_CREATE_TASK = "sys_p_create_task";

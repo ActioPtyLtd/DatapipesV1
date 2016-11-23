@@ -174,6 +174,19 @@ public class DPSystemConfig extends DPSystemConfigurable {
         return null;
     }
 
+    public ConfigObject getNodeConfig(String name, String type)
+    {
+        try {
+            if (type.contains(DPSystemConfigurable.PIPE_LABEL))
+                return getPipeConfig(name);
+            else
+                return getTaskConfig(name);
+        } catch (Exception e){
+            // very bad could not find a config definition for name label combo
+            logger.error("Could Not find a Config Definiton for ="+name+" of type ="+type);
+        }
+        return null;
+    }
 
     //
     // Compile all pipelines into a parse tree
@@ -203,9 +216,9 @@ public class DPSystemConfig extends DPSystemConfigurable {
                     pipeLineString = pipes.toConfig().getString(key);
                 }
 
-                DPFnNode node = compileDataPipe(pipeLineString);
+                DPFnNode node = compileDataPipe(key,pipeLineString);
                 // set the root names node to the name of the pipeline, not 'pipe' as set by the parser
-                node.name = key;
+                //node.name = key;
                 // Check for any other Pipeline variables to be added to the node
                 pipelinesMap.put(key,node);
 
@@ -245,14 +258,14 @@ public class DPSystemConfig extends DPSystemConfigurable {
 
     // ==================================================================================================
 
-    private DPFnNode compileDataPipe(String dpiperaw) throws Exception
+    private DPFnNode compileDataPipe(String name, String dpiperaw) throws Exception
     {
         DPLangTokens lt = new DPLangTokens();
         //lt.setConfig(config, masterConfig);
 
         lt.tokeniseBrute(dpiperaw);
 
-        return DPLangParser.parse(lt, this);
+        return DPLangParser.parse(name, lt, this);
     }
 
     // ================================================================

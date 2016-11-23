@@ -6,6 +6,7 @@ package com.actio.dpsystem;
 
 
 //import com.jcabi.aspects.Loggable;
+import com.typesafe.config.ConfigObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -25,9 +26,10 @@ public class DPFnNode {
     private String type;
 
     public DPSystemConfig sysconf = null;
+    public Config conf = null;
 
 
-    public DPFnNode(String name, String type)
+    private DPFnNode(String name, String type)
     {
         this.name = name;
         this.type = type;
@@ -38,6 +40,13 @@ public class DPFnNode {
         this.name = name;
         this.type = type;
         this.sysconf = _conf;
+
+        if (sysconf == null)
+            return;
+
+        // set the conf node for this
+        ConfigObject val = sysconf.getNodeConfig(name,type);
+        conf = (val != null) ? val.toConfig() : null;
     }
 
     private DPFnNode() {}
@@ -129,6 +138,15 @@ public class DPFnNode {
         System.out.print(" \"RUNID::" + getRunID() + "::\" ");
         dump(this, 0, "");
         System.out.println();
+    }
+
+    public String getAttrib(String attrib){
+        // locate the attribute in the associated config or return null
+        if (conf != null)
+            if (conf.hasPath(attrib))
+                return conf.getString(attrib);
+
+        return "";
     }
 
 }

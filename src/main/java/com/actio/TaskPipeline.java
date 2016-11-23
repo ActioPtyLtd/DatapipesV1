@@ -126,7 +126,7 @@ public class TaskPipeline extends Task implements Runnable
                 //subResultSet.dump();
                 int reccount =  subResultSet.elems().size();
                 logger.info("Processing::" + currentNode.getName() + "::size=" +reccount);
-                sysconf.events.count(getInstanceID(), currentNode.getInstanceID(), "RecordCount", currentNode.getName(), "Records", reccount);
+                sysconf.events.progress(getInstanceID(), currentNode.getInstanceID(), "RecordCount", currentNode.getName(), "Records", reccount);
                 for (DataSet iteratedDatSet : getSubDataSets(subResultSet, tasksInPipeline, keyIndex)) {
                     processPipeLineRE(tasksInPipeline, keyIndex, iteratedDatSet);
 
@@ -178,11 +178,9 @@ public class TaskPipeline extends Task implements Runnable
 
             // ===========================================
             sysconf.events.info(getInstanceID(), t.getInstanceID(), "START", "Starting Task", t.node.getName(), "", 0);
-            //events.info(t.getInstanceID(), "COUNT", "Processing Record Count", t.node.getName(), "Records", t.dataSet.elems().length());
 
             try {
                 t.execute();
-                //events.info(t.getInstanceID(), "COUNT", "Processing Record Count", t.node.getName(), "Records", t.dataSet.elems().length());
                 sysconf.events.info(getInstanceID(), t.getInstanceID(), "FINISH", "Finishing Task", t.node.getName(), "", 0);
 
                 return t.getDataSet();

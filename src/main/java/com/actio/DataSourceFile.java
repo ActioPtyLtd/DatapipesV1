@@ -76,6 +76,8 @@ public class DataSourceFile extends DataSource {
             dataSet = new DataSetDBF(new FileInputStream(new File(fname)));
 	else if(behaviour.equalsIgnoreCase(READ_JSON_FROM_FILE))
             dataSet = Data2Json.fromFileStream2Json2Data(attribute, new FileInputStream(new File(fname)));
+        else if(behaviour.equals("dump"))
+            dataSet = DataSetDumpFile$.MODULE$.apply(this.config.getString("directory"), this.config.getString("regex"));
         else
             dataSet = new DataSetFileStream(new FileInputStream(new File(fname)));
 

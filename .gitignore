@@ -6,6 +6,7 @@ out/
 
 *.iml
 
+
 ## Directory-based project format:
 # if you remove the above rule, at least ignore the following:
 
@@ -60,3 +61,6 @@ src/test/
 # Ensime
 .ensime
 .ensime_cache/
+
+# Data Set Dump Files
+*.ds

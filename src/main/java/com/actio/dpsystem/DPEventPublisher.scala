@@ -10,7 +10,7 @@ class DPEventPublisher(val dprun: DPSystemRuntime) {
 
   def getRun(): DataSet = DataArray(
     DataRecord(
-      DataString(DPSystemConfigurable.CONFIG_NAME,dprun.getSysconf.getConfigName),
+      DataString(DPSystemConfigurable.CONFIG_NAME,dprun.getConfigName),
       DataString(DPSystemConfigurable.RUN_ID,dprun.getRunID)))
 
   import collection.JavaConverters._
@@ -23,7 +23,7 @@ class DPEventPublisher(val dprun: DPSystemRuntime) {
       DataString(DPSystemConfigurable.RUN_ID, p._1),
       DataString("pipelineRunId", p._2),
       DataString("pipelineName", p._3),
-      DataString(DPSystemConfigurable.CONFIG_NAME,dprun.getSysconf.getConfigName)))).toList)
+      DataString(DPSystemConfigurable.CONFIG_NAME,dprun.getConfigName)))).toList)
 
   }
 
@@ -34,7 +34,7 @@ class DPEventPublisher(val dprun: DPSystemRuntime) {
 
     DataArray(tasks.filter(f => Option(f._3).isDefined).
       map(p => DataRecord(List(
-        DataString(DPSystemConfigurable.CONFIG_NAME,dprun.getSysconf.getConfigName),
+        DataString(DPSystemConfigurable.CONFIG_NAME,dprun.getConfigName),
         DataString("runId", p._3),
         DataString("pipelineRunId", p._4),
         DataString("taskRunId", p._1),
@@ -45,8 +45,8 @@ class DPEventPublisher(val dprun: DPSystemRuntime) {
   def GetEvents(): DataSet = {
 
     DataArray(dprun.events.eventList.map(e => DataRecord(List(
-      DataString(DPSystemConfigurable.CONFIG_NAME,dprun.getSysconf.getConfigName),
-      DataString("event_id", DPSystemConfigurable.getUUID()),
+      DataString(DPSystemConfigurable.CONFIG_NAME,dprun.getConfigName),
+      DataString("event_id", DPSystemConfigurable.getUUID ),
       DataString("event_time", dprun.events.getTime(e.timeStamp)),
       DataString("runId", dprun.events.runId),
       DataString("pipeline_run_id", e.pipeInstanceId),
@@ -57,19 +57,25 @@ class DPEventPublisher(val dprun: DPSystemRuntime) {
       DataString("message", e.msg),
       DataString("counter_value", e.theCount.toString),
       DataString("counter_label", e.counter),
-      DataString("counter_total", e.theCount.toString)))).toList)
+      DataString("counter_total", e.theCount.toString)))))
 
   }
 
   def getConfigCreate(): DataSet = {
+    getConfigCreate("")
+  }
+
+  def getConfigCreate(postfix:String): DataSet = {
 
     // get the config file name
 
     // check sys section if defined
     // otherwise use name of config file
-    DataRecord("initial", DataArray(DataRecord("record",
-      List(DataString(DPSystemConfigurable.CONFIG_NAME, dprun.getSysconf.getConfigName),
-        DataString(DPSystemConfigurable.CONFIG_DESCRIPTION, dprun.getSysconf.getSystemConfig(DPSystemConfigurable.CONFIG_DESCRIPTION))))))
+     DataArray(DataRecord(
+       DataString(DPSystemConfigurable.CONFIG_NAME, dprun.getConfigName),
+       DataString(DPSystemConfigurable.CONFIG_DESCRIPTION, dprun.getSysconf.getSystemConfig(DPSystemConfigurable.CONFIG_DESCRIPTION)),
+       DataString(DPSystemConfigurable.CONFIG_NAME_POSTFIX,dprun.getConfigName + "__" + postfix)
+     ))
   }
 
   def getConfigPipe(): DataSet = {
@@ -77,7 +83,7 @@ class DPEventPublisher(val dprun: DPSystemRuntime) {
     val pipes = dprun.getSysconf().pipelinesMap.values().asScala
 
     DataArray(pipes.map(p => DataRecord(
-      DataString("configName", dprun.getSysconf.getConfigName),
+      DataString("configName", dprun.getConfigName),
       DataString("pipelineName", p.getName),
       DataString("source", p.getAttrib("source")),
       DataString("destination", p.getAttrib("destination")),
@@ -97,7 +103,7 @@ class DPEventPublisher(val dprun: DPSystemRuntime) {
             case "load" => "LOAD"
             case _ => "TRANSFORM"
           }),
-          DataString("configName", dprun.getSysconf.getConfigName))
+          DataString("configName", dprun.getConfigName))
       )).toList.distinct)
 
   }
@@ -115,10 +121,14 @@ class DPEventPublisher(val dprun: DPSystemRuntime) {
             case _ => "TRANSFORM"
           }),
           DataString("pipelineName", p.name),
-          DataString("configName", dprun.getSysconf.getConfigName),
+          DataString("configName", dprun.getConfigName),
           DataString("seq", (x+1).toString))
       }).toList)
 
+  }
+
+  def clearEvents: Unit =  {
+    dprun.events.clearEvents
   }
 }
 

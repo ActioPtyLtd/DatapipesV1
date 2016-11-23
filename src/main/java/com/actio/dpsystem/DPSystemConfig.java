@@ -75,16 +75,20 @@ public class DPSystemConfig extends DPSystemConfigurable {
         system = setconfigsection(script, SYSTEM_LABEL, false);
     }
 
-    public String getConfigName() throws Exception {
+    public String getConfigName() {
 
-        // check system section for a config name
-        String configName = getSystemConfig(CONFIG_NAME);
+        try {
+            // check system section for a config name
+            String configName = getSystemConfig(CONFIG_NAME);
 
-        if (configName != null) {
-            // otherwise use filename
-            return configName;
+            if (configName != null) {
+                // otherwise use filename
+                return configName;
+            }
+        } catch (Exception e){
+            logger.warn("getSystemConfig Failed="+CONFIG_NAME);
         }
-        return  config.origin().filename();
+        return null;
     }
 
     public ConfigObject getTaskConfig(String name) throws Exception {

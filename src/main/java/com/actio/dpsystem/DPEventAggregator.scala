@@ -48,8 +48,8 @@ case class DPEventAggregator(runId: String) {
     addEvent(dpEvent(pipeInstanceId, taskInstanceId, "WARN", theAction, themsg, keyName, counter, count))
   }
 
-  def count(pipeInstanceId: String, taskInstanceId: String, themsg: String, keyName: String, counter: String = "", count: Int = 0): Unit = {
-    info(pipeInstanceId, taskInstanceId, "COUNT", themsg, keyName, counter, count)
+  def progress(pipeInstanceId: String, taskInstanceId: String, themsg: String, keyName: String, counter: String = "", count: Int = 0): Unit = {
+    info(pipeInstanceId, taskInstanceId, "PROGRESS", themsg, keyName, counter, count)
   }
 
   // ============================================================

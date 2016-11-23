@@ -74,14 +74,36 @@ class DPEventPublisher(val dprun: DPSystemRuntime) {
 
   def getConfigPipe(): DataSet = {
 
-    val pipes = dprun.getSysconf().pipelinesMap.values().asScala.map(n => (n.name))
+    val pipes = dprun.getSysconf().pipelinesMap.values().asScala
 
     DataArray(pipes.map(p => DataRecord(
       DataString("configName", dprun.getSysconf.getConfigName),
-      DataString("pipelineName", p))).toList)
+      DataString("pipelineName", p.getName),
+      DataString("source", p.getAttrib("source")),
+      DataString("destination", p.getAttrib("destination")),
+      DataString("sourceGeoLoc", p.getAttrib("sourceGeoLoc")),
+      DataString("destinationGeoLoc", p.getAttrib("destinationGeoLoc"))
+    )).toList)
   }
 
   def getConfigTask(): DataSet = {
+
+    DataArray(dprun.getSysconf().pipelinesMap.values().asScala.flatMap(p =>
+      p.getNodeList.asScala.map(t =>
+        DataRecord(
+          DataString("taskName", t.name),
+          DataString("taskType", t.getType match {
+            case "extract" => "EXTRACT"
+            case "load" => "LOAD"
+            case _ => "TRANSFORM"
+          }),
+          DataString("configName", dprun.getSysconf.getConfigName))
+      )).toList.distinct)
+
+  }
+
+
+  def getConfigStage(): DataSet = {
 
     DataArray(dprun.getSysconf().pipelinesMap.values().asScala.flatMap(p =>
       p.getNodeList.asScala.zipWithIndex.map { case (t, x) =>
@@ -94,7 +116,7 @@ class DPEventPublisher(val dprun: DPSystemRuntime) {
           }),
           DataString("pipelineName", p.name),
           DataString("configName", dprun.getSysconf.getConfigName),
-          DataString("seq", (x + 1).toString))
+          DataString("seq", (x+1).toString))
       }).toList)
 
   }

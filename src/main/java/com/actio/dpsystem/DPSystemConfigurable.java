@@ -89,7 +89,7 @@ public class DPSystemConfigurable {
     public static final String SYS_PIPE_CREATE_CONFIG = "sys_p_create_config";
     public static final String SYS_PIPE_CREATE_PIPE = "sys_p_create_pipe";
     public static final String SYS_PIPE_CREATE_TASK = "sys_p_create_task";
-
+    public static final String SYS_PIPE_CREATE_STAGES = "sys_p_create_stages";
     public static final String SYS_PIPE_CREATE_RUN = "sys_p_create_run";
     public static final String SYS_PIPE_CREATE_RUN_PIPE = "sys_p_create_run_pipelines";
     public static final String SYS_PIPE_CREATE_RUN_TASKS = "sys_p_create_run_tasks";

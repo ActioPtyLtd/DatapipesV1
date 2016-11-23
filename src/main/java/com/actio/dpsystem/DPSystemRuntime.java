@@ -1,9 +1,7 @@
 package com.actio.dpsystem;
 
 import com.actio.DataSet;
-import com.actio.DataSourceREST;
 import com.actio.Task;
-import com.actio.TaskService;
 import com.actio.Data2Json;
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
@@ -40,7 +38,7 @@ public class DPSystemRuntime extends DPSystemConfigurable {
         this.properties = null;
     }
 
-    private final DPFnNode root = new DPFnNode("root", "root");
+    private final DPFnNode root = new DPFnNode("root", "root", getSysconf());
     // Collection of Instantiated Pipelines within the System
     private DPSystemConfig sysconf;
     public DPEventAggregator events = null;
@@ -219,6 +217,10 @@ public class DPSystemRuntime extends DPSystemConfigurable {
         // creates the Task & the pipeline Stage Relationships
         DataSet dstask = dppub.getConfigTask();
         eventRunTime.execute(SYS_PIPE_CREATE_TASK, dstask);
+
+        // creates the Task & the pipeline Stage Relationships
+        DataSet dstage = dppub.getConfigStage();
+        eventRunTime.execute(SYS_PIPE_CREATE_STAGES, dstage);
 
     }
 

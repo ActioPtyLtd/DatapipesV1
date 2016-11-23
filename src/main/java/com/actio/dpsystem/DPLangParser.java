@@ -14,9 +14,9 @@ class DPLangParser {
     private static final int READ_FUNCTION_STATE = 1;
     private static final int END_READ_STATE = 3;
 
-    public static DPFnNode parse(DPLangTokens tokens, DPSystemConfig sysconf) throws Exception
+    public static DPFnNode parse(String nodeName, DPLangTokens tokens, DPSystemConfig sysconf) throws Exception
     {
-        DPFnNode root = new DPFnNode(DPSystemConfigurable.PIPE_LABEL, DPSystemConfigurable.PIPE_LABEL);
+        DPFnNode root = new DPFnNode(nodeName, DPSystemConfigurable.PIPE_LABEL, sysconf);
         tokens.init();
 
         return parseNewNode(READ_PARAMS_STATE,root,tokens,0,true,sysconf);
@@ -123,8 +123,5 @@ class DPLangParser {
         }
         return parent;
     }
-
-
-
 
 }

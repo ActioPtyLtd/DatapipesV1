@@ -26,7 +26,8 @@ libraryDependencies ++= Seq(
   "com.sparkjava" % "spark-core" % "2.5",
   "org.postgresql" % "postgresql" % "9.4.1209.jre7",
   "org.scalameta" %% "scalameta" % "1.0.0",
-  "commons-net" % "commons-net" % "3.5"
+  "commons-net" % "commons-net" % "3.5",
+  "me.chrons" %% "boopickle" % "1.2.5"
 )
 
 enablePlugins(JavaAppPackaging)

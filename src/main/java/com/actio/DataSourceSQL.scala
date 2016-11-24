@@ -3,6 +3,7 @@ package com.actio
 import com.actio.dpsystem.{ Logging, DPSystemFactory, DPSystemConfigurable }
 import com.typesafe.config.Config
 import java.sql._
+import scala.util.{Try,Success,Failure}
 
 /**
  * Created by mauri on 4/08/2016.
@@ -18,10 +19,10 @@ class DataSourceSQL extends DataSource with Logging {
     logger.info("Connected")
 
     val statement = ds.elems.map(d => d(label).stringOption.getOrElse(
-      if (getConfig().hasPath("query."  + label))
-        getConfig().getConfig("query").getString(label)
-      else
-        label
+      Try(getConfig().hasPath("query."  + label)) match {
+        case Success(s) => getConfig().getConfig("query").getString(label)
+        case Failure(f) => label
+      }
     )) mkString "; "
 
     val stmt: PreparedStatement = cn.prepareStatement(statement)

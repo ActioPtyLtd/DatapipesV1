@@ -33,6 +33,7 @@ public class Main {
         String pipelineName = null;
         Boolean runService = false;
         Properties properties = null;
+        Boolean loadConfigIntoAdmin = false;
 
         Logger logger =  null;
 
@@ -71,34 +72,43 @@ public class Main {
                     logger.info(key + " = " + properties.getProperty(key));
                 }
             }
+            if (line.hasOption('L')) {
+                logger.info("Load Config into Admin Server");
+                loadConfigIntoAdmin = true;
+            }
 
             logger.info("loadingConfigFile=" + configFile);
 
             debug(logger);
 
-            DPSystemFactory tf = new DPSystemFactory();
-            tf.loadConfig(configFile, properties);
+            //DPSystemFactory tf = new DPSystemFactory();
+            //tf.loadConfig(configFile, properties);
 
-            DPSystemRuntime dprun = tf.newRuntime();
+            DPSystemRuntime dprun = new DPSystemRuntime(configFile,properties);
 
-            try {
-              if (!runService) {
-                  if (pipelineName == null)
-                      dprun.execute();
-                  else
-                      dprun.execute(pipelineName);
+            try
+            {
+                if (loadConfigIntoAdmin){
 
-                  ///==========
-                  dprun.sendEvents();
-                  logger.info("Execution completed.");
-              }
-              else {
+                    dprun.uploadConfig();
+                }
+                else  if (!runService) {
+                    if (pipelineName == null)
+                        dprun.execute();
+                    else
+                        dprun.execute(pipelineName);
+
+                    ///==========
+                    dprun.sendEvents();
+                    logger.info("Execution completed.");
+                }
+                else {
                   dprun.service();
               }
 
             }
             catch(Exception exp) {
-              logger.error("Unexpected exception:" + exp.getMessage());
+              logger.error("Unexpected exception:" + exp.toString());
               logger.info("Execution stopped.");
             }
             // dump out the runtime state
@@ -116,18 +126,16 @@ public class Main {
     {
         /*
         Command line options
-
         -s  : run as service according to Service
         -c  : config
         -p  : run pipeline
-
          */
-
         // create the Options
         Options options = new Options();
         options.addOption( "c", "config", true, "config" );
         options.addOption( "p", "pipe", true, "run named pipeline .." );
         options.addOption( "s", "service", false, "run as Service, as configured in Services section");
+        options.addOption( "L", "load config file into Admin Server");
         options.addOption( Option.builder("D").argName( "property=value" )
                 .hasArgs()
                 .valueSeparator('=')

@@ -3,6 +3,7 @@ package com.actio.dpsystem
 import java.text.SimpleDateFormat
 import java.text.DateFormat
 
+
 /**
   * Created by jim on 22/07/16.
   */
@@ -19,21 +20,16 @@ case class dpEvent(pipeInstanceId: String,
   val timeStamp: Long = System.currentTimeMillis()
 }
 
-/*
-object dpEvents {
-  case class Start (msg : String) extends dpEvents
-  case class Success (msg : String) extends dpEvents
-  case class Failure (msg : String) extends dpEvents
-  case class End (msg : String) extends dpEvents
-  case class Info (msg : String) extends dpEvents
-  case class Counter (msg : String) extends dpEvents
-}
-*/
-
 case class DPEventAggregator(runId: String) {
 
-  val addevents: Boolean = true
+  var addevents: Boolean = true
   var eventList: List[dpEvent] = List()
+
+  def disableEvents : Unit = { addevents = false }
+
+  def clearEvents : Unit = {
+    eventList = List()
+  }
 
   // ============================================================
 
@@ -48,12 +44,16 @@ case class DPEventAggregator(runId: String) {
       this.eventList = this.eventList ::: List(theEntry)
   }
 
-  def err(pipeInstanceId: String, taskInstanceId: String, theAction: String, themsg: String, keyName: String, counter: String = "", count: Int = 0): Unit = {
-    addEvent(dpEvent(pipeInstanceId, taskInstanceId, "ERROR", theAction, themsg, keyName, counter, count))
+  def err(pipeInstanceId: String, taskInstanceId: String, themsg: String, keyName: String, counter: String = "", count: Int = 0): Unit = {
+    addEvent(dpEvent(pipeInstanceId, taskInstanceId, "ERROR", "PROGRESS", themsg, keyName, counter, count))
   }
 
   def warn(pipeInstanceId: String, taskInstanceId: String, theAction: String, themsg: String, keyName: String, counter: String = "", count: Int = 0): Unit = {
     addEvent(dpEvent(pipeInstanceId, taskInstanceId, "WARN", theAction, themsg, keyName, counter, count))
+  }
+
+  def progress(pipeInstanceId: String, taskInstanceId: String, themsg: String, keyName: String, counter: String = "", count: Int = 0): Unit = {
+    info(pipeInstanceId, taskInstanceId, "PROGRESS", themsg, keyName, counter, count)
   }
 
   // ============================================================

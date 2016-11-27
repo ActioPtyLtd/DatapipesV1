@@ -53,6 +53,7 @@ public class DPSystemConfigurable {
     public static final String TASK_TRANSFORM_LABEL = "transform";
     public static final String TASK_PIPELINE_LABEL = "pipeline";
     public static final String ATTRIBUTE_LABEL = "attribute";
+
     // types of behavior
     public static final String CHECKPOINT_DIFF_LABEL="checkpointDiff";
     public static final String FULL_CHECKPOINT_DIFF_LABEL="fullCheckpointDiff";
@@ -76,6 +77,25 @@ public class DPSystemConfigurable {
     public static final String ROW_FUNCTIONS_LABEL = "row";
     public static final String BATCH_FUNCTIONS_KEY = "****batch****";
     public static final String ROW_FUNCTIONS_KEY = "****row****";
+
+    public static final String SYSTEM_LABEL = "system";
+    public static final String CONFIG_NAME = "configName";
+    public static final String CONFIG_NAME_POSTFIX = "configNamePostfix";
+    public static final String RUN_ID = "runId";
+    public static final String CONFIG_DESCRIPTION = "configDescription";
+
+    public static final String SYSTEM_CONFIG = "systemConfig";
+    public static final String SYSTEM_CONFIG_FILE = "dp_system.conf";
+    public static final String SYS_PIPE_RENAME_CONFIG = "sys_p_rename_config";
+    public static final String SYS_PIPE_CREATE_CONFIG = "sys_p_create_config";
+    public static final String SYS_PIPE_CREATE_PIPE = "sys_p_create_pipe";
+    public static final String SYS_PIPE_CREATE_TASK = "sys_p_create_task";
+    public static final String SYS_PIPE_CREATE_STAGES = "sys_p_create_stages";
+    public static final String SYS_PIPE_CREATE_RUN = "sys_p_create_run";
+    public static final String SYS_PIPE_CREATE_RUN_PIPE = "sys_p_create_run_pipelines";
+    public static final String SYS_PIPE_CREATE_RUN_TASKS = "sys_p_create_run_tasks";
+    public static final String SYS_PIPE_LOAD_TASKS = "sys_p_load_events";
+
     protected static final Logger logger = LoggerFactory.getLogger(DPSystemConfigurable.class);
     /**
      * The base resource path.
@@ -84,8 +104,8 @@ public class DPSystemConfigurable {
     public DataSet dataSet;
     public Config config;
     public Config masterConfig;
-    public DPEventAggregator events = null;
-    private String runID;
+    //public DPEventAggregator events = null;
+    //private String runID;
     private String instanceID;
 
     static public boolean matchLabel(String value, String label) {
@@ -111,13 +131,17 @@ public class DPSystemConfigurable {
         return UUID.randomUUID().toString();
     }
 
+    /*
     public String getRunID() {
+
         return runID;
     }
 
     public void setRunID(String runID) {
         this.runID = runID;
     }
+
+    */
 
     public String getInstanceID() {
         return instanceID;
@@ -162,11 +186,11 @@ public class DPSystemConfigurable {
         masterConfig = _master;
 
 
-        events = DPSoleAggregator.events;
+        //events = DPSoleAggregator.events;
 
-        setRunID(events.runId());
+        //setRunID(events.runId());
         setInstanceID(getUUID());
-        logger.info("***********---RUNID=" + getRunID() + "----INSTANCEID=" + getInstanceID() + ".");
+        logger.info("*******-----INSTANCEID=" + getInstanceID() + ".");
 
     }
 

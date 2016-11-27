@@ -20,19 +20,14 @@ import org.slf4j.LoggerFactory;
 Used to bootstrap Task system and return Task Instances from Configuration
 Should hide ALL the nasty Instantiation of specific Classes
 
+All the methods should be static, the factory should not be instantiated
+
+For stateful details about a pipeline run, they should all be in dpruntime
 */
 
 public class DPSystemFactory extends DPSystemConfigurable {
 
     private static final Logger logger = LoggerFactory.getLogger(DPSystemFactory.class);
-
-    String result = "";
-    InputStream inputStream;
-    private List<String> sortedConfigItems;
-    private DPSystemConfig sysconf;
-
-    public DPSystemFactory() {
-    }
 
     static public Task newTask(DPSystemConfig sysconf, DPFnNode node) throws Exception
     {
@@ -87,7 +82,7 @@ public class DPSystemFactory extends DPSystemConfigurable {
         // TODO this means that the Node model should be duplicated each run to represent a different instance
 
         node.setInstanceID(t.getInstanceID());
-        node.setRunID(t.getRunID());
+        node.setRunID(t.sysconf.events.runId());
         logger.info("---FACTORY----RUNID=" + node.getRunID() + "----INSTANCEID=" + node.getInstanceID() + ".");
 
         return t;
@@ -311,7 +306,7 @@ public class DPSystemFactory extends DPSystemConfigurable {
     // =====================================================
 
 
-    // REFACTOR NOTE - currently deal with a single sqlquery
+    // REFACTOR NOTE - currently deal with a single sql query
     // in the future will want to be able to deal with a collection of
     // queries, that fulfill an API definition
 
@@ -323,87 +318,4 @@ public class DPSystemFactory extends DPSystemConfigurable {
 
         return ts;
     }
-
-    public List<String> getSortedConfigItems() {
-        return sortedConfigItems;
-    }
-
-    // =====================================================    //
-    // Locate Task Configuration by taskLabelName
-    //
-
-    public void setSortedConfigItems(List<String> sortedConfigItems) {
-        this.sortedConfigItems = sortedConfigItems;
-    }
-
-    private void loadConfig() throws IOException {
-        config = ConfigFactory.load();
-        masterConfig = config;
-    }
-
-    // This is the binder from Token to actual Function
-    // Refactor this into a proper Inversion of Control Bind
-
-    public void loadConfig(String configFile) throws IOException {
-        loadConfig(configFile, null);
-    }
-
-    public void loadConfig(String configFile, Properties properties) throws IOException {
-
-        if (configFile == null) {
-            this.loadConfig();
-            return;
-        }
-
-        File myConfigFile = new File(configFile);
-
-        if (!myConfigFile.exists())
-            logger.error("File " + configFile + " does not exist.");
-
-        Config fallBack = ConfigFactory.parseFile(myConfigFile);
-
-        if(properties!=null) {
-            config = ConfigFactory.parseProperties(properties).withFallback(fallBack).resolve();
-        }
-        else {
-            config = fallBack.resolve();
-        }
-
-        masterConfig = config;
-    }
-
-    //
-    // Construct New Function Set Structure from config input
-    //
-
-    public void loadConfig(Config _config) throws IOException {
-        config = _config;
-        masterConfig = config;
-    }
-
-    private DPSystemConfig compileConfig() throws Exception {
-
-        sysconf = new DPSystemConfig();
-
-        sysconf.setConfig(config, masterConfig);
-
-        sysconf.compile();
-
-        // create top level task pipe
-        return sysconf;
-    }
-
-    public DPSystemRuntime newRuntime() throws Exception {
-        DPSystemConfig dpipeConfig = compileConfig();
-        dpipeConfig.dump();
-
-        DPSystemRuntime dprun = new DPSystemRuntime();
-        dprun.setConfig(config, masterConfig);
-
-        dprun.setRuntimeConfig(dpipeConfig);
-
-        return dprun;
-    }
-
-
 }

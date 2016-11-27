@@ -1,8 +1,8 @@
 name := "dpipes"
 
-version := "1.1.16"
+version := "1.1.18"
 
-scalaVersion := "2.11.7"
+scalaVersion := "2.11.8"
 
 javacOptions ++= Seq("-Xlint:unchecked")
 

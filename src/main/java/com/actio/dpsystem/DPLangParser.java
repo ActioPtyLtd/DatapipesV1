@@ -14,9 +14,9 @@ class DPLangParser {
     private static final int READ_FUNCTION_STATE = 1;
     private static final int END_READ_STATE = 3;
 
-    public static DPFnNode parse(DPLangTokens tokens, DPSystemConfig sysconf) throws Exception
+    public static DPFnNode parse(String nodeName, DPLangTokens tokens, DPSystemConfig sysconf) throws Exception
     {
-        DPFnNode root = new DPFnNode(DPSystemConfigurable.PIPE_LABEL, DPSystemConfigurable.PIPE_LABEL);
+        DPFnNode root = new DPFnNode(nodeName, DPSystemConfigurable.PIPE_LABEL, sysconf);
         tokens.init();
 
         return parseNewNode(READ_PARAMS_STATE,root,tokens,0,true,sysconf);
@@ -39,7 +39,7 @@ class DPLangParser {
 
             if (tokens.getToken().compareTo(String.valueOf(DPLangTokens.LeftFunctionStart)) == 0){
                 // Create a new Node, with a pipeline function
-                DPFnNode newChild = new DPFnNode(DPSystemConfigurable.PIPE_LABEL, DPSystemConfigurable.PIPE_LABEL);
+                DPFnNode newChild = new DPFnNode(DPSystemConfigurable.PIPE_LABEL, DPSystemConfigurable.PIPE_LABEL, sysconf);
 
                 currentState = READ_PARAMS_STATE;
                 parent.add( parseNewNode(READ_FUNCTION_STATE,newChild,tokens.moveNextToken(),++currentDepth,false,sysconf));
@@ -60,7 +60,7 @@ class DPLangParser {
             else if (tokens.getToken().compareTo(String.valueOf(DPLangTokens.LeftPipeStart)) == 0){
 
                 // Create a new Node, with a pipeline function
-                DPFnNode newChild = new DPFnNode(DPSystemConfigurable.PIPE_LABEL, DPSystemConfigurable.PIPE_LABEL);
+                DPFnNode newChild = new DPFnNode(DPSystemConfigurable.PIPE_LABEL, DPSystemConfigurable.PIPE_LABEL,sysconf);
 
                 parent.add( parseNewNode(READ_PARAMS_STATE,newChild,tokens.moveNextToken(),currentDepth + 1,true,sysconf));
                 continue;
@@ -109,7 +109,7 @@ class DPLangParser {
                     nodeType = sysconf.getType(name);
                 }
                 tokens.increment();
-                DPFnNode newChild = new DPFnNode(name, nodeType);
+                DPFnNode newChild = new DPFnNode(name, nodeType,sysconf);
                 parent.add(newChild);
             }
             else
@@ -123,8 +123,5 @@ class DPLangParser {
         }
         return parent;
     }
-
-
-
 
 }

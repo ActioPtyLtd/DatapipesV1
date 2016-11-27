@@ -9,7 +9,7 @@ import scala.util.Try
 import scala.collection.JavaConverters._
 
 
-case class DataSetTableScala(myschema: SchemaDefinition, data: DataSet) extends DataSet {
+case class  DataSetTableScala(myschema: SchemaDefinition, data: DataSet) extends DataSet {
   val rows: List[List[String]] = data.elems.map(_.elems.map(_.stringOption.getOrElse("")).toList).toList
   val header: List[String] = schema.asInstanceOf[SchemaArray].content.asInstanceOf[SchemaRecord].fields.map(_.label).toList
 

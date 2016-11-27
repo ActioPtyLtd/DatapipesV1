@@ -56,6 +56,7 @@ public class TaskTransform extends Task {
         sysconf = _sysconf;
         super.setConfig(sysconf.getTaskConfig(_node.getName()).toConfig(),sysconf.getMasterConfig());
         node = _node;
+
         logger.debug("setNode::"+node.getName());
 
         if (config.hasPath(BEHAVIOR_LABEL))
@@ -67,7 +68,7 @@ public class TaskTransform extends Task {
         if (config.hasPath("validateColumnCount"))
             setValidColumns(config.getIntList("validateColumnCount"));
         setInstanceID(getUUID());
-        logger.info("---RUNID=" + getRunID() + "----INSTANCEID=" + getInstanceID() + ".");
+        logger.info("---RUNID=" + sysconf.events.runId() + "----INSTANCEID=" + getInstanceID() + ".");
     }
 
     public void extract() throws Exception {

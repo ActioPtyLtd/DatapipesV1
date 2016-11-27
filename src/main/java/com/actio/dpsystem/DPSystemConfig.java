@@ -38,6 +38,7 @@ public class DPSystemConfig extends DPSystemConfigurable {
     private ConfigObject scheduled;
     private ConfigObject system;
 
+    public DPEventAggregator events = null;
 
     //  task name mapping to compiled task - TBD when we compileConfig tasks
 
@@ -60,10 +61,9 @@ public class DPSystemConfig extends DPSystemConfigurable {
 
     public void setConfig(Config conf, Config master) throws Exception
     {
-
         setInstanceID(getUUID());
-        logger.info("---RUNID=" + getRunID() + "----INSTANCEID=" + getInstanceID() + ".");
-
+        logger.info("----INSTANCEID=" + getInstanceID() + ".");
+        events = new DPEventAggregator(getInstanceID());
         super.setConfig(conf,master);
         script  = setconfigsection(master.root(),SCRIPT_LABEL,true);
         schema = setconfigsection(script,SCHEMA_LABEL,false);
@@ -72,7 +72,23 @@ public class DPSystemConfig extends DPSystemConfigurable {
         services = setconfigsection(script,SERVICES_LABEL,false);
         execs = setconfigsection(script, STARTUP_EXECS_LABEL,false);
         scheduled = setconfigsection(script,SCHEDULED_LABEL,false);
-        system = setconfigsection(script, "system", false);
+        system = setconfigsection(script, SYSTEM_LABEL, false);
+    }
+
+    public String getConfigName() {
+
+        try {
+            // check system section for a config name
+            String configName = getSystemConfig(CONFIG_NAME);
+
+            if (configName != null) {
+                // otherwise use filename
+                return configName;
+            }
+        } catch (Exception e){
+            logger.warn("getSystemConfig Failed="+CONFIG_NAME);
+        }
+        return null;
     }
 
     public ConfigObject getTaskConfig(String name) throws Exception {
@@ -162,6 +178,19 @@ public class DPSystemConfig extends DPSystemConfigurable {
         return null;
     }
 
+    public ConfigObject getNodeConfig(String name, String type)
+    {
+        try {
+            if (type.contains(DPSystemConfigurable.PIPE_LABEL))
+                return getPipeConfig(name);
+            else
+                return getTaskConfig(name);
+        } catch (Exception e){
+            // very bad could not find a config definition for name label combo
+            logger.error("Could Not find a Config Definiton for ="+name+" of type ="+type);
+        }
+        return null;
+    }
 
     //
     // Compile all pipelines into a parse tree
@@ -191,9 +220,9 @@ public class DPSystemConfig extends DPSystemConfigurable {
                     pipeLineString = pipes.toConfig().getString(key);
                 }
 
-                DPFnNode node = compileDataPipe(pipeLineString);
+                DPFnNode node = compileDataPipe(key,pipeLineString);
                 // set the root names node to the name of the pipeline, not 'pipe' as set by the parser
-                node.name = key;
+                //node.name = key;
                 // Check for any other Pipeline variables to be added to the node
                 pipelinesMap.put(key,node);
 
@@ -233,14 +262,14 @@ public class DPSystemConfig extends DPSystemConfigurable {
 
     // ==================================================================================================
 
-    private DPFnNode compileDataPipe(String dpiperaw) throws Exception
+    private DPFnNode compileDataPipe(String name, String dpiperaw) throws Exception
     {
         DPLangTokens lt = new DPLangTokens();
         //lt.setConfig(config, masterConfig);
 
         lt.tokeniseBrute(dpiperaw);
 
-        return DPLangParser.parse(lt, this);
+        return DPLangParser.parse(name, lt, this);
     }
 
     // ================================================================

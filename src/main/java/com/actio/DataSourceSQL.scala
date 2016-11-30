@@ -5,6 +5,27 @@ import com.typesafe.config.Config
 import java.sql._
 import scala.util.{Try,Success,Failure}
 
+object DataSourceSQL {
+
+  def configOrLabel(config: Config, label: String) = Try(config.hasPath("query."  + label)) match {
+    case Success(s) => config.getConfig("query").getString(label)
+    case Failure(f) => label
+  }
+
+  def getSelectQuery(ds: DataSet, config: Config, label: String): String = {
+    val newLabel = configOrLabel(config, label)
+
+    ds(newLabel).stringOption.getOrElse(newLabel)
+  }
+
+  def getExecuteQuery(ds: DataSet, config: Config, label: String): String = {
+    val newLabel = configOrLabel(config, label)
+
+    ds.elems.map(d => d(newLabel).stringOption.getOrElse(newLabel)) mkString "; "
+  }
+}
+
+
 /**
  * Created by mauri on 4/08/2016.
  */
@@ -18,12 +39,7 @@ class DataSourceSQL extends DataSource with Logging {
 
     logger.info("Connected")
 
-    val statement = ds.elems.map(d => d(label).stringOption.getOrElse(
-      Try(getConfig().hasPath("query."  + label)) match {
-        case Success(s) => getConfig().getConfig("query").getString(label)
-        case Failure(f) => label
-      }
-    )) mkString "; "
+    val statement = DataSourceSQL.getExecuteQuery(ds, getConfig, label)
 
     val stmt: PreparedStatement = cn.prepareStatement(statement)
 
@@ -48,7 +64,7 @@ class DataSourceSQL extends DataSource with Logging {
 
     try {
 
-      val sqlQuery = ds(label).stringOption.getOrElse(getConfig().getConfig("query").getString(label))
+      val sqlQuery = DataSourceSQL.getSelectQuery(ds, getConfig(), label)
 
       logger.info("Executing Query: " + sqlQuery)
 

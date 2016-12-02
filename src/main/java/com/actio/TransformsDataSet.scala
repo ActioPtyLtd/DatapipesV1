@@ -239,6 +239,8 @@ object TransformsDataSet {
 
   def contains(ds: List[DataSet], d: DataSet) = DataBoolean(ds.exists(i => i.stringOption == d.stringOption))
 
+  def strContains(str: String, targetStr: String): DataSet = DataBoolean(if(str == null) false else str.contains(targetStr))
+
   def capitalise(str: String): DataSet = DataString(str.toUpperCase)
 
   def quoteOption(ds: DataSet) = ds.stringOption.map(s => if (s.isEmpty) DataString("null") else DataString("\"" + s + "\"")).getOrElse(DataString("null"))
@@ -254,7 +256,29 @@ object TransformsDataSet {
 
   def integer(value: String): DataSet = DataNumeric(Try(BigDecimal(value.toInt)).getOrElse(BigDecimal(0)))
 
-  def round(value: String, scale: Int): DataSet = DataNumeric(Try(BigDecimal(value).setScale(scale, BigDecimal.RoundingMode.HALF_UP)).getOrElse(BigDecimal(0)))
+  def round(value: String, scale: Int): DataSet = roundWithMode(value,scale,"HALF_UP")
+
+  def roundWithMode(value: String, scale: Int, mode: String="HALF_UP"): DataSet = {
+    val roundingMode =
+      if (mode == None) BigDecimal.RoundingMode.HALF_UP
+      else mode.toUpperCase() match {
+        case "HALF_EVEN" =>
+          BigDecimal.RoundingMode.HALF_EVEN
+        case "HALF_DOWN" =>
+          BigDecimal.RoundingMode.HALF_DOWN
+        case "UP" =>
+          BigDecimal.RoundingMode.UP
+        case "DOWN" =>
+          BigDecimal.RoundingMode.DOWN
+        case "CEILING" =>
+          BigDecimal.RoundingMode.CEILING
+        case "FLOOR" =>
+          BigDecimal.RoundingMode.FLOOR
+        case _ =>
+          BigDecimal.RoundingMode.HALF_UP
+      }
+    DataNumeric(Try(BigDecimal(value).setScale(scale, roundingMode)).getOrElse(BigDecimal(0)))
+  }
 
   def removeTrailingZeros(value: String): DataSet = DataNumeric(Try(BigDecimal(value).setScale(2, BigDecimal.RoundingMode.HALF_UP)).getOrElse(BigDecimal(0)).underlying().stripTrailingZeros())
 

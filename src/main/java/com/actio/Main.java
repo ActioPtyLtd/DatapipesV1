@@ -34,6 +34,7 @@ public class Main {
         Boolean runService = false;
         Properties properties = null;
         Boolean loadConfigIntoAdmin = false;
+        Boolean suppressEvents = false;
 
         Logger logger =  null;
 
@@ -76,13 +77,14 @@ public class Main {
                 logger.info("Load Config into Admin Server");
                 loadConfigIntoAdmin = true;
             }
+            if (line.hasOption('S')){
+                logger.info("Suppressing event streaming");
+                suppressEvents = true;
+            }
 
             logger.info("loadingConfigFile=" + configFile);
 
-            debug(logger);
-
-            //DPSystemFactory tf = new DPSystemFactory();
-            //tf.loadConfig(configFile, properties);
+            // debug(logger);
 
             DPSystemRuntime dprun = new DPSystemRuntime(configFile,properties);
 
@@ -93,13 +95,16 @@ public class Main {
                     dprun.uploadConfig();
                 }
                 else  if (!runService) {
+                    if (suppressEvents)
+                        dprun.disableEvents();
                     if (pipelineName == null)
                         dprun.execute();
                     else
                         dprun.execute(pipelineName);
 
                     ///==========
-                    dprun.sendEvents();
+                    if (!suppressEvents)
+                        dprun.sendEvents();
                     logger.info("Execution completed.");
                 }
                 else {
@@ -136,6 +141,7 @@ public class Main {
         options.addOption( "p", "pipe", true, "run named pipeline .." );
         options.addOption( "s", "service", false, "run as Service, as configured in Services section");
         options.addOption( "L", "load config file into Admin Server");
+        options.addOption("S", "Supress event streaming to Admin Server");
         options.addOption( Option.builder("D").argName( "property=value" )
                 .hasArgs()
                 .valueSeparator('=')

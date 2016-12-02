@@ -241,6 +241,13 @@ public class DPSystemRuntime extends DPSystemConfigurable {
         eventRunTime.execute(SYS_PIPE_CREATE_STAGES, dstage);
     }
 
+    public void disableEvents() throws Exception {
+        if (!initialisedCheck){
+            initRuntime();
+        }
+        events.disableEvents();
+    }
+
     public void sendEvents() throws Exception {
         // going to instantiate a new factory & runtime
         // based upon the systemConfig to send the events out of the existing run

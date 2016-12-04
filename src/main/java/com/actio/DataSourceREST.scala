@@ -190,7 +190,9 @@ class DataSourceREST extends DataSource with Logging {
     val element = getResponseDataSet(requestQuery)(sendRequest)
 
     if(element.statusCode >= 400 && element.statusCode < 600) {
+
       logger.error(s"Status code ${element.statusCode} returned.")
+      logger.error(s"Body "+element.body.toString)
       if (onError != null)
         if (onError.toLowerCase  == "exit"){
           // exiting pipeline
@@ -215,8 +217,6 @@ class DataSourceREST extends DataSource with Logging {
   def sendRequest(request: HttpUriRequest): (StatusLine, Array[Header], String) = {
 
     headers.foreach(t => request.setHeader(new BasicHeader(t._1, t._2.replace("\"", ""))))
-
-    //request.setHeader(new BasicHeader("sfapikey","6ee2ac1c-6045-496f-892e-a0ad3dd5976c"))
 
     logger.info(">>>>>>>>" + request.toString + "<<<<<<<" + request.getRequestLine)
 

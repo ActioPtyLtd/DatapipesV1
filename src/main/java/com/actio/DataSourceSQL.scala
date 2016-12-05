@@ -8,8 +8,8 @@ import scala.util.{Try,Success,Failure}
 object DataSourceSQL {
 
   def configOrLabel(config: Config, label: String) = Try(config.hasPath("query."  + label)) match {
-    case Success(s) => if (s) config.getConfig("query").getString(label) else label
-    case Failure(f) => label
+    case Success(true) => config.getConfig("query").getString(label)
+    case _ => label
   }
 
   def getSelectQuery(ds: DataSet, config: Config, label: String): String = {

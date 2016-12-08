@@ -2,6 +2,8 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/dpipes.iml" filepath="$PROJECT_DIR$/.idea/modules/dpipes.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/dpipes-build.iml" filepath="$PROJECT_DIR$/.idea/modules/dpipes-build.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/dpipes2.iml" filepath="$PROJECT_DIR$/.idea/modules/dpipes2.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/dpipes2-build.iml" filepath="$PROJECT_DIR$/.idea/modules/dpipes2-build.iml" />
     </modules>

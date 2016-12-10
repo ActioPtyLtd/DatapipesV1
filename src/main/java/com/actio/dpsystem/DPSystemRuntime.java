@@ -27,6 +27,8 @@ public class DPSystemRuntime extends DPSystemConfigurable {
     String configFile;
     Properties properties;
 
+    public Integer lastTotal=0;
+
     public boolean initialisedCheck = false;
 
     public DPSystemRuntime(String configFile, Properties properties){
@@ -98,6 +100,8 @@ public class DPSystemRuntime extends DPSystemConfigurable {
             Task t = DPSystemFactory.newTask(sysconf,n);
             t.dataSet = ds;
             t.execute();
+
+            lastTotal = t.returnValue;
             events.info("", "", "FINISH", "Ending DataPipes Runtime", "run", "", 0);
             n.dump();
         }

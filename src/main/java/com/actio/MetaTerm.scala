@@ -296,6 +296,15 @@ object MetaTerm {
       }
     }
 
+    case Term.ApplyInfix(l, Term.Name("->"), Nil, Seq(r)) => {
+      val key = eval(l, scope).stringOption.getOrElse("")
+      val value = eval(r, scope)
+      value match {
+        case DataString(_, v) => DataString(key, v)
+        case DataNumeric(_, v) => DataNumeric(key, v)
+      }
+    }
+
 
   }
 

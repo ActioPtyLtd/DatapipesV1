@@ -261,7 +261,12 @@ object MetaTerm {
 
       DataBoolean(ls.isDefined && rs.isDefined && ls.get == rs.get)
     }
+    case Term.ApplyInfix(l, Term.Name("!="), Nil, Seq(r)) => {
+      val ls = eval(l, scope).stringOption
+      val rs = eval(r, scope).stringOption
 
+      DataBoolean(ls.isDefined && rs.isDefined && ls.get != rs.get)
+    }
     // AND logic
     case Term.ApplyInfix(l, Term.Name("&&"), Nil, Seq(r)) => {
       val ls = eval(l, scope).asInstanceOf[DataBoolean]

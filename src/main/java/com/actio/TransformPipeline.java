@@ -24,10 +24,8 @@ public class TransformPipeline extends TaskPipeline {
 
     private List<List<String>> rows = null;
 
-
     public TransformPipeline() {
     }
-
 
     public DataSet evokeTask(DPFnNode fnode, DataSet initDataSet) throws Exception {
         try {

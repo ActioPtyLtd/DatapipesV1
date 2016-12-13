@@ -13,7 +13,7 @@ import org.slf4j.LoggerFactory;
 public abstract class Task extends DPSystemConfigurable {
 
     protected static final Logger logger = LoggerFactory.getLogger(Task.class);
-
+    public Integer returnValue = 0;
     public DPFnNode node;
     public DPSystemConfig sysconf;
 

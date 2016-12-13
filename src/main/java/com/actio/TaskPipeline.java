@@ -128,7 +128,7 @@ public class TaskPipeline extends Task implements Runnable
                 logger.info("Processing::" + currentNode.getName() + "::size=" +reccount);
                 sysconf.events.progress(getInstanceID(), currentNode.getInstanceID(),
                         "RecordCount", currentNode.getName(), "Records", reccount);
-
+                returnValue = reccount;
                 // check for need to abort on zero dataset
                 if (reccount <= 0 && this.node.getAttrib("onEmpty").contains("exit"))
                 {

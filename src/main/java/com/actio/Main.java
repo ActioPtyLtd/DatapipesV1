@@ -35,7 +35,7 @@ public class Main {
         Properties properties = null;
         Boolean loadConfigIntoAdmin = false;
         Boolean suppressEvents = false;
-
+        Integer exitCode = 0;
         Logger logger =  null;
 
         try {
@@ -102,6 +102,8 @@ public class Main {
                     else
                         dprun.execute(pipelineName);
 
+                    exitCode = dprun.lastTotal;
+
                     ///==========
                     if (!suppressEvents)
                         dprun.sendEvents();
@@ -124,6 +126,8 @@ public class Main {
 
             exit(-1);
         }
+
+        exit (exitCode);
     }
 
 

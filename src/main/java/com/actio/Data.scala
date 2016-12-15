@@ -110,7 +110,7 @@ object Data2Json {
           "}"
       case DataArray(key, ds) =>
         toField(key) +
-          "[" + ds.map(d => toJsonString(d)).mkString(",") + "]"
+          "[" + ds.map(d => "{"+ toJsonString(d) + "}").mkString(",") + "]"
       case Nothin(_) => "null"
       case DataNumeric(_, num) => num.setScale(2, BigDecimal.RoundingMode.HALF_UP).underlying().stripTrailingZeros().toPlainString
       case DataBoolean(_, bool) => bool.toString

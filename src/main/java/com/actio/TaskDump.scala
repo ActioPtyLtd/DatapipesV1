@@ -7,7 +7,8 @@ import com.actio.dpsystem.Logging
   */
 class TaskDump extends Task with Logging {
   override def execute(): Unit = {
-    logger.info(Data2Json.toJsonString(dataSet))
+    // adding the external braces to correctly form array json
+    logger.info("{" + Data2Json.toJsonString(dataSet) + "}")
     dataSet = DataRecord(dataSet)
   }
 

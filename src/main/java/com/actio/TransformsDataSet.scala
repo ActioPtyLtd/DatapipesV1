@@ -322,6 +322,8 @@ object TransformsDataSet {
 
   def pick(ds: DataSet, labels: List[String]): DataSet = transformEachData(_.value(labels), _.value(labels map Label))(ds)
 
+  def toJsonStr(ds: DataSet): DataSet = DataString("jsonstr", Data2Json.toJsonString(ds))
+
   //def updateLabel(ds: DataSet, label: String): DataSet =
 
   //TODO: think about error handling. Maybe change next: Either[Error, Data]

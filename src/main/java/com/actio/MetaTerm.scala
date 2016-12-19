@@ -178,11 +178,17 @@ object MetaTerm {
 
     case Term.Apply(
       Term.Select(s, Term.Name("reduceLeft")),
-      Seq(Term.Function(Seq(Term.Param(Nil, Term.Name(ta), None, None), Term.Param(Nil, Term.Name(tb), None, None)), rem))) =>
-        eval(s, scope)
-          .elems
-          .toList
-          .reduceLeft((a,b) => eval(rem, scope + (ta -> a) + (tb -> b)))
+      Seq(Term.Function(Seq(Term.Param(Nil, Term.Name(ta), None, None), Term.Param(Nil, Term.Name(tb), None, None)), rem))) => {
+        val array = eval(s, scope)
+
+        if(array.length==0)
+          array
+          else
+          array
+            .elems
+            .toList
+            .reduceLeft((a,b) => eval(rem, scope + (ta -> a) + (tb -> b)))
+        }
 
 
 

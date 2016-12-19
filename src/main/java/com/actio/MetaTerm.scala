@@ -176,6 +176,16 @@ object MetaTerm {
               case _ => false})
           .getOrElse(Nothin())
 
+    case Term.Apply(
+      Term.Select(s, Term.Name("reduceLeft")),
+      Seq(Term.Function(Seq(Term.Param(Nil, Term.Name(ta), None, None), Term.Param(Nil, Term.Name(tb), None, None)), rem))) =>
+        eval(s, scope)
+          .elems
+          .toList
+          .reduceLeft((a,b) => eval(rem, scope + (ta -> a) + (tb -> b)))
+
+
+
   }
 
   def evalApplyUnary(t: Term.ApplyUnary, scope: Map[String, AnyRef]): DataSet = t match {

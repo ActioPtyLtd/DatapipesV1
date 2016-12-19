@@ -181,7 +181,7 @@ object MetaTerm {
       Seq(Term.Function(Seq(Term.Param(Nil, Term.Name(ta), None, None), Term.Param(Nil, Term.Name(tb), None, None)), rem))) => {
         val array = eval(s, scope)
 
-        if(array.elems.toList==0)
+        if(array.elems.toList.length==0)
           array
           else
           array

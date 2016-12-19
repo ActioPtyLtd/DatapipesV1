@@ -298,6 +298,7 @@ object MetaTerm {
       value match {
         case DataString(_, v) => DataString(key, v)
         case DataNumeric(_, v) => DataNumeric(key, v)
+        case _ => DataString(key,"")
       }
     }
 
@@ -307,6 +308,7 @@ object MetaTerm {
       value match {
         case DataString(_, v) => DataString(key, v)
         case DataNumeric(_, v) => DataNumeric(key, v)
+        case _ => DataString(key,"")
       }
     }
 

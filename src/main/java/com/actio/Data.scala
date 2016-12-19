@@ -12,6 +12,9 @@ import org.json4s.jackson.JsonMethods._
 
 case class DataString(label: String, str: String) extends DataSet {
 
+  def this(_str: String) {
+    this ("string",_str)
+  }
   override def stringOption: Option[String] = Option(str)
 
   override def schema: SchemaDefinition = SchemaString(label, 0)
@@ -19,7 +22,8 @@ case class DataString(label: String, str: String) extends DataSet {
 
 object DataString {
 
-  def apply(str: String): DataString = DataString("string", str)
+  def apply(str: String): DataString = new DataString( str)
+
 }
 
 case class DataNumeric(label: String, num: BigDecimal) extends DataSet {
@@ -102,6 +106,7 @@ object Data2Json {
   def toJsonString(data: DataSet): String =
     data match {
       case DataString(_, s) => "\"" + s + "\""
+    //  case DataString(l , s) => "\"" +l + "\" :  \"" + s + "\""
       case DataRecord(key, fs) =>
         toField(key) +
           "{" + fs.map(f =>

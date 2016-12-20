@@ -144,10 +144,12 @@ class DataSourceFTP extends DataSource with Logging {
 
 
   def write(dataSet: DataSet): Unit = {
-    writeFromDataSet(dataSet)
+    writeFromDataSet_Zeiss(dataSet)
   }
 
 
+
+  // zeiss specific
   def writeFromDataSet(dataSet: DataSet): Unit = {
 
     logger.info(s"write")
@@ -170,7 +172,6 @@ class DataSourceFTP extends DataSource with Logging {
         for (dsrecord: DataSet <- dataSet.elems) {
 
           val outRecord : String = dsrecord.toString()
-
           val data: InputStream = new ByteArrayInputStream(outRecord.getBytes(StandardCharsets.UTF_8))
           val fname = i + remotefile
           i += 1
@@ -195,6 +196,66 @@ class DataSourceFTP extends DataSource with Logging {
 
     }
   }
+
+
+  // zeiss specific
+  def writeFromDataSet_Zeiss(dataSet: DataSet): Unit = {
+
+    logger.info(s"write")
+
+
+    // read remote files locally
+    try {
+      ftpconn =  openConnection()
+      if (!ftpconn.isSuccess) throw ftpconn.failed.get
+
+      logger.info(s"cd to $remotepath")
+
+      ftpconn.get.changeWorkingDirectory(remotepath)
+      logger.info(ftpconn.get.getReplyString());
+      logger.info(s"putting to "+ftpconn.get.printWorkingDirectory())
+
+      // write DataSet
+      var i = 0
+
+      for (dsrecord: DataSet <- dataSet.elems) {
+        i += 1
+        val hdr_file : String = dsrecord("hdr_file").stringOption.get
+        val hdr_filename : String = dsrecord("hdr_filename").stringOption.getOrElse("default_hdr.xml")
+        val body_file : String = dsrecord("body_file").stringOption.get
+        val body_filename : String = dsrecord("body_filename").stringOption.getOrElse("default_bdy.xml")
+
+        writeStringFTP(hdr_file,hdr_filename)
+        writeStringFTP(body_file,body_filename)
+
+      }
+
+    }
+    catch
+      {
+        case ex: Exception => logger.info(s" Exception=="+ex.getMessage)
+      }
+    finally {
+      // do cleanup here
+
+    }
+  }
+
+  def writeStringFTP(literal:String, fname:String ): Unit ={
+
+    val data: InputStream = new ByteArrayInputStream(literal.getBytes(StandardCharsets.UTF_8))
+    // write that stream to the remote system
+    logger.info(s"writing "+fname)
+    var remoteFileStream = ftpconn.get.storeFile(fname, data)
+
+    // check for success
+    if (! remoteFileStream ) {
+    // failed
+    logger.error("Failed to write filestream")
+
+  }
+}
+
 
   override def create(ds: DataSet): Unit = {
     executeQueryLabel(ds.elems.toList.head, "create")

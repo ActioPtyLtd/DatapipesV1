@@ -50,9 +50,9 @@ class DataSourceFTP extends DataSource with Logging {
     if (config.hasPath("query")) {
       val queryConf: Config = config.getConfig("query")
       localpath = queryConf.getString("localpath")
-      localfile = queryConf.getString("localfile")
+      // localfile = queryConf.getString("localfile")
       remotepath = queryConf.getString("remotepath")
-      remotefile = queryConf.getString("remotefile")
+      // remotefile = queryConf.getString("remotefile")
     }
 
   }
@@ -116,6 +116,15 @@ class DataSourceFTP extends DataSource with Logging {
         ftp.disconnect();
         return Failure(new Throwable("FTP server refused connection."+reply))
       }
+
+      ftp.enterLocalPassiveMode();
+      reply = ftp.getReplyCode();
+
+      if(!FTPReply.isPositiveCompletion(reply)) {
+        ftp.disconnect();
+        return Failure(new Throwable("FTP server failed to go into passive mode"+reply))
+      }
+
     }
     catch {
 
@@ -220,12 +229,12 @@ class DataSourceFTP extends DataSource with Logging {
 
       for (dsrecord: DataSet <- dataSet.elems) {
         i += 1
-        val hdr_file : String = dsrecord("hdr_file").stringOption.get
-        val hdr_filename : String = dsrecord("hdr_filename").stringOption.getOrElse("default_hdr.xml")
+        val extra_file : String = dsrecord("extra_file").stringOption.get
+        val extra_filename : String = dsrecord("extra_filename").stringOption.getOrElse("gnm_default_H.xml")
         val body_file : String = dsrecord("body_file").stringOption.get
-        val body_filename : String = dsrecord("body_filename").stringOption.getOrElse("default_bdy.xml")
+        val body_filename : String = dsrecord("body_filename").stringOption.getOrElse("gnm_default_L.xml")
 
-        writeStringFTP(hdr_file,hdr_filename)
+        writeStringFTP(extra_file,extra_filename)
         writeStringFTP(body_file,body_filename)
 
       }
@@ -242,6 +251,8 @@ class DataSourceFTP extends DataSource with Logging {
   }
 
   def writeStringFTP(literal:String, fname:String ): Unit ={
+
+    if (literal == "" ) return;
 
     val data: InputStream = new ByteArrayInputStream(literal.getBytes(StandardCharsets.UTF_8))
     // write that stream to the remote system

@@ -212,6 +212,15 @@ object TransformsDataSet {
     }
   }
 
+  def parseDate(dateStr: String, format: String): DataSet = {
+    try {
+      DataDate(new SimpleDateFormat(format).parse(dateStr))
+    }
+    catch {
+      case e: Exception => throw new Exception(String.format("Unable to parseDate %s, with format %s",dateStr, format))
+    }
+  }
+
   def today(dateOffset: Int): DataSet = DataDate(DateUtils.addDays(new java.util.Date(), dateOffset))
 
   def filterValue(ds: DataSet, property: String, value: String): DataSet = DataArray(ds.elems.filter(f => f(property).stringOption.getOrElse("") == value).toList)
@@ -247,7 +256,12 @@ object TransformsDataSet {
 
   def urlEncode(str: String): DataSet = DataString(URLEncoder.encode(str, "UTF-8"))
 
-  def replaceAll(str: String, find: String, replaceWith: String): DataSet = DataString(str.replaceAll(find, replaceWith))
+  def replaceAll(str: String, find: String, replaceWith: String): DataSet =
+    try{ DataString(str.replaceAll(find, replaceWith))
+    }
+    catch {
+      case _ => DataString(str)
+    }
 
   // single quote escape
   def sq(str: String): DataSet = if(str == null) DataString("") else DataString(str.replace("'","''"))

@@ -4,6 +4,7 @@ import java.security.MessageDigest
 import java.text.SimpleDateFormat
 import java.time.{LocalDateTime, LocalDate}
 import java.time.format.DateTimeFormatter
+import java.text.DecimalFormat
 import java.net.URLEncoder
 import org.apache.commons.codec.binary.Hex
 import org.apache.commons.lang.time.DateUtils
@@ -250,6 +251,8 @@ object TransformsDataSet {
 
   def strContains(str: String, targetStr: String): DataSet = DataBoolean(if(str == null) false else str.contains(targetStr))
 
+  def substring(str: String, start: Int) = DataString(str.substring(start))
+
   def capitalise(str: String): DataSet = DataString(str.toUpperCase)
 
   def quoteOption(ds: DataSet) = ds.stringOption.map(s => if (s.isEmpty) DataString("null") else DataString("\"" + s + "\"")).getOrElse(DataString("null"))
@@ -260,13 +263,15 @@ object TransformsDataSet {
     try{ DataString(str.replaceAll(find, replaceWith))
     }
     catch {
-      case _ => DataString(str)
+      case _: Throwable => DataString(str)
     }
 
   // single quote escape
   def sq(str: String): DataSet = if(str == null) DataString("") else DataString(str.replace("'","''"))
 
   def numeric(value: String): DataSet = DataNumeric(Try(BigDecimal(value)).getOrElse(BigDecimal(0)))
+
+  def numericFormat(value: String, format: String) =  new DecimalFormat(format).format(Try(BigDecimal(value)).getOrElse(BigDecimal(0)))
 
   def integer(value: String): DataSet = DataNumeric(Try(BigDecimal(value.toInt)).getOrElse(BigDecimal(0)))
 

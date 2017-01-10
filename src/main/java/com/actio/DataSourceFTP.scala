@@ -229,13 +229,13 @@ class DataSourceFTP extends DataSource with Logging {
 
       for (dsrecord: DataSet <- dataSet.elems) {
         i += 1
-        val extra_file : String = dsrecord("extra_file").stringOption.get
+        val extra_file : String = dsrecord("extra_file").stringOption.get.replaceAllLiterally("\\n","\n")
         val extra_filename : String = dsrecord("extra_filename").stringOption.getOrElse("gnm_default_H.xml")
-        val body_file : String = dsrecord("body_file").stringOption.get
+        val body_file : String = dsrecord("body_file").stringOption.get.replaceAllLiterally("\\n","\n")
         val body_filename : String = dsrecord("body_filename").stringOption.getOrElse("gnm_default_L.xml")
 
-        writeStringFTP(extra_file,extra_filename)
-        writeStringFTP(body_file,body_filename)
+        writeStringFTP(s"$extra_file",extra_filename)
+        writeStringFTP(s"$body_file",body_filename)
 
       }
 

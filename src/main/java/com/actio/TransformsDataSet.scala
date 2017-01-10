@@ -266,12 +266,19 @@ object TransformsDataSet {
       case _: Throwable => DataString(str)
     }
 
+  def cleanStr(str: String) : DataSet =
+    try {
+      DataString(str.replace("[","_").replace("]","_").replace(".","_"))
+    }
+    catch {
+      case _: Throwable => DataString(str)
+    }
   // single quote escape
   def sq(str: String): DataSet = if(str == null) DataString("") else DataString(str.replace("'","''"))
 
   def numeric(value: String): DataSet = DataNumeric(Try(BigDecimal(value)).getOrElse(BigDecimal(0)))
 
-  def numericFormat(value: String, format: String) =  new DecimalFormat(format).format(Try(BigDecimal(value)).getOrElse(BigDecimal(0)))
+  def numericFormat(value: String, format: String) =  DataString(new DecimalFormat(format).format(Try(BigDecimal(value)).getOrElse(BigDecimal(0))))
 
   def integer(value: String): DataSet = DataNumeric(Try(BigDecimal(value.toInt)).getOrElse(BigDecimal(0)))
 
@@ -393,47 +400,6 @@ object TransformsDataSet {
     val res = ra.foldLeft[String](template)((t, e) => t.replace("@" + e + "@", d.value(e).stringOption.getOrElse("")))
     res
   }
-
-  /*
-  def concatWithinRecord(ds: DataSet, label: String) : DataSet = {
-
-    // iterate over ds
-
-
-    return ds
-  }
-*/
-  /*
-
-  def numeric(batch: Batch, field: String, precision: Int, scale: Int): DataSet = batch match {
-    case (s, DataRecord(key, fs)) =>
-      new DataSetFixedData(s, if (fs.map(_.label).contains(field))
-        DataRecord(key, fs.map(f =>
-          if (f.label == field)
-            DataNumeric(f.label, BigDecimal(f.stringOption.getOrElse("0")))
-          else
-            f).toList)
-      else
-        DataRecord(key, fs))
-    case (s, DataArray(key, a)) =>
-      new DataSetFixedData(s, DataArray(key, a.map(m => numeric((s, m), field, precision, scale).headOption.get)))
-    case (s, d) => new DataSetFixedData(s, d)
-  }
-
-  def bool(batch: Batch, field: String): DataSet = batch match {
-    case (s, DataRecord(key, fs)) =>
-      new DataSetFixedData(s, if (fs.map(_.label).contains(field))
-        DataRecord(key, fs.map(f =>
-          if (f.label == field)
-            DataBoolean(f.label, f.stringOption.map(_.toBoolean).getOrElse(false))
-          else
-            f).toList)
-      else
-        DataRecord(key, fs))
-    case (s, DataArray(key, a)) =>
-      new DataSetFixedData(s, DataArray(key, a.map(m => bool((s, m), field).headOption.get)))
-    case (s, d) => new DataSetFixedData(s, d)
-  } */
 
   def delim(str: String, d: DataSet) = DataString(d.elems.map(_.stringOption.getOrElse("")).mkString(str))
 

@@ -80,6 +80,8 @@ object MetaTerm {
 
     // evaluate unary operations
     case unary: Term.ApplyUnary => evalApplyUnary(unary, scope)
+
+    case e => throw new Exception(e.toString)
   }
 
   def evalSelect(t: Term.Select, scope: Map[String, AnyRef]): DataSet = t match {

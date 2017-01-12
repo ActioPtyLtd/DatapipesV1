@@ -238,6 +238,7 @@ object TransformsDataSet {
   def toUUIDFormat(str: String): DataSet = DataString(str.substring(0,8)+"-"+str.substring(8,12)+"-"+str.substring(12,16)+"-"+str.substring(16,20)+
     "-"+str.substring(20,32))
 
+  def splitTrim(instr: String, delim: String): DataSet =  DataArray( instr.split(delim).toList.map( s => DataString(s.trim)  ))
 
   def ifEqualOrElse(ds: DataSet, equal: String, dsThen: DataSet, dsElse: DataSet): DataSet = if (ds.stringOption.getOrElse("") == equal) dsThen else dsElse
 
@@ -547,4 +548,30 @@ object TransformsDataSet {
   def distinct(ds: DataSet, col: String) = {
     DataRecord(DataArray(ds.label, ds.elems.toList.groupBy((row: DataSet) => row(col)).map(_._2.head).toList))
   }
+
+  // ================
+  // CUSTOM FUNCTIONS
+  //
+
+  def subStringRegexp(instr: String, regexp: String) : String =
+  {
+    val rexp = regexp.r
+    instr match {
+      case rexp(x) => x
+      case _ => ""
+    }
+  }
+
+  // custom parse get the numeric part of a string
+  def getNumericPrism(instr: String): DataSet = {
+    val outstr  = subStringRegexp(instr,"""([\+-]?\d*\.?\d*).*""")
+    DataString(outstr)
+  }
+
+  // custom parse get the numeric part of a string
+  def getDirectionPrism(instr: String, checkStr: String): DataSet = {
+    val outstr = subStringRegexp(instr.toUpperCase,"""^\d*\.?\d*[bB]?([uUdDiIoO]?).*""")
+    DataString(outstr)
+  }
+
 }

@@ -1,8 +1,12 @@
 package com.actio
 
+import java.io.{PrintWriter, StringWriter}
 import java.lang.reflect.Parameter
+
+import com.actio.MetaTerm.logger
 import com.actio.TransformsDataSet.Batch
 import com.actio.dpsystem.Logging
+
 import scala.annotation.tailrec
 import scala.collection.JavaConverters._
 
@@ -17,7 +21,16 @@ object UtilityFunctions extends Logging {
     fs.asScala.foldLeft[DataSet](ds)((s, f) => execute(f.getName, (s.asInstanceOf[Any] :: f.getParameters.toList).asJava))
   }
 
-  def execute(methodName: String, params: List[Any]): DataSet = execute(methodName, params.asJava)
+  def execute(methodName: String, params: List[Any]): DataSet = {
+    try {
+      return execute(methodName, params.asJava)
+    }
+    catch {
+      case e : Throwable =>
+        logger.error(" methodName Error:: Exception e "+e.toString)
+        throw(e)
+    }
+  }
 
   def execute(methodName: String, params: java.util.List[Any]): DataSet = {
     val method = Class.forName("com.actio.TransformsDataSet").getDeclaredMethods.find(_.getName.equalsIgnoreCase(methodName))

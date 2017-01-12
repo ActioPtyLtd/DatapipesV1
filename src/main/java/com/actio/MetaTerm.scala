@@ -1,12 +1,15 @@
 package com.actio
 
+import com.actio.dpsystem.Logging
+import java.io.StringWriter
+import java.io.PrintWriter
 import scala.meta.Term.Arg.Repeated
 import scala.meta._
-
 /**
- * Created by mauri on 23/07/2016.
- */
-object MetaTerm {
+  * Created by mauri on 23/07/2016.
+  */
+
+object MetaTerm extends Logging {
 
   def eval(ds: DataSet, text: String): DataSet = eval(ds, text.parse[Term].get)
 
@@ -14,14 +17,26 @@ object MetaTerm {
 
   def interpolate(str: String): String = "s\"\"\"" + str + "\"\"\""
 
-  def eval(ds: DataSet, t: Term): DataSet = t match {
+  def eval(ds: DataSet, t: Term): DataSet = {
+    try {
+      return t match {
 
-    // evaluate lambda expression
-    case Term.Function(Seq(Term.Param(_, Term.Name(name), _, _)), body) =>
-      eval(body, Map(name -> ds))
+        // evaluate lambda expression
+        case Term.Function(Seq(Term.Param(_, Term.Name(name), _, _)), body) =>
+          eval(body, Map(name -> ds))
 
-    // evaluate expression, add to scope top level attributes of the DataSet
-    case _ => eval(t, ds.elems.map(e => e.label -> e).toList.toMap + ("this" -> ds))
+        // evaluate expression, add to scope top level attributes of the DataSet
+        case _ => eval(t, ds.elems.map(e => e.label -> e).toList.toMap + ("this" -> ds))
+      }
+    } catch {
+      case e : Throwable =>
+        logger.error(" MetaTerm Error:: Exception e "+e.toString)
+        val sw = new StringWriter
+        e.printStackTrace(new PrintWriter(sw))
+        logger.error(sw.toString)
+        dumpTerm(t)
+        throw(e)
+    }
   }
 
   def eval(t: AnyRef, scope: Map[String, AnyRef]): DataSet = t match {
@@ -41,7 +56,7 @@ object MetaTerm {
       s.tail.map(e => eval(e, scope)).toList)
 
     // for when you want to reference original top level dataset
-    case Term.This(_) => scope("this")  match {
+    case Term.This(_) => scope("this") match {
       case ds: DataSet => ds
       case term => eval(term, scope)
     }
@@ -107,7 +122,7 @@ object MetaTerm {
     // dynamically call function, evaluating parameters before execution
     case Term.Apply(Term.Name(fName), args)
       if !scope.contains(fName) =>
-        UtilityFunctions.execute(fName, args.map(eval(_, scope)).toList)
+      UtilityFunctions.execute(fName, args.map(eval(_, scope)).toList)
 
     // get DataSet by ordinal
     case Term.Apply(q, Seq(Lit(num: Int))) => eval(q, scope)(num)
@@ -117,81 +132,81 @@ object MetaTerm {
 
     // iterate through DataSet and include elements matching condition
     case Term.Apply(
-      Term.Select(s, Term.Name("filter")),
-      Seq(Term.Function(Seq(Term.Param(Nil, Term.Name(tn), None, None)), rem))) =>
-        DataArray(
-          eval(s, scope)
-            .elems
-            .filter(f => eval(rem, scope + (tn -> f)).asInstanceOf[DataBoolean].bool)
-            .toList)
+    Term.Select(s, Term.Name("filter")),
+    Seq(Term.Function(Seq(Term.Param(Nil, Term.Name(tn), None, None)), rem))) =>
+      DataArray(
+        eval(s, scope)
+          .elems
+          .filter(f => eval(rem, scope + (tn -> f)).asInstanceOf[DataBoolean].bool)
+          .toList)
 
     // iterate through DataSet and exclude elements matching condition
     case Term.Apply(
-      Term.Select(s, Term.Name("filterNot")),
-      Seq(Term.Function(Seq(Term.Param(Nil, Term.Name(tn), None, None)), rem))) =>
-        DataArray(
-          eval(s, scope)
-            .elems
-            .filterNot(f => eval(rem, scope + (tn -> f)).asInstanceOf[DataBoolean].bool)
-            .toList)
+    Term.Select(s, Term.Name("filterNot")),
+    Seq(Term.Function(Seq(Term.Param(Nil, Term.Name(tn), None, None)), rem))) =>
+      DataArray(
+        eval(s, scope)
+          .elems
+          .filterNot(f => eval(rem, scope + (tn -> f)).asInstanceOf[DataBoolean].bool)
+          .toList)
 
     // iterate through DataSet and apply function to each element
     case Term.Apply(
-      Term.Select(s, Term.Name("map")),
-      Seq(Term.Function(Seq(Term.Param(Nil, Term.Name(tn), None, None)), rem))) =>
-        DataArray(
-          eval(s, scope)
-            .elems
-            .map(f => eval(rem, scope + (tn -> f)))
-            .toList)
+    Term.Select(s, Term.Name("map")),
+    Seq(Term.Function(Seq(Term.Param(Nil, Term.Name(tn), None, None)), rem))) =>
+      DataArray(
+        eval(s, scope)
+          .elems
+          .map(f => eval(rem, scope + (tn -> f)))
+          .toList)
 
     // iterate through DataSet and apply function to each element
     case Term.Apply(
-      Term.Select(s, Term.Name("flatMap")),
-      Seq(Term.Function(Seq(Term.Param(Nil, Term.Name(tn), None, None)), rem))) =>
-        DataArray(
-          eval(s, scope)
-            .elems
-            .flatMap(f => eval(rem, scope + (tn -> f)).elems)
-            .toList)
+    Term.Select(s, Term.Name("flatMap")),
+    Seq(Term.Function(Seq(Term.Param(Nil, Term.Name(tn), None, None)), rem))) =>
+      DataArray(
+        eval(s, scope)
+          .elems
+          .flatMap(f => eval(rem, scope + (tn -> f)).elems)
+          .toList)
 
     case Term.Apply(
-      Term.Select(s, Term.Name("groupBy")),
-      Seq(Term.Function(Seq(Term.Param(Nil, Term.Name(tn), None, None)), rem))) =>
-        DataRecord(
-          eval(s, scope)
-            .elems
-            .toList
-            .groupBy(k => eval(rem, scope + (tn -> k)).stringOption.getOrElse(""))
-            .map(p => DataArray(p._1, p._2))
-            .toList)
-
-    case Term.Apply(
-      Term.Select(s, Term.Name("find")),
-      Seq(Term.Function(Seq(Term.Param(Nil, Term.Name(tn), None, None)), rem))) =>
+    Term.Select(s, Term.Name("groupBy")),
+    Seq(Term.Function(Seq(Term.Param(Nil, Term.Name(tn), None, None)), rem))) =>
+      DataRecord(
         eval(s, scope)
           .elems
           .toList
-          .find(f =>
-            eval(rem, scope + (tn -> f)) match {
-              case DataBoolean(_, bool) => bool
-              case _ => false})
-          .getOrElse(Nothin())
+          .groupBy(k => eval(rem, scope + (tn -> k)).stringOption.getOrElse(""))
+          .map(p => DataArray(p._1, p._2))
+          .toList)
 
     case Term.Apply(
-      Term.Select(s, Term.Name("reduceLeft")),
-      Seq(Term.Function(Seq(Term.Param(Nil, Term.Name(ta), None, None), Term.Param(Nil, Term.Name(tb), None, None)), rem))) => {
-        val array = eval(s, scope)
+    Term.Select(s, Term.Name("find")),
+    Seq(Term.Function(Seq(Term.Param(Nil, Term.Name(tn), None, None)), rem))) =>
+      eval(s, scope)
+        .elems
+        .toList
+        .find(f =>
+          eval(rem, scope + (tn -> f)) match {
+            case DataBoolean(_, bool) => bool
+            case _ => false
+          })
+        .getOrElse(Nothin())
 
-        if(array.elems.toList.length==0)
-          array
-          else
-          array
-            .elems
-            .toList
-            .reduceLeft((a,b) => eval(rem, scope + (ta -> a) + (tb -> b)))
-        }
+    case Term.Apply(
+    Term.Select(s, Term.Name("reduceLeft")),
+    Seq(Term.Function(Seq(Term.Param(Nil, Term.Name(ta), None, None), Term.Param(Nil, Term.Name(tb), None, None)), rem))) => {
+      val array = eval(s, scope)
 
+      if (array.elems.toList.length == 0)
+        array
+      else
+        array
+          .elems
+          .toList
+          .reduceLeft((a, b) => eval(rem, scope + (ta -> a) + (tb -> b)))
+    }
 
 
   }
@@ -211,7 +226,7 @@ object MetaTerm {
           DataBoolean(n.num >= eval(r, scope).asInstanceOf[DataNumeric].num)
         case _ =>
           DataBoolean(false)
-    }
+      }
 
     // >
     case Term.ApplyInfix(l, Term.Name(">"), Nil, Seq(r)) =>
@@ -222,7 +237,7 @@ object MetaTerm {
           DataBoolean(n.num > eval(r, scope).asInstanceOf[DataNumeric].num)
         case _ =>
           DataBoolean(false)
-    }
+      }
 
     // <
     case Term.ApplyInfix(l, Term.Name("<"), Nil, Seq(r)) => eval(l, scope) match {
@@ -245,32 +260,32 @@ object MetaTerm {
     }
 
     // string concat and numeric addition
-    case Term.ApplyInfix(l, Term.Name("+"), Nil, Seq(r)) => (eval(l, scope),eval(r, scope)) match {
+    case Term.ApplyInfix(l, Term.Name("+"), Nil, Seq(r)) => (eval(l, scope), eval(r, scope)) match {
       case (left: DataNumeric, right: DataNumeric) => DataNumeric(left.num + right.num)
-      case (left,right) => DataString(left.stringOption.getOrElse("") +
-                                  right.stringOption.getOrElse(""))
+      case (left, right) => DataString(left.stringOption.getOrElse("") +
+        right.stringOption.getOrElse(""))
     }
 
     // subtract numeric
-    case Term.ApplyInfix(l, Term.Name("-"), Nil, Seq(r)) => (eval(l, scope),eval(r, scope)) match {
+    case Term.ApplyInfix(l, Term.Name("-"), Nil, Seq(r)) => (eval(l, scope), eval(r, scope)) match {
       case (left: DataNumeric, right: DataNumeric) => DataNumeric(
         left.num -
-        right.num)
-      }
+          right.num)
+    }
 
     // multiply numeric
-    case Term.ApplyInfix(l, Term.Name("*"), Nil, Seq(r)) => (eval(l, scope),eval(r, scope)) match {
+    case Term.ApplyInfix(l, Term.Name("*"), Nil, Seq(r)) => (eval(l, scope), eval(r, scope)) match {
       case (left: DataNumeric, right: DataNumeric) => DataNumeric(
         left.num *
-        right.num)
-      }
+          right.num)
+    }
 
     // divide numeric
-    case Term.ApplyInfix(l, Term.Name("/"), Nil, Seq(r)) => (eval(l, scope),eval(r, scope)) match {
+    case Term.ApplyInfix(l, Term.Name("/"), Nil, Seq(r)) => (eval(l, scope), eval(r, scope)) match {
       case (left: DataNumeric, right: DataNumeric) => DataNumeric(
         left.num /
-        right.num)
-      }
+          right.num)
+    }
 
     // currently, equality will do a string comparison
     case Term.ApplyInfix(l, Term.Name("=="), Nil, Seq(r)) => {
@@ -289,7 +304,7 @@ object MetaTerm {
     case Term.ApplyInfix(l, Term.Name("&&"), Nil, Seq(r)) => {
       val ls = eval(l, scope).asInstanceOf[DataBoolean]
 
-      if(ls.bool) {
+      if (ls.bool) {
         eval(r, scope)
       } else {
         DataBoolean(false)
@@ -300,7 +315,7 @@ object MetaTerm {
     case Term.ApplyInfix(l, Term.Name("||"), Nil, Seq(r)) => {
       val ls = eval(l, scope).asInstanceOf[DataBoolean]
 
-      if(ls.bool) {
+      if (ls.bool) {
         DataBoolean(true)
       } else {
         eval(r, scope)
@@ -308,7 +323,7 @@ object MetaTerm {
     }
 
     case Term.ApplyInfix(l, Term.Name("mergeLeft"), Nil, Seq(r)) => {
-      DataSetOperations.mergeLeft(eval(l, scope), eval(r,scope))
+      DataSetOperations.mergeLeft(eval(l, scope), eval(r, scope))
     }
 
     case Term.ApplyInfix(Term.Name(key), Term.Name("->"), Nil, Seq(r)) => {
@@ -316,7 +331,7 @@ object MetaTerm {
       value match {
         case DataString(_, v) => DataString(key, v)
         case DataNumeric(_, v) => DataNumeric(key, v)
-        case _ => DataString(key,"")
+        case _ => DataString(key, "")
       }
     }
 
@@ -326,11 +341,18 @@ object MetaTerm {
       value match {
         case DataString(_, v) => DataString(key, v)
         case DataNumeric(_, v) => DataNumeric(key, v)
-        case _ => DataString(key,"")
+        case _ => DataString(key, "")
       }
     }
 
 
   }
+
+  def dumpTerm(t: Term): Unit = {
+    logger.info("TERM==" + t.toString())
+  }
+
+
+  override def clazz: Class[_] = MetaTerm.getClass()
 
 }

@@ -252,7 +252,7 @@ class DataSourceFTP extends DataSource with Logging {
 
   def writeStringFTP(literal:String, fname:String ): Unit ={
 
-    if (literal == "" ) return;
+    if (literal.trim == "" ) return;
 
     val data: InputStream = new ByteArrayInputStream(literal.getBytes(StandardCharsets.UTF_8))
     // write that stream to the remote system

@@ -1,14 +1,14 @@
 package com.actio
 
 import java.security.MessageDigest
-import java.text.SimpleDateFormat
-import java.time.{LocalDateTime, LocalDate}
+import java.text.{DecimalFormat, SimpleDateFormat}
+import java.time.{LocalDate, LocalDateTime}
 import java.time.format.DateTimeFormatter
-import java.text.DecimalFormat
 import java.net.URLEncoder
+import java.util.Date
+
 import org.apache.commons.codec.binary.Hex
 import org.apache.commons.lang.time.DateUtils
-;
 
 import scala.annotation.tailrec
 import scala.collection.mutable
@@ -222,6 +222,17 @@ object TransformsDataSet {
     }
   }
 
+  def parseDateWithDefault(dateStr: String, format: String): DataSet = {
+    try {
+      DataDate(new SimpleDateFormat(format).parse(dateStr))
+    }
+    catch {
+      case e: Exception => {
+        DataString(new SimpleDateFormat(format).format(new Date))
+      }
+    }
+  }
+
   def today(dateOffset: Int): DataSet = DataDate(DateUtils.addDays(new java.util.Date(), dateOffset))
 
   def filterValue(ds: DataSet, property: String, value: String): DataSet = DataArray(ds.elems.filter(f => f(property).stringOption.getOrElse("") == value).toList)
@@ -252,7 +263,7 @@ object TransformsDataSet {
 
   def strContains(str: String, targetStr: String): DataSet = DataBoolean(if(str == null) false else str.contains(targetStr))
 
-  def substring(str: String, start: Int) = DataString(str.substring(start))
+  def substring(str: String, start: Int): DataSet = if (start < str.length) DataString(str.substring(start)) else DataString("")
 
   def capitalise(str: String): DataSet = DataString(str.toUpperCase)
 
@@ -279,7 +290,13 @@ object TransformsDataSet {
 
   def numeric(value: String): DataSet = DataNumeric(Try(BigDecimal(value)).getOrElse(BigDecimal(0)))
 
-  def numericFormat(value: String, format: String) =  DataString(new DecimalFormat(format).format(Try(BigDecimal(value)).getOrElse(BigDecimal(0))))
+  def numericFormat(value: String, format: String) =  {
+
+//    if (value == "" && format == "#0")
+ //     DataString("0")
+ //   else
+      DataString(new DecimalFormat(format).format(Try(BigDecimal(value)).getOrElse(BigDecimal(0))))
+  }
 
   def integer(value: String): DataSet = DataNumeric(Try(BigDecimal(value.toInt)).getOrElse(BigDecimal(0)))
 

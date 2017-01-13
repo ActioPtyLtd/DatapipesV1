@@ -28,6 +28,7 @@ object UtilityFunctions extends Logging {
     catch {
       case e : Throwable =>
         logger.error(" methodName Error:: Exception e "+e.toString)
+        logger.error(s" methodName=$methodName, params="+params.asJava.toString)
         throw(e)
     }
   }

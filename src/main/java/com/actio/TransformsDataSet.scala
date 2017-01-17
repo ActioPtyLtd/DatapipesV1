@@ -265,6 +265,8 @@ object TransformsDataSet {
 
   def substring(str: String, start: Int): DataSet = if (start < str.length) DataString(str.substring(start)) else DataString("")
 
+  def substringWithEnd(str: String, start: Int, end: Int) = DataString(str.substring(start,end))
+
   def capitalise(str: String): DataSet = DataString(str.toUpperCase)
 
   def quoteOption(ds: DataSet) = ds.stringOption.map(s => if (s.isEmpty) DataString("null") else DataString("\"" + s + "\"")).getOrElse(DataString("null"))
@@ -322,6 +324,15 @@ object TransformsDataSet {
           BigDecimal.RoundingMode.HALF_UP
       }
     DataNumeric(Try(BigDecimal(value).setScale(scale, roundingMode)).getOrElse(BigDecimal(0)))
+  }
+
+  def csvWithHeader(ds: DataSet, delim: String): DataSet = {
+    val csvSplit = delim + "(?=([^\\\"]*\\\"[^\\\"]*\\\")*[^\\\"]*$)" // TODO: should allow encapsulation to be paramaterised
+    val rows = ds.elems.map(r => r(0).stringOption.getOrElse("").split(csvSplit, -1).map(c => c.replaceAll("^\"|\"$", ""))).toList
+    if(rows.length == 0)
+      Nothin()
+      else
+      DataArray(rows.tail.map(r => DataRecord(rows.head.zipWithIndex.map(c => DataString(c._1, r(c._2))).toList)).toList)
   }
 
   def removeTrailingZeros(value: String): DataSet = DataNumeric(Try(BigDecimal(value).setScale(2, BigDecimal.RoundingMode.HALF_UP)).getOrElse(BigDecimal(0)).underlying().stripTrailingZeros())

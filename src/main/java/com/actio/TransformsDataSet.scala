@@ -263,6 +263,9 @@ object TransformsDataSet {
 
   def strContains(str: String, targetStr: String): DataSet = DataBoolean(if(str == null) false else str.contains(targetStr))
 
+  def strNotContains(str: String, targetStr: String): DataSet = DataBoolean(if(str == null) false else !str.contains(targetStr))
+
+
   def substring(str: String, start: Int): DataSet = if (start < str.length) DataString(str.substring(start)) else DataString("")
 
   def capitalise(str: String): DataSet = DataString(str.toUpperCase)

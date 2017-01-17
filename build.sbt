@@ -1,6 +1,6 @@
 name := "dpipes"
 
-version := "1.2.3"
+version := "1.2.6"
 
 scalaVersion := "2.11.8"
 

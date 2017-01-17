@@ -64,7 +64,7 @@ class DataSourceFTP extends DataSource with Logging {
 
   @throws(classOf[Exception])
   def execute() {
-
+    extract()
   }
 
   @throws(classOf[Exception])
@@ -74,7 +74,9 @@ class DataSourceFTP extends DataSource with Logging {
   }
 
   @throws(classOf[Exception])
-  def extract(): Unit = ???
+  def extract(): Unit = {
+    openConnection().foreach(client => { dataSet = DataSetFTP(client, config.getString("query.remotepath"), config.getString("query.regex")) })
+  }
 
   @throws(classOf[Exception])
   def openConnection() : Try[FTPClient] = {

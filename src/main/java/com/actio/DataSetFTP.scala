@@ -18,14 +18,19 @@ class DataSetFTP(client: FTPClient, remotePath: String, files: List[FTPFile] ) e
 
     override lazy val elems = files.toIterator.flatMap(f => {
       val path = remotePath + "/" + f.getName
-      logger.info(s"Fetching remote file: $path...")
-      val fs = client.retrieveFileStream(path)
-      val fds = DataRecord(DataRecord("meta", DataString("fileName", f.getName)))
-      val ds = new DataSetFileStream(fs).elems.map(m => DataSetOperations.mergeLeft(DataRecord(m), fds)).toList.toIterator  // get everything right now so I can close
-      client.completePendingCommand()
-      logger.info(s"Deleting remote file: $path...")
-      client.deleteFile(path)
-      ds
+      try {
+        logger.info(s"Fetching remote file: $path...")
+        val fs = client.retrieveFileStream(path)
+        val fds = DataRecord(DataRecord("meta", DataString("fileName", f.getName)))
+        val ds = new DataSetFileStream(fs).elems.map(m => DataSetOperations.mergeLeft(DataRecord(m), fds)).toList.toIterator  // get everything right now so I can close
+        client.completePendingCommand()
+        logger.info(s"Deleting remote file: $path...")
+        client.deleteFile(path)
+        ds
+      } catch {
+        case e: Throwable => { logger.error(s"Failed to read or delete file $path. Ignoring file..."); Iterator.empty }
+      }
+
     })
 
     override def label: String = "file"

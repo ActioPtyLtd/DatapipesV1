@@ -268,7 +268,7 @@ object TransformsDataSet {
 
   def substring(str: String, start: Int): DataSet = if (start < str.length) DataString(str.substring(start)) else DataString("")
 
-  def substringWithEnd(str: String, start: Int, end: Int) = DataString(str.substring(start,end))
+  def substringWithEnd(str: String, start: Int, end: Int) = DataString(str.substring(start,if(str.length-1 < end) str.length-1 else end))
 
   def capitalise(str: String): DataSet = DataString(str.toUpperCase)
 

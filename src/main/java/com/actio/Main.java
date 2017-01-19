@@ -84,7 +84,7 @@ public class Main {
 
             logger.info("loadingConfigFile=" + configFile);
 
-            // debug(logger);
+            debug(logger);
 
             DPSystemRuntime dprun = new DPSystemRuntime(configFile,properties);
 

@@ -209,7 +209,7 @@ class DataSourceREST extends DataSource with Logging {
         }
     } else {
       logger.info(s"Status code ${element.statusCode} returned.")
-      logger.info(s"Body "+element.body.toString)
+      logger.debug(s"Body "+element.body.toString)
     }
 
     element

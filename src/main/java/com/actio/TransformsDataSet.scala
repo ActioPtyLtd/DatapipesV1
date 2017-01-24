@@ -603,6 +603,7 @@ object TransformsDataSet {
   def getDirectionPrism(instr: String, checkStr: String): DataSet = {
     val outstr = subStringRegexp(instr.toUpperCase,"""^\d*\.?\d*[bB]?([uUdDiIoO]?).*""")
     DataString(outstr)
+
   }
 
 }

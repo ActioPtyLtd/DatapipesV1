@@ -209,7 +209,9 @@ class DataSourceREST extends DataSource with Logging {
         }
     } else {
       logger.info(s"Status code ${element.statusCode} returned.")
-      logger.debug(s"Body "+element.body.toString)
+      val body:String = element.body.toString
+      logger.info(s"Body(50): '" + body.substring( Math.min(body.length,50)) )
+
     }
 
     element

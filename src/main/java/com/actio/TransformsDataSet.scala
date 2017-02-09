@@ -285,7 +285,7 @@ object TransformsDataSet {
 
   def cleanStr(str: String) : DataSet =
     try {
-      DataString(str.replace("[","_").replace("]","_").replace(".","_"))
+      DataString(str.replace("[","_").replace("]","_").replace(".","_").replace("\n","").replace("\"","'"))
     }
     catch {
       case _: Throwable => DataString(str)

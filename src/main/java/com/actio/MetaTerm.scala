@@ -9,9 +9,28 @@ import scala.meta._
   * Created by mauri on 23/07/2016.
   */
 
+object MetaTermStructureCache {
+  private val lookup = scala.collection.mutable.HashMap[String,Term]()
+
+  def get(text: String): Term = {
+    val opt = lookup.get(text)
+
+    if(opt.isDefined) {
+      opt.get
+    } else {
+      val term = text.parse[Term].get
+      lookup += (text -> term)
+      term
+    }
+  }
+    
+}
+
 object MetaTerm extends Logging {
 
   def eval(ds: DataSet, text: String): DataSet = eval(ds, text.parse[Term].get)
+
+  def evalLambdas(text: String, ds1: Seq[DataSet]): DataSet = evalLambdas(MetaTermStructureCache.get(text), ds1)
 
   def evalTemplate(ds: DataSet, text: String): DataSet = eval(ds, interpolate(text))
 
@@ -38,6 +57,14 @@ object MetaTerm extends Logging {
         throw(e)
     }
   }
+
+  def evalLambdas(t: Term, ds: Seq[DataSet]): DataSet = t match {
+    case Term.Function(seq: Seq[Term.Param], body) => eval(body, (seq.map {
+      case Term.Param(Nil, Term.Name(name), None, None) => name
+      case _ => ""
+    } zip ds).map(m => (m._1 -> m._2)).toMap)
+  }
+
 
   def eval(t: AnyRef, scope: Map[String, AnyRef]): DataSet = t match {
 
@@ -208,6 +235,8 @@ object MetaTerm extends Logging {
           .reduceLeft((a, b) => eval(rem, scope + (ta -> a) + (tb -> b)))
     }
 
+    // get DataSet by name
+    case Term.Apply(q, Seq(t)) => eval(q, scope)(eval(t, scope).stringOption.getOrElse(""))
 
   }
 

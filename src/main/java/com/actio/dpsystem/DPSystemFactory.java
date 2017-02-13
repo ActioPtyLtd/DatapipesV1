@@ -73,6 +73,9 @@ public class DPSystemFactory extends DPSystemConfigurable {
             case "join":
                 t = new TaskDataJoin();
                 break;
+            case "find":
+                t = new TaskDataFind();
+                break;
             default:
                 throw new Exception("DPSystemFactory:Unknown Task Type "+type);
         }

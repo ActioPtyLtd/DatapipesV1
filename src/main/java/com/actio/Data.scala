@@ -64,7 +64,9 @@ object DataBoolean {
 
 case class DataRecord(label: String, fields: List[DataSet]) extends DataSet {
 
-  override def apply(field: String): DataSet = fields.find(f => f.label == field).getOrElse(Nothin())
+  lazy val mapFields: Map[String, DataSet] = fields.map(f => f.label -> f).toMap
+
+  override def apply(field: String): DataSet = mapFields.getOrElse(field, Nothin())
 
   override def apply(ord: Int): DataSet = fields.lift(ord).getOrElse(Nothin())
 

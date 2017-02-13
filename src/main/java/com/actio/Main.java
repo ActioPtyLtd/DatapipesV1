@@ -82,9 +82,10 @@ public class Main {
                 suppressEvents = true;
             }
 
+            debug(logger);
+
             logger.info("loadingConfigFile=" + configFile);
 
-            debug(logger);
 
             DPSystemRuntime dprun = new DPSystemRuntime(configFile,properties);
 
@@ -159,9 +160,9 @@ public class Main {
         ClassLoader cl = ClassLoader.getSystemClassLoader();
 
         URL[] urls = ((URLClassLoader)cl).getURLs();
-
+        logger.info("============================= Dump loaded classes ================= ");
         for(URL url: urls){
-            logger.info(url.getFile());
+            logger.info(url.toString());
         }
 
     }

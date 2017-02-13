@@ -209,7 +209,6 @@ class DataSourceREST extends DataSource with Logging {
         }
     } else {
       logger.info(s"Status code ${element.statusCode} returned.")
-      logger.info(s"Body "+element.body.toString)
     }
 
     element
@@ -241,7 +240,10 @@ class DataSourceREST extends DataSource with Logging {
   def getResponseDataSet(request: HttpUriRequest)(implicit httpClient: HttpClient): DataSetHttpResponse = {
     val response = httpClient(request)
 
-    this.logger.debug(response._3)
+ //   val displayString:String = Option(response._3).getOrElse("")
+ //   if (displayString.length > 0) {
+ //     logger.info(s"Body: '" + displayString.substring(1, Math.min(displayString.length, 250)) + "'")
+//    }
 
     val dsBody = Try(Data2Json.fromJson2Data(response._3)).toOption.getOrElse(DataString(Option(response._3).getOrElse("")))
 

@@ -240,8 +240,12 @@ object MetaTerm extends Logging {
 
   }
 
+  // reverse sign only if the term evaluates to a numeric, otherwise leave as is
   def evalApplyUnary(t: Term.ApplyUnary, scope: Map[String, AnyRef]): DataSet = t match {
-    case Term.ApplyUnary(Term.Name("-"), r) => DataNumeric(-eval(r, scope).asInstanceOf[DataNumeric].num)
+    case Term.ApplyUnary(Term.Name("-"), r) => eval(r, scope) match {
+      case DataNumeric(label, num) => DataNumeric(label, -num)
+      case ds => ds
+    }
   }
 
   def evalApplyInfix(t: Term.ApplyInfix, scope: Map[String, AnyRef]): DataSet = t match {
@@ -307,6 +311,7 @@ object MetaTerm extends Logging {
       case (left: DataNumeric, right: DataNumeric) => DataNumeric(
         left.num *
           right.num)
+      case _ => Nothin()
     }
 
     // divide numeric
@@ -314,6 +319,7 @@ object MetaTerm extends Logging {
       case (left: DataNumeric, right: DataNumeric) => DataNumeric(
         left.num /
           right.num)
+      case _ => Nothin()
     }
 
     // currently, equality will do a string comparison

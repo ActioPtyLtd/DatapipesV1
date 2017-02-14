@@ -35,7 +35,11 @@ case class DataNumeric(label: String, num: BigDecimal) extends DataSet {
 
 object DataNumeric {
 
-  def apply(num: BigDecimal): DataNumeric = DataNumeric("numeric", num)
+  private val name = "numeric"
+
+  def apply(num: BigDecimal): DataNumeric = DataNumeric(name, num)
+
+  def apply(num: Int): DataNumeric = DataNumeric(name, BigDecimal(num))
 }
 
 case class DataDate(label: String, date: java.util.Date) extends DataSet {

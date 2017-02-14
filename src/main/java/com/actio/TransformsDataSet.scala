@@ -303,6 +303,8 @@ object TransformsDataSet {
       DataString(new DecimalFormat(format).format(Try(BigDecimal(value)).getOrElse(BigDecimal(0))))
   }
 
+  def sign(value: String): DataSet = DataNumeric(Try(BigDecimal(value).signum).getOrElse(0))
+
   def integer(value: String): DataSet = DataNumeric(Try(BigDecimal(value.toInt)).getOrElse(BigDecimal(0)))
 
   def round(value: String, scale: Int): DataSet = roundWithMode(value,scale,"HALF_UP")

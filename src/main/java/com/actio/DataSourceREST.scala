@@ -193,6 +193,7 @@ class DataSourceREST extends DataSource with Logging {
 
       logger.error(s"Status code ${element.statusCode} returned.")
       logger.error(s"Body "+element.body.toString)
+      logger.error("{" + Data2Json.toJsonString(element.body) + "}")
       if (onError != null)
         if (onError.toLowerCase  == "exit"){
           // exiting pipeline

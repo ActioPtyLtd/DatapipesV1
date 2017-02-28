@@ -63,7 +63,7 @@ class DataSourceREST extends DataSource with Logging {
   var onResponse: String = null
   var onEmpty: String = null
   var onError : String = null
-
+  var outputBufferLogSize : Integer = 500
 
   @throws(classOf[Exception])
   override def setConfig(_conf: Config, _master: Config) {
@@ -106,6 +106,10 @@ class DataSourceREST extends DataSource with Logging {
     if (config.hasPath("onError")) {
       onError = config.getString("onError")
     }
+    if (config.hasPath("outputBufferLogSize"))
+      {
+        outputBufferLogSize = config.getInt("outputBufferLogSize")
+      }
 
     if (config.hasPath("headers")) {
       import scala.collection.JavaConversions._
@@ -241,10 +245,10 @@ class DataSourceREST extends DataSource with Logging {
   def getResponseDataSet(request: HttpUriRequest)(implicit httpClient: HttpClient): DataSetHttpResponse = {
     val response = httpClient(request)
 
- //   val displayString:String = Option(response._3).getOrElse("")
- //   if (displayString.length > 0) {
- //     logger.info(s"Body: '" + displayString.substring(1, Math.min(displayString.length, 250)) + "'")
-//    }
+    val displayString:String = Option(response._3).getOrElse("")
+    if (displayString.length > 0) {
+      logger.info(s"Body: '" + displayString.substring(0, Math.min(displayString.length, outputBufferLogSize)) + "'")
+    }
 
     val dsBody = Try(Data2Json.fromJson2Data(response._3)).toOption.getOrElse(DataString(Option(response._3).getOrElse("")))
 

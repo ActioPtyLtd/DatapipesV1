@@ -11,7 +11,6 @@ import org.apache.commons.codec.binary.Hex
 import org.apache.commons.lang.time.DateUtils
 
 import scala.annotation.tailrec
-import scala.collection.mutable.ListBuffer
 import scala.util.Try
 
 /**

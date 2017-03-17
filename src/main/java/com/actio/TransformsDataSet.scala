@@ -127,16 +127,7 @@ object TransformsDataSet {
   }
 
   def chunk(ds: DataSet, numberOfItemsPerChunk: Int): DataSet = {
-    val elementCount = ds.elems.length
-    var resultDS = ListBuffer[DataSet]()
-    if(elementCount > 0)
-    {
-      val splitIterator = ds.elems.grouped(numberOfItemsPerChunk)
-      while(splitIterator.hasNext) {
-        resultDS += DataArray("piece", splitIterator.next())
-      }
-    }
-    DataRecord("chunk", resultDS.toList)
+    DataRecord("chunk", ds.elems.grouped(numberOfItemsPerChunk).map(p => DataArray("piece", p.toList )).toList)
   }
 
   def getDataSetWithHierarchy(ds: DataSet, hierarchyPath:Array[String]): List[DataSet] = {

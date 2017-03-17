@@ -11,7 +11,7 @@ import org.apache.commons.codec.binary.Hex
 import org.apache.commons.lang.time.DateUtils
 
 import scala.annotation.tailrec
-import scala.collection.mutable
+import scala.collection.mutable.ListBuffer
 import scala.util.Try
 
 /**
@@ -124,6 +124,26 @@ object TransformsDataSet {
       }
     }
     DataRecord("take", List[DataSet]{takenSet})
+  }
+
+  def chunk(ds: DataSet, numberOfItemsPerChunk: Int): DataSet = {
+    val elementCount = ds.elems.length
+    var resultDS = ListBuffer[DataSet]()
+    if(elementCount > 0)
+    {
+      var offset = 0
+      while(offset < elementCount) {
+        if((offset + numberOfItemsPerChunk) < elementCount) {
+          resultDS += DataArray("piece", ds.elems.slice(offset, offset + numberOfItemsPerChunk).toList)
+          offset += numberOfItemsPerChunk
+        }
+        else {
+          resultDS += DataArray("piece", ds.elems.slice(offset, elementCount).toList)
+          offset += elementCount
+        }
+      }
+    }
+    DataRecord("chunk", resultDS.toList)
   }
 
   def getDataSetWithHierarchy(ds: DataSet, hierarchyPath:Array[String]): List[DataSet] = {

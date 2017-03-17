@@ -134,7 +134,7 @@ object TransformsDataSet {
       var offset = 0
       while(offset < elementCount) {
         if((offset + numberOfItemsPerChunk) < elementCount) {
-          resultDS += DataArray("piece", ds.elems.slice(offset, offset + numberOfItemsPerChunk).toList)
+          resultDS += DataArray("piece", ds.elems.slice(offset, offset + numberOfItemsPerChunk - 1).toList)
           offset += numberOfItemsPerChunk
         }
         else {

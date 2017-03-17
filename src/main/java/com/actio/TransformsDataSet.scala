@@ -11,7 +11,6 @@ import org.apache.commons.codec.binary.Hex
 import org.apache.commons.lang.time.DateUtils
 
 import scala.annotation.tailrec
-import scala.collection.mutable
 import scala.util.Try
 
 /**
@@ -124,6 +123,10 @@ object TransformsDataSet {
       }
     }
     DataRecord("take", List[DataSet]{takenSet})
+  }
+
+  def chunk(ds: DataSet, numberOfItemsPerChunk: Int): DataSet = {
+    DataRecord("chunk", ds.elems.grouped(numberOfItemsPerChunk).map(p => DataArray("piece", p.toList )).toList)
   }
 
   def getDataSetWithHierarchy(ds: DataSet, hierarchyPath:Array[String]): List[DataSet] = {

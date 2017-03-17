@@ -131,16 +131,9 @@ object TransformsDataSet {
     var resultDS = ListBuffer[DataSet]()
     if(elementCount > 0)
     {
-      var offset = 0
-      while(offset < elementCount) {
-        if((offset + numberOfItemsPerChunk) < elementCount) {
-          resultDS += DataArray("piece", ds.elems.slice(offset, offset + numberOfItemsPerChunk - 1).toList)
-          offset += numberOfItemsPerChunk
-        }
-        else {
-          resultDS += DataArray("piece", ds.elems.slice(offset, elementCount).toList)
-          offset += elementCount
-        }
+      val splitIterator = ds.elems.grouped(numberOfItemsPerChunk)
+      while(splitIterator.hasNext) {
+        resultDS += DataArray("piece", splitIterator.next())
       }
     }
     DataRecord("chunk", resultDS.toList)

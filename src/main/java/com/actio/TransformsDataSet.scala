@@ -595,6 +595,17 @@ object TransformsDataSet {
     }
   }
 
+  def getSubStringRegexp(instr: String, regexp: String) : DataSet = {
+    DataString(subStringRegexp(instr,regexp))
+  }
+
+  def getNumericRegexp(instr: String) : DataSet = {
+    //  "(\d*\.?\d*)"
+
+    DataString(subStringRegexp(instr,"""(\d*\.?\d*).*"""))
+  }
+
+
   // custom parse get the numeric part of a string
   def getNumericPrism(instr: String): DataSet = {
     val outstr  = subStringRegexp(instr,"""([\+-]?\d*\.?\d*).*""")
@@ -603,9 +614,11 @@ object TransformsDataSet {
 
   // custom parse get the numeric part of a string
   def getDirectionPrism(instr: String, checkStr: String): DataSet = {
-    val outstr = subStringRegexp(instr.toUpperCase,"""^\d*\.?\d*[bB]?([uUdDiIoO]?).*""")
-    DataString(outstr)
+    // convert the direction In, Out, Up, Down into True/False equivlants
+    val outstr =
+      subStringRegexp(instr.toUpperCase,"""^[ +-]*[\d]*\.?[\d \^]*[bB]?([uUdDiIoO]?).*""")
 
+    DataString(outstr)
   }
 
 }

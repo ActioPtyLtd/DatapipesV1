@@ -30,6 +30,8 @@ object DataSourceSQL {
  * Created by mauri on 4/08/2016.
  */
 class DataSourceSQL extends DataSource with Logging {
+  var batchSize:Int = 50000
+
   override def execute(): Unit = extract()
 
   override def getLastLoggedDataSet: DataSet = ???
@@ -68,7 +70,7 @@ class DataSourceSQL extends DataSource with Logging {
 
       logger.info("Executing Query: " + sqlQuery)
 
-      dataSet = new DataSetDBStream(statement.executeQuery(sqlQuery), 50000)
+      dataSet = new DataSetDBStream(statement.executeQuery(sqlQuery), batchSize)
 
       logger.info("Successfully executed statement.")
     } catch {
@@ -107,6 +109,9 @@ class DataSourceSQL extends DataSource with Logging {
           var1.printStackTrace()
         }
       }
+    }
+    if (config.hasPath(DPSystemConfigurable.DATASOURCE_BATCHSIZE)) {
+      batchSize = config.getInt(DPSystemConfigurable.DATASOURCE_BATCHSIZE)
     }
   }
 

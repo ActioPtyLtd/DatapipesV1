@@ -11,7 +11,6 @@ import org.apache.commons.codec.binary.Hex
 import org.apache.commons.lang.time.DateUtils
 
 import scala.annotation.tailrec
-import scala.collection.mutable
 import scala.util.Try
 
 /**
@@ -124,6 +123,10 @@ object TransformsDataSet {
       }
     }
     DataRecord("take", List[DataSet]{takenSet})
+  }
+
+  def chunk(ds: DataSet, numberOfItemsPerChunk: Int): DataSet = {
+    DataRecord("chunk", ds.elems.grouped(numberOfItemsPerChunk).map(p => DataArray("piece", p.toList )).toList)
   }
 
   def getDataSetWithHierarchy(ds: DataSet, hierarchyPath:Array[String]): List[DataSet] = {
@@ -261,9 +264,9 @@ object TransformsDataSet {
 
   def contains(ds: List[DataSet], d: DataSet) = DataBoolean(ds.exists(i => i.stringOption == d.stringOption))
 
-  def strContains(str: String, targetStr: String): DataSet = DataBoolean(if(str == null) false else str.contains(targetStr))
+  def strContains(str: String, targetStr: String): DataSet = DataBoolean(if(str == null || targetStr == null) false else str.contains(targetStr))
 
-  def strNotContains(str: String, targetStr: String): DataSet = DataBoolean(if(str == null) false else !str.contains(targetStr))
+  def strNotContains(str: String, targetStr: String): DataSet = DataBoolean(if(str == null || targetStr == null) false else !str.contains(targetStr))
 
 
   def substring(str: String, start: Int): DataSet = if (start < str.length) DataString(str.substring(start)) else DataString("")
@@ -546,7 +549,7 @@ object TransformsDataSet {
 
   def trim(ds: DataSetTableScala, cols: List[String]) = cols.foldLeft(ds)((d, c) => valueFunc(d, c, v => v.trim))
 
-  def trimValue(value: String) = DataString(value.trim)
+  def trimValue(value: String) = DataString(Option(value).getOrElse("").trim)
 
   def mapOrElse(v: String, colPairs: List[DataSet], orElse: String) = {
     val pairMap = colPairs.map(p => p.stringOption.getOrElse("")).grouped(2).map(g => (g.head, g.tail.headOption.getOrElse(""))).toMap

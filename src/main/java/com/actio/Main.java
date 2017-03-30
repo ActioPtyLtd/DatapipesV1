@@ -35,6 +35,7 @@ public class Main {
         Properties properties = null;
         Boolean loadConfigIntoAdmin = false;
         Boolean suppressEvents = false;
+        Boolean returnLastProcessedCount = false;
         Integer exitCode = 0;
         Logger logger =  null;
         Boolean BatchMode = true;
@@ -45,6 +46,11 @@ public class Main {
             String appendLogName = "application";
 
             // Check the options set
+            if ( line.hasOption( "help" ) ) {
+                printUsage(options);
+                exit(0);
+            }
+
             if( line.hasOption( "c" ) ) {
                 // print the value of config
                 configFile = line.getOptionValue('c');
@@ -62,6 +68,10 @@ public class Main {
             if (line.hasOption('s')){
                 runService = true;
                 logger.info("============ RUN AS SERVICE ==========");
+            }
+            if (line.hasOption('n')){
+                returnLastProcessedCount = true;
+                logger.info("============ USE PROCESSED RECORD COUNT OF LAST TASK AS EXIT CODE ============");
             }
             if (line.hasOption('D')) {
                 properties = line.getOptionProperties("D");
@@ -103,8 +113,8 @@ public class Main {
                         dprun.execute();
                     else
                         dprun.execute(pipelineName);
-
-                    exitCode = dprun.lastTotal;
+                    if(returnLastProcessedCount)
+                        exitCode = dprun.lastTotal;
 
                     ///==========
                     if (!suppressEvents)
@@ -146,14 +156,22 @@ public class Main {
         options.addOption( "c", "config", true, "config" );
         options.addOption( "p", "pipe", true, "run named pipeline .." );
         options.addOption( "s", "service", false, "run as Service, as configured in Services section");
+        options.addOption( "n", "return number of records processed in final task as the exit code");
+        options.addOption( "help", "print this help message");
         options.addOption( "L", "load config file into Admin Server");
-        options.addOption("S", "Supress event streaming to Admin Server");
+        options.addOption( "S", "Supress event streaming to Admin Server");
         options.addOption( Option.builder("D").argName( "property=value" )
                 .hasArgs()
                 .valueSeparator('=')
                 .build());
 
         return options;
+    }
+
+    private static void printUsage(Options options)
+    {
+        final HelpFormatter helpFormatter = new HelpFormatter();
+        helpFormatter.printHelp( " ", options );
     }
 
     private static void debug(Logger logger)

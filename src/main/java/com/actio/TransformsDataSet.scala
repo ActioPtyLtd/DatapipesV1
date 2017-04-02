@@ -616,10 +616,23 @@ object TransformsDataSet {
   }
 
   // custom parse get the numeric part of a string
-  def getDirectionPrism(instr: String, checkStr: String): DataSet = {
-    // convert the direction In, Out, Up, Down into True/False equivlants
-    val outstr =
+  def getDirectionPrism(instr: String, checkStr: String, prismtype: String): DataSet = {
+    // extract the direction In, Out, Up, Down from instr otherwise
+    // convert True/False into horizontal(t=i,f=o) vertical(t=u,f=d)
+    var outstr =
       subStringRegexp(instr.toUpperCase,"""^[ +-]*[\d]*\.?[\d \^]*[bB]?([uUdDiIoO]?).*""")
+
+    if (outstr == "")
+      if (prismtype == "H")
+        if (checkStr == "T")
+          outstr = "I"
+        else
+          outstr = "O"
+      else if (prismtype == "V")
+        if (checkStr == "T")
+          outstr = "U"
+        else
+          outstr = "D"
 
     DataString(outstr)
   }

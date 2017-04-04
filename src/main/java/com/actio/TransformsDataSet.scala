@@ -605,7 +605,7 @@ object TransformsDataSet {
   def getNumericRegexp(instr: String) : DataSet = {
     //  "(\d*\.?\d*)"
 
-    DataString(subStringRegexp(instr,"""(\d*\.?\d*).*"""))
+    DataString(subStringRegexp(instr,"""[^\+\-\d]*([\+\-\d]*\.?\d*).*"""))
   }
 
 

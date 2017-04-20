@@ -173,6 +173,16 @@ class DataSourceREST extends DataSource with Logging {
     }
   }
 
+  override def read(ds: DataSet): DataSet = {
+    if(config.hasPath("iterate")) {
+      val condStr = config.getString("iterate.condition")
+      new DataSetIterator(new DataSourcePaging(this, x => MetaTerm.eval(x, condStr) == DataBoolean(true) ))
+    }
+    else {
+      super.read(ds)
+    }
+  }
+
   override def create(ds: DataSet): Unit = {
     ds.elems.foreach(e => executeQueryLabel(e, "create"))
   }

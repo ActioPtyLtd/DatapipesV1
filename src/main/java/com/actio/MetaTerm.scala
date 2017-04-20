@@ -240,11 +240,17 @@ object MetaTerm extends Logging {
 
   }
 
-  // reverse sign only if the term evaluates to a numeric, otherwise leave as is
+  // reverse sign only if the term evaluates to a numeric
   def evalApplyUnary(t: Term.ApplyUnary, scope: Map[String, AnyRef]): DataSet = t match {
+
     case Term.ApplyUnary(Term.Name("-"), r) => eval(r, scope) match {
       case DataNumeric(label, num) => DataNumeric(label, -num)
-      case ds => ds
+      case _ => Nothin()
+    }
+
+    case Term.ApplyUnary(Term.Name("!"), r) => eval(r, scope) match {
+      case DataBoolean(label, b) => DataBoolean(label,b)
+      case _ => Nothin()
     }
   }
 
@@ -323,17 +329,21 @@ object MetaTerm extends Logging {
     }
 
     // currently, equality will do a string comparison
-    case Term.ApplyInfix(l, Term.Name("=="), Nil, Seq(r)) => {
-      val ls = eval(l, scope).stringOption
-      val rs = eval(r, scope).stringOption
-
-      DataBoolean(ls.isDefined && rs.isDefined && ls.get == rs.get)
+    case Term.ApplyInfix(l, Term.Name("=="), Nil, Seq(r)) => (eval(l, scope), eval(r, scope)) match {
+      case (ls: DataString, rs: DataString) => DataBoolean(ls.str == rs.str)
+      case (ls: DataNumeric, rs: DataNumeric) => DataBoolean(ls.num == rs.num)
+      case (ls: DataBoolean, rs: DataBoolean) => DataBoolean(ls.bool == rs.bool)
+      case (ls: DataDate, rs: DataDate) => DataBoolean(ls.date == rs.date)
+      case (ls: DataSet, rs: DataSet) => DataBoolean(ls.stringOption.isDefined && rs.stringOption.isDefined && ls.stringOption.get == rs.stringOption.get)
     }
-    case Term.ApplyInfix(l, Term.Name("!="), Nil, Seq(r)) => {
-      val ls = eval(l, scope).stringOption
-      val rs = eval(r, scope).stringOption
 
-      DataBoolean(ls.isDefined && rs.isDefined && ls.get != rs.get)
+      // shameless copy & paste
+    case Term.ApplyInfix(l, Term.Name("!="), Nil, Seq(r)) => (eval(l, scope), eval(r, scope)) match {
+      case (ls: DataString, rs: DataString) => DataBoolean(ls.str != rs.str)
+      case (ls: DataNumeric, rs: DataNumeric) => DataBoolean(ls.num != rs.num)
+      case (ls: DataBoolean, rs: DataBoolean) => DataBoolean(ls.bool != rs.bool)
+      case (ls: DataDate, rs: DataDate) => DataBoolean(ls.date != rs.date)
+      case (ls: DataSet, rs: DataSet) => DataBoolean(ls.stringOption.isDefined && rs.stringOption.isDefined && ls.stringOption.get != rs.stringOption.get)
     }
     // AND logic
     case Term.ApplyInfix(l, Term.Name("&&"), Nil, Seq(r)) => {

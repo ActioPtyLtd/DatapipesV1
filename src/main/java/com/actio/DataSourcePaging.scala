@@ -47,7 +47,7 @@ class DataSourcePaging(src: DataSource, stopCondition: DataSet => Boolean) exten
       ds = src.read(nds)
       stop = stopCondition(ds)
       index = index + 1
-      Some(ds)
+      Some(ds(0))
     }
   }
 

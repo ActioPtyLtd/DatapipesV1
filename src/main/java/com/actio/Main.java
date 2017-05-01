@@ -38,6 +38,7 @@ public class Main {
         Boolean returnLastProcessedCount = false;
         Integer exitCode = 0;
         Logger logger =  null;
+        Boolean BatchMode = true;
 
         try {
             // parse the command line arguments

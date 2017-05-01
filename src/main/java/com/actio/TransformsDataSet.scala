@@ -11,7 +11,6 @@ import org.apache.commons.codec.binary.Hex
 import org.apache.commons.lang.time.DateUtils
 
 import scala.annotation.tailrec
-import scala.collection.mutable
 import scala.util.Try
 
 /**
@@ -124,6 +123,10 @@ object TransformsDataSet {
       }
     }
     DataRecord("take", List[DataSet]{takenSet})
+  }
+
+  def chunk(ds: DataSet, numberOfItemsPerChunk: Int): DataSet = {
+    DataRecord("chunk", ds.elems.grouped(numberOfItemsPerChunk).map(p => DataArray("piece", p.toList )).toList)
   }
 
   def getDataSetWithHierarchy(ds: DataSet, hierarchyPath:Array[String]): List[DataSet] = {
@@ -598,6 +601,17 @@ object TransformsDataSet {
     }
   }
 
+  def getSubStringRegexp(instr: String, regexp: String) : DataSet = {
+    DataString(subStringRegexp(instr,regexp))
+  }
+
+  def getNumericRegexp(instr: String) : DataSet = {
+    //  "(\d*\.?\d*)"
+
+    DataString(subStringRegexp(instr,"""[^\+\-\d]*([\+\-\d]*\.?\d*).*"""))
+  }
+
+
   // custom parse get the numeric part of a string
   def getNumericPrism(instr: String): DataSet = {
     val outstr  = subStringRegexp(instr,"""([\+-]?\d*\.?\d*).*""")
@@ -605,10 +619,25 @@ object TransformsDataSet {
   }
 
   // custom parse get the numeric part of a string
-  def getDirectionPrism(instr: String, checkStr: String): DataSet = {
-    val outstr = subStringRegexp(instr.toUpperCase,"""^\d*\.?\d*[bB]?([uUdDiIoO]?).*""")
-    DataString(outstr)
+  def getDirectionPrism(instr: String, checkStr: String, prismtype: String): DataSet = {
+    // extract the direction In, Out, Up, Down from instr otherwise
+    // convert True/False into horizontal(t=i,f=o) vertical(t=u,f=d)
+    var outstr =
+      subStringRegexp(instr.toUpperCase,"""^[ +-]*[\d]*\.?[\d \^]*[bB]?([uUdDiIoO]?).*""")
 
+    if (outstr == "")
+      if (prismtype == "H")
+        if (checkStr == "T")
+          outstr = "I"
+        else
+          outstr = "O"
+      else if (prismtype == "V")
+        if (checkStr == "T")
+          outstr = "U"
+        else
+          outstr = "D"
+
+    DataString(outstr)
   }
 
 }

@@ -262,12 +262,15 @@ object TransformsDataSet {
 
   def isNull(ds: DataSet) = DataBoolean(ds.toOption.isEmpty)
 
+  def isEmpty(ds: DataSet): DataSet = DataBoolean(ds.elems.isEmpty)
+
+  def size(ds: DataSet): DataSet = DataNumeric(ds.elems.size)
+
   def contains(ds: List[DataSet], d: DataSet) = DataBoolean(ds.exists(i => i.stringOption == d.stringOption))
 
   def strContains(str: String, targetStr: String): DataSet = DataBoolean(if(str == null || targetStr == null) false else str.contains(targetStr))
 
   def strNotContains(str: String, targetStr: String): DataSet = DataBoolean(if(str == null || targetStr == null) false else !str.contains(targetStr))
-
 
   def substring(str: String, start: Int): DataSet = if (start < str.length) DataString(str.substring(start)) else DataString("")
 

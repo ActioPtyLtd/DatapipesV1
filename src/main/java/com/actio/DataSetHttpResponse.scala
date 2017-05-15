@@ -16,5 +16,7 @@ case class DataSetHttpResponse(label: String, uri: String, statusCode: Int, head
       headers.get(field).map(DataString(field, _)).getOrElse(Nothin())
     }
 
+  override def apply(num: Int): DataSet = body
+
   override def elems: Iterator[DataSet] = List(body).toIterator
 }

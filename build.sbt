@@ -1,6 +1,6 @@
 name := "dpipes"
 
-version := "1.2.13"
+version := "1.3.0"
 
 scalaVersion := "2.11.8"
 
@@ -27,7 +27,8 @@ libraryDependencies ++= Seq(
   "org.postgresql" % "postgresql" % "9.4.1209.jre7",
   "org.scalameta" %% "scalameta" % "1.0.0",
   "commons-net" % "commons-net" % "3.5",
-  "me.chrons" %% "boopickle" % "1.2.5"
+  "me.chrons" %% "boopickle" % "1.2.5",
+  "com.github.albfernandez" % "javadbf" % "1.2.1"
 )
 
 enablePlugins(JavaAppPackaging)

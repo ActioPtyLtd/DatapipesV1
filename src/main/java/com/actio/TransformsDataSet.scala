@@ -608,6 +608,10 @@ object TransformsDataSet {
     DataString(subStringRegexp(instr,"""[^\+\-\d]*([\+\-\d]*\.?\d*).*"""))
   }
 
+  def getLeftTrimRight(instr: String, len: Integer) : DataSet =
+  {
+    DataString(subStringRegexp(instr,"""(.*).{"""+len+"""}$"""))
+  }
 
   // custom parse get the numeric part of a string
   def getNumericPrism(instr: String): DataSet = {

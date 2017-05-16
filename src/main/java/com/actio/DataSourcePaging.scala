@@ -9,20 +9,24 @@ import com.typesafe.config.{Config, ConfigValueFactory}
 trait SimpleIterator[T] {
   def headOption(): Option[T]
 }
-
 class DataSetIterator(it: SimpleIterator[DataSet]) extends DataSet {
 
   override def label: String = "iterator"
 
-  override def elems: Iterator[DataSet] = new Iterator[DataSet]() {
+  override lazy val elems: Iterator[DataSet] = new Iterator[DataSet]() {
+    private var hNext = it.headOption()
     var t: Option[DataSet] = None
+    var moved = false
 
     override def hasNext: Boolean = {
-      t = it.headOption()
-      t.isDefined
+      hNext.isDefined
     }
 
-    override def next(): DataSet = t.get
+    override def next(): DataSet = {
+      val temp = hNext.get
+      hNext = it.headOption()
+      temp
+    }
   }
 }
 

@@ -296,6 +296,9 @@ object TransformsDataSet {
     catch {
       case _: Throwable => DataString(str)
     }
+
+  def sha256(str: String): DataSet = DataString(org.apache.commons.codec.digest.DigestUtils.sha256Hex(str))
+
   // single quote escape
   def sq(str: String): DataSet = if(str == null) DataString("") else DataString(str.replace("'","''"))
 

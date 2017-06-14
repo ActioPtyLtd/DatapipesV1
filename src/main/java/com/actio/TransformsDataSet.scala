@@ -12,6 +12,7 @@ import org.apache.commons.lang.time.DateUtils
 
 import scala.annotation.tailrec
 import scala.util.Try
+import scala.xml.Utility
 
 /**
   * Created by mauri on 27/04/2016.
@@ -572,6 +573,10 @@ object TransformsDataSet {
 
   def coalesce(vals: List[DataSet]) = vals.find(v => v.toOption.isDefined).getOrElse(Nothin())
 
+  def coalesceOnZero(vals: List[DataSet]) = vals.find(v => v.stringOption.getOrElse("0") !=  "0" ).getOrElse(Nothin())
+
+  def coalesceOnZeroStr(vals: List[String]) : String = vals.find(v => v !=  "0" ).getOrElse("0")
+
   def blankAsNull(str: String) = if(str.isEmpty) Nothin() else DataString(str)
 
   def isEmptyDataSet(ds: DataSetTableScala) = ds.rows.isEmpty
@@ -646,5 +651,26 @@ object TransformsDataSet {
 
     DataString(outstr)
   }
+
+  def calcPD(lens_calculation_type:String,lens_usage:String,lens_mono_pd:String,lens_mono_pd_near:String) : DataSet = {
+    val nlist: List[String] = List(lens_mono_pd_near, lens_mono_pd)
+    val flist: List[String] = List(lens_mono_pd, lens_mono_pd_near)
+    if (strContains("AGHS", lens_calculation_type) == true)
+      if (lens_usage == "N")
+        numericFormat(coalesceOnZeroStr(nlist), "#.0")
+      else
+        numericFormat(coalesceOnZeroStr(flist), "#.0")
+    else if (strContains("K", lens_calculation_type) == true)
+      if (lens_usage == "N")
+        numericFormat(coalesceOnZeroStr(nlist), "#.0")
+      else
+        numericFormat(coalesceOnZeroStr(flist), "#.0")
+    else if (strContains("M", lens_calculation_type) == true)
+      numericFormat(coalesceOnZeroStr(flist), "#.0")
+    else
+      numericFormat(coalesceOnZeroStr(flist), "#.0")
+  }
+
+  def getForXML(rawString: String) : DataSet = DataString(scala.xml.Utility.escape(rawString))
 
 }

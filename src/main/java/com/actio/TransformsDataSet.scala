@@ -279,6 +279,10 @@ object TransformsDataSet {
 
   def capitalise(str: String): DataSet = DataString(str.toUpperCase)
 
+  def toUpperCase(str: String): DataSet = capitalise(str)
+
+  def toLowerCase(str: String): DataSet = DataString(str.toLowerCase)
+
   def quoteOption(ds: DataSet) = ds.stringOption.map(s => if (s.isEmpty) DataString("null") else DataString("\"" + s + "\"")).getOrElse(DataString("null"))
 
   def urlEncode(str: String): DataSet = DataString(URLEncoder.encode(str, "UTF-8"))

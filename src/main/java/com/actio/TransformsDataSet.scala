@@ -675,6 +675,10 @@ object TransformsDataSet {
       numericFormat(coalesceOnZeroStr(flist), "#.0")
   }
 
-  def getForXML(rawString: String) : DataSet = DataString(scala.xml.Utility.escape(rawString))
+  def getForXML(rawString: String) : DataSet = {
+    val buffer:String = scala.xml.Utility.escape(rawString)
+    val buffer2:String = buffer.replaceAll("\'","&apos;")
+    DataString(buffer2)
+  }
 
 }

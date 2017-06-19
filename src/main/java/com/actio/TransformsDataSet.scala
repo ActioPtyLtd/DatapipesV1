@@ -676,6 +676,8 @@ object TransformsDataSet {
   }
 
   def getForXML(rawString: String) : DataSet = {
+    if (rawString == null)
+      return DataString("")
     val buffer:String = scala.xml.Utility.escape(rawString)
     val buffer2:String = buffer.replaceAll("\'","&apos;")
     DataString(buffer2)

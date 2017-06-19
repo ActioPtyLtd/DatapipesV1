@@ -121,6 +121,7 @@ public class TaskLoad extends Task {
         logger.info("Process Basic Load");
 
         destination.write(getDataSet());
+        dataSet = destination.getDataSet();
     }
 
     private void CheckPointDiff() throws Exception {

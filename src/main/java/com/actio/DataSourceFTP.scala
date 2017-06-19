@@ -156,6 +156,7 @@ class DataSourceFTP extends DataSource with Logging {
 
   def write(dataSet: DataSet): Unit = {
     writeFromDataSet_Zeiss(dataSet)
+    this.dataSet = DataRecord("postFTPSet",dataSet)
   }
 
 

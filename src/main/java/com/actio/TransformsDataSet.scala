@@ -683,4 +683,15 @@ object TransformsDataSet {
     DataString(buffer2)
   }
 
+  def tokenizeSplit(str: String, len: Int): DataSet = if(str == null) Nothin() else tokenizeSplitList(str.split("\\s+").toList, len, Nil)
+
+  def tokenizeSplitList(list: List[String], len: Int, result: List[String]): DataArray = list match {
+      case Nil => DataArray(result.reverse.map(DataString(_)).toList)
+      case (h::t) => {
+        val first = (list.size until 0 by -1).map(list.take(_)).filter(a => a.mkString(" ").size <= len).head
+        tokenizeSplitList(list.drop(first.size).toList, len, (first.mkString(" ")) :: result)
+    }
+
+  }
+
 }

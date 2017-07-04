@@ -265,7 +265,7 @@ public class DPSystemRuntime extends DPSystemConfigurable {
 
         logger.info("----Sending Messages-----");
 
-        DPSystemRuntime eventRunTime = new DPSystemRuntime(sysconfigfilename);
+        DPSystemRuntime eventRunTime = new DPSystemRuntime(sysconfigfilename, properties);
         eventRunTime.initRuntime();
 
         // dont have the event transmission process generate more events

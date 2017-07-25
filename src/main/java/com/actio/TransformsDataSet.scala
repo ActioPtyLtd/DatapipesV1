@@ -309,12 +309,18 @@ object TransformsDataSet {
 
   def numeric(value: String): DataSet = DataNumeric(Try(BigDecimal(value)).getOrElse(BigDecimal(0)))
 
+  def numericWithDefault(value: String, default: DataSet): DataSet = Try(DataNumeric(BigDecimal(value))).getOrElse(default)
+
   def numericFormat(value: String, format: String) =  {
 
 //    if (value == "" && format == "#0")
  //     DataString("0")
  //   else
       DataString(new DecimalFormat(format).format(Try(BigDecimal(value)).getOrElse(BigDecimal(0))))
+  }
+
+  def numericFormatWithDefault(value: String, format: String, defaultString: String) =  {
+      DataString(Try(new DecimalFormat(format).format(BigDecimal(value))).getOrElse(defaultString))
   }
 
   def sign(value: String): DataSet = DataNumeric(Try(BigDecimal(value).signum).getOrElse(0))

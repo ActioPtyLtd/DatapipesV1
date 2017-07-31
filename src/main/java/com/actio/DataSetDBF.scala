@@ -34,8 +34,8 @@ object DataSetDBF {
   }).toList)
 }
 
-class DataSetDBF(private val reader: InputStream) extends DataSet {
-  private val stream = new DBFReader(reader)
+class DataSetDBF(private val reader: InputStream, val showDeletedRecords: Boolean) extends DataSet {
+  private val stream = new DBFReader(reader, showDeletedRecords)
   private val fields = (0 until stream.getFieldCount).map(stream.getField).toList
 
   private val batchSize = 100

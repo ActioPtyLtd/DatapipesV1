@@ -72,8 +72,13 @@ public class DataSourceFile extends DataSource {
 
         // execute the query
         logger.info("ReadFile: " + fname);
-	if(behaviour.equals("DBF"))
-            dataSet = new DataSetDBF(new FileInputStream(new File(fname)));
+	if(behaviour.equals("DBF")) {
+	    Boolean showDeletedRecords = false;
+	    if(this.config.hasPath("showDeletedRecords") && this.config.getBoolean("showDeletedRecords"))
+	        showDeletedRecords = true;
+
+        dataSet = new DataSetDBF(new FileInputStream(new File(fname)), showDeletedRecords);
+    }
 	else if(behaviour.equalsIgnoreCase(READ_JSON_FROM_FILE))
             dataSet = Data2Json.fromFileStream2Json2Data(attribute, new FileInputStream(new File(fname)));
         else if(behaviour.equals("dump"))

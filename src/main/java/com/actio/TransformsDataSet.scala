@@ -249,6 +249,8 @@ object TransformsDataSet {
 
   def concatString(ds: DataSet): DataSet = DataString(ds.elems.filter(_.stringOption.isDefined).map(_.stringOption.get).mkString(","))
 
+  def concatStringWithDelimiter(ds: DataSet, delim: String): DataSet = DataString(ds.elems.filter(_.stringOption.isDefined).map(_.stringOption.get).mkString(delim))
+  
   //	  "{1-9}-{9-12}-{13-16}-{17-20}-{21-32}"
   def toUUIDFormat(str: String): DataSet = DataString(str.substring(0,8)+"-"+str.substring(8,12)+"-"+str.substring(12,16)+"-"+str.substring(16,20)+
     "-"+str.substring(20,32))

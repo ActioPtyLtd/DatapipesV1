@@ -16,8 +16,9 @@ case class dpEvent(pipeInstanceId: String,
                    msg: String,
                    keyName: String = "",
                    counter: String = "",
-                   theCount: Int = 0) {
-  val timeStamp: Long = System.currentTimeMillis()
+                   theCount: Int = 0,
+                   timeStamp: Long = System.currentTimeMillis()
+                  ) {
 }
 
 case class DPEventAggregator(runId: String) {

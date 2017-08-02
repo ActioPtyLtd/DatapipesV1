@@ -1,6 +1,8 @@
 package com.actio.dpsystem
 
 import com.actio.{DataArray, _}
+
+import scala.collection.mutable
 /**
   * Created by jim on 25/07/16.
   */
@@ -42,7 +44,53 @@ class DPEventPublisher(val dprun: DPSystemRuntime) {
 
   }
 
+  def postProcessEvents(events: List[dpEvent]): List[dpEvent] = {
+    var taskMapTSmin: Map[String, dpEvent] = Map()
+    var taskMapTSmax: Map[String, dpEvent] = Map()
+    var taskMaptheCount: Map[String, Int] = Map()
+    var taskNames: Set[String] = Set()
+    events.foreach(ev => {
+      taskNames += ev.keyName
+      val evmin = taskMapTSmin.get(ev.keyName)
+      if (evmin.isEmpty || evmin.get.timeStamp > ev.timeStamp) {
+        taskMapTSmin += (ev.keyName -> ev)
+      }
+      val evmax = taskMapTSmax.get(ev.keyName)
+      if (evmax.isEmpty || evmax.get.timeStamp <= ev.timeStamp) {
+        taskMapTSmax += (ev.keyName -> ev)
+      }
+      var evcount: Int = taskMaptheCount.get(ev.keyName).getOrElse(0)
+      taskMaptheCount += (ev.keyName -> (evcount + ev.theCount))
+    })
+    var neweventsList: List[dpEvent] = List()
+    val runstart = taskMapTSmin.get("run")
+    if (!runstart.isEmpty) {
+      neweventsList = neweventsList ::: List(runstart.get)
+    }
+    neweventsList = neweventsList ::: events.filter(ev => "ERROR".equals(ev.theType))
+    taskNames.filter(taskName => !"run".equals(taskName)).foreach(taskname => {
+      var eventEntry: List[dpEvent] = List()
+      var ev: dpEvent = taskMapTSmin.get(taskname).get
+      eventEntry = eventEntry ::: List(dpEvent(ev.pipeInstanceId,
+        ev.taskInstanceId, "INFO", "START", "Starting Task",
+        ev.keyName, "", 0, ev.timeStamp))
+      ev = taskMapTSmax.get(taskname).get
+      eventEntry = eventEntry ::: List(
+          dpEvent(ev.pipeInstanceId, ev.taskInstanceId,
+            "INFO", "PROGRESS", "Finishing Task", ev.keyName,
+          "RecordCount", taskMaptheCount.getOrElse(ev.keyName, 0), ev.timeStamp))
+      eventEntry = eventEntry ::: List(dpEvent(ev.pipeInstanceId, ev.taskInstanceId, "INFO", "FINISH", "Finished Task", ev.keyName, "", 0, ev.timeStamp))
+      neweventsList = neweventsList ::: eventEntry
+    })
+    val runfinish = taskMapTSmax.get("run")
+    if (!runfinish.isEmpty) {
+      neweventsList = neweventsList ::: List(runfinish.get)
+    }
+    neweventsList.sortBy(ev => ev.timeStamp)
+  }
+
   def GetEvents(): DataSet = {
+    dprun.events.eventList = postProcessEvents(dprun.events.eventList)
 
     DataArray(dprun.events.eventList.map(e => DataRecord(List(
       DataString(DPSystemConfigurable.CONFIG_NAME,dprun.getConfigName),

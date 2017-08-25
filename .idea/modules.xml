@@ -4,6 +4,8 @@
     <modules>
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/dpipes.iml" filepath="$PROJECT_DIR$/.idea/modules/dpipes.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/dpipes-build.iml" filepath="$PROJECT_DIR$/.idea/modules/dpipes-build.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/dpipes-jim.iml" filepath="$PROJECT_DIR$/.idea/modules/dpipes-jim.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/dpipes-jim-build.iml" filepath="$PROJECT_DIR$/.idea/modules/dpipes-jim-build.iml" />
     </modules>
   </component>
 </project>

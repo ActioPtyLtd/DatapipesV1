@@ -260,7 +260,7 @@ class DataSourceREST extends DataSource with Logging {
       logger.info(s"Body: '" + displayString.substring(0, Math.min(displayString.length, outputBufferLogSize)) + "'")
     }
 
-    val dsBody = Try(Data2Json.fromJson2Data(response._3)).toOption.getOrElse(DataString(Option(response._3).getOrElse("")))
+    val dsBody = Try(Data2Json.fromJson2Data(response._3)).toOption.getOrElse(DataRecord({DataString("nonjsoncompliantmsg",Option(response._3).getOrElse(""))}))
 
     DataSetHttpResponse("response",
       request.getURI.toString,

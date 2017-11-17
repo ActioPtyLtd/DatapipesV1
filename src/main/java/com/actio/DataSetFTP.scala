@@ -8,13 +8,13 @@ import com.actio.dpsystem.Logging
 object DataSetFTP {
 
   // TODO: needs refactoring, only added this here to avoid writing java
-  def apply(client: FTPClient, remotePath: String, regex: String): DataSet = {
+  def apply(client: FTPClient, remotePath: String, regex: String, cleanupAfterRead: Boolean): DataSet = {
     client.enterLocalPassiveMode()
-    new DataSetFTP(client, remotePath, client.listFiles(remotePath).filter(f => Pattern.compile(regex).matcher(f.getName).matches).toList)
+    new DataSetFTP(client, remotePath, client.listFiles(remotePath).filter(f => Pattern.compile(regex).matcher(f.getName).matches).toList, cleanupAfterRead)
   }
 }
 
-class DataSetFTP(client: FTPClient, remotePath: String, files: List[FTPFile] ) extends DataSet with Logging {
+class DataSetFTP(client: FTPClient, remotePath: String, files: List[FTPFile], cleanupAfterRead: Boolean) extends DataSet with Logging {
 
     override lazy val elems = files.toIterator.flatMap(f => {
       val path = remotePath + "/" + f.getName
@@ -24,8 +24,11 @@ class DataSetFTP(client: FTPClient, remotePath: String, files: List[FTPFile] ) e
         val fds = DataRecord(DataRecord("meta", DataString("fileName", f.getName)))
         val ds = new DataSetFileStream(fs).elems.map(m => DataSetOperations.mergeLeft(DataRecord(m), fds)).toList.toIterator  // get everything right now so I can close
         client.completePendingCommand()
-        logger.info(s"Deleting remote file: $path...")
-        client.deleteFile(path)
+
+        if(cleanupAfterRead) {
+          logger.info(s"Deleting remote file: $path...")
+          client.deleteFile(path)
+        }
         ds
       } catch {
         case e: Throwable => { logger.error(s"Failed to read or delete file $path. Ignoring file..."); Iterator.empty }

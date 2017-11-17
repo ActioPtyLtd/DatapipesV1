@@ -54,6 +54,7 @@ public class DPSystemConfigurable {
     public static final String TASK_PIPELINE_LABEL = "pipeline";
     public static final String ATTRIBUTE_LABEL = "attribute";
     public static final String DATASOURCE_BATCHSIZE = "batchsize";
+    public static final String CLEANUP_AFTER_READ = "cleanupAfterRead";
 
     // types of behavior
     public static final String CHECKPOINT_DIFF_LABEL="checkpointDiff";

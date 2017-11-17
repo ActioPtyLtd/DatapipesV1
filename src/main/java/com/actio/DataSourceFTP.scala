@@ -1,13 +1,12 @@
 package com.actio
 
 import org.apache.commons.net.ftp._
-import com.actio.dpsystem.Logging
+import com.actio.dpsystem.{DPSystemConfigurable, Logging}
 import com.typesafe.config.Config
 import org.slf4j.LoggerFactory
 import org.slf4j.Logger
 
 import scala.util._
-
 import java.io.InputStream
 import java.io.ByteArrayInputStream
 import java.nio.charset.StandardCharsets
@@ -33,6 +32,7 @@ class DataSourceFTP extends DataSource with Logging {
   var localfile : String = null
   var verb : String = null
   var ftpconn : Try[FTPClient] = null
+  var cleanupAfterRead: Boolean = true
 
   override def setConfig(_conf: Config, _master: Config) {
     super.setConfig(_conf, _master)
@@ -53,6 +53,9 @@ class DataSourceFTP extends DataSource with Logging {
       // localfile = queryConf.getString("localfile")
       remotepath = queryConf.getString("remotepath")
       // remotefile = queryConf.getString("remotefile")
+    }
+    if (config.hasPath(DPSystemConfigurable.CLEANUP_AFTER_READ)) {
+      cleanupAfterRead = config.getBoolean(DPSystemConfigurable.CLEANUP_AFTER_READ)
     }
 
   }
@@ -75,7 +78,7 @@ class DataSourceFTP extends DataSource with Logging {
 
   @throws(classOf[Exception])
   def extract(): Unit = {
-    openConnection().foreach(client => { dataSet = DataSetFTP(client, config.getString("query.remotepath"), config.getString("query.regex")) })
+    openConnection().foreach(client => { dataSet = DataSetFTP(client, config.getString("query.remotepath"), config.getString("query.regex"), cleanupAfterRead) })
   }
 
   @throws(classOf[Exception])
